@@ -53,12 +53,13 @@ import AdminLayout from "@/layout/AdminLayout";
 
 export const router = createBrowserRouter([
   // 🌐 Public
-  { path: "/", element: <LandingPage /> },
+  // { path: "/", element: <LandingPage /> },
 
   // 🌐 Public Pages with shared layout
   {
     element: <PublicLayout />,
     children: [
+      { index: true, element: <LandingPage /> },
       { path: "/jobs", element: <PublicJobsPage /> },
       { path: "/jobs/:id", element: <PublicJobDetailPage /> },
       { path: "/leaderboard", element: <PublicLeaderboard /> },

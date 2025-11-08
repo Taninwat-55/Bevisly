@@ -1,4 +1,3 @@
-import LandingNavbar from "@/components/landing/LandingNavbar";
 import HeroSection from "@/components/landing/HeroSection";
 import HowItWorksSection from "@/components/landing/HowItWorksSection";
 import JobListingsSection from "@/components/landing/JobListingsSection";
@@ -12,7 +11,6 @@ import FeedbackButton from "@/components/ui/FeedbackButton";
 export default function LandingPage() {
   return (
     <div className="bg-[var(--color-bg)] text-[var(--color-text)]">
-      <LandingNavbar />
       <HeroSection />
       <JobListingsSection />
       <FeaturedEmployersSection />
