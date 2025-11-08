@@ -76,7 +76,7 @@ export default function Navbar() {
   return (
     <header
       className="sticky top-0 z-40 border-b border-[var(--color-border)] 
-             bg-[var(--color-surface)]/90 backdrop-blur-md 
+             bg-[var(--color-surface)] backdrop-blur-md 
              shadow-[var(--shadow-soft)] transition-[background,border,color] duration-300"
     >
       <div className="flex items-center justify-between px-6 py-3">
