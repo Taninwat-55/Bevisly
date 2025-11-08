@@ -1,7 +1,7 @@
-// src/components/landing/HeroSection.tsx
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Search } from "lucide-react";
+import { motion } from "framer-motion";
 
 export default function HeroSection() {
   const navigate = useNavigate();
@@ -9,7 +9,6 @@ export default function HeroSection() {
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
-    // Detect mobile to disable autoplay video for performance
     const mobile =
       typeof window !== "undefined" &&
       /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
@@ -37,7 +36,6 @@ export default function HeroSection() {
           <source src="/hiring.mp4" type="video/mp4" />
         </video>
       ) : (
-        // Static fallback for mobile
         <img
           src="/thumbnail.jpg"
           alt="Hiring background"
@@ -46,21 +44,33 @@ export default function HeroSection() {
       )}
 
       {/* 🌫️ Overlay */}
-      <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black/80 backdrop-blur-[1px]" />
+      <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black/90" />
 
       {/* 🧠 Content */}
-      <div className="relative z-10 mx-auto max-w-7xl px-6 py-28 text-center text-white">
-        <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight leading-tight">
-          Prove your skills.{" "}
-          <span className="text-[var(--color-candidate)]">Get hired.</span>
-        </h1>
+      <div className="relative z-10 mx-auto max-w-7xl px-6 py-32 text-center text-white">
+        <motion.h1
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          className="text-4xl md:text-5xl font-extrabold tracking-tight leading-tight"
+        >
+          <span className="block text-[var(--color-candidate)]">
+            Proof replaces promise.
+          </span>
+          <span className="block mt-1 text-white">
+            Fair, fast, and verifiable hiring for emerging talent.
+          </span>
+        </motion.h1>
 
-        {/* ✨ Improved readability */}
-        <p className="mx-auto mt-4 max-w-2xl text-base md:text-lg font-medium leading-relaxed text-white/90 drop-shadow-[0_1px_4px_rgba(0,0,0,0.7)]">
-          Bevis reimagines hiring by letting candidates prove real skills
-          through verified work — bridging potential and opportunity with
-          evidence.
-        </p>
+        <motion.p
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.2 }}
+          className="mx-auto mt-5 max-w-2xl text-base md:text-lg font-medium leading-relaxed text-white/90 drop-shadow-[0_1px_4px_rgba(0,0,0,0.7)]"
+        >
+          Candidates prove real skills through short, verified work.  
+          Employers discover top talent in hours — not weeks.
+        </motion.p>
 
         {/* 🔍 Search */}
         <form
@@ -96,7 +106,12 @@ export default function HeroSection() {
         </div>
 
         {/* 🚀 CTA Buttons */}
-        <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.4 }}
+          className="mt-6 flex flex-wrap items-center justify-center gap-3"
+        >
           <Link
             to="/auth?role=candidate"
             className="rounded-[var(--radius-button)] px-5 py-3 bg-[var(--color-candidate)] text-white hover:brightness-110 transition shadow-[var(--shadow-soft)]"
@@ -109,7 +124,14 @@ export default function HeroSection() {
           >
             Post a Role
           </Link>
-        </div>
+        </motion.div>
+
+        {/* 🌍 Trust strip */}
+        {/* <p className="mt-10 text-xs text-white/60">
+          Trusted by startups like <span className="font-semibold">Trailr.ai</span>,{" "}
+          <span className="font-semibold">Looply</span>, and{" "}
+          <span className="font-semibold">DesignBuddy</span>.
+        </p> */}
       </div>
     </section>
   );

@@ -1,4 +1,3 @@
-// src/components/landing/FeaturedEmployerSection.tsx
 import { useEffect, useState } from "react";
 import { getFeaturedJobs } from "@/lib/api/jobs";
 import { Link } from "react-router-dom";
@@ -12,8 +11,27 @@ export default function FeaturedEmployersSection() {
     getFeaturedJobs().then(setJobs).catch(console.error);
   }, []);
 
-  if (!jobs.length) return null;
+  // 🌱 Empty state — pre-launch fallback
+  if (!jobs.length) {
+    return (
+      <section className="relative py-20 border-t border-[var(--color-border)] bg-[var(--color-surface)] text-center">
+        <div className="max-w-2xl mx-auto px-6">
+          <h2 className="heading-md mb-3">⭐ Future Featured Employers</h2>
+          <p className="body-base text-[var(--color-text-muted)]">
+            We’re partnering with early-stage startups and schools to launch the first proof-based roles on Bevis.
+          </p>
+          <Link
+            to="/auth?role=employer"
+            className="inline-block mt-6 rounded-[var(--radius-button)] px-5 py-3 bg-[var(--color-employer)] text-white hover:brightness-110 transition shadow-[var(--shadow-soft)]"
+          >
+            Become an Early Employer →
+          </Link>
+        </div>
+      </section>
+    );
+  }
 
+  // 🌟 Featured employer cards (if data exists)
   return (
     <section className="relative py-20 border-t border-[var(--color-border)] bg-[var(--color-surface)] overflow-hidden">
       {/* ✨ shimmer overlay */}
@@ -63,7 +81,10 @@ export default function FeaturedEmployersSection() {
               {/* Meta line */}
               <p className="text-xs text-[var(--color-text-muted)]">
                 📍 {j.location ?? "Remote"} ·{" "}
-                {new Date(j.created_at ?? "").toLocaleDateString()}
+                {new Date(j.created_at ?? "").toLocaleDateString("en-GB", {
+                  month: "short",
+                  day: "numeric",
+                })}
               </p>
 
               {/* subtle underline on hover */}
