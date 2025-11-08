@@ -10,13 +10,14 @@ import {
   BarChart2,
 } from "lucide-react";
 import toast from "react-hot-toast";
+import BackButton from "@/components/ui/BackButton";
 import type { FeedbackMessage } from "@/types/admin";
+import { motion } from "framer-motion";
 
 export default function AdminFeedbackMessages() {
   const [messages, setMessages] = useState<FeedbackMessage[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Filters
   const [categoryFilter, setCategoryFilter] = useState<"all" | string>("all");
   const [sortOrder, setSortOrder] = useState<"newest" | "oldest">("newest");
   const [searchTerm, setSearchTerm] = useState("");
@@ -32,8 +33,7 @@ export default function AdminFeedbackMessages() {
       if (error) {
         console.error(error);
         toast.error("Failed to load feedback messages.");
-      } else if (data) {
-        // 👇 Cast safely if types aren’t updated yet
+      } else {
         setMessages(data as unknown as FeedbackMessage[]);
       }
       setLoading(false);
@@ -83,22 +83,28 @@ export default function AdminFeedbackMessages() {
     return { ...counts, total };
   }, [messages]);
 
+  /* ─────────────────────────────── UI ─────────────────────────────── */
   return (
-    <div className="min-h-screen bg-[var(--color-bg)] p-10">
-      {/* Header */}
-      <header className="mb-8">
-        <h1 className="heading-lg mb-2 text-[var(--color-text)]">
+    <div className="min-h-screen bg-[var(--color-bg)] text-[var(--color-text)] px-6 md:px-10 py-12 transition-colors">
+      {/* 🧭 Header */}
+      <header className="mb-8 flex flex-col gap-2">
+        <BackButton to="/admin" label="Back to Dashboard" className="w-fit" />
+        <h1 className="heading-lg flex items-center gap-2">
           💬 Platform Feedback
         </h1>
         <p className="body-base text-[var(--color-text-muted)] max-w-2xl">
-          View all feedback submitted by users via the floating feedback button
-          — including bug reports, questions, and suggestions.
+          User-submitted feedback — including bug reports, suggestions, and
+          questions — collected from the in-app floating button.
         </p>
       </header>
 
-      {/* Summary */}
+      {/* 📊 Summary */}
       {!loading && summary.total > 0 && (
-        <div className="flex flex-wrap items-center gap-4 mb-6 text-sm">
+        <motion.div
+          initial={{ opacity: 0, y: 6 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="flex flex-wrap items-center gap-4 mb-6 text-sm"
+        >
           <div className="flex items-center gap-2 text-[var(--color-text-muted)]">
             <BarChart2 size={16} />
             <span>
@@ -106,68 +112,36 @@ export default function AdminFeedbackMessages() {
               feedbacks
             </span>
           </div>
-          <div className="flex gap-3 flex-wrap">
-            <button
-              onClick={() =>
-                setCategoryFilter(categoryFilter === "bug" ? "all" : "bug")
-              }
-              className={`text-xs px-2 py-1 rounded-full font-medium cursor-pointer ${
-                categoryFilter === "bug"
-                  ? "ring-2 ring-[var(--color-candidate-dark)]"
-                  : ""
-              } bg-red-100 text-red-700`}
-            >
-              🐞 {summary.bug}
-            </button>
-            <button
-              onClick={() =>
-                setCategoryFilter(
-                  categoryFilter === "suggestion" ? "all" : "suggestion"
-                )
-              }
-              className={`text-xs px-2 py-1 rounded-full font-medium cursor-pointer ${
-                categoryFilter === "suggestion"
-                  ? "ring-2 ring-[var(--color-candidate-dark)]"
-                  : ""
-              } bg-yellow-100 text-yellow-800`}
-            >
-              💡 {summary.suggestion}
-            </button>
-            <button
-              onClick={() =>
-                setCategoryFilter(
-                  categoryFilter === "question" ? "all" : "question"
-                )
-              }
-              className={`text-xs px-2 py-1 rounded-full font-medium cursor-pointer ${
-                categoryFilter === "question"
-                  ? "ring-2 ring-[var(--color-candidate-dark)]"
-                  : ""
-              } bg-blue-100 text-blue-800`}
-            >
-              ❓ {summary.question}
-            </button>
-            <button
-              onClick={() =>
-                setCategoryFilter(
-                  categoryFilter === "general" ? "all" : "general"
-                )
-              }
-              className={`text-xs px-2 py-1 rounded-full font-medium cursor-pointer ${
-                categoryFilter === "general"
-                  ? "ring-2 ring-[var(--color-candidate-dark)]"
-                  : ""
-              } bg-gray-100 text-gray-700`}
-            >
-              💬 {summary.general}
-            </button>
+
+          <div className="flex gap-2 flex-wrap">
+            {[
+              { key: "bug", label: "🐞", bg: "red" },
+              { key: "suggestion", label: "💡", bg: "yellow" },
+              { key: "question", label: "❓", bg: "blue" },
+              { key: "general", label: "💬", bg: "gray" },
+            ].map(({ key, label, bg }) => (
+              <button
+                key={key}
+                onClick={() =>
+                  setCategoryFilter(categoryFilter === key ? "all" : key)
+                }
+                className={`text-xs px-2 py-1 rounded-full font-medium cursor-pointer 
+                bg-${bg}-100 text-${bg}-800 dark:bg-${bg}-950/40 dark:text-${bg}-300
+                ${
+                  categoryFilter === key
+                    ? "ring-2 ring-[var(--color-candidate-dark)]"
+                    : ""
+                }`}
+              >
+                {label} {summary[key as keyof typeof summary]}
+              </button>
+            ))}
           </div>
-        </div>
+        </motion.div>
       )}
 
-      {/* 🔍 Controls */}
+      {/* 🔍 Filters */}
       <div className="flex flex-wrap items-center gap-3 mb-6">
-        {/* Search */}
         <div className="relative flex-1 min-w-[240px]">
           <Search
             size={16}
@@ -178,18 +152,17 @@ export default function AdminFeedbackMessages() {
             placeholder="Search messages or emails..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full border border-[var(--color-border)] rounded-[var(--radius-button)] pl-8 pr-3 py-2 text-sm focus:ring-1 focus:ring-[var(--color-candidate-dark)]"
+            className="w-full border border-[var(--color-border)] rounded-[var(--radius-button)] pl-8 pr-3 py-2 text-sm bg-[var(--color-surface)] focus:ring-1 focus:ring-[var(--color-candidate)]"
           />
         </div>
 
-        {/* Sort toggle */}
         <button
           onClick={() =>
             setSortOrder(sortOrder === "newest" ? "oldest" : "newest")
           }
-          className="flex items-center gap-2 border border-[var(--color-border)] rounded-[var(--radius-button)] px-3 py-2 text-sm bg-[var(--color-surface)] hover:bg-[var(--color-bg-hover)] transition"
+          className="flex items-center gap-1.5 border border-[var(--color-border)] rounded-[var(--radius-button)] px-3 py-2 text-sm bg-[var(--color-surface)] hover:bg-[var(--color-bg-hover)] transition"
         >
-          <ArrowDownUp size={16} />
+          <ArrowDownUp size={14} />
           {sortOrder === "newest" ? "Newest First" : "Oldest First"}
         </button>
       </div>
@@ -204,9 +177,13 @@ export default function AdminFeedbackMessages() {
 
       {/* 📋 Table */}
       {!loading && filteredMessages.length > 0 && (
-        <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-card)] shadow-[var(--shadow-soft)] overflow-hidden transition-colors">
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-card)] shadow-[var(--shadow-soft)] overflow-hidden transition-colors"
+        >
           <table className="w-full text-sm text-left">
-            <thead className="bg-[var(--color-bg-muted)] border-b border-[var(--color-border)]">
+            <thead className="bg-[color-mix(in srgb,var(--color-employer)10%,var(--color-surface))] border-b border-[var(--color-border)] sticky top-0 z-10">
               <tr>
                 <th className="py-3 px-4 font-medium">Category</th>
                 <th className="py-3 px-4 font-medium">Message</th>
@@ -216,10 +193,14 @@ export default function AdminFeedbackMessages() {
               </tr>
             </thead>
             <tbody>
-              {filteredMessages.map((m) => (
+              {filteredMessages.map((m, i) => (
                 <tr
                   key={m.id}
-                  className="border-b border-[var(--color-border)] hover:bg-[var(--color-bg-hover)] transition-colors"
+                  className={`border-b border-[var(--color-border)] ${
+                    i % 2 === 0
+                      ? "bg-[color-mix(in srgb,var(--color-bg)95%,transparent)]"
+                      : ""
+                  } hover:bg-[var(--color-bg-hover)] transition`}
                 >
                   <td className="py-3 px-4">
                     <button
@@ -232,12 +213,12 @@ export default function AdminFeedbackMessages() {
                       }
                       className={`text-xs px-2 py-1 rounded-full font-medium cursor-pointer ${
                         m.category === "bug"
-                          ? "bg-red-100 text-red-700"
+                          ? "bg-red-100 text-red-700 dark:bg-red-950/40 dark:text-red-300"
                           : m.category === "suggestion"
-                          ? "bg-yellow-100 text-yellow-800"
+                          ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-950/40 dark:text-yellow-300"
                           : m.category === "question"
-                          ? "bg-blue-100 text-blue-800"
-                          : "bg-gray-100 text-gray-700"
+                          ? "bg-blue-100 text-blue-800 dark:bg-blue-950/40 dark:text-blue-300"
+                          : "bg-gray-100 text-gray-700 dark:bg-gray-900 dark:text-gray-300"
                       } ${
                         categoryFilter === m.category
                           ? "ring-2 ring-[var(--color-candidate-dark)]"
@@ -271,19 +252,23 @@ export default function AdminFeedbackMessages() {
               ))}
             </tbody>
           </table>
-        </div>
+        </motion.div>
       )}
 
       {/* 🚫 Empty */}
       {!loading && filteredMessages.length === 0 && (
-        <div className="flex flex-col items-center justify-center py-20 text-center text-[var(--color-text-muted)]">
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="flex flex-col items-center justify-center py-20 text-center text-[var(--color-text-muted)]"
+        >
           <MessageCircle size={28} className="mb-3 opacity-60" />
           <p className="text-base font-medium">No feedback found.</p>
           <p className="text-sm max-w-sm">
             Try adjusting your filters or check again later once users submit
-            feedback.
+            more feedback.
           </p>
-        </div>
+        </motion.div>
       )}
     </div>
   );

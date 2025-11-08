@@ -1,4 +1,3 @@
-// src/pages/admin/AdminDashboard.tsx
 import { supabase } from "../../lib/supabaseClient";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
@@ -12,7 +11,10 @@ import {
   UserCheck,
   UserCircle2,
   Database,
+  ShieldCheck,
+  RefreshCcw,
 } from "lucide-react";
+import { motion } from "framer-motion";
 
 export default function AdminDashboard() {
   const { setOverride } = useAuth();
@@ -41,10 +43,7 @@ export default function AdminDashboard() {
   const handleOverride = (role: "candidate" | "employer" | "admin") => {
     setOverride?.(role);
     toast.success(`🔁 Viewing as ${role}`);
-
-    if (role === "admin") navigate("/admin", { replace: true });
-    else if (role === "employer") navigate("/employer", { replace: true });
-    else navigate("/dashboard", { replace: true });
+    navigate(role === "admin" ? "/admin" : `/${role}`, { replace: true });
   };
 
   const promoteUser = async () => {
@@ -54,193 +53,176 @@ export default function AdminDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-[var(--color-bg)] p-10">
+    <div className="min-h-screen bg-[var(--color-bg)] text-[var(--color-text)] px-6 md:px-10 py-12 transition-colors">
       {/* Header */}
       <header className="mb-10">
-        <h1 className="heading-lg text-[var(--color-text)] mb-2">
+        <h1 className="heading-lg flex items-center gap-2 mb-2">
           🧩 Admin Dashboard
         </h1>
         <p className="body-base text-[var(--color-text-muted)]">
-          Monitor key metrics and manage platform data.
+          Monitor key metrics, manage system data, and test user roles.
         </p>
       </header>
 
       {/* 🧾 System Overview */}
-      <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
-        {[
-          { label: "Users", value: stats.total_users },
-          { label: "Jobs", value: stats.total_jobs },
-          { label: "Submissions", value: stats.total_submissions },
-          {
-            label: "Feedbacks",
-            value: `${stats.total_feedbacks}`,
-            sub: `⭐ Avg Score: ${stats.avg_feedback_score}`,
-          },
-        ].map((item) => (
-          <div
-            key={item.label}
-            className="bg-[var(--color-surface)] p-5 rounded-[var(--radius-card)] shadow-[var(--shadow-soft)] border border-[var(--color-border)]"
-          >
-            <p className="text-sm text-[var(--color-text-muted)]">
-              {item.label}
-            </p>
-            <h3 className="text-2xl font-semibold text-[var(--color-text)]">
-              {item.value}
-            </h3>
-            {item.sub && (
-              <p className="text-sm text-[var(--color-text-muted)] mt-1">
-                {item.sub}
-              </p>
-            )}
-          </div>
-        ))}
+      <section className="mb-12">
+        <h2 className="heading-md mb-5">System Overview</h2>
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"
+        >
+          {[
+            {
+              label: "Total Users",
+              value: stats.total_users,
+              icon: <Users size={18} />,
+              color: "var(--color-employer)",
+            },
+            {
+              label: "Jobs Posted",
+              value: stats.total_jobs,
+              icon: <Briefcase size={18} />,
+              color: "var(--color-candidate-dark)",
+            },
+            {
+              label: "Submissions",
+              value: stats.total_submissions,
+              icon: <FileSpreadsheet size={18} />,
+              color: "var(--color-employer-dark)",
+            },
+            {
+              label: "Feedbacks",
+              value: stats.total_feedbacks,
+              sub: `⭐ Avg: ${stats.avg_feedback_score}`,
+              icon: <ShieldCheck size={18} />,
+              color: "var(--color-success)",
+            },
+          ].map(({ label, value, sub, icon, color }) => (
+            <div
+              key={label}
+              className="flex flex-col justify-between bg-[var(--color-surface)] border border-[var(--color-border)]
+              rounded-[var(--radius-card)] shadow-[var(--shadow-soft)] p-5 hover:shadow-md transition-all"
+            >
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-sm text-[var(--color-text-muted)]">
+                  {label}
+                </p>
+                <span style={{ color }}>{icon}</span>
+              </div>
+              <h3 className="text-2xl font-semibold text-[var(--color-text)] leading-tight">
+                {value}
+              </h3>
+              {sub && (
+                <p className="text-sm text-[var(--color-text-muted)] mt-1">
+                  {sub}
+                </p>
+              )}
+            </div>
+          ))}
+        </motion.div>
       </section>
 
       {/* 🚀 Quick Access */}
-      <section className="mb-10">
-        <h2 className="heading-md mb-4 text-[var(--color-text)]">
-          Quick Access
-        </h2>
-
+      <section className="mb-12">
+        <h2 className="heading-md mb-5">Quick Access</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {/* 👥 Manage Users */}
-          <button
-            onClick={() => navigate("/admin/users")}
-            className="flex items-center gap-3 p-4 bg-[var(--color-surface)] rounded-[var(--radius-card)] border border-[var(--color-border)] shadow-[var(--shadow-soft)] hover:bg-[var(--color-bg-hover)] transition cursor-pointer text-left"
-          >
-            <Users size={20} className="text-[var(--color-admin-dark)]" />
-            <div>
-              <p className="font-medium text-[var(--color-text)]">
-                Manage Users
-              </p>
-              <p className="text-sm text-[var(--color-text-muted)]">
-                View and edit user roles
-              </p>
-            </div>
-          </button>
-
-          {/* 💼 Jobs Overview */}
-          <button
-            onClick={() => navigate("/admin/jobs")}
-            className="flex items-center gap-3 p-4 bg-[var(--color-surface)] rounded-[var(--radius-card)] border border-[var(--color-border)] shadow-[var(--shadow-soft)] hover:bg-[var(--color-bg-hover)] transition cursor-pointer text-left"
-          >
-            <Briefcase
-              size={20}
-              className="text-[var(--color-employer-dark)]"
-            />
-            <div>
-              <p className="font-medium text-[var(--color-text)]">
-                Jobs Overview
-              </p>
-              <p className="text-sm text-[var(--color-text-muted)]">
-                Browse all posted jobs
-              </p>
-            </div>
-          </button>
-
-          {/* 🗂️ Feedback Logs */}
-          <button
-            onClick={() => navigate("/admin/feedback")}
-            className="flex items-center gap-3 p-4 bg-[var(--color-surface)] rounded-[var(--radius-card)] border border-[var(--color-border)] shadow-[var(--shadow-soft)] hover:bg-[var(--color-bg-hover)] transition cursor-pointer text-left"
-          >
-            <FileSpreadsheet
-              size={20}
-              className="text-[var(--color-candidate-dark)]"
-            />
-            <div>
-              <p className="font-medium text-[var(--color-text)]">
-                Feedback Logs
-              </p>
-              <p className="text-sm text-[var(--color-text-muted)]">
-                Review all candidate feedback
-              </p>
-            </div>
-          </button>
-
-          {/* 🧮 Data Viewer */}
-          <button
-            onClick={() => navigate("/admin/data-viewer")}
-            className="flex items-center gap-3 p-4 bg-[var(--color-surface)] rounded-[var(--radius-card)] border border-[var(--color-border)] shadow-[var(--shadow-soft)] hover:bg-[var(--color-bg-hover)] transition cursor-pointer text-left"
-          >
-            <Database size={20} className="text-[var(--color-text-muted)]" />
-            <div>
-              <p className="font-medium text-[var(--color-text)]">
-                Data Viewer
-              </p>
-              <p className="text-sm text-[var(--color-text-muted)]">
-                Inspect platform tables
-              </p>
-            </div>
-          </button>
-
-          {/* 👩‍🎓 View as Candidate */}
-          <button
-            onClick={() => handleOverride("candidate")}
-            className="flex items-center gap-3 p-4 bg-[var(--color-surface)] rounded-[var(--radius-card)] border border-[var(--color-border)] shadow-[var(--shadow-soft)] hover:bg-[var(--color-bg-hover)] transition cursor-pointer text-left"
-          >
-            <UserCircle2
-              size={20}
-              className="text-[var(--color-candidate-dark)]"
-            />
-            <div>
-              <p className="font-medium text-[var(--color-text)]">
-                View as Candidate
-              </p>
-              <p className="text-sm text-[var(--color-text-muted)]">
-                Switch perspective
-              </p>
-            </div>
-          </button>
-
-          {/* 🏢 View as Employer */}
-          <button
-            onClick={() => handleOverride("employer")}
-            className="flex items-center gap-3 p-4 bg-[var(--color-surface)] rounded-[var(--radius-card)] border border-[var(--color-border)] shadow-[var(--shadow-soft)] hover:bg-[var(--color-bg-hover)] transition cursor-pointer text-left"
-          >
-            <UserCheck
-              size={20}
-              className="text-[var(--color-employer-dark)]"
-            />
-            <div>
-              <p className="font-medium text-[var(--color-text)]">
-                View as Employer
-              </p>
-              <p className="text-sm text-[var(--color-text-muted)]">
-                Switch perspective
-              </p>
-            </div>
-          </button>
+          {[
+            {
+              label: "Manage Users",
+              desc: "View and edit user roles",
+              to: "/admin/users",
+              icon: <Users size={20} />,
+              color: "var(--color-employer)",
+            },
+            {
+              label: "Jobs Overview",
+              desc: "Browse all posted jobs",
+              to: "/admin/jobs",
+              icon: <Briefcase size={20} />,
+              color: "var(--color-candidate-dark)",
+            },
+            {
+              label: "Feedback Logs",
+              desc: "Review all candidate feedback",
+              to: "/admin/feedback",
+              icon: <FileSpreadsheet size={20} />,
+              color: "var(--color-candidate)",
+            },
+            {
+              label: "Data Viewer",
+              desc: "Inspect platform tables",
+              to: "/admin/data-viewer",
+              icon: <Database size={20} />,
+              color: "var(--color-text-muted)",
+            },
+            {
+              label: "View as Candidate",
+              desc: "Switch to candidate view",
+              action: () => handleOverride("candidate"),
+              icon: <UserCircle2 size={20} />,
+              color: "var(--color-candidate-dark)",
+            },
+            {
+              label: "View as Employer",
+              desc: "Switch to employer view",
+              action: () => handleOverride("employer"),
+              icon: <UserCheck size={20} />,
+              color: "var(--color-employer-dark)",
+            },
+          ].map(({ label, desc, to, action, icon, color }) => (
+            <motion.button
+              key={label}
+              whileHover={{ y: -2 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={() => (to ? navigate(to) : action?.())}
+              className="flex items-center gap-3 p-4 bg-[var(--color-surface)]
+              rounded-[var(--radius-card)] border border-[var(--color-border)]
+              shadow-[var(--shadow-soft)] hover:shadow-md hover:bg-[var(--color-bg-hover)]
+              transition cursor-pointer text-left"
+            >
+              <span style={{ color }}>{icon}</span>
+              <div>
+                <p className="font-medium text-[var(--color-text)]">{label}</p>
+                <p className="text-sm text-[var(--color-text-muted)]">{desc}</p>
+              </div>
+            </motion.button>
+          ))}
         </div>
       </section>
 
       {/* 🛠 Admin Actions */}
-      <section className="bg-[var(--color-surface)] p-6 rounded-[var(--radius-card)] shadow-[var(--shadow-soft)] border border-[var(--color-border)]">
-        <h2 className="heading-md mb-4 text-[var(--color-text)]">
-          Admin Actions
-        </h2>
+      <motion.section
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="bg-[var(--color-surface)] border border-[var(--color-border)]
+        rounded-[var(--radius-card)] shadow-[var(--shadow-soft)] p-6"
+      >
+        <h2 className="heading-md mb-4">Admin Actions</h2>
 
-        <div className="flex gap-4 flex-wrap">
-          {/* 🔁 Reset to Admin */}
+        <div className="flex flex-wrap gap-3">
           <button
             onClick={() => handleOverride("admin")}
-            className="bg-gray-600 text-white px-5 py-2 rounded-[var(--radius-button)] hover:bg-gray-700 transition"
+            className="flex items-center gap-2 bg-[var(--color-employer-dark)] text-white px-5 py-2
+            rounded-[var(--radius-button)] hover:brightness-110 transition shadow-[var(--shadow-soft)]"
           >
-            🧩 Reset to Admin
+            <RefreshCcw size={16} /> Reset to Admin
           </button>
 
-          {/* 🔼 Promote Current User */}
           <button
             onClick={promoteUser}
-            className="bg-[var(--color-success)] text-white px-5 py-2 rounded-[var(--radius-button)] hover:bg-green-600 transition"
+            className="flex items-center gap-2 bg-[var(--color-success)] text-white px-5 py-2
+            rounded-[var(--radius-button)] hover:brightness-110 transition shadow-[var(--shadow-soft)]"
           >
-            🔼 Promote Current User
+            <ShieldCheck size={16} /> Promote Current User
           </button>
         </div>
 
-        <p className="text-sm text-[var(--color-text-muted)] mt-3">
-          Use these tools for system-level maintenance or role upgrades.
+        <p className="text-sm text-[var(--color-text-muted)] mt-4">
+          Use these tools for maintenance and testing user perspectives safely.
         </p>
-      </section>
+      </motion.section>
     </div>
   );
 }
