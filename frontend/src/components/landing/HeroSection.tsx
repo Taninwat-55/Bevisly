@@ -68,8 +68,8 @@ export default function HeroSection() {
           transition={{ delay: 0.2 }}
           className="mx-auto mt-5 max-w-2xl text-base md:text-lg font-medium leading-relaxed text-white/90 drop-shadow-[0_1px_4px_rgba(0,0,0,0.7)]"
         >
-          Candidates prove real skills through short, verified work.  
-          Employers discover top talent in hours — not weeks.
+          Candidates prove real skills through short, verified work. Employers
+          discover top talent in hours — not weeks.
         </motion.p>
 
         {/* 🔍 Search */}
