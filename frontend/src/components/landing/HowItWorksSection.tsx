@@ -1,3 +1,4 @@
+// src/components/landing/HowItWorksSection.tsx
 import {
   Briefcase,
   CheckCircle2,

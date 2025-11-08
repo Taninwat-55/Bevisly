@@ -1,3 +1,4 @@
+// src/components/landing/WhyProofSection.tsx
 import { ShieldCheck, Zap } from "lucide-react";
 
 export default function WhyProofSection() {
