@@ -80,7 +80,7 @@ bevis-mvp/
 │ │ │ ├── EmployerLayout.tsx
 │ │ │ ├── HomeLayout.tsx
 │ │ │ ├── PublicLayout.tsx
-│ │ ├── lib/api/ # Supabase API functions
+│ │ ├── lib/ # Supabase API functions
 │ │ │ ├── api/
 │ │ │ │ ├── admin.ts
 │ │ │ │ ├── feedback.ts
