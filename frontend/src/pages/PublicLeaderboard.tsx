@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/lib/supabaseClient";
+import BackButton from "@/components/ui/BackButton";
 
 type ProfileLite = {
   id: string;
@@ -34,12 +35,7 @@ export default function PublicLeaderboard() {
 
   return (
     <div className="p-8 max-w-3xl mx-auto">
-      <Link
-        to="/"
-        className="text-sm text-[var(--color-text-muted)] hover:text-[var(--color-candidate)] transition"
-      >
-        ← Back
-      </Link>
+      <BackButton to="/" />
       <h1 className="heading-md mb-6 text-center">🏆 Top Proof Earners</h1>
       <ul className="space-y-3">
         {leaders.map((u, i) => (

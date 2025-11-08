@@ -110,7 +110,7 @@ export default function PublicJobsPage() {
   return (
     <main className="min-h-screen bg-[var(--color-bg)] text-[var(--color-text)]">
       <div className="mx-auto max-w-7xl px-6 py-16">
-        <BackButton />
+        <BackButton to="/" />
         {/* --- Header --- */}
         <header className="mb-12 text-center">
           <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight mb-2">
