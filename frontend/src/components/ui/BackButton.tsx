@@ -41,10 +41,11 @@ export default function BackButton({
   return (
     <button
       onClick={handleClick}
-      className={`inline-flex items-center gap-1.5 rounded-md border border-[var(--color-border)]
-        px-2.5 py-1.5 text-sm text-[var(--color-text-muted)]
-        hover:text-[var(--color-text)] hover:bg-[var(--color-bg-hover)]
-        transition-colors ${className}`}
+      className={`inline-flex w-fit items-center gap-1.5 rounded-[var(--radius-button)]
+  border border-[var(--color-border)] bg-[var(--color-surface)]
+  px-3 py-1.5 text-sm text-[var(--color-text-muted)]
+  hover:text-[var(--color-text)] hover:bg-[var(--color-bg-hover)]
+  hover:shadow-[var(--shadow-soft)] transition-all duration-150 ${className}`}
     >
       <ArrowLeft size={14} />
       {defaultLabel}
