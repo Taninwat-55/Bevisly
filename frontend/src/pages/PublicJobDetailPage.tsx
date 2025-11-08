@@ -3,7 +3,8 @@ import { useParams, Link } from "react-router-dom";
 import { getJobWithTasks, getAllJobs } from "@/lib/api/jobs";
 import { getErrorMessage } from "@/lib/error";
 import type { ProofTask, CandidateJob } from "@/types";
-import { Briefcase, MapPin, Clock, ArrowLeft } from "lucide-react";
+import { Briefcase, MapPin, Clock } from "lucide-react";
+import BackButton from "@/components/ui/BackButton";
 
 type JobDetail = {
   id: string;
@@ -90,12 +91,7 @@ export default function PublicJobDetailPage() {
       <div className="mx-auto max-w-4xl px-6 py-16">
         {/* Back navigation */}
         <div className="mb-8">
-          <Link
-            to="/jobs"
-            className="inline-flex items-center gap-1 text-sm text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition"
-          >
-            <ArrowLeft size={16} /> Back to Jobs
-          </Link>
+          <BackButton to="/jobs" />
         </div>
 
         {/* Header */}

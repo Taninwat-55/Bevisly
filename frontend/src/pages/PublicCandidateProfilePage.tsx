@@ -1,10 +1,11 @@
 // src/pages/PublicCandidateProfilePage.tsx
-import { useParams, Link } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import { Copy, ChevronDown, ChevronUp } from "lucide-react";
 import toast from "react-hot-toast";
 import type { ProfileLite, ProofCardLite } from "@/types";
+import BackButton from "@/components/ui/BackButton";
 
 export default function PublicCandidateProfilePage() {
   const { id } = useParams<{ id: string }>();
@@ -68,12 +69,7 @@ export default function PublicCandidateProfilePage() {
 
         {/* 🏠 Back + 🔗 Copy */}
         <div className="flex items-center gap-4">
-          <Link
-            to="/leaderboard"
-            className="text-sm text-[var(--color-text-muted)] hover:text-[var(--color-candidate)] transition"
-          >
-            ← Back to Leaderboard
-          </Link>
+          <BackButton to="/leaderboard" />
 
           <button
             onClick={() => {
