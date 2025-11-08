@@ -1,16 +1,16 @@
-// src/pages/admin/AdminJobs.tsx
 import { useEffect, useState, useMemo } from "react";
 import { getAllJobs, toggleFeaturedJob } from "@/lib/api/admin";
 import type { AdminJob } from "@/types/admin";
 import toast from "react-hot-toast";
-import { ArrowDownUp } from "lucide-react";
+import { ArrowDownUp, Search, Star } from "lucide-react";
 import BackButton from "@/components/ui/BackButton";
+import { motion } from "framer-motion";
 
 export default function AdminJobs() {
   const [jobs, setJobs] = useState<AdminJob[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Filters & sorting
+  // Filters
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<"all" | "open" | "closed">(
     "all"
@@ -35,19 +35,17 @@ export default function AdminJobs() {
       const message =
         err instanceof Error ? err.message : "Unknown error occurred";
       toast.error(`Failed to load jobs: ${message}`);
-      console.error(err);
     } finally {
       setLoading(false);
     }
   };
 
-  // 🔍 Derived filtered + sorted jobs
+  /* ─────────────────────── Filter + Sort ─────────────────────── */
   const filteredJobs = useMemo(() => {
     let result = [...jobs];
 
-    // search term
-    if (searchTerm.trim()) {
-      const term = searchTerm.toLowerCase();
+    const term = searchTerm.toLowerCase().trim();
+    if (term) {
       result = result.filter(
         (j) =>
           j.title.toLowerCase().includes(term) ||
@@ -56,17 +54,11 @@ export default function AdminJobs() {
       );
     }
 
-    // status filter
-    if (statusFilter !== "all") {
+    if (statusFilter !== "all")
       result = result.filter((j) => j.status === statusFilter);
-    }
-
-    // employer filter
-    if (employerFilter !== "all") {
+    if (employerFilter !== "all")
       result = result.filter((j) => j.employer_email === employerFilter);
-    }
 
-    // sort
     result.sort((a, b) => {
       const da = new Date(a.created_at).getTime();
       const db = new Date(b.created_at).getTime();
@@ -76,154 +68,169 @@ export default function AdminJobs() {
     return result;
   }, [jobs, searchTerm, statusFilter, employerFilter, sortOrder]);
 
-  // unique employer list for dropdown
-  const uniqueEmployers = useMemo(() => {
-    const emails = Array.from(
-      new Set(jobs.map((j) => j.employer_email))
-    ).sort();
-    return emails;
-  }, [jobs]);
+  const uniqueEmployers = useMemo(
+    () => Array.from(new Set(jobs.map((j) => j.employer_email))).sort(),
+    [jobs]
+  );
 
-  // pagination logic
   const totalPages = Math.ceil(filteredJobs.length / perPage);
   const paginated = filteredJobs.slice((page - 1) * perPage, page * perPage);
 
-  // role summary counts
-  const stats = useMemo(() => {
-    return {
+  const stats = useMemo(
+    () => ({
       open: jobs.filter((j) => j.status === "open").length,
       closed: jobs.filter((j) => j.status === "closed").length,
       total: jobs.length,
-    };
-  }, [jobs]);
+    }),
+    [jobs]
+  );
 
   useEffect(
     () => setPage(1),
     [searchTerm, statusFilter, employerFilter, perPage]
   );
 
+  /* ─────────────────────── Render ─────────────────────── */
   if (loading)
-    return <p className="p-8 text-[var(--color-text-muted)]">Loading jobs…</p>;
+    return (
+      <div className="min-h-screen flex items-center justify-center text-[var(--color-text-muted)]">
+        Loading jobs…
+      </div>
+    );
 
   return (
-    <div className="min-h-screen bg-[var(--color-bg)] p-10">
+    <div className="min-h-screen bg-[var(--color-bg)] text-[var(--color-text)] px-6 md:px-10 py-12 transition-colors">
       {/* 🧭 Header */}
       <header className="mb-8 flex flex-col gap-2">
-        <BackButton to="/admin" />
-        <div className="flex items-center justify-between flex-wrap gap-3">
-          <h1 className="heading-lg text-[var(--color-text)]">
-            💼 Job Overview
-          </h1>
-          <div className="flex flex-wrap items-center gap-3">
-            <input
-              type="text"
-              placeholder="Search by title, company, or employer..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="border border-[var(--color-border)] rounded-[var(--radius-button)] px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-[var(--color-candidate-dark)]"
-            />
-
-            <select
-              value={statusFilter}
-              onChange={(e) =>
-                setStatusFilter(e.target.value as "all" | "open" | "closed")
-              }
-              className="border border-[var(--color-border)] rounded-[var(--radius-button)] px-3 py-2 text-sm bg-[var(--color-surface)] transition-colors"
-            >
-              <option value="all">All Statuses</option>
-              <option value="open">Open</option>
-              <option value="closed">Closed</option>
-            </select>
-
-            <select
-              value={employerFilter}
-              onChange={(e) => setEmployerFilter(e.target.value)}
-              className="border border-[var(--color-border)] rounded-[var(--radius-button)] px-3 py-2 text-sm bg-[var(--color-surface)] transition-colors"
-            >
-              <option value="all">All Employers</option>
-              {uniqueEmployers.map((email) => (
-                <option key={email} value={email}>
-                  {email}
-                </option>
-              ))}
-            </select>
-
-            <button
-              onClick={() =>
-                setSortOrder((prev) =>
-                  prev === "newest" ? "oldest" : "newest"
-                )
-              }
-              className="flex items-center gap-2 border border-[var(--color-border)] rounded-[var(--radius-button)] px-3 py-2 text-sm bg-[var(--color-surface)] transition-colors hover:bg-[var(--color-bg-hover)] transition"
-            >
-              <ArrowDownUp size={16} />
-              {sortOrder === "newest" ? "Newest First" : "Oldest First"}
-            </button>
-          </div>
-        </div>
+        <BackButton to="/admin" label="Back to Dashboard" className="w-fit" />
+        <h1 className="heading-lg flex items-center gap-2">💼 Job Overview</h1>
         <p className="body-base text-[var(--color-text-muted)]">
-          Browse all job postings across the platform.
+          Browse and manage all job postings across the platform.
         </p>
       </header>
 
-      {/* 🧮 Job Summary Counters */}
-      <section className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-        <div className="p-4 bg-green-50 border border-[var(--color-border)] rounded-lg text-center">
+      {/* 🧮 Job Counters */}
+      <motion.section
+        initial={{ opacity: 0, y: 6 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6"
+      >
+        <div className="p-4 text-center rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[color-mix(in srgb,var(--color-success)10%,var(--color-surface))]">
           <p className="text-sm text-[var(--color-text-muted)]">Open Jobs</p>
-          <h3 className="text-xl font-semibold text-green-700">{stats.open}</h3>
+          <h3 className="text-xl font-semibold text-green-600 dark:text-green-400">
+            {stats.open}
+          </h3>
         </div>
-        <div className="p-4 bg-gray-100 border border-[var(--color-border)] rounded-lg text-center">
+        <div className="p-4 text-center rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[color-mix(in srgb,var(--color-text-muted)10%,var(--color-surface))]">
           <p className="text-sm text-[var(--color-text-muted)]">Closed Jobs</p>
-          <h3 className="text-xl font-semibold text-gray-700">
+          <h3 className="text-xl font-semibold text-gray-600 dark:text-gray-300">
             {stats.closed}
           </h3>
         </div>
-        <div className="p-4 bg-blue-50 border border-[var(--color-border)] rounded-lg text-center">
+        <div className="p-4 text-center rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[color-mix(in srgb,var(--color-employer)10%,var(--color-surface))]">
           <p className="text-sm text-[var(--color-text-muted)]">Total Jobs</p>
-          <h3 className="text-xl font-semibold text-blue-700">{stats.total}</h3>
+          <h3 className="text-xl font-semibold text-blue-600 dark:text-blue-400">
+            {stats.total}
+          </h3>
         </div>
-      </section>
+      </motion.section>
+
+      {/* 🔍 Filters */}
+      <div className="flex flex-wrap items-center gap-3 mb-6">
+        <div className="relative">
+          <Search
+            size={14}
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)]"
+          />
+          <input
+            type="text"
+            placeholder="Search title, company, or employer..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="border border-[var(--color-border)] rounded-[var(--radius-button)] pl-8 pr-3 py-2 text-sm bg-[var(--color-surface)] focus:ring-1 focus:ring-[var(--color-candidate)]"
+          />
+        </div>
+
+        <select
+          value={statusFilter}
+          onChange={(e) =>
+            setStatusFilter(e.target.value as "all" | "open" | "closed")
+          }
+          className="border border-[var(--color-border)] rounded-[var(--radius-button)] px-3 py-2 text-sm bg-[var(--color-surface)]"
+        >
+          <option value="all">All Statuses</option>
+          <option value="open">Open</option>
+          <option value="closed">Closed</option>
+        </select>
+
+        <select
+          value={employerFilter}
+          onChange={(e) => setEmployerFilter(e.target.value)}
+          className="border border-[var(--color-border)] rounded-[var(--radius-button)] px-3 py-2 text-sm bg-[var(--color-surface)]"
+        >
+          <option value="all">All Employers</option>
+          {uniqueEmployers.map((email) => (
+            <option key={email} value={email}>
+              {email}
+            </option>
+          ))}
+        </select>
+
+        <button
+          onClick={() =>
+            setSortOrder((prev) => (prev === "newest" ? "oldest" : "newest"))
+          }
+          className="flex items-center gap-1.5 border border-[var(--color-border)] rounded-[var(--radius-button)] px-3 py-2 text-sm bg-[var(--color-surface)] hover:bg-[var(--color-bg-hover)] transition"
+        >
+          <ArrowDownUp size={14} />
+          {sortOrder === "newest" ? "Newest First" : "Oldest First"}
+        </button>
+      </div>
 
       {/* 📋 Table */}
-      <div className="bg-[var(--color-surface)] transition-colors rounded-[var(--radius-card)] shadow-[var(--shadow-soft)] border border-[var(--color-border)] overflow-hidden">
-        <table className="w-full text-left">
-          <thead className="bg-[var(--color-bg-muted)] border-b border-[var(--color-border)]">
+      <motion.div
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-card)] shadow-[var(--shadow-soft)] overflow-auto"
+      >
+        <table className="w-full text-sm text-left">
+          <thead className="bg-[color-mix(in srgb,var(--color-candidate)10%,var(--color-surface))] border-b border-[var(--color-border)] sticky top-0 z-10">
             <tr>
-              <th className="py-3 px-4 text-sm font-medium">Title</th>
-              <th className="py-3 px-4 text-sm font-medium">Company</th>
-              <th className="py-3 px-4 text-sm font-medium">Employer</th>
-              <th className="py-3 px-4 text-sm font-medium">Status</th>
-              <th className="py-3 px-4 text-sm font-medium text-center">
-                ⭐ Featured
-              </th>
-              <th className="py-3 px-4 text-sm font-medium">Created</th>
+              <th className="py-3 px-4 font-medium">Title</th>
+              <th className="py-3 px-4 font-medium">Company</th>
+              <th className="py-3 px-4 font-medium">Employer</th>
+              <th className="py-3 px-4 font-medium">Status</th>
+              <th className="py-3 px-4 font-medium text-center">⭐ Featured</th>
+              <th className="py-3 px-4 font-medium">Created</th>
             </tr>
           </thead>
           <tbody>
             {paginated.length ? (
-              paginated.map((j) => (
+              paginated.map((j, i) => (
                 <tr
                   key={j.id}
-                  className="border-b border-[var(--color-border)] hover:bg-[var(--color-bg-hover)] transition-colors"
+                  className={`border-b border-[var(--color-border)] ${
+                    i % 2 === 0
+                      ? "bg-[color-mix(in srgb,var(--color-bg)96%,transparent)]"
+                      : ""
+                  } hover:bg-[var(--color-bg-hover)] transition`}
                 >
-                  <td className="py-3 px-4">{j.title}</td>
+                  <td className="py-3 px-4 font-medium">{j.title}</td>
                   <td className="py-3 px-4">{j.company ?? "—"}</td>
-                  <td className="py-3 px-4 text-sm text-[var(--color-text-muted)]">
+                  <td className="py-3 px-4 text-[var(--color-text-muted)]">
                     {j.employer_email}
                   </td>
                   <td className="py-3 px-4">
                     <span
                       className={`px-2 py-1 rounded text-xs font-medium ${
                         j.status === "open"
-                          ? "bg-green-100 text-green-700"
-                          : "bg-gray-200 text-gray-700"
+                          ? "bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300"
+                          : "bg-gray-200 text-gray-700 dark:bg-gray-900 dark:text-gray-400"
                       }`}
                     >
                       {j.status}
                     </span>
                   </td>
-
-                  {/* ⭐ New Featured Toggle */}
                   <td className="py-3 px-4 text-center">
                     <button
                       onClick={async () => {
@@ -242,26 +249,24 @@ export default function AdminJobs() {
                             )
                           );
                         } catch (err) {
-                          toast.error("Failed to update featured state");
                           console.error(err);
+                          toast.error("Failed to update featured state");
                         }
                       }}
-                      className={`px-2 py-1 rounded text-xs font-medium ${
+                      className={`flex items-center justify-center gap-1 px-2 py-1 rounded text-xs font-medium transition ${
                         j.featured
-                          ? "bg-yellow-100 text-yellow-700 hover:bg-yellow-200"
-                          : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-                      } transition`}
-                      title={
-                        j.featured
-                          ? "Click to unfeature this job"
-                          : "Click to feature this job"
-                      }
+                          ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-300 hover:brightness-110"
+                          : "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400 hover:brightness-125"
+                      }`}
                     >
-                      {j.featured ? "⭐ Featured" : "Mark as Featured"}
+                      <Star
+                        size={14}
+                        fill={j.featured ? "currentColor" : "none"}
+                      />
+                      {j.featured ? "Featured" : "Mark"}
                     </button>
                   </td>
-
-                  <td className="py-3 px-4 text-sm text-[var(--color-text-muted)]">
+                  <td className="py-3 px-4 text-[var(--color-text-muted)]">
                     {new Date(j.created_at).toLocaleDateString()}
                   </td>
                 </tr>
@@ -278,46 +283,48 @@ export default function AdminJobs() {
             )}
           </tbody>
         </table>
-      </div>
+      </motion.div>
 
-      {/* 📄 Pagination Controls */}
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-3 mt-6 text-sm">
-        <div className="text-[var(--color-text-muted)]">
-          Showing {(page - 1) * perPage + 1}–
-          {Math.min(page * perPage, filteredJobs.length)} of{" "}
-          {filteredJobs.length} jobs
+      {/* 📄 Pagination */}
+      {filteredJobs.length > 0 && (
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 mt-6 text-sm">
+          <div className="text-[var(--color-text-muted)]">
+            Showing {(page - 1) * perPage + 1}–
+            {Math.min(page * perPage, filteredJobs.length)} of{" "}
+            {filteredJobs.length} jobs
+          </div>
+
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+              disabled={page === 1}
+              className="px-3 py-1 border border-[var(--color-border)] rounded disabled:opacity-40 hover:bg-[var(--color-bg-hover)]"
+            >
+              Prev
+            </button>
+            <span>
+              Page {page} / {totalPages || 1}
+            </span>
+            <button
+              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+              disabled={page >= totalPages}
+              className="px-3 py-1 border border-[var(--color-border)] rounded disabled:opacity-40 hover:bg-[var(--color-bg-hover)]"
+            >
+              Next
+            </button>
+
+            <select
+              value={perPage}
+              onChange={(e) => setPerPage(Number(e.target.value))}
+              className="border border-[var(--color-border)] rounded px-2 py-1 bg-[var(--color-surface)]"
+            >
+              <option value={10}>10 / page</option>
+              <option value={25}>25 / page</option>
+              <option value={50}>50 / page</option>
+            </select>
+          </div>
         </div>
-
-        <div className="flex items-center gap-3">
-          <button
-            onClick={() => setPage((p) => Math.max(1, p - 1))}
-            disabled={page === 1}
-            className="px-3 py-1 border border-[var(--color-border)] rounded disabled:opacity-40"
-          >
-            Prev
-          </button>
-          <span>
-            Page {page} / {totalPages || 1}
-          </span>
-          <button
-            onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-            disabled={page >= totalPages}
-            className="px-3 py-1 border border-[var(--color-border)] rounded disabled:opacity-40"
-          >
-            Next
-          </button>
-
-          <select
-            value={perPage}
-            onChange={(e) => setPerPage(Number(e.target.value))}
-            className="border border-[var(--color-border)] rounded px-2 py-1 bg-[var(--color-surface)] transition-colors"
-          >
-            <option value={10}>10 / page</option>
-            <option value={25}>25 / page</option>
-            <option value={50}>50 / page</option>
-          </select>
-        </div>
-      </div>
+      )}
     </div>
   );
 }

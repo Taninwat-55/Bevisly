@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import { getTableData, getTableSchema } from "@/lib/api/admin";
 import toast from "react-hot-toast";
-import { ArrowDownUp, Database } from "lucide-react";
+import { ArrowDownUp, Database, RefreshCw, Search } from "lucide-react";
 import BackButton from "@/components/ui/BackButton";
+import { motion } from "framer-motion";
 
 export default function AdminDataViewer() {
   const [table, setTable] = useState("users");
@@ -51,7 +52,7 @@ export default function AdminDataViewer() {
     }
   };
 
-  // 🔍 Filter in-memory (simple string match)
+  // 🔍 Filter and sort
   const filteredRows = data.rows.filter((row) =>
     searchTerm
       ? Object.values(row)
@@ -60,34 +61,28 @@ export default function AdminDataViewer() {
           .includes(searchTerm.toLowerCase())
       : true
   );
-
-  // 🔃 Sort by created_at if present
   const sortedRows = [...filteredRows].sort((a, b) => {
-    const da = new Date(
-      String((a as Record<string, unknown>)["created_at"] || 0)
-    ).getTime();
-    const db = new Date(
-      String((b as Record<string, unknown>)["created_at"] || 0)
-    ).getTime();
+    const da = new Date(String(a["created_at"] || 0)).getTime();
+    const db = new Date(String(b["created_at"] || 0)).getTime();
     return sortOrder === "desc" ? db - da : da - db;
   });
-
   const paginatedRows = sortedRows.slice(0, perPage);
 
   return (
-    <div className="min-h-screen bg-[var(--color-bg)] p-10">
-      {/* Header */}
+    <div className="min-h-screen bg-[var(--color-bg)] text-[var(--color-text)] px-6 md:px-10 py-12 transition-colors">
+      {/* 🧭 Header */}
       <header className="mb-8 flex flex-col gap-2">
-        <BackButton to="/admin" />
-        <div className="flex items-center justify-between flex-wrap gap-3">
-          <h1 className="heading-lg text-[var(--color-text)] flex items-center gap-2">
+        <BackButton to="/admin" label="Back to Dashboard" className="w-fit" />
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <h1 className="heading-lg flex items-center gap-2">
             <Database size={22} /> Data Viewer
           </h1>
-          <div className="flex items-center gap-3">
+
+          <div className="flex flex-wrap items-center gap-3">
             <select
               value={table}
               onChange={(e) => setTable(e.target.value)}
-              className="border border-[var(--color-border)] rounded-[var(--radius-button)] px-3 py-2 text-sm bg-[var(--color-surface)] transition-colors"
+              className="border border-[var(--color-border)] rounded-[var(--radius-button)] px-3 py-2 text-sm bg-[var(--color-surface)]"
             >
               <option value="users">users</option>
               <option value="jobs">jobs</option>
@@ -95,41 +90,60 @@ export default function AdminDataViewer() {
               <option value="feedback">feedback</option>
             </select>
 
-            <input
-              type="text"
-              placeholder="Search..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="border border-[var(--color-border)] rounded-[var(--radius-button)] px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-[var(--color-admin-dark)]"
-            />
+            <div className="relative">
+              <Search
+                size={14}
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)]"
+              />
+              <input
+                type="text"
+                placeholder="Search..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="border border-[var(--color-border)] rounded-[var(--radius-button)] pl-8 pr-3 py-2 text-sm bg-[var(--color-surface)] focus:ring-1 focus:ring-[var(--color-candidate)] focus:outline-none"
+              />
+            </div>
 
             <button
               onClick={() =>
                 setSortOrder((prev) => (prev === "desc" ? "asc" : "desc"))
               }
-              className="flex items-center gap-2 border border-[var(--color-border)] rounded-[var(--radius-button)] px-3 py-2 text-sm bg-[var(--color-surface)] transition-colors hover:bg-[var(--color-bg-hover)] transition"
+              className="flex items-center gap-1.5 border border-[var(--color-border)] rounded-[var(--radius-button)] px-3 py-2 text-sm bg-[var(--color-surface)] hover:bg-[var(--color-bg-hover)] transition"
             >
-              <ArrowDownUp size={16} />
-              {sortOrder === "desc" ? "Newest First" : "Oldest First"}
+              <ArrowDownUp size={14} />
+              {sortOrder === "desc" ? "Newest" : "Oldest"}
+            </button>
+
+            <button
+              onClick={loadData}
+              className="flex items-center gap-1.5 border border-[var(--color-border)] rounded-[var(--radius-button)] px-3 py-2 text-sm bg-[var(--color-employer)] text-white hover:brightness-110 transition"
+            >
+              <RefreshCw size={14} /> Refresh
             </button>
           </div>
         </div>
-
         <p className="body-base text-[var(--color-text-muted)]">
-          Browse raw database tables in read-only mode.
+          Inspect Supabase tables in read-only mode.
         </p>
       </header>
 
-      {/* Table */}
-      <div className="bg-[var(--color-surface)] transition-colors rounded-[var(--radius-card)] shadow-[var(--shadow-soft)] border border-[var(--color-border)] overflow-auto">
+      {/* 📊 Table */}
+      <motion.div
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-card)] shadow-[var(--shadow-soft)] overflow-auto"
+      >
         {loading ? (
           <p className="p-8 text-[var(--color-text-muted)]">Loading data…</p>
         ) : data.rows.length > 0 ? (
-          <table className="w-full text-left text-sm">
-            <thead className="bg-[var(--color-bg-muted)] border-b border-[var(--color-border)]">
+          <table className="w-full text-sm">
+            <thead className="bg-[color-mix(in srgb,var(--color-candidate)10%,var(--color-surface))] border-b border-[var(--color-border)] sticky top-0 z-10">
               <tr>
                 {data.columns.map((col) => (
-                  <th key={col} className="py-2 px-4 font-medium">
+                  <th
+                    key={col}
+                    className="py-2 px-4 font-medium text-left text-[var(--color-text)]"
+                  >
                     {col}
                   </th>
                 ))}
@@ -139,12 +153,17 @@ export default function AdminDataViewer() {
               {paginatedRows.map((row, i) => (
                 <tr
                   key={i}
-                  className="border-b border-[var(--color-border)] hover:bg-[var(--color-bg-hover)] transition"
+                  className={`border-b border-[var(--color-border)] ${
+                    i % 2 === 0
+                      ? "bg-[color-mix(in srgb,var(--color-bg)90%,transparent)]"
+                      : ""
+                  } hover:bg-[var(--color-bg-hover)] transition`}
                 >
                   {data.columns.map((col) => (
                     <td
                       key={col}
-                      className="py-2 px-4 text-[var(--color-text-muted)]"
+                      className="py-2 px-4 text-[var(--color-text-muted)] max-w-[280px] truncate"
+                      title={String(row[col] ?? "—")}
                     >
                       {String(row[col] ?? "—")}
                     </td>
@@ -156,37 +175,52 @@ export default function AdminDataViewer() {
         ) : (
           <p className="p-8 text-[var(--color-text-muted)]">No data found.</p>
         )}
-      </div>
+      </motion.div>
 
-      {/* 📄 Pagination Controls */}
+      {/* 📄 Pagination */}
       {!loading && data.rows.length > 0 && (
         <div className="flex flex-col sm:flex-row items-center justify-between gap-3 mt-6 text-sm">
-          <div className="text-[var(--color-text-muted)]">
+          <span className="text-[var(--color-text-muted)]">
             Showing {(page - 1) * perPage + 1}–
             {Math.min(page * perPage, filteredRows.length)} of{" "}
             {filteredRows.length} rows
-          </div>
+          </span>
 
           <div className="flex items-center gap-3">
+            {/* ⬅️ Prev */}
             <button
               onClick={() => setPage((p) => Math.max(1, p - 1))}
               disabled={page === 1}
-              className="px-3 py-1 border border-[var(--color-border)] rounded disabled:opacity-40"
+              className="px-3 py-1 border border-[var(--color-border)] rounded disabled:opacity-40 hover:bg-[var(--color-bg-hover)] transition"
             >
               Prev
             </button>
+
             <span>Page {page}</span>
+
+            {/* ➡️ Next */}
             <button
-              onClick={() => setPage((p) => p + 1)}
-              className="px-3 py-1 border border-[var(--color-border)] rounded"
+              onClick={() => {
+                // Only move forward if more results exist
+                const totalShown = page * perPage;
+                if (totalShown < filteredRows.length) {
+                  setPage((p) => p + 1);
+                }
+              }}
+              disabled={page * perPage >= filteredRows.length}
+              className="px-3 py-1 border border-[var(--color-border)] rounded disabled:opacity-40 hover:bg-[var(--color-bg-hover)] transition"
             >
               Next
             </button>
 
+            {/* Rows per page */}
             <select
               value={perPage}
-              onChange={(e) => setPerPage(Number(e.target.value))}
-              className="border border-[var(--color-border)] rounded px-2 py-1 bg-[var(--color-surface)] transition-colors"
+              onChange={(e) => {
+                setPerPage(Number(e.target.value));
+                setPage(1); // Reset to first page
+              }}
+              className="border border-[var(--color-border)] rounded px-2 py-1 bg-[var(--color-surface)]"
             >
               <option value={10}>10 / page</option>
               <option value={25}>25 / page</option>
@@ -196,11 +230,15 @@ export default function AdminDataViewer() {
         </div>
       )}
 
-      {/* 🧩 Schema info */}
+      {/* 🧬 Schema */}
       {schema.length > 0 && (
-        <div className="mt-2 text-xs text-[var(--color-text-muted)] bg-[var(--color-bg-muted)] border border-[var(--color-border)] rounded-[var(--radius-card)] p-3 overflow-x-auto">
-          <p className="font-medium text-[var(--color-text)] mb-1">
-            Columns & Types
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="mt-4 text-xs bg-[var(--color-bg-hover)] border border-[var(--color-border)] rounded-[var(--radius-card)] p-4 overflow-x-auto"
+        >
+          <p className="font-medium text-[var(--color-text)] mb-2">
+            Columns &amp; Types
           </p>
           <div className="flex flex-wrap gap-x-4 gap-y-1">
             {schema.map((col) => (
@@ -212,7 +250,7 @@ export default function AdminDataViewer() {
               </span>
             ))}
           </div>
-        </div>
+        </motion.div>
       )}
     </div>
   );
