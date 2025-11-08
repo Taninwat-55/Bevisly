@@ -1,3 +1,4 @@
+// src/components/landing/JobListingsSection.tsx
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { MapPin, Briefcase } from "lucide-react";

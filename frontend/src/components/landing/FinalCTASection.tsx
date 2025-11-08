@@ -1,3 +1,4 @@
+// src/components/landing/FinalCTASection.tsx
 import { Link } from "react-router-dom";
 
 export default function FinalCTASection() {
