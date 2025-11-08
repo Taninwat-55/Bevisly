@@ -5,27 +5,28 @@ interface BackButtonProps {
   to?: string;
   label?: string;
   className?: string;
+  onClick?: () => void;
 }
 
 export default function BackButton({
   to,
   label,
   className = "",
+  onClick,
 }: BackButtonProps) {
   const navigate = useNavigate();
   const location = useLocation();
 
   const handleClick = () => {
+    if (onClick) return onClick();
     if (to) navigate(to);
     else if (window.history.state?.idx > 0) navigate(-1);
     else navigate("/");
   };
 
-  // ✅ fixed logic
   let defaultLabel = label;
   if (!defaultLabel) {
     const path = location.pathname;
-
     if (/^\/jobs\/[a-zA-Z0-9_-]+$/.test(path)) {
       defaultLabel = "Back to Jobs";
     } else if (/^\/candidate\/[a-zA-Z0-9_-]+$/.test(path)) {

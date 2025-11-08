@@ -1,10 +1,10 @@
-// src/pages/auth/AuthPage.tsx
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../../lib/supabaseClient";
 import { useAuth } from "../../hooks/useAuth";
 import { notify } from "@/components/ui/Notify";
 import { Eye, EyeOff } from "lucide-react";
+import BackButton from "@/components/ui/BackButton";
 
 export default function AuthPage() {
   const [email, setEmail] = useState("");
@@ -110,15 +110,17 @@ export default function AuthPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-[var(--color-bg)] overflow-hidden">
-      {/* 🔙 Back to Landing Page */}
-      <button
-        type="button"
-        onClick={() => navigate("/")}
-        className="absolute left-4 top-4 flex items-center gap-1 text-sm text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition"
-      >
-        <span>←</span>
-        <span>Back</span>
-      </button>
+      {/* 🔙 Consistent Back Button */}
+      <div className="absolute left-4 top-4">
+        <BackButton
+          label={isLogin ? "Back to Home" : "Back to Login"}
+          to={isLogin ? "/" : undefined}
+          onClick={!isLogin ? () => setIsLogin(true) : undefined}
+          className="border-transparent hover:border-[var(--color-border)]"
+        />
+      </div>
+
+      {/* Auth Card */}
       <div className="bg-[var(--color-surface)] p-8 rounded-card shadow-soft w-full max-w-md relative overflow-hidden transition-all duration-300">
         <h1 className="text-2xl font-semibold text-center mb-6 text-[var(--color-candidate-dark)]">
           {isLogin ? "Welcome Back 👋" : "Create Your Account"}
