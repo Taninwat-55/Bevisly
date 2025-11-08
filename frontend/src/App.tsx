@@ -1,7 +1,7 @@
 import { Outlet } from "react-router-dom";
 import Navbar from "./components/Navbar";
 import { BevisToaster } from "./components/ui/Toast";
-import FeedbackButton from "./components/ui/FeedbackButton";
+// import FeedbackButton from "./components/ui/FeedbackButton";
 
 export default function App() {
   return (
@@ -9,7 +9,7 @@ export default function App() {
       {/* You can add Navbar or Sidebar later */}
       <Navbar />
       <Outlet />
-      <FeedbackButton />
+      {/* <FeedbackButton /> */}
       <BevisToaster />
     </main>
   );
