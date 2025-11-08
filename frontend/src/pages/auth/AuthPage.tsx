@@ -5,6 +5,7 @@ import { useAuth } from "../../hooks/useAuth";
 import { notify } from "@/components/ui/Notify";
 import { Eye, EyeOff } from "lucide-react";
 import BackButton from "@/components/ui/BackButton";
+import { motion } from "framer-motion";
 
 export default function AuthPage() {
   const [email, setEmail] = useState("");
@@ -15,6 +16,8 @@ export default function AuthPage() {
   const [role, setRole] = useState<"candidate" | "employer">("candidate");
   const [formLoading, setFormLoading] = useState(false);
   const [isLogin, setIsLogin] = useState(true);
+  const [formError, setFormError] = useState<string | null>(null);
+
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const emailRef = useRef<HTMLInputElement>(null);
@@ -35,8 +38,20 @@ export default function AuthPage() {
 
   // 🟣 Sign Up
   async function handleSignUp() {
-    if (password !== confirmPassword)
-      return notify.error("Passwords do not match.");
+    setFormError(null);
+
+    if (!email.includes("@")) {
+      setFormError("Please enter a valid email address.");
+      return;
+    }
+    if (password.length < 6) {
+      setFormError("Password must be at least 6 characters long.");
+      return;
+    }
+    if (password !== confirmPassword) {
+      setFormError("Passwords do not match.");
+      return;
+    }
 
     try {
       setFormLoading(true);
@@ -46,11 +61,11 @@ export default function AuthPage() {
         options: { data: { role } },
       });
 
-      if (error) notify.error(`❌ ${error.message}`);
+      if (error) setFormError(error.message);
       else notify.success("✅ Check your email for confirmation link.", role);
     } catch (err) {
       console.error("Error", err);
-      notify.error("Unexpected error. Please try again.");
+      setFormError("Unexpected error. Please try again.");
     } finally {
       setFormLoading(false);
     }
@@ -58,45 +73,39 @@ export default function AuthPage() {
 
   // 🟦 Log In
   async function handleLogin() {
+    setFormError(null);
+
+    if (!email.trim() || !password.trim()) {
+      setFormError("Please enter both email and password.");
+      return;
+    }
+
     try {
       setFormLoading(true);
-      const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
 
       if (error) {
-        notify.error(`❌ ${error.message}`);
+        setFormError("Invalid email or password. Please try again.");
         return;
       }
 
       const { data: sessionData } = await supabase.auth.getSession();
       const sessionUser = sessionData.session?.user;
-
       if (sessionUser) {
         const role =
-          (sessionUser.user_metadata.role as
-            | "candidate"
-            | "employer"
-            | "admin") ?? "candidate";
+          (sessionUser.user_metadata.role as "candidate" | "employer" | "admin") ?? "candidate";
 
         localStorage.setItem(
           "bevis_user",
-          JSON.stringify({
-            id: sessionUser.id,
-            email: sessionUser.email,
-            role,
-          })
+          JSON.stringify({ id: sessionUser.id, email: sessionUser.email, role })
         );
 
         notify.success("✅ Logged in successfully!", role);
-
-        if (role === "admin") navigate("/admin");
-        else if (role === "employer") navigate("/employer");
-        else navigate("/candidate");
+        navigate(role === "admin" ? "/admin" : role === "employer" ? "/employer" : "/candidate");
       }
-    } catch {
-      notify.error("Login failed. Please try again.");
+    } catch (err) {
+      console.error(err);
+      setFormError("Unexpected error. Please try again later.");
     } finally {
       setFormLoading(false);
     }
@@ -129,9 +138,7 @@ export default function AuthPage() {
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Email */}
           <div>
-            <label className="block text-sm font-medium mb-1 text-[var(--color-text)]">
-              Email
-            </label>
+            <label className="block text-sm font-medium mb-1 text-[var(--color-text)]">Email</label>
             <input
               ref={emailRef}
               type="email"
@@ -162,6 +169,17 @@ export default function AuthPage() {
             >
               {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
             </button>
+
+            {/* Inline Error (animated) */}
+            {formError && (
+              <motion.p
+                initial={{ opacity: 0, y: -2 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="text-xs text-[var(--color-error)] mt-1"
+              >
+                {formError}
+              </motion.p>
+            )}
           </div>
 
           {/* Confirm Password (signup only) */}
@@ -190,7 +208,7 @@ export default function AuthPage() {
                 {showConfirm ? <EyeOff size={18} /> : <Eye size={18} />}
               </button>
               {confirmPassword && password !== confirmPassword && (
-                <p className="text-xs text-red-500 mt-1">
+                <p className="text-xs text-[var(--color-error)] mt-1">
                   Passwords do not match
                 </p>
               )}
@@ -200,14 +218,10 @@ export default function AuthPage() {
           {/* Role (signup only) */}
           {!isLogin && (
             <div>
-              <label className="block text-sm font-medium mb-1 text-[var(--color-text)]">
-                Role
-              </label>
+              <label className="block text-sm font-medium mb-1 text-[var(--color-text)]">Role</label>
               <select
                 value={role}
-                onChange={(e) =>
-                  setRole(e.target.value as "candidate" | "employer")
-                }
+                onChange={(e) => setRole(e.target.value as "candidate" | "employer")}
                 className="w-full border border-[var(--color-border)] rounded-button px-3 py-2 text-sm"
               >
                 <option value="candidate">Candidate</option>
