@@ -1,3 +1,4 @@
+// src/components/ui/FeedbackButton.tsx
 import { useState, useEffect } from "react";
 import { MessageCircle, X } from "lucide-react";
 import { supabase } from "@/lib/supabaseClient";
