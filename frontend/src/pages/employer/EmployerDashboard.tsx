@@ -1,18 +1,28 @@
-// src/pages/employer/EmployerDashboard.tsx
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import {
   getEmployerJobs,
   getEmployerSubmissions,
   getEmployerJobSummary,
-} from "../../lib/api";
-import { useAuth } from "../../hooks/useAuth";
+  toggleJobStatus,
+  toggleJobFeatured,
+} from "@/lib/api";
+import { useAuth } from "@/hooks/useAuth";
 import type {
   EmployerJob,
   EmployerSubmission,
   EmployerJobSummary,
 } from "@/types";
+import {
+  Briefcase,
+  Star,
+  Users,
+  CheckCircle2,
+  Clock,
+  ArrowRight,
+} from "lucide-react";
+import { motion } from "framer-motion";
 
 export default function EmployerDashboard() {
   const { user } = useAuth();
@@ -21,48 +31,140 @@ export default function EmployerDashboard() {
   const [jobs, setJobs] = useState<EmployerJob[]>([]);
   const [submissions, setSubmissions] = useState<EmployerSubmission[]>([]);
   const [summaries, setSummaries] = useState<EmployerJobSummary[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
 
-  // 📦 Load data
+  // 📦 Load employer data
   useEffect(() => {
-    if (!user) return;
-    const uid = user.id;
-    async function loadData() {
+    if (!user?.id) return;
+    (async () => {
       try {
+        setLoading(true);
         const [jobsData, subsData, summariesData] = await Promise.all([
-          getEmployerJobs(uid),
-          getEmployerSubmissions(uid),
-          getEmployerJobSummary(uid),
+          getEmployerJobs(user.id),
+          getEmployerSubmissions(user.id),
+          getEmployerJobSummary(user.id),
         ]);
         setJobs(jobsData);
         setSubmissions(subsData);
         setSummaries(summariesData);
       } catch (err) {
-        console.error("Error fetching employer data:", err);
+        console.error("Employer dashboard error:", err);
         toast.error("Failed to load dashboard data.");
+      } finally {
+        setLoading(false);
       }
-    }
-    loadData();
-  }, [user]);
+    })();
+  }, [user?.id]);
 
   // 🧮 Quick metrics
   const totalJobs = jobs.length;
   const totalSubmissions = submissions.length;
+  const totalHires = submissions.filter((s) => s.status === "hired").length;
   const avgRating = useMemo(() => {
     const ratings = summaries
       .map((s) => s.avg_score)
       .filter((v): v is number => v !== null);
-    if (!ratings.length) return null;
+    if (!ratings.length) return "—";
     return (ratings.reduce((sum, r) => sum + r, 0) / ratings.length).toFixed(1);
   }, [summaries]);
+
+  // 🔍 Filtered jobs
+  const filteredJobs = useMemo(() => {
+    return jobs
+      .filter((job) => {
+        const matchesSearch = job.title
+          ?.toLowerCase()
+          .includes(searchTerm.toLowerCase());
+        const matchesStatus =
+          statusFilter === "all" ||
+          (statusFilter === "active" && job.status === "active") ||
+          (statusFilter === "closed" && job.status === "closed") ||
+          (statusFilter === "featured" && job.featured);
+        return matchesSearch && matchesStatus;
+      })
+      .sort((a, b) => Number(b.featured) - Number(a.featured));
+  }, [jobs, searchTerm, statusFilter]);
 
   const findSummary = (jobId: string) =>
     summaries.find((s) => s.job_id === jobId);
 
+  // 🧩 Universal job action handler
+  const handleJobAction = async (
+    e: React.MouseEvent,
+    job: EmployerJob,
+    action: "status" | "featured"
+  ) => {
+    e.stopPropagation();
+
+    try {
+      const updated =
+        action === "status"
+          ? await toggleJobStatus(job.id, job.status || "active")
+          : await toggleJobFeatured(job.id, job.featured || false);
+
+      setJobs((prev) =>
+        prev.map((j) =>
+          j.id === job.id
+            ? {
+                ...j,
+                ...(action === "status"
+                  ? {
+                      status:
+                        updated.status === "active" ||
+                        updated.status === "closed"
+                          ? updated.status
+                          : null,
+                    }
+                  : { featured: !!updated.featured }),
+              }
+            : j
+        )
+      );
+
+      toast.success(
+        action === "status"
+          ? updated.status === "active"
+            ? "✅ Job reopened successfully."
+            : "🛑 Job closed successfully."
+          : updated.featured
+          ? "⭐ Job featured successfully!"
+          : "Job unfeatured."
+      );
+    } catch (err) {
+      console.error(err);
+      toast.error(
+        action === "status"
+          ? "Failed to update job status."
+          : "Failed to toggle featured state."
+      );
+    }
+  };
+
+  // 🌀 Loading state
+  if (loading)
+    return (
+      <div className="flex items-center justify-center min-h-screen text-[var(--color-text-muted)]">
+        Loading dashboard…
+      </div>
+    );
+
   return (
-    <div className="min-h-screen bg-[var(--color-bg)] px-8 py-10 space-y-10">
-      {/* 🧭 Header + CTA */}
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="heading-lg">Employer Dashboard</h1>
+    <motion.div
+      className="min-h-screen bg-[var(--color-bg)] px-8 py-10 space-y-10"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.25 }}
+    >
+      {/* 🧭 Header */}
+      <div className="flex flex-wrap items-center justify-between gap-4 mb-4">
+        <div>
+          <h1 className="heading-lg">Employer Dashboard</h1>
+          <p className="text-[var(--color-text-muted)]">
+            Manage jobs, review proofs, and track hiring performance.
+          </p>
+        </div>
         <button
           onClick={() => navigate("/employer/jobs/new")}
           className="bg-[var(--color-employer)] text-white px-4 py-2 rounded-[var(--radius-button)] shadow-[var(--shadow-soft)] hover:bg-[var(--color-employer-dark)] transition"
@@ -71,71 +173,180 @@ export default function EmployerDashboard() {
         </button>
       </div>
 
-      {/* 📊 Summary Metrics */}
-      <section className="flex flex-wrap gap-4">
-        <MetricCard title="Jobs Posted" value={totalJobs} />
-        <MetricCard title="Total Submissions" value={totalSubmissions} />
-        <MetricCard title="Average Rating" value={avgRating ?? "—"} />
+      {/* 📊 Metrics Overview */}
+      <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <MetricCard
+          title="Jobs Posted"
+          value={totalJobs}
+          icon={<Briefcase />}
+        />
+        <MetricCard
+          title="Total Submissions"
+          value={totalSubmissions}
+          icon={<Users />}
+        />
+        <MetricCard title="Average Rating" value={avgRating} icon={<Star />} />
+        <MetricCard
+          title="Hires Made"
+          value={totalHires}
+          icon={<CheckCircle2 />}
+        />
       </section>
 
-      {/* 💼 Jobs List */}
+      {/* 🔍 Search + Filter */}
+      <div className="flex flex-wrap items-center gap-3 mb-6">
+        <input
+          type="text"
+          placeholder="Search job title..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="flex-1 min-w-[200px] border border-[var(--color-border)] bg-[var(--color-bg)] text-[var(--color-text)] rounded-[var(--radius-button)] px-3 py-2 text-sm focus:ring-2 focus:ring-[var(--color-employer-light)]"
+        />
+        <select
+          value={statusFilter}
+          onChange={(e) => setStatusFilter(e.target.value)}
+          className="border border-[var(--color-border)] bg-[var(--color-bg)] text-[var(--color-text)] rounded-[var(--radius-button)] px-3 py-2 text-sm"
+        >
+          <option value="all">All Jobs</option>
+          <option value="active">Active</option>
+          <option value="closed">Closed</option>
+          <option value="featured">Featured</option>
+        </select>
+      </div>
+
+      {/* 💼 Job Performance */}
       <section>
-        <h2 className="heading-lg mb-6">Your Jobs</h2>
-        {jobs.length === 0 ? (
-          <p className="text-[var(--color-text-muted)]">No jobs posted yet.</p>
+        <h2 className="heading-md mb-4">Your Jobs Overview</h2>
+        {filteredJobs.length === 0 ? (
+          <p className="text-[var(--color-text-muted)] italic">
+            No jobs match your criteria.
+          </p>
         ) : (
-          <ul className="space-y-2 mb-10">
-            {jobs.map((job) => {
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+            {filteredJobs.map((job) => {
               const summary = findSummary(job.id);
               return (
-                <li
+                <motion.div
                   key={job.id}
                   onClick={() => navigate(`/employer/job/${job.id}`)}
-                  className="cursor-pointer bg-[var(--color-surface)] transition-colors p-4 rounded-[var(--radius-card)] border border-[var(--color-border)] hover:shadow-[var(--shadow-soft)] transition group"
+                  whileHover={{ scale: 1.02 }}
+                  className="cursor-pointer bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-card)] shadow-[var(--shadow-soft)] p-5 hover:shadow-[var(--shadow-hover)] transition group"
                 >
-                  <div className="flex justify-between items-center">
-                    <div>
-                      <h3 className="font-medium text-[var(--color-text)] group-hover:text-[var(--color-employer-dark)] transition">
-                        {job.title}
-                      </h3>
-                      <p className="text-sm text-[var(--color-text-muted)]">
-                        {job.description || "No description provided."}
-                      </p>
-                    </div>
+                  <div className="flex justify-between items-start mb-3">
+                    <h3 className="font-semibold text-[var(--color-text)] group-hover:text-[var(--color-employer-dark)] transition line-clamp-2 flex items-center gap-1">
+                      {job.title}
+                      {job.featured && (
+                        <span
+                          className="text-yellow-500 text-sm"
+                          title="Featured"
+                        >
+                          ⭐
+                        </span>
+                      )}
+                    </h3>
+                    <ArrowRight
+                      size={16}
+                      className="opacity-60 group-hover:translate-x-1 transition-transform"
+                    />
+                  </div>
+
+                  <p className="text-sm text-[var(--color-text-muted)] mb-4 line-clamp-2">
+                    {job.description || "No description provided."}
+                  </p>
+
+                  <div className="flex justify-between text-xs text-[var(--color-text-muted)] mb-2">
+                    <span>
+                      📅{" "}
+                      {job.created_at
+                        ? new Date(job.created_at).toLocaleDateString()
+                        : "—"}
+                    </span>
                     {summary && (
-                      <div className="text-sm text-[var(--color-text-muted)] text-right">
-                        <p>{summary.submissions_count || 0} submissions</p>
-                        <p>
-                          ⭐ Avg rating:{" "}
-                          {summary.avg_score
-                            ? Number(summary.avg_score).toFixed(1)
-                            : "—"}
-                        </p>
-                      </div>
+                      <span>
+                        {summary.submissions_count ?? 0} submissions · ⭐{" "}
+                        {summary.avg_score
+                          ? Number(summary.avg_score).toFixed(1)
+                          : "—"}
+                      </span>
                     )}
                   </div>
-                </li>
+
+                  {/* 🧩 Status + Actions */}
+                  <div className="flex justify-between items-center pt-2 border-t border-[var(--color-border)] mt-3">
+                    <span
+                      className={`text-xs font-medium px-2 py-1 rounded-full ${
+                        job.status === "active"
+                          ? "bg-green-100 text-green-700"
+                          : "bg-red-100 text-red-700"
+                      }`}
+                    >
+                      {job.status === "active" ? "Active" : "Closed"}
+                    </span>
+
+                    <div className="flex items-center gap-3">
+                      <button
+                        onClick={(e) => handleJobAction(e, job, "status")}
+                        className="text-xs text-[var(--color-employer)] hover:underline"
+                      >
+                        {job.status === "active" ? "Close" : "Reopen"}
+                      </button>
+                      <button
+                        onClick={(e) => handleJobAction(e, job, "featured")}
+                        className={`text-xs ${
+                          job.featured
+                            ? "text-yellow-600 hover:underline"
+                            : "text-[var(--color-employer)] hover:underline"
+                        }`}
+                      >
+                        {job.featured ? "Unfeature ⭐" : "Feature ⭐"}
+                      </button>
+                    </div>
+                  </div>
+                </motion.div>
               );
             })}
-          </ul>
+          </div>
         )}
       </section>
 
-      {/* 🧾 Proof Submissions */}
+      {/* 🕓 Recent Submissions */}
       <section>
-        <h2 className="heading-lg mb-6">Proof Submissions</h2>
+        <h2 className="heading-md mb-4">Recent Proof Submissions</h2>
         {submissions.length === 0 ? (
-          <p className="text-[var(--color-text-muted)]">No submissions yet.</p>
+          <p className="text-[var(--color-text-muted)]">
+            No submissions yet — candidates’ proofs will appear here as soon as
+            they apply.
+          </p>
         ) : (
-          <ul className="space-y-2">
-            {submissions.map((s) => (
+          <ul className="divide-y divide-[var(--color-border)] bg-[var(--color-surface)] rounded-[var(--radius-card)] border border-[var(--color-border)] shadow-[var(--shadow-soft)]">
+            {submissions.slice(0, 6).map((s) => (
               <li
                 key={s.id}
                 onClick={() => navigate(`/employer/review/${s.id}`)}
-                className="bg-[var(--color-surface)] transition-colors p-3 rounded-[var(--radius-card)] border border-[var(--color-border)] hover:shadow-[var(--shadow-soft)] transition"
+                className="flex justify-between items-center p-4 cursor-pointer hover:bg-[var(--color-bg-hover)] transition"
               >
-                <span className="font-medium">{s.proof_tasks?.title}</span>
-                <span className="ml-2 text-[var(--color-text-muted)]">
+                <div>
+                  <p className="font-medium text-[var(--color-text)]">
+                    {s.proof_tasks?.title || "Untitled Proof"}
+                  </p>
+                  <p className="text-xs text-[var(--color-text-muted)] flex items-center gap-1">
+                    <Clock size={12} />{" "}
+                    {s.created_at
+                      ? new Date(s.created_at).toLocaleDateString()
+                      : "—"}
+                  </p>
+                </div>
+                <span
+                  className={`px-2 py-1 rounded-full text-xs ${
+                    s.status === "pending"
+                      ? "bg-yellow-100 text-yellow-700"
+                      : s.status === "reviewed"
+                      ? "bg-blue-100 text-blue-700"
+                      : s.status === "hired"
+                      ? "bg-green-100 text-green-700"
+                      : "bg-gray-100 text-gray-600"
+                  }`}
+                >
                   {s.status}
                 </span>
               </li>
@@ -143,23 +354,34 @@ export default function EmployerDashboard() {
           </ul>
         )}
       </section>
-    </div>
+    </motion.div>
   );
 }
 
+/* ─── Subcomponent: MetricCard ─────────────────────────────── */
 function MetricCard({
   title,
   value,
+  icon,
 }: {
   title: string;
   value: string | number;
+  icon?: React.ReactNode;
 }) {
   return (
-    <div className="flex-1 min-w-[200px] bg-[var(--color-surface)] transition-colors border border-[var(--color-border)] rounded-[var(--radius-card)] p-4 text-center shadow-[var(--shadow-soft)]">
-      <h3 className="text-sm text-[var(--color-text-muted)]">{title}</h3>
-      <p className="text-2xl font-semibold text-[var(--color-text)] mt-1">
-        {value}
-      </p>
-    </div>
+    <motion.div
+      whileHover={{ scale: 1.03 }}
+      className="flex items-center gap-4 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-card)] p-4 shadow-[var(--shadow-soft)]"
+    >
+      <div className="p-3 rounded-full bg-[var(--color-employer)]/10 text-[var(--color-employer)]">
+        {icon}
+      </div>
+      <div>
+        <h3 className="text-sm text-[var(--color-text-muted)]">{title}</h3>
+        <p className="text-xl font-semibold text-[var(--color-text)] mt-1">
+          {value}
+        </p>
+      </div>
+    </motion.div>
   );
 }
