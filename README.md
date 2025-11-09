@@ -47,6 +47,10 @@ bevis-mvp/
 │ │ │ │ ├── LandingNavbar.tsx
 │ │ │ │ ├── ProblemSection.tsx
 │ │ │ │ ├── WhyProofSection.tsx
+│ │ │ ├── proofs/
+│ │ │ │ ├── ProofCard.tsx
+│ │ │ │ ├── ProofCardsGrid.tsx
+│ │ │ │ ├── ProofDetailModal.tsx
 │ │ │ ├── talent/
 │ │ │ │ ├── CandidateCard.tsx
 │ │ │ │ ├── index.ts
@@ -126,10 +130,16 @@ bevis-mvp/
 │ │ │ │ ├── EmployerTalentPool.tsx
 │ │ │ ├── landing/
 │ │ │ │ ├── LandingPage.tsx
+│ │ │ ├── LearnMore/
+│ │ │ │ ├── CandidateGuide.tsx
+│ │ │ │ ├── EmployerGuide.tsx
+│ │ │ │ ├── InfoSections.tsx
+│ │ │ │ ├── LearnMorePage.tsx
 │ │ │ ├── shared/
-│ │ │ │ ├── UserSettings.tsx.tsx
+│ │ │ │ ├── UserSettings.tsx.
 │ │ │ ├── AboutPage.tsx
-│ │ │ ├── LearnMorePage.tsx
+│ │ │ ├── JobListingPage.tsx
+│ │ │ ├── JobDetailPage.tsx
 │ │ │ ├── PublicJCandidateProfilePage.tsx
 │ │ │ ├── PublicJobDetailPage.tsx
 │ │ │ ├── PublicJobsPage.tsx

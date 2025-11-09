@@ -118,3 +118,33 @@ export async function updateHiringStage(
   if (error) throw error;
   return data;
 }
+
+/**
+ * ✅ Toggle job active/closed state
+ */
+export async function toggleJobStatus(job_id: string, currentStatus?: string) {
+  const newStatus = currentStatus === "active" ? "closed" : "active";
+
+  const { data, error } = await supabase
+    .from("jobs")
+    .update({ status: newStatus })
+    .eq("id", job_id)
+    .select()
+    .single();
+
+  if (error) throw error;
+  return data;
+}
+
+export async function toggleJobFeatured(job_id: string, currentFeatured?: boolean) {
+  const newFeatured = !currentFeatured;
+  const { data, error } = await supabase
+    .from("jobs")
+    .update({ featured: newFeatured })
+    .eq("id", job_id)
+    .select()
+    .single();
+
+  if (error) throw error;
+  return data;
+}
