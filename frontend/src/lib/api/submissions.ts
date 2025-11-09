@@ -123,38 +123,64 @@ export async function getEmployerSubmissionsWithFeedback(
  */
 export async function getProofTaskDetails(
   proof_task_id: string
-): Promise<ProofTask> {
+): Promise<ProofTask | null> {
   const { data, error } = await supabase
     .from("proof_tasks")
     .select(
       "id, job_id, title, description, expected_time, submission_format, ai_tools_allowed"
     )
     .eq("id", proof_task_id)
-    .single();
+    .maybeSingle();
 
   if (error) throw error;
-  return data;
+  return data ?? null;
 }
 
 export async function submitProof({
   job_id,
   submission_link,
   reflection,
+  file,
 }: {
   job_id: string;
-  submission_link: string;
+  submission_link?: string; // ✅ optional
   reflection?: string;
+  file?: File | null; // ✅ optional (for non-dev proofs)
 }) {
   const user = (await supabase.auth.getUser()).data.user;
   if (!user) throw new Error("Not authenticated");
 
+  // 🧠 Validate: at least one proof method
+  if (!submission_link && !file) {
+    throw new Error("A submission link or file is required.");
+  }
+
+  let uploadedFileUrl: string | null = null;
+
+  // 📤 If file provided, upload it to Supabase Storage
+  if (file) {
+    const filePath = `proofs/${user.id}/${Date.now()}-${file.name}`;
+    const { error: uploadErr } = await supabase.storage
+      .from("proofs")
+      .upload(filePath, file);
+
+    if (uploadErr) throw uploadErr;
+
+    const { data: publicUrlData } = supabase.storage
+      .from("proofs")
+      .getPublicUrl(filePath);
+
+    uploadedFileUrl = publicUrlData?.publicUrl || null;
+  }
+
+  // 🧾 Store submission record
   const { data, error } = await supabase
     .from("submissions")
     .insert([
       {
         user_id: user.id,
         job_id,
-        submission_link, // ✅ matches DB
+        submission_link: uploadedFileUrl || submission_link || null, // ✅ either link or uploaded file
         reflection,
         status: "pending",
       },
@@ -174,12 +200,15 @@ export async function getCandidateFeedback(user_id: string) {
       id,
       created_at,
       status,
+      submission_link,       
+      reflection,            
       jobs (title, company),
       proof_tasks (title),
       feedback (
         strengths,
         improvements,
         stars,
+        comments,
         created_at
       )
     `

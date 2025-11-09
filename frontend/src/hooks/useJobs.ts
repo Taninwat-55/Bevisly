@@ -12,7 +12,11 @@ export interface Job {
   proof_tasks?: {
     id: string;
     title: string;
-    duration_minutes?: number | null; // ← correct field name
+    description?: string | null;
+    expected_time?: string | null;
+    submission_format?: string | null;
+    ai_tools_allowed?: boolean | null;
+    duration_minutes?: number | null;
   }[];
 }
 
@@ -25,13 +29,27 @@ export function useJobs() {
     const fetchJobs = async () => {
       const { data, error } = await supabase
         .from("jobs")
-        .select(
-          "id, title, company, location, paid, description, proof_tasks(id, title, duration_minutes)"
-        )
+        .select(`
+          id,
+          title,
+          company,
+          location,
+          paid,
+          description,
+          proof_tasks (
+            id,
+            title,
+            description,
+            expected_time,
+            submission_format,
+            ai_tools_allowed,
+            duration_minutes
+          )
+        `)
         .order("created_at", { ascending: false });
 
       if (error) setError(error.message);
-      else setJobs((data as unknown as Job[]) || []); // double cast to silence type inference
+      else setJobs((data as unknown as Job[]) || []);
       setLoading(false);
     };
 

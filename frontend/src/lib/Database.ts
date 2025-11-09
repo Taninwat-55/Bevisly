@@ -561,6 +561,17 @@ export type Database = {
           title: string
         }[]
       }
+      get_recent_activity: {
+        Args: { user_id: string }
+        Returns: {
+          comments: string
+          id: string
+          job_title: string
+          rating: number
+          reviewed_at: string
+        }[]
+      }
+      get_user_rank: { Args: { user_id: string }; Returns: number }
       is_admin: { Args: { uid: string }; Returns: boolean }
       promote_to_admin: { Args: never; Returns: undefined }
     }

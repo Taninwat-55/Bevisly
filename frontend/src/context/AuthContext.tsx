@@ -4,7 +4,7 @@ import { createContext } from "react";
 export type SessionUser = {
   id: string;
   email: string;
-  role: "candidate" | "employer" | "admin";
+  role: "candidate" | "employer" | "admin" | null;
 };
 
 // ✅ Extended context type

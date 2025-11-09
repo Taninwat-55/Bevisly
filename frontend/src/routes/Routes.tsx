@@ -13,8 +13,8 @@ import RequestResetPage from "@/pages/auth/RequestResetPage";
 import CandidateLayout from "@/layout/CandidateLayout";
 import CandidateHome from "@/pages/candidate/CandidateHome";
 import CandidateDashboard from "@/pages/candidate/CandidateDashboard";
-import CandidateJobListings from "@/pages/candidate/CandidateJobListings";
-import CandidateJobDetail from "@/pages/candidate/CandidateJobDetail";
+// import CandidateJobListings from "@/pages/candidate/CandidateJobListings";
+// import CandidateJobDetail from "@/pages/candidate/CandidateJobDetail";
 import CandidateProofWorkspace from "@/pages/candidate/CandidateProofWorkspace";
 import CandidateFeedbackView from "@/pages/candidate/CandidateFeedbackView";
 import CandidateProfile from "@/pages/candidate/CandidateProfile";
@@ -41,15 +41,18 @@ import AdminDataViewer from "@/pages/admin/AdminDataViewer";
 import UserSettings from "@/pages/shared/UserSettings";
 
 // --- Public pages
-import PublicJobDetailPage from "@/pages/PublicJobDetailPage";
-import PublicJobsPage from "@/pages/PublicJobsPage";
+// import PublicJobDetailPage from "@/pages/PublicJobDetailPage";
+// import PublicJobsPage from "@/pages/PublicJobsPage";
 import PublicCandidateProfilePage from "@/pages/PublicCandidateProfilePage";
 import PublicLeaderboard from "@/pages/PublicLeaderboard";
 import PublicLayout from "@/layout/PublicLayout";
 import LearnMorePage from "@/pages/LearnMore/LearnMorePage";
-import AboutPage from "@/pages/AboutPage";
+import AboutPage from "@/pages/shared/AboutPage";
 import AdminFeedbackMessages from "@/pages/admin/AdminFeedbackMessages";
 import AdminLayout from "@/layout/AdminLayout";
+
+import JobDetailPage from "@/pages/jobs/JobDetailPage";
+import JobListingPage from "@/pages/jobs/JobListingPage";
 
 export const router = createBrowserRouter([
   // 🌐 Public
@@ -60,8 +63,10 @@ export const router = createBrowserRouter([
     element: <PublicLayout />,
     children: [
       { index: true, element: <LandingPage /> },
-      { path: "/jobs", element: <PublicJobsPage /> },
-      { path: "/jobs/:id", element: <PublicJobDetailPage /> },
+      { path: "/jobs", element: <JobListingPage /> },
+      { path: "/jobs/:id", element: <JobDetailPage /> },
+      // { path: "/jobs", element: <PublicJobsPage /> },
+      // { path: "/jobs/:id", element: <PublicJobDetailPage /> },
       { path: "/leaderboard", element: <PublicLeaderboard /> },
       { path: "/candidate/:id", element: <PublicCandidateProfilePage /> },
       { path: "/learn-more", element: <LearnMorePage /> },
@@ -88,8 +93,10 @@ export const router = createBrowserRouter([
         children: [
           { index: true, element: <CandidateHome /> },
           { path: "dashboard", element: <CandidateDashboard /> },
-          { path: "jobs", element: <CandidateJobListings /> },
-          { path: "job/:id", element: <CandidateJobDetail /> },
+          // { path: "jobs", element: <CandidateJobListings /> },
+          // { path: "job/:id", element: <CandidateJobDetail /> },
+          { path: "jobs", element: <JobListingPage /> },
+          { path: "job/:id", element: <JobDetailPage /> },
           { path: "proof/:id", element: <CandidateProofWorkspace /> },
           { path: "proofs", element: <CandidateFeedbackView /> },
           { path: "profile", element: <CandidateProfile /> },
