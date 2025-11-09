@@ -1,86 +1,42 @@
-// src/components/Navbar.tsx
-import { useState, useRef, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate, Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useTheme } from "@/hooks/useTheme";
-import { notify } from "@/components/ui/Notify";
-import toast from "react-hot-toast";
-import {
-  Menu,
-  X,
-  Bell,
-  LogOut,
-  UserCircle2,
-  Settings,
-  FileText,
-  Shield,
-  Home,
-  Moon,
-  Sun,
-} from "lucide-react";
+import { Sun, Moon, Menu, X, Home } from "lucide-react";
+import UserMenu from "@/components/ui/UserMenu";
 
 export default function Navbar() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { signOut, user, setOverride } = useAuth();
+  const { user } = useAuth();
   const { isDark, toggleTheme } = useTheme();
 
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [dropdownOpen, setDropdownOpen] = useState(false);
-  const dropdownRef = useRef<HTMLDivElement>(null);
 
-  const storedUser = JSON.parse(localStorage.getItem("bevis_user") || "{}");
-  const actualRole = storedUser?.role;
-  const overrideRole = localStorage.getItem("overrideRole");
-  const effectiveRole = overrideRole || actualRole;
-  const isAdmin = effectiveRole === "admin";
-
-  /* ─────────────────────────────────────────────── */
-  /* 🧭 Handle Logout */
-  const handleLogout = async () => {
-    await signOut();
-    notify.success("👋 You’ve been logged out");
-    navigate("/");
-  };
-
-  /* 🔒 Role-based dashboard routing */
-  const goToDashboard = () => {
-    if (isAdmin) navigate("/admin");
-    else if (effectiveRole === "employer") navigate("/employer");
-    else navigate("/candidate");
-  };
-
-  /* ─────────────────────────────────────────────── */
-  /* 🧩 Close dropdown on outside click */
-  useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (
-        dropdownRef.current &&
-        !dropdownRef.current.contains(e.target as Node)
-      ) {
-        setDropdownOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
-
-  /* ─────────────────────────────────────────────── */
-  // 🌐 Global links (role-aware)
+  /* 🌐 Global navigation links */
   const navLinks = [
     { label: "Home", to: "/" },
     { label: "Find Jobs", to: "/jobs" },
     { label: "Leaderboard", to: "/leaderboard" },
   ];
 
+  /* 🧭 Go to dashboard based on role */
+  const goToDashboard = () => {
+    const storedUser = JSON.parse(localStorage.getItem("bevis_user") || "{}");
+    const role = localStorage.getItem("overrideRole") || storedUser?.role;
+    if (role === "admin") navigate("/admin");
+    else if (role === "employer") navigate("/employer");
+    else navigate("/candidate");
+  };
+
   return (
     <header
       className="sticky top-0 z-40 border-b border-[var(--color-border)] 
-             bg-[var(--color-surface)] backdrop-blur-md 
-             shadow-[var(--shadow-soft)] transition-[background,border,color] duration-300"
+                 bg-[var(--color-surface)] backdrop-blur-md 
+                 shadow-[var(--shadow-soft)] transition-[background,border,color] duration-300"
     >
       <div className="flex items-center justify-between px-6 py-3">
-        {/* Left: Logo + Mobile toggle */}
+        {/* ─── Left: Logo + Mobile toggle ─── */}
         <div className="flex items-center gap-3">
           <button
             onClick={() => setMobileOpen(!mobileOpen)}
@@ -97,7 +53,7 @@ export default function Navbar() {
           </h1>
         </div>
 
-        {/* Center: Nav links (desktop) */}
+        {/* ─── Center: Main Nav Links ─── */}
         <nav className="hidden md:flex items-center gap-6 text-sm font-medium text-[var(--color-text-muted)]">
           {navLinks.map(({ label, to }) => (
             <Link
@@ -114,118 +70,40 @@ export default function Navbar() {
           ))}
         </nav>
 
-        {/* Right: Icons + Profile */}
-        {/* Right: Actions */}
-<div className="flex items-center gap-4 relative" ref={dropdownRef}>
-  <button
-    onClick={toggleTheme}
-    className="text-[var(--color-text-muted)] hover:text-[var(--color-candidate-dark)] transition"
-    title="Toggle Theme"
-  >
-    {isDark ? <Sun size={18} /> : <Moon size={18} />}
-  </button>
-
-  {!user ? (
-    <>
-      {/* 🌐 Logged-out view */}
-      <Link
-        to="/auth"
-        className="text-sm text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition"
-      >
-        Log in
-      </Link>
-      <Link
-        to="/auth?mode=signup"
-        className="text-sm rounded-[var(--radius-button)] bg-[var(--color-employer)] text-white px-4 py-2 hover:brightness-110 transition"
-      >
-        Sign up
-      </Link>
-    </>
-  ) : (
-    <>
-      {/* 👤 Logged-in view */}
-      <button
-        onClick={() => toast("No new notifications 📬")}
-        className="text-[var(--color-text-muted)] hover:text-[var(--color-candidate-dark)] transition"
-        title="Notifications"
-      >
-        <Bell size={20} />
-      </button>
-
-      <button
-        onClick={() => setDropdownOpen(!dropdownOpen)}
-        className="text-[var(--color-text-muted)] hover:text-[var(--color-candidate-dark)] transition"
-        title="Account"
-      >
-        <UserCircle2 size={22} />
-      </button>
-
-      {/* Dropdown */}
-      {dropdownOpen && (
-        <div className="absolute top-10 right-0 w-56 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-card)] shadow-[var(--shadow-soft)] overflow-hidden">
-          <p className="px-4 py-2 text-xs text-[var(--color-text-muted)] border-b border-[var(--color-border)] truncate">
-            {user?.email}
-          </p>
-
+        {/* ─── Right: Theme + Auth/User ─── */}
+        <div className="flex items-center gap-4">
+          {/* Theme toggle */}
           <button
-            onClick={() => {
-              navigate("/candidate/profile");
-              setDropdownOpen(false);
-            }}
-            className="w-full text-left px-4 py-2 text-sm flex items-center gap-2 hover:bg-[var(--color-bg-hover)] transition"
+            onClick={toggleTheme}
+            className="text-[var(--color-text-muted)] hover:text-[var(--color-candidate-dark)] transition"
+            title="Toggle Theme"
           >
-            <UserCircle2 size={16} /> My Profile
+            {isDark ? <Sun size={18} /> : <Moon size={18} />}
           </button>
 
-          <button
-            onClick={() => {
-              navigate("/candidate/proofs");
-              setDropdownOpen(false);
-            }}
-            className="w-full text-left px-4 py-2 text-sm flex items-center gap-2 hover:bg-[var(--color-bg-hover)] transition"
-          >
-            <FileText size={16} /> My Proofs
-          </button>
-
-          <button
-            onClick={() => {
-              navigate("/candidate/settings");
-              setDropdownOpen(false);
-            }}
-            className="w-full text-left px-4 py-2 text-sm flex items-center gap-2 hover:bg-[var(--color-bg-hover)] transition"
-          >
-            <Settings size={16} /> Settings
-          </button>
-
-          {isAdmin && (
-            <button
-              onClick={() => {
-                setOverride?.("admin");
-                navigate("/admin");
-                setDropdownOpen(false);
-              }}
-              className="w-full text-left px-4 py-2 text-sm flex items-center gap-2 hover:bg-[var(--color-bg-hover)] transition"
-            >
-              <Shield size={16} /> Admin Dashboard
-            </button>
+          {/* Auth-dependent content */}
+          {!user ? (
+            <>
+              <Link
+                to="/auth"
+                className="text-sm text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition"
+              >
+                Log in
+              </Link>
+              <Link
+                to="/auth?mode=signup"
+                className="text-sm rounded-[var(--radius-button)] bg-[var(--color-employer)] text-white px-4 py-2 hover:brightness-110 transition"
+              >
+                Sign up
+              </Link>
+            </>
+          ) : (
+            <UserMenu />
           )}
-
-          <div className="border-t border-[var(--color-border)] my-1" />
-
-          <button
-            onClick={handleLogout}
-            className="w-full text-left px-4 py-2 text-sm text-[var(--color-error)] flex items-center gap-2 hover:bg-[color-mix(in srgb,var(--color-error)5%,transparent)] transition"
-          >
-            <LogOut size={16} /> Log Out
-          </button>
         </div>
-      )}
-    </>
-  )}
-</div>
       </div>
 
-      {/* Mobile Drawer */}
+      {/* ─── Mobile Drawer ─── */}
       {mobileOpen && (
         <div className="absolute top-full left-0 w-full bg-[var(--color-surface)] border-t border-[var(--color-border)] md:hidden shadow-lg z-50">
           <nav className="flex flex-col px-6 py-4 text-sm">
