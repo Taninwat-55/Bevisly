@@ -9,8 +9,11 @@ export type EmployerJob = {
   location: string | null;
   paid: boolean | null;
   created_at: string | null;
-  status?: string | null; 
   featured?: boolean | null;
+  salary_range?: string | null;
+  job_type?: string | null;
+  department?: string | null;
+  work_mode?: string | null;
 };
 
 /**

@@ -4,6 +4,7 @@ import toast from "react-hot-toast";
 import { supabase } from "@/lib/supabaseClient";
 import { useAuth } from "@/hooks/useAuth";
 import type { SessionUser } from "@/context/AuthContext";
+import type { ProofTask } from "@/types/shared";
 import {
   Loader2,
   Clock,
@@ -12,18 +13,13 @@ import {
   LogIn,
   CheckCircle,
   X,
+  Edit3,
+  FolderOpen,
+  Shield,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
-interface ProofTask {
-  id: string;
-  title: string;
-  description?: string | null;
-  expected_time?: string | null;
-  submission_format?: string | null;
-  ai_tools_allowed?: boolean | null;
-}
-
+/* ─── Job type ─────────────────────────────────────────────── */
 interface Job {
   id: string;
   title: string;
@@ -34,6 +30,7 @@ interface Job {
   proof_tasks?: ProofTask[];
 }
 
+/* ─── Component ─────────────────────────────────────────────── */
 export default function JobDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -48,12 +45,7 @@ export default function JobDetailPage() {
     localStorage.getItem("skipProofConfirm") === "true"
   );
 
-  useEffect(() => {
-    if (role === "employer" || role === "admin") {
-      navigate(`/employer/job/${id}`);
-    }
-  }, [role, id, navigate]);
-
+  /* ─── Fetch job + proof tasks ─────────────────────────────── */
   useEffect(() => {
     if (!id) return;
     const fetchJob = async () => {
@@ -71,6 +63,7 @@ export default function JobDetailPage() {
     fetchJob();
   }, [id]);
 
+  /* ─── Loading & Empty States ─────────────────────────────── */
   if (loading)
     return (
       <div className="flex justify-center items-center min-h-screen text-[var(--color-text-muted)]">
@@ -87,6 +80,7 @@ export default function JobDetailPage() {
 
   const proof = job.proof_tasks?.[0];
 
+  /* ─── Candidate CTA ─────────────────────────────────────── */
   const handleCTA = () => {
     if (!user) {
       navigate("/auth");
@@ -97,7 +91,6 @@ export default function JobDetailPage() {
       return;
     }
 
-    // 👇 If user chose “Don’t show again”, skip modal
     if (skipModal) {
       confirmStartProof();
     } else {
@@ -115,6 +108,7 @@ export default function JobDetailPage() {
     }, 600);
   };
 
+  /* ─── Render ─────────────────────────────────────────────── */
   return (
     <div className="min-h-screen bg-[var(--color-bg)] px-8 py-10 relative">
       {/* 🔙 Back Button */}
@@ -138,14 +132,22 @@ export default function JobDetailPage() {
       {/* 📄 Job Description */}
       <section className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-card)] shadow-[var(--shadow-soft)] p-6 mb-8">
         <h2 className="heading-md mb-2">About the Role</h2>
-        <p className="body-base leading-relaxed text-[var(--color-text-muted)]">
+        <p className="body-base leading-relaxed text-[var(--color-text-muted)] whitespace-pre-line">
           {job.description || "No description provided."}
         </p>
+        <div className="flex items-center gap-3 mt-4 text-sm text-[var(--color-text-muted)]">
+          <span>📍 {job.location || "Remote"}</span>
+          {job.paid && (
+            <span className="bg-[var(--color-candidate-light)] text-[var(--color-candidate-dark)] px-2 py-1 rounded-[var(--radius-button)] text-xs font-medium">
+              Paid Opportunity
+            </span>
+          )}
+        </div>
       </section>
 
       {/* 🧩 Proof Task Section */}
       {proof && (
-        <section className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-card)] shadow-[var(--shadow-soft)] p-6">
+        <section className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-card)] shadow-[var(--shadow-soft)] p-6 mb-10">
           <div className="flex items-center justify-between mb-4">
             <h2 className="heading-md">Proof Task</h2>
             <span className="text-xs text-[var(--color-text-muted)]">
@@ -162,20 +164,20 @@ export default function JobDetailPage() {
 
           <ul className="text-sm text-[var(--color-text-muted)] space-y-2 mb-6">
             <li className="flex items-center gap-2">
-              <Clock size={15} className="opacity-80" />{" "}
+              <Clock size={15} className="opacity-80" />
               <span>
                 <strong>Expected Time:</strong> {proof.expected_time || "—"}
               </span>
             </li>
             <li className="flex items-center gap-2">
-              <Package size={15} className="opacity-80" />{" "}
+              <Package size={15} className="opacity-80" />
               <span>
                 <strong>Submission Format:</strong>{" "}
                 {proof.submission_format || "Not specified"}
               </span>
             </li>
             <li className="flex items-center gap-2">
-              <Brain size={15} className="opacity-80" />{" "}
+              <Brain size={15} className="opacity-80" />
               <span>
                 <strong>AI Tools Allowed:</strong>{" "}
                 {proof.ai_tools_allowed ? (
@@ -191,23 +193,53 @@ export default function JobDetailPage() {
             </li>
           </ul>
 
-          {/* 🎯 CTA — dynamic based on user */}
-          <button
-            onClick={handleCTA}
-            className={`w-full py-3 rounded-[var(--radius-button)] font-medium transition ${
-              !user
-                ? "bg-[var(--color-bg-hover)] border border-[var(--color-border)] text-[var(--color-text-muted)] hover:text-[var(--color-candidate-dark)]"
-                : "bg-[var(--color-candidate)] text-white hover:bg-[var(--color-candidate-dark)]"
-            }`}
-          >
-            {!user ? (
-              <span className="inline-flex items-center gap-1 justify-center">
-                <LogIn size={14} /> Sign in to Apply
-              </span>
-            ) : (
-              "Start Proof Task"
-            )}
-          </button>
+          {/* 🎯 Role-specific actions */}
+          {role === "candidate" && (
+            <button
+              onClick={handleCTA}
+              className={`w-full py-3 rounded-[var(--radius-button)] font-medium transition ${
+                !user
+                  ? "bg-[var(--color-bg-hover)] border border-[var(--color-border)] text-[var(--color-text-muted)] hover:text-[var(--color-candidate-dark)]"
+                  : "bg-[var(--color-candidate)] text-white hover:bg-[var(--color-candidate-dark)]"
+              }`}
+            >
+              {!user ? (
+                <span className="inline-flex items-center gap-1 justify-center">
+                  <LogIn size={14} /> Sign in to Apply
+                </span>
+              ) : (
+                "Start Proof Task"
+              )}
+            </button>
+          )}
+
+          {role === "employer" && (
+            <div className="flex gap-3 mt-4">
+              <button
+                onClick={() => navigate(`/employer/job/${id}/edit`)}
+                className="bg-[var(--color-employer)] text-white px-4 py-2 rounded-[var(--radius-button)] hover:bg-[var(--color-employer-dark)] transition flex items-center gap-2"
+              >
+                <Edit3 size={16} /> Edit Job
+              </button>
+              <button
+                onClick={() => navigate(`/employer/submissions`)}
+                className="border border-[var(--color-border)] text-[var(--color-text-muted)] px-4 py-2 rounded-[var(--radius-button)] hover:bg-[var(--color-border)] transition flex items-center gap-2"
+              >
+                <FolderOpen size={16} /> View Submissions
+              </button>
+            </div>
+          )}
+
+          {role === "admin" && (
+            <div className="flex gap-3 mt-4">
+              <button
+                onClick={() => toast("Admin management coming soon!")}
+                className="bg-[var(--color-admin)] text-white px-4 py-2 rounded-[var(--radius-button)] hover:bg-[var(--color-admin-dark)] transition flex items-center gap-2"
+              >
+                <Shield size={16} /> Manage Job
+              </button>
+            </div>
+          )}
         </section>
       )}
 
@@ -236,7 +268,6 @@ export default function JobDetailPage() {
                 <strong>{job.title}</strong>.
               </p>
 
-              {/* 🧩 Don't show again checkbox */}
               <label className="flex items-center justify-center gap-2 text-xs text-[var(--color-text-muted)] mb-6 cursor-pointer select-none">
                 <input
                   type="checkbox"

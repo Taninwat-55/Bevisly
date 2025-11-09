@@ -169,13 +169,14 @@ export default function Sidebar({ role }: SidebarProps) {
             key={to}
             to={to}
             end
+            title={label} // tooltip for collapsed mode
             className={({ isActive }) =>
               `flex items-center gap-3 px-3 py-2 rounded-[var(--radius-button)] text-sm font-medium transition-all
-               ${
-                 isActive
-                   ? "bg-[color-mix(in srgb,var(--color-bg) 85%,transparent)] text-[var(--color-text)] font-semibold"
-                   : "text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[color-mix(in srgb,var(--color-bg) 90%,transparent)]"
-               }`
+     ${
+       isActive
+         ? "bg-[color-mix(in srgb,var(--color-bg) 85%,transparent)] text-[var(--color-text)] font-semibold"
+         : "text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[color-mix(in srgb,var(--color-bg) 90%,transparent)]"
+     }`
             }
             style={({ isActive }) =>
               isActive
