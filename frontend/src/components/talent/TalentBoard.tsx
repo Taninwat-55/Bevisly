@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState, useEffect } from "react";
 import {
   DndContext,
   type DragEndEvent,
@@ -14,11 +14,7 @@ import toast from "react-hot-toast";
 import type { EmployerSubmission, HiringStage } from "@/types";
 import StageColumn from "./StageColumn";
 import CandidateCard from "./CandidateCard";
-
-interface TalentBoardProps {
-  submissions: EmployerSubmission[];
-  setSubmissions: React.Dispatch<React.SetStateAction<EmployerSubmission[]>>;
-}
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 const STAGES: { key: HiringStage; label: string; emoji: string }[] = [
   { key: "new", label: "New", emoji: "🆕" },
@@ -29,7 +25,7 @@ const STAGES: { key: HiringStage; label: string; emoji: string }[] = [
   { key: "rejected", label: "Rejected", emoji: "❌" },
 ];
 
-// 🧭 Custom collision: prioritize columns over cards
+// 🧭 Custom collision: prioritize columns
 const collisionDetectionStrategy: CollisionDetection = (args) => {
   const intersections = rectIntersection(args);
   if (intersections.length > 0) {
@@ -44,13 +40,19 @@ const collisionDetectionStrategy: CollisionDetection = (args) => {
 export default function TalentBoard({
   submissions,
   setSubmissions,
-}: TalentBoardProps) {
+}: {
+  submissions: EmployerSubmission[];
+  setSubmissions: React.Dispatch<React.SetStateAction<EmployerSubmission[]>>;
+}) {
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } })
   );
-
   const [activeId, setActiveId] = useState<string | null>(null);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(false);
+  const scrollRef = useRef<HTMLDivElement>(null);
 
+  // 🧮 Grouped columns (memoized)
   const grouped = useMemo(() => {
     const groups: Record<HiringStage, EmployerSubmission[]> = {
       new: [],
@@ -85,7 +87,7 @@ export default function TalentBoard({
     const dragged = submissions.find((s) => s.id === activeId);
     if (!dragged || dragged.hiring_stage === destinationStage) return;
 
-    // Optimistic UI
+    // Optimistic update
     setSubmissions((prev) =>
       prev.map((s) =>
         s.id === activeId ? { ...s, hiring_stage: destinationStage } : s
@@ -109,32 +111,77 @@ export default function TalentBoard({
     }
   }
 
-  return (
-    <DndContext
-      sensors={sensors}
-      collisionDetection={collisionDetectionStrategy}
-      onDragStart={(e) => setActiveId(String(e.active.id))}
-      onDragEnd={handleDragEnd}
-      onDragCancel={() => setActiveId(null)}
-    >
-      <div className="flex overflow-x-auto gap-x-4 px-6 py-2 snap-x snap-mandatory">
-        {STAGES.map(({ key, label, emoji }) => (
-          <StageColumn
-            key={key}
-            stage={key}
-            label={`${emoji} ${label}`}
-            submissions={grouped[key]}
-          />
-        ))}
-      </div>
+  // 🧭 Scroll awareness for arrows/fade
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const update = () => {
+      setCanScrollLeft(el.scrollLeft > 0);
+      setCanScrollRight(el.scrollLeft + el.clientWidth < el.scrollWidth);
+    };
+    update();
+    el.addEventListener("scroll", update);
+    window.addEventListener("resize", update);
+    return () => {
+      el.removeEventListener("scroll", update);
+      window.removeEventListener("resize", update);
+    };
+  }, []);
 
-      <DragOverlay>
-        {activeItem ? (
-          <div className="cursor-grabbing scale-[1.02] opacity-90">
-            <CandidateCard submission={activeItem} />
-          </div>
-        ) : null}
-      </DragOverlay>
-    </DndContext>
+  return (
+    <div className="relative">
+      {/* Scroll buttons */}
+      {canScrollLeft && (
+        <button
+          onClick={() =>
+            scrollRef.current?.scrollBy({ left: -300, behavior: "smooth" })
+          }
+          className="absolute text-[var(--color-text)] left-2 top-1/2 -translate-y-1/2 bg-[var(--color-surface)]/80 backdrop-blur-sm shadow-md p-2 rounded-full border border-[var(--color-border)] hover:bg-[var(--color-border)] transition z-10"
+        >
+          <ChevronLeft size={18} />
+        </button>
+      )}
+      {canScrollRight && (
+        <button
+          onClick={() =>
+            scrollRef.current?.scrollBy({ left: 300, behavior: "smooth" })
+          }
+          className="absolute text-[var(--color-text)] right-2 top-1/2 -translate-y-1/2 bg-[var(--color-surface)]/80 backdrop-blur-sm shadow-md p-2 rounded-full border border-[var(--color-border)] hover:bg-[var(--color-border)] transition z-10"
+        >
+          <ChevronRight size={18} />
+        </button>
+      )}
+
+      {/* Kanban */}
+      <DndContext
+        sensors={sensors}
+        collisionDetection={collisionDetectionStrategy}
+        onDragStart={(e) => setActiveId(String(e.active.id))}
+        onDragEnd={handleDragEnd}
+        onDragCancel={() => setActiveId(null)}
+      >
+        <div
+          ref={scrollRef}
+          className="flex overflow-x-auto gap-x-4 px-6 py-2 snap-x snap-mandatory relative scroll-smooth"
+        >
+          {STAGES.map(({ key, label, emoji }) => (
+            <StageColumn
+              key={key}
+              stage={key}
+              label={`${emoji} ${label}`}
+              submissions={grouped[key]}
+            />
+          ))}
+        </div>
+
+        <DragOverlay>
+          {activeItem ? (
+            <div className="cursor-grabbing scale-[1.02] opacity-90">
+              <CandidateCard submission={activeItem} />
+            </div>
+          ) : null}
+        </DragOverlay>
+      </DndContext>
+    </div>
   );
 }

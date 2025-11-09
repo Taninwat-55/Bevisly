@@ -245,3 +245,27 @@ export async function getSubmissionById(submission_id: string) {
   if (error) throw error;
   return data;
 }
+
+/**
+ * ✅ Get all submissions for a given job (used for “Next Candidate” feature)
+ */
+export async function getSubmissionsByJob(job_id: string): Promise<EmployerSubmission[]> {
+  const { data, error } = await supabase
+    .from("submissions")
+    .select(`
+      id,
+      user_id,
+      job_id,
+      status,
+      submission_link,
+      reflection,
+      created_at,
+      proof_tasks ( id, title ),
+      jobs ( id, title, company )
+    `)
+    .eq("job_id", job_id)
+    .order("created_at", { ascending: true });
+
+  if (error) throw error;
+  return data as EmployerSubmission[];
+}

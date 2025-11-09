@@ -46,7 +46,9 @@
   --color-employer: #4db3ff;
   --color-employer-dark: #0077cc;
   --color-success: #4ade80;
+  --color-warning: #fbbf24;
   --color-error: #f87171;
+  --color-accent: #60a5fa;
 }
 
 @layer utilities {
