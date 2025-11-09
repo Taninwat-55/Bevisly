@@ -16,7 +16,7 @@ export default function Navbar() {
   /* 🌐 Global navigation links */
   const navLinks = [
     { label: "Home", to: "/" },
-    { label: "Find Jobs", to: "/jobs" },
+    { label: "Jobs", to: "/jobs" },
     { label: "Leaderboard", to: "/leaderboard" },
     { label: "Learn", to: "/learn-more" },
     { label: "About", to: "/about" },

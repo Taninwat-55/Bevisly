@@ -128,6 +128,7 @@ export type Database = {
           company: string | null
           created_at: string | null
           created_by: string | null
+          department: string | null
           description: string | null
           employer_id: string | null
           featured: boolean | null
@@ -137,13 +138,16 @@ export type Database = {
           location: string | null
           paid: boolean | null
           required_skills: string[] | null
+          salary_range: string | null
           status: string | null
           title: string
+          work_mode: string | null
         }
         Insert: {
           company?: string | null
           created_at?: string | null
           created_by?: string | null
+          department?: string | null
           description?: string | null
           employer_id?: string | null
           featured?: boolean | null
@@ -153,13 +157,16 @@ export type Database = {
           location?: string | null
           paid?: boolean | null
           required_skills?: string[] | null
+          salary_range?: string | null
           status?: string | null
           title: string
+          work_mode?: string | null
         }
         Update: {
           company?: string | null
           created_at?: string | null
           created_by?: string | null
+          department?: string | null
           description?: string | null
           employer_id?: string | null
           featured?: boolean | null
@@ -169,8 +176,10 @@ export type Database = {
           location?: string | null
           paid?: boolean | null
           required_skills?: string[] | null
+          salary_range?: string | null
           status?: string | null
           title?: string
+          work_mode?: string | null
         }
         Relationships: [
           {
