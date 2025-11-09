@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { MoreHorizontal } from "lucide-react";
@@ -25,6 +25,7 @@ export default function CandidateCard({
     submission;
   const [open, setOpen] = useState(false);
   const [showNotes, setShowNotes] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   const { attributes, listeners, setNodeRef, transform, isDragging } =
     useSortable({ id });
@@ -34,6 +35,20 @@ export default function CandidateCard({
     transition: "transform 0.2s ease, opacity 0.2s",
     opacity: isDragging ? 0.5 : 1,
   };
+
+  // 🧠 Close dropdown on outside click
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(e.target as Node)
+      ) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
 
   async function handleMove(stage: HiringStage) {
     try {
@@ -54,49 +69,52 @@ export default function CandidateCard({
       className={`relative bg-[var(--color-surface)] border border-[var(--color-border)] 
       rounded-[var(--radius-button)] p-3 cursor-grab hover:shadow-[var(--shadow-soft)] transition`}
     >
-      {/* Header */}
       <div className="flex justify-between items-center mb-1">
         <h4 className="font-medium text-sm text-[var(--color-text)] truncate">
           👤 {user_id || "Unknown"}
         </h4>
 
-        <button
-          onPointerDown={(e) => e.stopPropagation()}
-          onClick={() => setOpen((prev) => !prev)}
-          className="text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
-        >
-          <MoreHorizontal size={14} />
-        </button>
-
-        {/* Dropdown */}
-        {open && (
-          <div
-            className="absolute right-2 top-6 z-[999] bg-[var(--color-surface)] border border-[var(--color-border)]
-               rounded-[var(--radius-card)] shadow-xl text-sm "
+        <div ref={dropdownRef} className="relative">
+          <button
             onPointerDown={(e) => e.stopPropagation()}
+            onClick={() => setOpen((p) => !p)}
+            className="text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
           >
-            {STAGES.map((stage) => (
-              <button
-                key={stage}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleMove(stage);
-                }}
-                disabled={stage === hiring_stage}
-                className={`block w-full text-left px-3 py-1.5 hover:bg-[var(--color-bg-accent)] ${
-                  stage === hiring_stage
-                    ? "text-[var(--color-text-muted)] opacity-70"
-                    : ""
-                }`}
-              >
-                Move to {stage}
-              </button>
-            ))}
-          </div>
-        )}
+            <MoreHorizontal size={14} />
+          </button>
+
+          {open && (
+            <div
+              className="absolute text-[var(--color-text)] right-0 top-6 z-[999] bg-[var(--color-surface)] border border-[var(--color-border)]
+              rounded-[var(--radius-card)] shadow-lg text-sm"
+            >
+              {STAGES.map((stage) => (
+                <button
+                  key={stage}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleMove(stage);
+                  }}
+                  disabled={stage === hiring_stage}
+                  className={`block w-full text-left px-3 py-1.5 hover:bg-[var(--color-bg-hover)] ${
+                    stage === hiring_stage
+                      ? "text-[var(--color-text-muted)] opacity-70"
+                      : ""
+                  }`}
+                >
+                  Move to {stage}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
 
-      {/* Rating */}
+      {/* Candidate Info */}
+      <p className="text-xs text-[var(--color-text-muted)] truncate">
+        {proof_tasks?.title || "Untitled task"}
+      </p>
+
       {feedback?.[0]?.stars ? (
         <span className="text-xs text-yellow-500 font-medium">
           ⭐ {feedback[0].stars}/5
@@ -105,17 +123,12 @@ export default function CandidateCard({
         <span className="text-xs text-[var(--color-text-muted)]">—</span>
       )}
 
-      {/* Task title */}
-      <p className="text-xs text-[var(--color-text-muted)] truncate">
-        {proof_tasks?.title || "Untitled task"}
-      </p>
-
-      {/* Notes */}
       {employer_notes && (
         <p className="text-xs text-[var(--color-text-muted)] italic mt-1 truncate">
           📝 {employer_notes}
         </p>
       )}
+
       <button
         onPointerDown={(e) => e.stopPropagation()}
         onClick={() => setShowNotes(true)}
