@@ -1,4 +1,10 @@
 // src/pages/jobs/JobListingPage.tsx
+/**
+ * 🧭 JobListingPage.tsx
+ * Unified job listing for candidates & employers.
+ * Combines modern filtering + search + back navigation.
+ */
+
 import { useState, useMemo, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
@@ -16,11 +22,15 @@ import {
   XCircle,
 } from "lucide-react";
 import toast from "react-hot-toast";
+
 import type { SessionUser } from "@/context/AuthContext";
 import type { ProofTask, CandidateJob, EmployerJob } from "@/types";
+
+import BackButton from "@/components/ui/BackButton";
+import MultiSelectFilter from "@/components/ui/MultiSelectFilter";
 import FilterChips from "@/components/ui/FilterChips";
 
-/* ─── Types ─────────────────────────────── */
+/* ─── Helpers ─────────────────────────────── */
 type JobListItem =
   | (CandidateJob & { proof_tasks?: ProofTask[] })
   | (EmployerJob & { proof_tasks?: ProofTask[] });
@@ -31,13 +41,13 @@ function hasProofTasks(
   return Array.isArray((job as { proof_tasks?: unknown }).proof_tasks);
 }
 
-/* ─── Unified Job Listing Page ─────────────────────────────── */
+/* ─── Component ─────────────────────────────── */
 export default function JobListingPage() {
   const { user } = useAuth();
   const role: SessionUser["role"] = user?.role ?? null;
   const navigate = useNavigate();
 
-  // Candidate & Public jobs
+  // Candidate/public jobs
   const { jobs: publicJobs, loading, error } = useJobs();
 
   // Employer jobs
@@ -54,7 +64,11 @@ export default function JobListingPage() {
     short: false,
   });
 
-  /* 🧭 Fetch employer jobs when role = employer */
+  const [companies, setCompanies] = useState<string[]>([]);
+  const [locations, setLocations] = useState<string[]>([]);
+  const [categories, setCategories] = useState<string[]>([]);
+
+  /* ─── Fetch employer jobs ─────────────────────────────── */
   useEffect(() => {
     if (role !== "employer" || !user?.id) return;
     const loadEmployerJobs = async () => {
@@ -72,23 +86,54 @@ export default function JobListingPage() {
     loadEmployerJobs();
   }, [role, user?.id]);
 
-  /* 🕓 Debounced Search */
+  /* ─── Debounced Search ─────────────────────────────── */
   const [debouncedQuery, setDebouncedQuery] = useState("");
   useEffect(() => {
     const handler = setTimeout(() => setDebouncedQuery(query), 300);
     return () => clearTimeout(handler);
   }, [query]);
 
-  /* 🎯 Data source depends on role (wrapped in useMemo for stability) */
+  /* ─── Data source ─────────────────────────────── */
   const jobs: JobListItem[] = useMemo(() => {
-    return (
-      (role === "employer" ? employerJobs : (publicJobs as JobListItem[])) ?? []
-    );
+    return role === "employer" ? employerJobs : (publicJobs as JobListItem[]);
   }, [role, employerJobs, publicJobs]);
 
   const isLoading = loading || employerLoading;
 
-  /* 🎯 Filtering logic */
+  /* ─── Unique filter options (fix string|null issue) ─────────────────────────────── */
+  const allCompanies = useMemo(
+    () =>
+      Array.from(
+        new Set(jobs.map((j) => j.company).filter((c): c is string => !!c))
+      ),
+    [jobs]
+  );
+
+  const allLocations = useMemo(
+    () =>
+      Array.from(
+        new Set(jobs.map((j) => j.location).filter((l): l is string => !!l))
+      ),
+    [jobs]
+  );
+
+  const allCategories = useMemo(() => {
+    const departments = jobs
+      .map((j) =>
+        "department" in j && typeof j.department === "string"
+          ? j.department
+          : undefined
+      )
+      .filter((d): d is string => !!d);
+
+    const proofTitles = jobs.flatMap((j) =>
+      hasProofTasks(j) ? j.proof_tasks.map((p) => p.title) : []
+    );
+
+    return Array.from(new Set([...departments, ...proofTitles]));
+  }, [jobs]);
+
+  /* ─── Filtering Logic ─────────────────────────────── */
   const filteredJobs = useMemo(() => {
     return jobs.filter((job) => {
       const proof = hasProofTasks(job) ? job.proof_tasks[0] : undefined;
@@ -105,11 +150,33 @@ export default function JobListingPage() {
         ? proof?.expected_time?.toLowerCase().includes("30")
         : true;
 
-      return textMatch && paidMatch && aiMatch && shortMatch;
-    });
-  }, [jobs, debouncedQuery, filters]);
+      const locationMatch =
+        locations.length > 0 ? locations.includes(job.location || "") : true;
+      const companyMatch =
+        companies.length > 0 ? companies.includes(job.company || "") : true;
+      const categoryMatch =
+        categories.length > 0
+          ? hasProofTasks(job) &&
+            job.proof_tasks.some((p) =>
+              categories.some((c) =>
+                p.title.toLowerCase().includes(c.toLowerCase())
+              )
+            )
+          : true;
 
-  /* 🧩 Handlers for FilterChips */
+      return (
+        textMatch &&
+        paidMatch &&
+        aiMatch &&
+        shortMatch &&
+        locationMatch &&
+        companyMatch &&
+        categoryMatch
+      );
+    });
+  }, [jobs, debouncedQuery, filters, locations, companies, categories]);
+
+  /* ─── Handlers ─────────────────────────────── */
   const handleRemoveChip = (type: string) => {
     switch (type) {
       case "query":
@@ -126,9 +193,12 @@ export default function JobListingPage() {
   const handleClearAll = () => {
     setFilters({ paid: false, aiAllowed: false, short: false });
     setQuery("");
+    setCompanies([]);
+    setLocations([]);
+    setCategories([]);
   };
 
-  /* 🧭 Loading + Empty States */
+  /* ─── Empty/Loading States ─────────────────────────────── */
   if (isLoading)
     return (
       <div className="flex justify-center items-center min-h-screen text-[var(--color-text-muted)]">
@@ -143,6 +213,7 @@ export default function JobListingPage() {
       </div>
     );
 
+  /* ─── Employer empty state ─────────────────────────────── */
   if (role === "employer" && !employerJobs.length)
     return (
       <div className="min-h-screen bg-[var(--color-bg)] px-8 py-10 text-center">
@@ -161,6 +232,7 @@ export default function JobListingPage() {
       </div>
     );
 
+  /* ─── Candidate empty state ─────────────────────────────── */
   if (!jobs.length)
     return (
       <div className="p-10 text-center text-[var(--color-text-muted)]">
@@ -168,10 +240,12 @@ export default function JobListingPage() {
       </div>
     );
 
-  /* 🧭 Normal Display */
+  /* ─── Main Layout ─────────────────────────────── */
   return (
     <div className="min-h-screen bg-[var(--color-bg)] px-8 py-10">
-      {/* 🏁 Header */}
+      <BackButton to="/" className="mb-6" />
+
+      {/* Header */}
       <header className="mb-8 flex justify-between items-center">
         <div>
           <h1 className="heading-lg mb-1">
@@ -194,11 +268,12 @@ export default function JobListingPage() {
         )}
       </header>
 
-      {/* 🧭 Search + Filters (for candidates/public only) */}
+      {/* Candidate/Public Filters */}
       {role !== "employer" && (
         <>
-          <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-card)] shadow-[var(--shadow-soft)] p-4 mb-4">
-            <div className="relative mb-3">
+          <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-card)] shadow-[var(--shadow-soft)] p-4 mb-4 space-y-4">
+            {/* Search */}
+            <div className="relative">
               <Search
                 size={16}
                 className={`absolute left-3 top-1/2 -translate-y-1/2 transition-colors ${
@@ -218,12 +293,34 @@ export default function JobListingPage() {
               />
             </div>
 
-            {/* 🧩 Inline filter toggles */}
-            <div className="flex flex-wrap gap-2 justify-between">
+            {/* Multi-select filters */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+              <MultiSelectFilter
+                label="Companies"
+                options={allCompanies}
+                selected={companies}
+                onChange={setCompanies}
+              />
+              <MultiSelectFilter
+                label="Locations"
+                options={allLocations}
+                selected={locations}
+                onChange={setLocations}
+              />
+              <MultiSelectFilter
+                label="Categories"
+                options={allCategories}
+                selected={categories}
+                onChange={setCategories}
+              />
+            </div>
+
+            {/* Toggles + Reset */}
+            <div className="flex flex-wrap justify-between items-center text-sm">
               <div className="flex flex-wrap gap-2">
                 <button
                   onClick={() => setFilters((f) => ({ ...f, paid: !f.paid }))}
-                  className={`px-3 py-1.5 text-sm rounded-full border transition-all ${
+                  className={`px-3 py-1.5 rounded-full border transition-all ${
                     filters.paid
                       ? "bg-[var(--color-candidate)] text-white border-[var(--color-candidate)]"
                       : "border-[var(--color-border)] text-[var(--color-text-muted)] hover:border-[var(--color-candidate-light)] hover:text-[var(--color-candidate-dark)]"
@@ -231,23 +328,21 @@ export default function JobListingPage() {
                 >
                   💰 Paid Only
                 </button>
-
                 <button
                   onClick={() => setFilters((f) => ({ ...f, short: !f.short }))}
-                  className={`px-3 py-1.5 text-sm rounded-full border transition-all ${
+                  className={`px-3 py-1.5 rounded-full border transition-all ${
                     filters.short
                       ? "bg-[var(--color-candidate)] text-white border-[var(--color-candidate)]"
                       : "border-[var(--color-border)] text-[var(--color-text-muted)] hover:border-[var(--color-candidate-light)] hover:text-[var(--color-candidate-dark)]"
                   }`}
                 >
-                  ⏱ Under 30m
+                  ⏱ Under 30 min
                 </button>
-
                 <button
                   onClick={() =>
                     setFilters((f) => ({ ...f, aiAllowed: !f.aiAllowed }))
                   }
-                  className={`px-3 py-1.5 text-sm rounded-full border transition-all ${
+                  className={`px-3 py-1.5 rounded-full border transition-all ${
                     filters.aiAllowed
                       ? "bg-[var(--color-candidate)] text-white border-[var(--color-candidate)]"
                       : "border-[var(--color-border)] text-[var(--color-text-muted)] hover:border-[var(--color-candidate-light)] hover:text-[var(--color-candidate-dark)]"
@@ -257,36 +352,46 @@ export default function JobListingPage() {
                 </button>
               </div>
 
-              {(query || Object.values(filters).some(Boolean)) && (
+              {(!!query ||
+                Object.values(filters).some(Boolean) ||
+                companies.length > 0 ||
+                locations.length > 0 ||
+                categories.length > 0) && (
                 <button
                   onClick={handleClearAll}
-                  className="flex items-center gap-1 text-sm text-[var(--color-text-muted)] hover:text-[var(--color-error)] transition"
+                  className="flex items-center gap-1 text-[var(--color-text-muted)] hover:text-[var(--color-error)] transition"
                 >
-                  <XCircle size={14} /> Reset
+                  <XCircle size={14} /> Clear All
+                  {companies.length + locations.length + categories.length >
+                    0 && (
+                    <span className="ml-1 text-xs opacity-70">
+                      ({companies.length + locations.length + categories.length}
+                      )
+                    </span>
+                  )}
                 </button>
               )}
             </div>
           </div>
 
-          {/* ✅ Shared FilterChips */}
+          {/* Filter Chips */}
           <FilterChips
             query={query || undefined}
             paidOnly={filters.paid}
             remoteOnly={false}
-            companies={[]}
-            locations={[]}
-            categories={[]}
+            companies={companies}
+            locations={locations}
+            categories={categories}
             onRemove={handleRemoveChip}
             onClearAll={handleClearAll}
           />
         </>
       )}
 
-      {/* 💼 Job Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
+      {/* Job Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6 mt-6">
         {filteredJobs.map((job) => {
           const proof = hasProofTasks(job) ? job.proof_tasks[0] : undefined;
-
           const handleCTA = () => {
             if (role === "employer") navigate(`/jobs/${job.id}`);
             else if (!user) navigate("/auth");
