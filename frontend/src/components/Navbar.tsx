@@ -18,6 +18,8 @@ export default function Navbar() {
     { label: "Home", to: "/" },
     { label: "Find Jobs", to: "/jobs" },
     { label: "Leaderboard", to: "/leaderboard" },
+    { label: "Learn", to: "/learn-more" },
+    { label: "About", to: "/about" },
   ];
 
   /* 🧭 Go to dashboard based on role */
