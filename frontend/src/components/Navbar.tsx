@@ -71,7 +71,7 @@ export default function Navbar() {
         </nav>
 
         {/* ─── Right: Theme + Auth/User ─── */}
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-5">
           {/* Theme toggle */}
           <button
             onClick={toggleTheme}

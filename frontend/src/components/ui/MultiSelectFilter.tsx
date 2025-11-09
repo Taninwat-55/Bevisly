@@ -70,7 +70,7 @@ export default function MultiSelectFilter({
 
       {/* --- Dropdown --- */}
       {open && (
-        <div className="absolute left-0 right-0 z-20 mt-1 rounded-md border border-[var(--color-border)] bg-[var(--color-surface)] shadow-lg overflow-hidden">
+        <div className="absolute left-0 right-0 z-20 mt-1 rounded-md border border-[color-mix(in srgb,var(--color-border) 90%,transparent)] bg-[var(--color-surface)] shadow-[var(--shadow-soft)] overflow-hidden">
           {/* Search Input */}
           <div className="flex items-center gap-2 px-3 py-2 border-b border-[var(--color-border)]">
             <Search size={14} className="text-[var(--color-text-muted)]" />
@@ -84,7 +84,7 @@ export default function MultiSelectFilter({
           </div>
 
           {/* Options List */}
-          <div className="max-h-56 overflow-y-auto">
+          <div className="max-h-56 overflow-y-auto scroll-smooth">
             {filteredOptions.length === 0 && (
               <p className="p-3 text-sm text-[var(--color-text-muted)]">
                 No matches
@@ -94,13 +94,13 @@ export default function MultiSelectFilter({
             {filteredOptions.map((opt) => (
               <label
                 key={opt}
-                className="flex items-center gap-2 px-3 py-2 text-sm hover-bg-soft cursor-pointer"
+                className="flex items-center gap-2 px-3 py-2 text-sm hover:bg-[color-mix(in srgb,var(--color-text-muted) 5%,transparent)] cursor-pointer rounded-sm"
               >
                 <input
                   type="checkbox"
                   checked={selected.includes(opt)}
                   onChange={() => toggleOption(opt)}
-                  className="accent-[var(--color-employer-dark)]"
+                  className="accent-[var(--color-employer-dark)] cursor-pointer"
                 />
                 <span className="truncate">{opt}</span>
               </label>

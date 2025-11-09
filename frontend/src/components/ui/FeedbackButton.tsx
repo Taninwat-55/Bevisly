@@ -59,7 +59,7 @@ export default function FeedbackButton() {
       <div className="fixed bottom-5 right-5 z-40 group">
         <button
           onClick={() => setOpen(true)}
-          className="flex items-center gap-2 bg-[var(--color-candidate)] text-white px-4 py-3 rounded-full shadow-lg hover:brightness-110 transition"
+          className="flex items-center gap-2 bg-[var(--color-candidate)] text-white px-4 py-3 rounded-full shadow-lg hover:brightness-110 focus:ring-2 focus:ring-[var(--color-candidate-dark)] transition"
           title="Share your feedback"
         >
           <MessageCircle size={18} />
@@ -67,13 +67,13 @@ export default function FeedbackButton() {
         </button>
 
         {/* Tooltip — shows automatically first time OR on hover */}
-        {(tooltipVisible || <div></div>) && (
+        {tooltipVisible && (
           <div
-            className={`absolute bottom-16 right-0 bg-[var(--color-surface)] text-[var(--color-text)] border border-[var(--color-border)] rounded-[var(--radius-card)] shadow-md px-3 py-2 text-xs transition-opacity duration-300 ${
+            className={`absolute bottom-16 right-0 bg-[var(--color-surface)] text-[var(--color-text)] border border-[var(--color-border)] rounded-[var(--radius-card)] shadow-md px-3 py-2 text-xs w-[200px] transition-opacity duration-300 ${
               tooltipVisible
                 ? "opacity-100"
                 : "opacity-0 group-hover:opacity-100"
-            } pointer-events-none w-[200px]`}
+            }`}
           >
             💡 Have an idea or found a bug? We’d love your feedback!
           </div>
