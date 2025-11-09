@@ -48,8 +48,8 @@ export default function UserMenu() {
 
   /* Theme-adaptive background */
   const bgColor = isDark
-    ? "bg-[color-mix(in srgb,var(--color-surface) 95%,black)]"
-    : "bg-[color-mix(in srgb,var(--color-surface) 98%,white)]";
+    ? "bg-[var(--color-surface)]"
+    : "bg-[var(--color-surface)]";
 
   return (
     <div className="relative flex items-center gap-3" ref={dropdownRef}>

@@ -15,15 +15,24 @@ export const notify = {
     toast.success(msg, {
       style: {
         borderLeft: `4px solid ${color}`,
+        maxWidth: "360px",
+        background: "var(--color-surface)",
+        color: "var(--color-text)",
       },
     });
   },
-  error: (msg: string) => toast.error(msg),
+  error: (msg: string) =>
+    toast.error(msg, {
+      style: { borderLeft: "4px solid var(--color-error)", maxWidth: "360px" },
+    }),
   info: (msg: string) =>
     toast(msg, {
       icon: "💡",
       style: {
         borderLeft: `4px solid var(--color-employer-dark)`,
+        maxWidth: "360px",
+        background: "var(--color-surface)",
+        color: "var(--color-text)",
       },
     }),
 };
