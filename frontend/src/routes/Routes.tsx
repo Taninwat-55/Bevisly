@@ -46,7 +46,7 @@ import PublicJobsPage from "@/pages/PublicJobsPage";
 import PublicCandidateProfilePage from "@/pages/PublicCandidateProfilePage";
 import PublicLeaderboard from "@/pages/PublicLeaderboard";
 import PublicLayout from "@/layout/PublicLayout";
-import LearnMorePage from "@/pages/LearnMorePage";
+import LearnMorePage from "@/pages/LearnMore/LearnMorePage";
 import AboutPage from "@/pages/AboutPage";
 import AdminFeedbackMessages from "@/pages/admin/AdminFeedbackMessages";
 import AdminLayout from "@/layout/AdminLayout";

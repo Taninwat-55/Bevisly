@@ -1,5 +1,4 @@
-// src/components/ui/FeedbackButton.tsx
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { MessageCircle, X } from "lucide-react";
 import { supabase } from "@/lib/supabaseClient";
 import { useAuth } from "@/hooks/useAuth";
@@ -7,23 +6,12 @@ import { notify } from "@/components/ui/Notify";
 
 export default function FeedbackButton() {
   const { user } = useAuth();
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(false); // modal state
+  const [expanded, setExpanded] = useState(false); // tab expanded/collapsed
   const [category, setCategory] = useState("general");
   const [message, setMessage] = useState("");
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
-  const [tooltipVisible, setTooltipVisible] = useState(false);
-
-  // 🧩 Show tooltip automatically on first visit
-  useEffect(() => {
-    const hasSeen = localStorage.getItem("seen_feedback_tooltip");
-    if (!hasSeen) {
-      setTooltipVisible(true);
-      localStorage.setItem("seen_feedback_tooltip", "true");
-      const timer = setTimeout(() => setTooltipVisible(false), 3000);
-      return () => clearTimeout(timer);
-    }
-  }, []);
 
   const handleSubmit = async () => {
     if (!message.trim()) return notify.error("Please enter a message.");
@@ -55,32 +43,35 @@ export default function FeedbackButton() {
 
   return (
     <>
-      {/* Floating button + tooltip */}
-      <div className="fixed bottom-5 right-5 z-40 group">
+      {/* 🧭 Floating Edge Tab */}
+      <div
+        className={`fixed bottom-[4%] right-[-1.5rem] z-40 group transition-all duration-300 ease-out`}
+        onMouseEnter={() => setExpanded(true)}
+        onMouseLeave={() => setExpanded(false)}
+      >
         <button
           onClick={() => setOpen(true)}
-          className="flex items-center gap-2 bg-[var(--color-candidate)] text-white px-4 py-3 rounded-full shadow-lg hover:brightness-110 focus:ring-2 focus:ring-[var(--color-candidate-dark)] transition"
           title="Share your feedback"
+          className={`flex items-center gap-2 bg-[var(--color-candidate)] text-white shadow-lg 
+                     hover:brightness-110 focus:ring-2 focus:ring-[var(--color-candidate-dark)]
+                     rounded-l-full transition-all duration-300 origin-right
+                     ${expanded ? "pl-5 pr-4 py-3" : "pl-3 pr-2 py-3"} `}
+          style={{
+            transform: expanded ? "translateX(0)" : "translateX(40%)",
+          }}
         >
-          <MessageCircle size={18} />
-          <span className="hidden sm:inline font-medium">Feedback</span>
-        </button>
-
-        {/* Tooltip — shows automatically first time OR on hover */}
-        {tooltipVisible && (
-          <div
-            className={`absolute bottom-16 right-0 bg-[var(--color-surface)] text-[var(--color-text)] border border-[var(--color-border)] rounded-[var(--radius-card)] shadow-md px-3 py-2 text-xs w-[200px] transition-opacity duration-300 ${
-              tooltipVisible
-                ? "opacity-100"
-                : "opacity-0 group-hover:opacity-100"
+          <MessageCircle size={18} className="shrink-0" />
+          <span
+            className={`font-medium text-sm whitespace-nowrap transition-opacity duration-300 ${
+              expanded ? "opacity-100" : "opacity-0"
             }`}
           >
-            💡 Have an idea or found a bug? We’d love your feedback!
-          </div>
-        )}
+            Feedback
+          </span>
+        </button>
       </div>
 
-      {/* Modal */}
+      {/* 🪟 Modal */}
       {open && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 backdrop-blur-sm">
           <div className="bg-[var(--color-surface)] p-6 rounded-[var(--radius-card)] shadow-xl w-[90%] max-w-md border border-[var(--color-border)] relative">
