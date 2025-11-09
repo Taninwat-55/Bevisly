@@ -1,119 +1,68 @@
 import { useEffect, useState } from "react";
-import { useAuth } from "../../hooks/useAuth";
+import { useAuth } from "@/hooks/useAuth";
 import toast from "react-hot-toast";
-import { getCandidateFeedback } from "../../lib/api/submissions";
-
-interface FeedbackItem {
-  strengths?: string | null;
-  improvements?: string | null;
-  stars?: number | null;
-  created_at?: string | null;
-}
-
-interface SubmissionItem {
-  id: string;
-  created_at: string | null;
-  status: string | null;
-  jobs?: { title: string; company?: string | null } | null;
-  proof_tasks?: { title: string } | null;
-  feedback?: FeedbackItem[] | null;
-}
+import { getCandidateFeedback } from "@/lib/api/submissions";
+import ProofCard from "@/components/proofs/ProofCard";
+import ProofDetailModal from "@/components/proofs/ProofDetailModal";
+import { MessageSquare } from "lucide-react";
+import type { CandidateFeedbackEntry } from "@/types/candidate";
 
 export default function CandidateFeedbackView() {
   const { user } = useAuth();
-  console.log(user?.role);
-  const [proofs, setProofs] = useState<SubmissionItem[]>([]);
+  const [proofs, setProofs] = useState<CandidateFeedbackEntry[]>([]);
+  const [selectedProof, setSelectedProof] =
+    useState<CandidateFeedbackEntry | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!user?.id) return;
     getCandidateFeedback(user.id)
-      .then((data) => setProofs(data as SubmissionItem[]))
+      .then((data) => setProofs(data))
       .catch((err) => toast.error(err.message))
       .finally(() => setLoading(false));
   }, [user?.id]);
 
   if (loading)
     return (
-      <p className="p-8 text-[var(--color-text-muted)]">Loading feedback...</p>
+      <div className="p-10 text-center text-[var(--color-text-muted)]">
+        Loading feedback…
+      </div>
     );
 
   if (!proofs.length)
     return (
-      <p className="p-8 text-[var(--color-text-muted)]">
-        No proofs submitted yet.
-      </p>
+      <div className="p-10 text-center text-[var(--color-text-muted)]">
+        You haven’t submitted any proofs yet.
+      </div>
     );
 
   return (
     <div className="min-h-screen bg-[var(--color-bg)] px-8 py-10">
       <header className="mb-10">
-        <h1 className="heading-lg">📜 My Proofs & Feedback</h1>
-        <p className="body-base mt-1">
-          See feedback and ratings from employers.
+        <h1 className="heading-lg flex items-center gap-2">
+          <MessageSquare size={22} /> My Feedback
+        </h1>
+        <p className="body-base mt-1 text-[var(--color-text-muted)]">
+          Review employer feedback on your submitted proofs.
         </p>
       </header>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {proofs.map((p) => {
-          const fb = p.feedback?.[0];
-          const reviewed = p.status === "reviewed" && fb;
-
-          return (
-            <div
-              key={p.id}
-              className="bg-[var(--color-surface)] transition-colors p-6 rounded-[var(--radius-card)] border border-[var(--color-border)] shadow-[var(--shadow-soft)]"
-            >
-              <h3 className="text-lg font-semibold text-[var(--color-text)] mb-1">
-                {p.proof_tasks?.title || "Proof Task"}
-              </h3>
-              <p className="text-sm text-[var(--color-text-muted)] mb-3">
-                {p.jobs?.title} • {p.jobs?.company}
-              </p>
-
-              {reviewed ? (
-                <>
-                  <div className="flex items-center mb-3 text-yellow-500">
-                    {Array.from({ length: 5 }).map((_, i) => (
-                      <span key={i}>{i < (fb.stars || 0) ? "★" : "☆"}</span>
-                    ))}
-                    <span className="ml-2 text-sm text-[var(--color-text-muted)]">
-                      {fb.stars}/5
-                    </span>
-                  </div>
-                  <p className="text-sm mb-1">
-                    <strong className="text-[var(--color-success)]">
-                      Strengths:
-                    </strong>{" "}
-                    {fb.strengths}
-                  </p>
-                  <p className="text-sm mb-1">
-                    <strong className="text-[var(--color-error)]">
-                      Improvements:
-                    </strong>{" "}
-                    {fb.improvements}
-                  </p>
-                </>
-              ) : (
-                <p className="text-[var(--color-text-muted)] italic">
-                  Awaiting feedback from employer...
-                </p>
-              )}
-
-              <p className="text-xs text-[var(--color-text-muted)] mt-3">
-                Submitted{" "}
-                {p.created_at
-                  ? new Date(p.created_at || "").toLocaleDateString(undefined, {
-                      year: "numeric",
-                      month: "short",
-                      day: "numeric",
-                    })
-                  : "–"}
-              </p>
-            </div>
-          );
-        })}
+        {proofs.map((proof) => (
+          <ProofCard
+            key={proof.id}
+            proof={proof}
+            onClick={() => setSelectedProof(proof)}
+          />
+        ))}
       </div>
+
+      {selectedProof && (
+        <ProofDetailModal
+          proof={selectedProof}
+          onClose={() => setSelectedProof(null)}
+        />
+      )}
     </div>
   );
 }

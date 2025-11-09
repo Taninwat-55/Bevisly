@@ -30,6 +30,7 @@ export type CandidateFeedback = {
   strengths: string | null;
   improvements: string | null;
   stars: number | null;
+  comments: string | null;
   created_at: string | null;
 };
 
@@ -40,6 +41,8 @@ export type CandidateFeedbackEntry = {
   id: string;
   created_at: string | null;
   status: string | null;
+  submission_link?: string | null;
+  reflection?: string | null;
   jobs: { title: string | null; company: string | null } | null;
   proof_tasks: { title: string | null } | null;
   feedback: CandidateFeedback[];
