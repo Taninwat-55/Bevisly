@@ -9,6 +9,8 @@ export type EmployerJob = {
   location: string | null;
   paid: boolean | null;
   created_at: string | null;
+  status?: string | null; 
+  featured?: boolean | null;
 };
 
 /**
