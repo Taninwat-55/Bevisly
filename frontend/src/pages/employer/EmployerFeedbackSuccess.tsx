@@ -1,12 +1,23 @@
-// src/pages/employer/FeedbackSuccess.tsx
+import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
 
 export default function EmployerFeedbackSuccess() {
   const navigate = useNavigate();
 
+  useEffect(() => {
+    const timer = setTimeout(() => navigate("/employer/dashboard"), 4000);
+    return () => clearTimeout(timer);
+  }, [navigate]);
+
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-[var(--color-bg)] text-center px-6">
-      <div className="bg-[var(--color-surface)] transition-colors border border-[var(--color-border)] shadow-[var(--shadow-soft)] rounded-[var(--radius-card)] p-10 max-w-md">
+    <motion.div
+      className="min-h-screen flex flex-col items-center justify-center bg-[var(--color-bg)] text-center px-6"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.4 }}
+    >
+      <div className="bg-[var(--color-surface)] border border-[var(--color-border)] shadow-[var(--shadow-soft)] rounded-[var(--radius-card)] p-10 max-w-md">
         <h1 className="text-3xl font-semibold text-[var(--color-employer-dark)] mb-4">
           🎉 Feedback Submitted!
         </h1>
@@ -21,6 +32,6 @@ export default function EmployerFeedbackSuccess() {
           ← Back to Dashboard
         </button>
       </div>
-    </div>
+    </motion.div>
   );
 }

@@ -1,100 +1,32 @@
-// src/pages/employer/EmployerHome.tsx
 import { useEffect, useState } from "react";
-import { useAuth } from "@/hooks/useAuth";
 import { Link } from "react-router-dom";
-import { supabase } from "@/lib/supabaseClient";
+import { motion } from "framer-motion";
+import { useAuth } from "@/hooks/useAuth";
+import { getEmployerStats } from "@/lib/api/employer";
+import type { EmployerStats } from "@/types";
 
 export default function EmployerHome() {
   const { user } = useAuth();
-
-  const [jobsPosted, setJobsPosted] = useState(0);
-  const [activeSubmissions, setActiveSubmissions] = useState(0);
-  const [avgScore, setAvgScore] = useState<number | null>(null);
-  const [submissions, setSubmissions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [stats, setStats] = useState<EmployerStats>({
+    jobsPosted: 0,
+    activeSubmissions: 0,
+    avgScore: null,
+    submissions: [],
+  });
 
   useEffect(() => {
     if (!user?.id) return;
-
-    const fetchStats = async () => {
+    (async () => {
       try {
-        // 1️⃣ Count jobs posted by employer
-        const { count: jobCount } = await supabase
-          .from("jobs")
-          .select("*", { count: "exact", head: true })
-          .eq("employer_id", user.id);
-
-        // 2️⃣ Get employer submissions for those jobs
-        const { data: jobIds } = await supabase
-          .from("jobs")
-          .select("id")
-          .eq("employer_id", user.id);
-
-        const jobIdList = jobIds?.map((j) => j.id) || [];
-
-        let submissionCount = 0;
-        let feedbackScores: number[] = [];
-        let latestSubs: any[] = [];
-
-        if (jobIdList.length > 0) {
-          // Count active submissions
-          const { count } = await supabase
-            .from("submissions")
-            .select("*", { count: "exact", head: true })
-            .in("job_id", jobIdList)
-            .eq("status", "submitted");
-          submissionCount = count || 0;
-
-          // Fetch submissions + feedback
-          const { data: recent } = await supabase
-            .from("submissions")
-            .select(
-              `
-              id,
-              user_id,
-              job_id,
-              created_at,
-              proof_tasks ( title ),
-              feedback ( stars )
-            `
-            )
-            .in("job_id", jobIdList)
-            .order("created_at", { ascending: false })
-            .limit(3);
-
-          latestSubs = recent || [];
-
-          // Compute average rating
-          const ratings =
-            recent
-              ?.flatMap((s) => s.feedback?.map((f) => f.stars))
-              .filter((r): r is number => typeof r === "number") || [];
-          if (ratings.length) {
-            feedbackScores = ratings;
-          }
-        }
-
-        setJobsPosted(jobCount || 0);
-        setActiveSubmissions(submissionCount);
-        setAvgScore(
-          feedbackScores.length
-            ? Number(
-                (
-                  feedbackScores.reduce((a, b) => a + b, 0) /
-                  feedbackScores.length
-                ).toFixed(1)
-              )
-            : null
-        );
-        setSubmissions(latestSubs);
+        const result = await getEmployerStats(user.id);
+        setStats(result);
       } catch (err) {
-        console.error("Error fetching employer home data:", err);
+        console.error("Error fetching employer stats:", err);
       } finally {
         setLoading(false);
       }
-    };
-
-    fetchStats();
+    })();
   }, [user?.id]);
 
   if (loading)
@@ -104,16 +36,23 @@ export default function EmployerHome() {
       </div>
     );
 
+  const { jobsPosted, activeSubmissions, avgScore, submissions } = stats;
+
   return (
-    <div className="min-h-screen bg-[var(--color-bg)] px-8 py-10">
+    <motion.div
+      className="min-h-screen bg-[var(--color-bg)] px-8 py-10"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.25 }}
+    >
       {/* 🏠 Header */}
       <header className="mb-10">
-        <div className="mb-8 bg-gradient-to-r from-[var(--color-employer)]/10 to-transparent border border-[var(--color-border)] rounded-[var(--radius-card)] p-6">
+        <div className="bg-gradient-to-r from-[var(--color-employer)]/10 to-transparent border border-[var(--color-border)] rounded-[var(--radius-card)] p-6 mb-8">
           <h1 className="heading-md text-[var(--color-employer-dark)] mb-1">
             👋 Welcome back, {user?.email?.split("@")[0]}!
           </h1>
-          <p className="body-base mt-1 text-[var(--color-text-muted)]">
-            Manage your hiring workflow, review proofs, and discover top talent.
+          <p className="body-base text-[var(--color-text-muted)]">
+            Manage your hiring workflow and discover top talent.
           </p>
           <p className="text-sm text-[var(--color-text-muted)] mt-1">
             You have <strong>{activeSubmissions}</strong> submissions awaiting
@@ -139,9 +78,9 @@ export default function EmployerHome() {
           <ul className="divide-y divide-[var(--color-border)]">
             {submissions.map((s) => (
               <li key={s.id} className="py-3 text-sm">
-                <span className="font-medium">{s.proof_tasks?.title}</span> from{" "}
+                <span className="font-medium">{s.proof_tasks?.title}</span>{" "}
                 <span className="text-[var(--color-text-muted)]">
-                  {s.user_id}
+                  ({s.user_id})
                 </span>
               </li>
             ))}
@@ -171,7 +110,7 @@ export default function EmployerHome() {
           href="/employer/talent"
         />
       </section>
-    </div>
+    </motion.div>
   );
 }
 
