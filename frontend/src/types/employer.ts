@@ -51,3 +51,21 @@ export type EmployerSubmission = {
   hiring_stage?: HiringStage | null;
   employer_notes?: string | null;
 };
+
+// Used on EmployerHome.tsx for recent submissions section
+export type EmployerRecentSubmission = {
+  id: string;
+  user_id: string | null;
+  job_id: string | null;
+  created_at: string | null;
+  proof_tasks: { title: string | null } | null;
+  feedback: { stars: number | null }[] | null;
+};
+
+// Summary of key employer stats (used on EmployerHome)
+export type EmployerStats = {
+  jobsPosted: number;
+  activeSubmissions: number;
+  avgScore: number | null;
+  submissions: EmployerRecentSubmission[];
+};
