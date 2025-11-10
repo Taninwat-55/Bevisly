@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "../lib/supabaseClient";
 import { AuthContext, type SessionUser } from "./AuthContext";
+import toast from "react-hot-toast";
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<SessionUser | null>(null);
@@ -9,10 +10,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   // ✅ Logout handler
   const signOut = async () => {
-    await supabase.auth.signOut();
-    setUser(null);
-    localStorage.removeItem("bevis_user");
-    localStorage.removeItem("overrideRole");
+    try {
+      // ✅ Show toast first — BevisToaster will handle rendering
+      toast.success("👋 You've been logged out successfully!", {
+        duration: 1800,
+      });
+
+      // ✅ Immediately clear session data
+      await supabase.auth.signOut();
+      setUser(null);
+      localStorage.removeItem("bevis_user");
+      localStorage.removeItem("overrideRole");
+
+      // ✅ Use replace() instead of setTimeout + href
+      // This avoids showing /auth and keeps the toast visible
+      setTimeout(() => window.location.replace("/"), 500);
+    } catch (err) {
+      console.error("Logout error:", err);
+      toast.error("Something went wrong during logout.");
+    }
   };
 
   useEffect(() => {
@@ -112,7 +128,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     : null;
 
   const setOverride = (role: SessionUser["role"]) => {
-    localStorage.setItem("overrideRole", role);
+    localStorage.setItem("overrideRole", role ?? "");
     setUser((u) => (u ? { ...u, role } : null)); // immediately update context
   };
 

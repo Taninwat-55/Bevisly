@@ -22,6 +22,22 @@ export default function Navbar() {
     { label: "About", to: "/about" },
   ];
 
+  /* 🧭 Append Dashboard link for logged-in users */
+  if (user) {
+    const storedUser = JSON.parse(localStorage.getItem("bevis_user") || "{}");
+    const role = localStorage.getItem("overrideRole") || storedUser?.role;
+
+    navLinks.splice(1, 0, {
+      label: "Overview",
+      to:
+        role === "admin"
+          ? "/admin"
+          : role === "employer"
+          ? "/employer"
+          : "/candidate",
+    });
+  }
+
   /* 🧭 Go to dashboard based on role */
   const goToDashboard = () => {
     const storedUser = JSON.parse(localStorage.getItem("bevis_user") || "{}");

@@ -40,7 +40,7 @@ export default function Sidebar({ role }: SidebarProps) {
   const links =
     resolvedRole === "employer"
       ? [
-          { to: "/employer", label: "Home", icon: <House size={17} /> },
+          { to: "/employer", label: "Overview", icon: <House size={17} /> },
           {
             to: "/employer/dashboard",
             label: "Dashboard",
@@ -108,7 +108,7 @@ export default function Sidebar({ role }: SidebarProps) {
           },
         ]
       : [
-          { to: "/candidate", label: "Home", icon: <House size={17} /> },
+          { to: "/candidate", label: "Overview", icon: <House size={17} /> },
           {
             to: "/candidate/dashboard",
             label: "Dashboard",
