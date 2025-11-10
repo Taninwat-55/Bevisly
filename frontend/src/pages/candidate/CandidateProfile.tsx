@@ -12,7 +12,7 @@ import {
   FileText,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { uploadResume, getProfileResume } from "@/lib/api/profiles"; // 🆕 import
+import { uploadResume, getProfileResume } from "@/lib/api/profiles";
 
 export default function CandidateProfile() {
   const { user } = useAuth();
@@ -21,8 +21,9 @@ export default function CandidateProfile() {
 
   const [joined, setJoined] = useState<string>("");
   const [copied, setCopied] = useState(false);
-  const [resumeUrl, setResumeUrl] = useState<string | null>(null); // 🆕
-  const [uploading, setUploading] = useState(false); // 🆕
+  const [resumeUrl, setResumeUrl] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const [resumeUpdatedAt, setResumeUpdatedAt] = useState<string | null>(null);
 
   /* 🗓️ Fetch join date */
   useEffect(() => {
@@ -46,7 +47,10 @@ export default function CandidateProfile() {
   useEffect(() => {
     if (!user?.id) return;
     getProfileResume(user.id)
-      .then((res) => setResumeUrl(res?.resume_url || null))
+      .then((res) => {
+        setResumeUrl(res?.resume_url || null);
+        setResumeUpdatedAt(res?.resume_updated_at || null);
+      })
       .catch(() => {});
   }, [user?.id]);
 
@@ -101,6 +105,56 @@ export default function CandidateProfile() {
     setTimeout(() => setCopied(false), 1500);
   };
 
+  // 🧩 Extract & clean file name from URL (e.g. "1762740193705-_CV%20-%20Eng.pdf")
+  const extractFileName = (url: string | null) => {
+    if (!url) return null;
+    try {
+      const decoded = decodeURIComponent(url);
+      const parts = decoded.split("/");
+      let fileName = parts[parts.length - 1];
+
+      // Remove leading timestamp or random prefix before a dash
+      fileName = fileName.replace(/^\d+-/, "");
+
+      // Truncate long names but keep extension
+      if (fileName.length > 30) {
+        const ext = fileName.split(".").pop();
+        const base = fileName.slice(0, 25);
+        fileName = `${base}...${ext}`;
+      }
+
+      return fileName;
+    } catch {
+      return null;
+    }
+  };
+
+  // 🧩 Format date nicely (e.g. "Nov 10, 2025")
+  const formatDate = (dateStr: string | null) => {
+    if (!dateStr) return null;
+    const date = new Date(dateStr);
+    return date.toLocaleDateString(undefined, {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
+  };
+
+  const handleDownloadCV = async () => {
+    if (!resumeUrl) return;
+    const response = await fetch(resumeUrl);
+    const blob = await response.blob();
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = extractFileName(resumeUrl) || "My_CV.pdf";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    window.URL.revokeObjectURL(url);
+  };
+
+  // 🧠 Keep everything below as-is
   if (loading)
     return (
       <div className="flex justify-center items-center min-h-screen text-[var(--color-text-muted)]">
@@ -143,14 +197,36 @@ export default function CandidateProfile() {
 
           {resumeUrl ? (
             <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
-              <a
-                href={resumeUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-[var(--color-employer-dark)] text-sm underline truncate max-w-full"
-              >
-                View uploaded CV
-              </a>
+              <div className="flex flex-col text-sm">
+                <div className="flex items-center gap-3 flex-wrap">
+                  {/* 🌐 Open in new tab */}
+                  {/* 🗓️ Filename + updated date */}
+                  <span className="text-[var(--color-text-muted)] text-xs mt-1 block">
+                    📄 {extractFileName(resumeUrl)}{" "}
+                    {resumeUpdatedAt && (
+                      <>• Updated {formatDate(resumeUpdatedAt)}</>
+                    )}
+                  </span>
+
+                  <a
+                    href={resumeUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-[var(--color-employer-dark)] underline hover:text-[var(--color-employer)] transition text-sm"
+                  >
+                    Open CV
+                  </a>
+
+                  {/* 💾 Download */}
+                  <button
+                    onClick={handleDownloadCV}
+                    className="text-[var(--color-employer-dark)] underline hover:text-[var(--color-employer)] transition text-sm"
+                  >
+                    Download
+                  </button>
+                </div>
+              </div>
+
               <label className="text-sm text-[var(--color-employer)] cursor-pointer hover:underline">
                 <input
                   type="file"
@@ -271,7 +347,6 @@ export default function CandidateProfile() {
   );
 }
 
-/* ─── Subcomponents remain unchanged ─────────────────────────────── */
 /* ─── Subcomponents ─────────────────────────────── */
 function InfoRow({
   label,
@@ -284,7 +359,6 @@ function InfoRow({
   const formatValue = (val: string | number | null | undefined) => {
     if (val == null || val === "") return "—";
 
-    // 🗓️ If it looks like a date or ISO string
     if (typeof val === "string" && !isNaN(Date.parse(val))) {
       const date = new Date(val);
       return date.toLocaleDateString(undefined, {
