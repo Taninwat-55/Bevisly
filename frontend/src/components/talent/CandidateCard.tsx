@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { MoreHorizontal } from "lucide-react";
+import { MoreHorizontal, FileText } from "lucide-react";
 import toast from "react-hot-toast";
 import { updateHiringStage } from "@/lib/api/mutations";
 import type { EmployerSubmission, HiringStage } from "@/types";
@@ -70,8 +70,20 @@ export default function CandidateCard({
       rounded-[var(--radius-button)] p-3 cursor-grab hover:shadow-[var(--shadow-soft)] transition`}
     >
       <div className="flex justify-between items-center mb-1">
-        <h4 className="font-medium text-sm text-[var(--color-text)] truncate">
+        <h4 className="font-medium text-sm text-[var(--color-text)] truncate flex items-center gap-1">
           👤 {user_id || "Unknown"}
+          {submission.status === "reviewed" && submission.resume_url && (
+            <a
+              href={submission.resume_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              onPointerDown={(e) => e.stopPropagation()}
+              title="View Candidate CV"
+              className="text-[var(--color-employer-dark)] hover:text-[var(--color-employer)] transition-colors"
+            >
+              <FileText size={13} strokeWidth={1.8} />
+            </a>
+          )}
         </h4>
 
         <div ref={dropdownRef} className="relative">
@@ -115,6 +127,20 @@ export default function CandidateCard({
         {proof_tasks?.title || "Untitled task"}
       </p>
 
+      {/* 🆕 Candidate CV */}
+      {submission.status === "reviewed" && submission.resume_url && (
+        <a
+          href={submission.resume_url}
+          target="_blank"
+          rel="noopener noreferrer"
+          onPointerDown={(e) => e.stopPropagation()}
+          className="text-xs text-[var(--color-employer-dark)] hover:underline block mt-0.5"
+        >
+          📄 View CV
+        </a>
+      )}
+
+      {/* Rating */}
       {feedback?.[0]?.stars ? (
         <span className="text-xs text-yellow-500 font-medium">
           ⭐ {feedback[0].stars}/5

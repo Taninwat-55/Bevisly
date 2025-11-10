@@ -205,6 +205,8 @@ export type Database = {
           email: string | null
           full_name: string | null
           id: string
+          resume_updated_at: string | null
+          resume_url: string | null
           role: string | null
         }
         Insert: {
@@ -213,6 +215,8 @@ export type Database = {
           email?: string | null
           full_name?: string | null
           id: string
+          resume_updated_at?: string | null
+          resume_url?: string | null
           role?: string | null
         }
         Update: {
@@ -221,6 +225,8 @@ export type Database = {
           email?: string | null
           full_name?: string | null
           id?: string
+          resume_updated_at?: string | null
+          resume_url?: string | null
           role?: string | null
         }
         Relationships: []
@@ -382,10 +388,13 @@ export type Database = {
           proof_link: string | null
           proof_task_id: string | null
           reflection: string | null
+          resume_metadata: Json | null
+          resume_url: string | null
           score: number | null
           status: string | null
           submission_link: string | null
           updated_at: string | null
+          uploaded_at: string | null
           user_id: string | null
         }
         Insert: {
@@ -397,10 +406,13 @@ export type Database = {
           proof_link?: string | null
           proof_task_id?: string | null
           reflection?: string | null
+          resume_metadata?: Json | null
+          resume_url?: string | null
           score?: number | null
           status?: string | null
           submission_link?: string | null
           updated_at?: string | null
+          uploaded_at?: string | null
           user_id?: string | null
         }
         Update: {
@@ -412,10 +424,13 @@ export type Database = {
           proof_link?: string | null
           proof_task_id?: string | null
           reflection?: string | null
+          resume_metadata?: Json | null
+          resume_url?: string | null
           score?: number | null
           status?: string | null
           submission_link?: string | null
           updated_at?: string | null
+          uploaded_at?: string | null
           user_id?: string | null
         }
         Relationships: [

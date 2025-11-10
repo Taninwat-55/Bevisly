@@ -24,6 +24,7 @@ import {
   Filter,
   Award,
   Trophy,
+  FileText,
 } from "lucide-react";
 
 export default function EmployerTalentPool() {
@@ -218,6 +219,7 @@ export default function EmployerTalentPool() {
                   <th className="py-2 px-3">Candidate</th>
                   <th className="py-2 px-3">Job</th>
                   <th className="py-2 px-3">Task</th>
+                  <th className="py-2 px-3">CV</th>
                   <th className="py-2 px-3">Rating</th>
                   <th className="py-2 px-3">Status</th>
                   <th className="py-2 px-3">Action</th>
@@ -238,7 +240,23 @@ export default function EmployerTalentPool() {
                       onClick={() => navigate(`/employer/review/${s.id}`)}
                     >
                       <td className="py-2 px-3 text-[var(--color-text)]">
-                        {s.user_id}
+                        <div className="flex items-center gap-1">
+                          <span>{s.user_id}</span>
+
+                          {/* Lucide CV icon for reviewed candidates */}
+                          {s.status === "reviewed" && s.resume_url && (
+                            <a
+                              href={s.resume_url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              onClick={(e) => e.stopPropagation()}
+                              title="View Candidate CV"
+                              className="text-[var(--color-employer-dark)] hover:text-[var(--color-employer)] transition-colors"
+                            >
+                              <FileText size={13} strokeWidth={1.8} />
+                            </a>
+                          )}
+                        </div>
                       </td>
                       <td className="py-2 px-3 text-[var(--color-text-muted)]">
                         {s.jobs?.title || "—"}
@@ -246,6 +264,26 @@ export default function EmployerTalentPool() {
                       <td className="py-2 px-3 text-[var(--color-text-muted)]">
                         {s.proof_tasks?.title || "—"}
                       </td>
+
+                      {/* 🆕 Candidate CV */}
+                      <td className="py-2 px-3">
+                        {s.status === "reviewed" && s.resume_url ? (
+                          <a
+                            href={s.resume_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-[var(--color-employer-dark)] text-xs underline"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            View CV
+                          </a>
+                        ) : (
+                          <span className="text-[var(--color-text-muted)] text-xs">
+                            —
+                          </span>
+                        )}
+                      </td>
+
                       <td className="py-2 px-3">
                         {rating ? (
                           <span className="inline-flex items-center gap-1 text-[var(--color-employer-dark)] font-medium">
@@ -257,6 +295,7 @@ export default function EmployerTalentPool() {
                           </span>
                         )}
                       </td>
+
                       <td
                         className={`py-2 px-3 font-medium ${
                           s.status === "reviewed"
@@ -266,6 +305,7 @@ export default function EmployerTalentPool() {
                       >
                         {s.status}
                       </td>
+
                       <td className="py-2 px-3">
                         <button
                           onClick={(e) => {

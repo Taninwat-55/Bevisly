@@ -4,8 +4,15 @@ import { useAuth } from "@/hooks/useAuth";
 import { useCandidateStats } from "@/hooks/useCandidateStats";
 import ProofCardsGrid from "@/components/proofs/ProofCardsGrid";
 import toast from "react-hot-toast";
-import { RotateCcw, Copy, CheckCircle } from "lucide-react";
+import {
+  RotateCcw,
+  Copy,
+  CheckCircle,
+  UploadCloud,
+  FileText,
+} from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { uploadResume, getProfileResume } from "@/lib/api/profiles"; // 🆕 import
 
 export default function CandidateProfile() {
   const { user } = useAuth();
@@ -14,6 +21,8 @@ export default function CandidateProfile() {
 
   const [joined, setJoined] = useState<string>("");
   const [copied, setCopied] = useState(false);
+  const [resumeUrl, setResumeUrl] = useState<string | null>(null); // 🆕
+  const [uploading, setUploading] = useState(false); // 🆕
 
   /* 🗓️ Fetch join date */
   useEffect(() => {
@@ -32,6 +41,38 @@ export default function CandidateProfile() {
 
     fetchJoinDate();
   }, [user?.id]);
+
+  /* 🆕 Fetch existing resume */
+  useEffect(() => {
+    if (!user?.id) return;
+    getProfileResume(user.id)
+      .then((res) => setResumeUrl(res?.resume_url || null))
+      .catch(() => {});
+  }, [user?.id]);
+
+  /* 🆕 Handle CV upload */
+  const handleUploadCV = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.name.endsWith(".pdf") && !file.name.endsWith(".docx")) {
+      toast.error("Only PDF or DOCX files are allowed.");
+      return;
+    }
+
+    setUploading(true);
+    try {
+      const url = await uploadResume(file);
+      setResumeUrl(url);
+      toast.success("✅ CV uploaded successfully!");
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to upload CV");
+    } finally {
+      setUploading(false);
+      e.target.value = ""; // reset file input
+    }
+  };
 
   /* 🧹 Reset stored preferences (e.g., skip modals) */
   const handleResetPreferences = () => {
@@ -92,6 +133,52 @@ export default function CandidateProfile() {
           <InfoRow label="Role" value={user?.role} />
           <InfoRow label="Member Since" value={joined || "—"} />
           <InfoRow label="Proof Credits" value={credits ?? "—"} />
+        </div>
+
+        {/* 🆕 Upload CV Section */}
+        <div className="mt-6 pt-4 border-t border-[var(--color-border)]">
+          <h3 className="text-sm font-medium text-[var(--color-text)] mb-2 flex items-center gap-2">
+            <FileText size={14} /> Resume / CV
+          </h3>
+
+          {resumeUrl ? (
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
+              <a
+                href={resumeUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-[var(--color-employer-dark)] text-sm underline truncate max-w-full"
+              >
+                View uploaded CV
+              </a>
+              <label className="text-sm text-[var(--color-employer)] cursor-pointer hover:underline">
+                <input
+                  type="file"
+                  accept=".pdf,.docx"
+                  onChange={handleUploadCV}
+                  disabled={uploading}
+                  className="hidden"
+                />
+                {uploading ? "Uploading..." : "Replace CV"}
+              </label>
+            </div>
+          ) : (
+            <label className="inline-flex items-center gap-2 text-sm text-[var(--color-employer)] cursor-pointer hover:underline">
+              <UploadCloud size={14} />
+              <input
+                type="file"
+                accept=".pdf,.docx"
+                onChange={handleUploadCV}
+                disabled={uploading}
+                className="hidden"
+              />
+              {uploading ? "Uploading..." : "Upload CV"}
+            </label>
+          )}
+
+          <p className="text-xs text-[var(--color-text-muted)] mt-2">
+            Accepted formats: PDF or DOCX, max 5MB.
+          </p>
         </div>
 
         {/* 🔄 Reset Preferences */}
@@ -184,6 +271,7 @@ export default function CandidateProfile() {
   );
 }
 
+/* ─── Subcomponents remain unchanged ─────────────────────────────── */
 /* ─── Subcomponents ─────────────────────────────── */
 function InfoRow({
   label,

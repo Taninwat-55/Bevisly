@@ -143,46 +143,45 @@ export async function submitProof({
   file,
 }: {
   job_id: string;
-  submission_link?: string; // ✅ optional
+  submission_link?: string;
   reflection?: string;
-  file?: File | null; // ✅ optional (for non-dev proofs)
+  file?: File | null;
 }) {
   const user = (await supabase.auth.getUser()).data.user;
   if (!user) throw new Error("Not authenticated");
 
-  // 🧠 Validate: at least one proof method
-  if (!submission_link && !file) {
-    throw new Error("A submission link or file is required.");
-  }
-
   let uploadedFileUrl: string | null = null;
 
-  // 📤 If file provided, upload it to Supabase Storage
+  // 📤 Upload proof file if provided
   if (file) {
     const filePath = `proofs/${user.id}/${Date.now()}-${file.name}`;
     const { error: uploadErr } = await supabase.storage
       .from("proofs")
       .upload(filePath, file);
-
     if (uploadErr) throw uploadErr;
-
     const { data: publicUrlData } = supabase.storage
       .from("proofs")
       .getPublicUrl(filePath);
-
     uploadedFileUrl = publicUrlData?.publicUrl || null;
   }
 
-  // 🧾 Store submission record
+  // 🧠 Attach candidate resume automatically if available
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("resume_url")
+    .eq("id", user.id)
+    .maybeSingle();
+
   const { data, error } = await supabase
     .from("submissions")
     .insert([
       {
         user_id: user.id,
         job_id,
-        submission_link: uploadedFileUrl || submission_link || null, // ✅ either link or uploaded file
+        submission_link: uploadedFileUrl || submission_link || null,
         reflection,
         status: "pending",
+        resume_url: profile?.resume_url || null,
       },
     ])
     .select()
@@ -226,19 +225,18 @@ export async function getCandidateFeedback(user_id: string) {
 export async function getSubmissionById(submission_id: string) {
   const { data, error } = await supabase
     .from("submissions")
-    .select(
-      `
+    .select(`
       id,
       user_id,
       job_id,
       status,
       submission_link,
       reflection,
+      resume_url,
       created_at,
       proof_tasks ( id, title, description ),
       jobs ( id, title, company )
-    `
-    )
+`)
     .eq("id", submission_id)
     .single();
 
@@ -259,10 +257,11 @@ export async function getSubmissionsByJob(job_id: string): Promise<EmployerSubmi
       status,
       submission_link,
       reflection,
+      resume_url,
       created_at,
       proof_tasks ( id, title ),
       jobs ( id, title, company )
-    `)
+`)
     .eq("job_id", job_id)
     .order("created_at", { ascending: true });
 
