@@ -53,6 +53,9 @@ export type EmployerSubmission = {
   // 🧭 Talent Manager fields
   hiring_stage?: HiringStage | null;
   employer_notes?: string | null;
+
+  // 🆕 New — attach candidate resume for employers
+  resume_url?: string | null;
 };
 
 // Used on EmployerHome.tsx for recent submissions section
@@ -72,3 +75,4 @@ export type EmployerStats = {
   avgScore: number | null;
   submissions: EmployerRecentSubmission[];
 };
+

@@ -5,6 +5,7 @@
  *  - Fetches all submissions for a job once (cached in memory)
  *  - Allows next/previous navigation
  *  - Displays review progress (e.g. 3 of 7)
+ *  - Includes "View Candidate CV" link if uploaded
  *  - Includes "Back to Submissions"
  */
 
@@ -16,7 +17,7 @@ import { updateSubmissionStatus } from "@/lib/api/mutations";
 import { getSubmissionById, getSubmissionsByJob } from "@/lib/api/submissions";
 import { useAuth } from "@/hooks/useAuth";
 import type { EmployerSubmission } from "@/types";
-import { Loader2, Star, ArrowRight, ArrowLeft } from "lucide-react";
+import { Loader2, Star, ArrowRight, ArrowLeft, FileText } from "lucide-react";
 
 export default function EmployerReviewProof() {
   const { id } = useParams();
@@ -169,29 +170,47 @@ export default function EmployerReviewProof() {
 
       {/* 🧾 Submission Info */}
       <section className="bg-[var(--color-surface)] border border-[var(--color-border)] shadow-[var(--shadow-soft)] rounded-[var(--radius-card)] p-6 max-w-3xl">
-        <p className="text-sm mb-3 text-[var(--color-text-muted)]">
-          <strong>Submission Link:</strong>{" "}
-          {submission.submission_link ? (
-            <a
-              href={submission.submission_link}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-[var(--color-employer-dark)] underline"
-            >
-              {submission.submission_link}
-            </a>
-          ) : (
-            "No submission link provided."
-          )}
-        </p>
+        <div className="space-y-3 text-sm text-[var(--color-text-muted)]">
+          {/* Proof Link */}
+          <p>
+            <strong>Submission Link:</strong>{" "}
+            {submission.submission_link ? (
+              <a
+                href={submission.submission_link}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-[var(--color-employer-dark)] underline"
+              >
+                {submission.submission_link}
+              </a>
+            ) : (
+              "No submission link provided."
+            )}
+          </p>
 
-        <p className="text-sm mb-6 text-[var(--color-text-muted)] leading-relaxed">
-          <strong>Candidate Reflection:</strong>{" "}
-          {submission.reflection || "No reflection provided."}
-        </p>
+          {/* 🆕 Candidate CV */}
+          {submission.resume_url && (
+            <p>
+              <strong>Candidate CV:</strong>{" "}
+              <a
+                href={submission.resume_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1 text-[var(--color-employer-dark)] underline"
+              >
+                <FileText size={14} /> View CV
+              </a>
+            </p>
+          )}
+
+          <p className="leading-relaxed">
+            <strong>Candidate Reflection:</strong>{" "}
+            {submission.reflection || "No reflection provided."}
+          </p>
+        </div>
 
         {/* 💬 Feedback Form */}
-        <h2 className="heading-md mb-4">Leave Feedback</h2>
+        <h2 className="heading-md mb-4 mt-8">Leave Feedback</h2>
 
         <div className="space-y-5">
           <div>
