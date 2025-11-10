@@ -4,10 +4,12 @@ export async function uploadResume(file: File) {
   const user = (await supabase.auth.getUser()).data.user;
   if (!user) throw new Error("Not authenticated");
 
-  const filePath = `resumes/${user.id}/${Date.now()}-${file.name}`;
+  const filePath = `${user.id}/${Date.now()}-${file.name}`;
+  console.log("📤 Uploading to:", filePath);
+
   const { error: uploadErr } = await supabase.storage
     .from("resumes")
-    .upload(filePath, file);
+    .upload(filePath, file, { upsert: true, contentType: file.type });
 
   if (uploadErr) throw uploadErr;
 
@@ -18,7 +20,6 @@ export async function uploadResume(file: File) {
   const publicUrl = publicUrlData?.publicUrl;
   if (!publicUrl) throw new Error("Failed to retrieve public URL");
 
-  // ✅ Save to profile
   const { error: updateErr } = await supabase
     .from("profiles")
     .update({
@@ -28,6 +29,8 @@ export async function uploadResume(file: File) {
     .eq("id", user.id);
 
   if (updateErr) throw updateErr;
+
+  console.log("✅ Resume uploaded successfully");
   return publicUrl;
 }
 
