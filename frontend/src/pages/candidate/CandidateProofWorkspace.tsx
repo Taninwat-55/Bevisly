@@ -1,7 +1,16 @@
+/**
+ * 🧠 CandidateProofWorkspace.tsx
+ * Candidate view for completing and submitting proof tasks.
+ */
+
 import { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
-import { getProofTaskDetails, submitProof } from "@/lib/api/submissions";
+import {
+  getProofTaskDetails,
+  startProof,
+  completeProof,
+} from "@/lib/api/submissions";
 import {
   Loader2,
   Clock,
@@ -12,8 +21,6 @@ import {
 } from "lucide-react";
 import { motion } from "framer-motion";
 import type { ProofTask } from "@/types/shared";
-
-type SubmissionFormat = "link" | "file" | "custom";
 
 export default function CandidateProofWorkspace() {
   const { id: proof_task_id } = useParams<{ id: string }>();
@@ -40,12 +47,18 @@ export default function CandidateProofWorkspace() {
       .finally(() => setLoading(false));
   }, [proof_task_id]);
 
+  useEffect(() => {
+    if (task?.job_id && task?.id) {
+      startProof(task.job_id, task.id).catch(() => {});
+    }
+  }, [task]);
+
   /* 🚀 Handle submission */
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!task) return toast.error("Task not found.");
 
-    const format = getFormat(task.submission_format);
+    const format = task.submission_type || "link";
 
     if (format === "link" && !link.trim())
       return toast.error("Please include a valid submission link.");
@@ -58,12 +71,18 @@ export default function CandidateProofWorkspace() {
         toast.error("Missing job reference. Please contact support.");
         return;
       }
-      await submitProof({
+      await completeProof({
         job_id: task.job_id,
         submission_link: link || undefined,
         reflection,
-        file, // optional, depending on backend
+        file,
       });
+      // await submitProof({
+      //   job_id: task.job_id,
+      //   submission_link: link || undefined,
+      //   reflection,
+      //   file,
+      // });
       toast.success("🚀 Proof submitted successfully!");
       navigate("/candidate/dashboard");
     } catch (err: unknown) {
@@ -82,77 +101,119 @@ export default function CandidateProofWorkspace() {
       </div>
     );
 
-  function getFormat(formatStr: string | null | undefined): SubmissionFormat {
-    const f = formatStr?.toLowerCase() ?? "link";
-    if (f.includes("file")) return "file";
-    if (f.includes("custom")) return "custom";
-    return "link";
-  }
-
-  /* 🧭 Dynamic Input based on format */
+  /* 🧭 Dynamic Input based on submission_type */
   const renderSubmissionInput = () => {
-    const format = getFormat(task.submission_format);
+    const format = task.submission_type || "link";
 
-    if (format === "file")
-      return (
-        <div>
-          <label className="block text-sm font-medium mb-1 text-[var(--color-text)]">
-            Upload File (PDF, Image, etc.)
-          </label>
-          <div
-            onClick={() => fileInputRef.current?.click()}
-            className="flex flex-col items-center justify-center border border-[var(--color-border)] border-dashed bg-[var(--color-bg)] rounded-[var(--radius-button)] px-3 py-6 cursor-pointer hover:bg-[var(--color-bg-hover)] transition"
-          >
-            <Upload size={20} className="text-[var(--color-text-muted)] mb-2" />
-            <span className="text-sm text-[var(--color-text-muted)]">
-              {file ? file.name : "Click to upload or drag a file here"}
-            </span>
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept=".pdf,.jpg,.png,.jpeg,.doc,.docx"
-              className="hidden"
-              onChange={(e) => {
-                const selected = e.target.files?.[0];
-                setFile(selected || null);
-                if (selected)
-                  toast.success(`✅ ${selected.name} ready for upload`);
-              }}
-            />
-          </div>
-        </div>
-      );
-
-    if (format === "custom")
-      return (
-        <div>
-          <label className="block text-sm font-medium mb-1 text-[var(--color-text)]">
-            Write Your Proof
-          </label>
-          <textarea
-            rows={6}
-            value={reflection}
-            onChange={(e) => setReflection(e.target.value)}
-            placeholder="Write or paste your proof here..."
-            className="w-full border border-[var(--color-border)] bg-[var(--color-bg)] text-[var(--color-text)] rounded-[var(--radius-button)] px-3 py-2 text-sm focus:ring-2 focus:ring-[var(--color-candidate-light)]"
-          />
-        </div>
-      );
-
-    // default: link input
     return (
       <div>
-        <label className="block text-sm font-medium mb-1 text-[var(--color-text)]">
-          Submission Link ({task.submission_format || "URL"})
-        </label>
-        <input
-          type="url"
-          required
-          value={link}
-          onChange={(e) => setLink(e.target.value)}
-          placeholder="Paste your submission link (e.g., Website, Figma, Docs, Drive, etc.)"
-          className="w-full border border-[var(--color-border)] bg-[var(--color-bg)] text-[var(--color-text)] rounded-[var(--radius-button)] px-3 py-2 text-sm focus:ring-2 focus:ring-[var(--color-candidate-light)]"
-        />
+        {/* 💡 Recommended platform hint */}
+        {task.recommended_platform && (
+          <p className="text-xs text-[var(--color-text-muted)] mb-3">
+            💡 The employer recommends submitting this proof using{" "}
+            <span className="font-medium text-[var(--color-text)]">
+              {task.recommended_platform}
+            </span>
+            .
+          </p>
+        )}
+        {/* {task.recommended_platform && (
+          <p className="text-xs text-[var(--color-text-muted)] mb-2">
+            💡 Recommended:{" "}
+            <span className="font-medium text-[var(--color-text)]">
+              {task.recommended_platform}
+            </span>
+          </p>
+        )} */}
+
+        {format === "file" ? (
+          /* 🗂 File upload */
+          <div>
+            <label className="block text-sm font-medium mb-1 text-[var(--color-text)]">
+              Upload File (PDF, Image, etc.)
+            </label>
+            <div
+              onClick={() => fileInputRef.current?.click()}
+              className="flex flex-col items-center justify-center border border-[var(--color-border)] border-dashed bg-[var(--color-bg)] rounded-[var(--radius-button)] px-3 py-6 cursor-pointer hover:bg-[var(--color-bg-hover)] transition"
+            >
+              <Upload
+                size={20}
+                className="text-[var(--color-text-muted)] mb-2"
+              />
+              <span className="text-sm text-[var(--color-text-muted)]">
+                {file ? file.name : "Click to upload or drag a file here"}
+              </span>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".pdf,.jpg,.png,.jpeg,.doc,.docx,.zip"
+                className="hidden"
+                onChange={(e) => {
+                  const selected = e.target.files?.[0];
+                  setFile(selected || null);
+                  if (selected)
+                    toast.success(`✅ ${selected.name} ready for upload`);
+                }}
+              />
+            </div>
+          </div>
+        ) : format === "text" ? (
+          /* ✍️ Text entry */
+          <div>
+            <label className="block text-sm font-medium mb-1 text-[var(--color-text)]">
+              Write Your Proof
+            </label>
+            <textarea
+              rows={6}
+              value={reflection}
+              onChange={(e) => setReflection(e.target.value)}
+              placeholder="Write or paste your proof here..."
+              className="w-full border border-[var(--color-border)] bg-[var(--color-bg)] text-[var(--color-text)] rounded-[var(--radius-button)] px-3 py-2 text-sm focus:ring-2 focus:ring-[var(--color-candidate-light)]"
+            />
+          </div>
+        ) : format === "mixed" ? (
+          /* 🧩 Mixed mode */
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium mb-1 text-[var(--color-text)]">
+                Proof Link
+              </label>
+              <input
+                type="url"
+                value={link}
+                onChange={(e) => setLink(e.target.value)}
+                placeholder="Paste your proof link (GitHub, Figma, Notion, etc.)"
+                className="w-full border border-[var(--color-border)] bg-[var(--color-bg)] text-[var(--color-text)] rounded-[var(--radius-button)] px-3 py-2 text-sm focus:ring-2 focus:ring-[var(--color-candidate-light)]"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1 text-[var(--color-text)]">
+                Upload File (optional)
+              </label>
+              <input
+                ref={fileInputRef}
+                type="file"
+                className="w-full text-sm"
+                onChange={(e) => setFile(e.target.files?.[0] || null)}
+              />
+            </div>
+          </div>
+        ) : (
+          /* 🔗 Default link input */
+          <div>
+            <label className="block text-sm font-medium mb-1 text-[var(--color-text)]">
+              Submission Link
+            </label>
+            <input
+              type="url"
+              required
+              value={link}
+              onChange={(e) => setLink(e.target.value)}
+              placeholder="Paste your submission link (e.g., Website, GitHub, Figma, Docs, etc.)"
+              className="w-full border border-[var(--color-border)] bg-[var(--color-bg)] text-[var(--color-text)] rounded-[var(--radius-button)] px-3 py-2 text-sm focus:ring-2 focus:ring-[var(--color-candidate-light)]"
+            />
+          </div>
+        )}
       </div>
     );
   };
@@ -169,6 +230,12 @@ export default function CandidateProofWorkspace() {
         <h1 className="heading-lg text-[var(--color-text)] mb-1">
           {task.title}
         </h1>
+        <p className="text-xs text-[var(--color-text-muted)] mt-2">
+          Status:{" "}
+          <span className="font-medium text-[var(--color-candidate-light)]">
+            In Progress
+          </span>
+        </p>
         <p className="body-base text-[var(--color-text-muted)] max-w-2xl mx-auto">
           {task.description || "Complete the proof as described below."}
         </p>
@@ -190,8 +257,8 @@ export default function CandidateProofWorkspace() {
             />
             <InfoRow
               icon={<Package size={14} />}
-              label="Submission Format"
-              value={task.submission_format || "Link / File"}
+              label="Submission Type"
+              value={task.submission_type || "Link"}
             />
             <InfoRow
               icon={<Brain size={14} />}
@@ -235,8 +302,8 @@ export default function CandidateProofWorkspace() {
           <form onSubmit={handleSubmit} className="space-y-5">
             {renderSubmissionInput()}
 
-            {/* ✏️ Reflection (always optional) */}
-            {!task.submission_format?.toLowerCase().includes("custom") && (
+            {/* ✏️ Reflection (optional for all non-text types) */}
+            {task.submission_type !== "text" && (
               <div>
                 <label className="block text-sm font-medium mb-1 text-[var(--color-text)]">
                   Reflection (optional)
