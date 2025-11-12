@@ -4,7 +4,6 @@ import toast from "react-hot-toast";
 import { supabase } from "@/lib/supabaseClient";
 import { useAuth } from "@/hooks/useAuth";
 import type { SessionUser } from "@/context/AuthContext";
-import type { ProofTask } from "@/types/shared";
 import {
   Loader2,
   Clock,
@@ -18,17 +17,7 @@ import {
   Shield,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-
-/* ─── Job type ─────────────────────────────────────────────── */
-interface Job {
-  id: string;
-  title: string;
-  company?: string | null;
-  location?: string | null;
-  description?: string | null;
-  paid?: boolean | null;
-  proof_tasks?: ProofTask[];
-}
+import type { Job } from "@/types/job";
 
 /* ─── Component ─────────────────────────────────────────────── */
 export default function JobDetailPage() {
@@ -135,11 +124,20 @@ export default function JobDetailPage() {
         <p className="body-base leading-relaxed text-[var(--color-text-muted)] whitespace-pre-line">
           {job.description || "No description provided."}
         </p>
-        <div className="flex items-center gap-3 mt-4 text-sm text-[var(--color-text-muted)]">
+        <div className="flex flex-wrap items-center gap-3 mt-4 text-sm text-[var(--color-text-muted)]">
           <span>📍 {job.location || "Remote"}</span>
+
           {job.paid && (
             <span className="bg-[var(--color-candidate-light)] text-[var(--color-candidate-dark)] px-2 py-1 rounded-[var(--radius-button)] text-xs font-medium">
               Paid Opportunity
+            </span>
+          )}
+
+          {job.show_salary_range && job.salary_min && job.salary_max && (
+            <span className="bg-[var(--color-surface-hover)] text-[var(--color-text)] px-2 py-1 rounded-[var(--radius-button)] text-xs font-medium">
+              💰 {job.salary_min.toLocaleString()} –{" "}
+              {job.salary_max.toLocaleString()} {job.payment_currency ?? "EUR"}{" "}
+              /{job.pay_period ?? "month"}
             </span>
           )}
         </div>
