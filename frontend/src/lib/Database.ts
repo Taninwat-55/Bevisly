@@ -137,8 +137,14 @@ export type Database = {
           job_type: string | null
           location: string | null
           paid: boolean | null
+          pay_period: string | null
+          payment_amount: number | null
+          payment_currency: string | null
           required_skills: string[] | null
+          salary_max: number | null
+          salary_min: number | null
           salary_range: string | null
+          show_salary_range: boolean | null
           status: string | null
           title: string
           work_mode: string | null
@@ -156,8 +162,14 @@ export type Database = {
           job_type?: string | null
           location?: string | null
           paid?: boolean | null
+          pay_period?: string | null
+          payment_amount?: number | null
+          payment_currency?: string | null
           required_skills?: string[] | null
+          salary_max?: number | null
+          salary_min?: number | null
           salary_range?: string | null
+          show_salary_range?: boolean | null
           status?: string | null
           title: string
           work_mode?: string | null
@@ -175,8 +187,14 @@ export type Database = {
           job_type?: string | null
           location?: string | null
           paid?: boolean | null
+          pay_period?: string | null
+          payment_amount?: number | null
+          payment_currency?: string | null
           required_skills?: string[] | null
+          salary_max?: number | null
+          salary_min?: number | null
           salary_range?: string | null
+          show_salary_range?: boolean | null
           status?: string | null
           title?: string
           work_mode?: string | null
@@ -380,6 +398,7 @@ export type Database = {
       }
       submissions: {
         Row: {
+          completed_at: string | null
           created_at: string | null
           employer_notes: string | null
           hiring_stage: string | null
@@ -391,6 +410,7 @@ export type Database = {
           resume_metadata: Json | null
           resume_url: string | null
           score: number | null
+          started_at: string | null
           status: string | null
           submission_link: string | null
           updated_at: string | null
@@ -398,6 +418,7 @@ export type Database = {
           user_id: string | null
         }
         Insert: {
+          completed_at?: string | null
           created_at?: string | null
           employer_notes?: string | null
           hiring_stage?: string | null
@@ -409,6 +430,7 @@ export type Database = {
           resume_metadata?: Json | null
           resume_url?: string | null
           score?: number | null
+          started_at?: string | null
           status?: string | null
           submission_link?: string | null
           updated_at?: string | null
@@ -416,6 +438,7 @@ export type Database = {
           user_id?: string | null
         }
         Update: {
+          completed_at?: string | null
           created_at?: string | null
           employer_notes?: string | null
           hiring_stage?: string | null
@@ -427,6 +450,7 @@ export type Database = {
           resume_metadata?: Json | null
           resume_url?: string | null
           score?: number | null
+          started_at?: string | null
           status?: string | null
           submission_link?: string | null
           updated_at?: string | null

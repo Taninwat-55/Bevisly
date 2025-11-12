@@ -268,3 +268,77 @@ export async function getSubmissionsByJob(job_id: string): Promise<EmployerSubmi
   if (error) throw error;
   return data as EmployerSubmission[];
 }
+
+export async function startProof(job_id: string, proof_task_id?: string) {
+  const user = (await supabase.auth.getUser()).data.user;
+  if (!user) throw new Error("Not authenticated");
+
+  let query = supabase
+    .from("submissions")
+    .select("id, status, started_at")
+    .eq("user_id", user.id);
+
+  // ✅ only apply the filter if proof_task_id is defined
+  if (proof_task_id) query = query.eq("proof_task_id", proof_task_id);
+
+  const { data: existing } = await query.maybeSingle();
+
+  if (existing) {
+    if (existing.status === "not_started" || existing.status === "in_progress") {
+      await supabase
+        .from("submissions")
+        .update({
+          status: "in_progress",
+          started_at: existing.started_at ?? new Date().toISOString(),
+        })
+        .eq("id", existing.id);
+    }
+    return existing.id;
+  }
+
+  // 🆕 Insert a new submission row
+  const { data, error } = await supabase
+    .from("submissions")
+    .insert([
+      {
+        user_id: user.id,
+        job_id,
+        proof_task_id: proof_task_id ?? null, // fine here, insert accepts null
+        status: "in_progress",
+        started_at: new Date().toISOString(),
+      },
+    ])
+    .select("id")
+    .single();
+
+  if (error) throw error;
+  return data.id;
+}
+
+/**
+ * ✅ Complete submission + mark submitted
+ */
+export async function completeProof({
+  job_id,
+  submission_link,
+  reflection,
+  file,
+}: {
+  job_id: string;
+  submission_link?: string;
+  reflection?: string;
+  file?: File | null;
+}) {
+  const result = await submitProof({ job_id, submission_link, reflection, file });
+
+  // Mark as completed
+  await supabase
+    .from("submissions")
+    .update({
+      status: "submitted",
+      completed_at: new Date().toISOString(),
+    })
+    .eq("id", result.id);
+
+  return result;
+}

@@ -11,6 +11,8 @@ export type ProofTask = {
   description?: string | null;
   expected_time?: string | null;
   submission_format?: string | null;
+  submission_type?: "link" | "file" | "text" | "mixed";
+  recommended_platform?: string | null;
   ai_tools_allowed?: boolean | null;
 };
 
