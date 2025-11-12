@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { supabase } from "@/lib/supabaseClient";
 import { useAuth } from "@/hooks/useAuth";
 import { Info, CreditCard, Target, Briefcase, CheckCircle } from "lucide-react";
+import type { DashboardProof } from "@/types";
 
 export default function CandidateDashboard() {
   const { user } = useAuth();
@@ -103,6 +104,14 @@ export default function CandidateDashboard() {
           />
         </div>
       </section>
+      {/* 📜 Active Proofs Section */}
+      <section className="mt-14">
+        <h2 className="flex items-center gap-2 heading-md mb-4">
+          <CheckCircle size={20} /> My Active Proofs
+        </h2>
+
+        <ActiveProofs userId={user?.id} />
+      </section>
     </div>
   );
 }
@@ -180,5 +189,80 @@ function LinkCard({
         <p className="text-sm text-[var(--color-text-muted)]">{desc}</p>
       </div>
     </Link>
+  );
+}
+
+function ActiveProofs({ userId }: { userId?: string }) {
+  const [proofs, setProofs] = useState<DashboardProof[]>([]);
+
+  useEffect(() => {
+    if (!userId) return;
+
+    supabase
+      .from("submissions")
+      .select(`
+        id,
+        status,
+        created_at,
+        proof_tasks ( id, title ),
+        jobs ( title, company )
+      `)
+      .eq("user_id", userId)
+      .order("created_at", { ascending: false })
+      .then(({ data }) => setProofs(data ?? []));
+  }, [userId]);
+
+  if (!proofs.length)
+    return (
+      <p className="text-sm text-[var(--color-text-muted)]">
+        You haven’t started any proofs yet.
+      </p>
+    );
+
+  return (
+    <div className="space-y-3">
+      {proofs.map((p) => {
+        const proofTaskId = p.proof_tasks?.id;
+        const status = p.status || "not_started";
+
+        const statusClasses =
+          status === "submitted"
+            ? "bg-green-100 text-green-700"
+            : status === "in_progress"
+            ? "bg-yellow-100 text-yellow-700"
+            : status === "reviewed"
+            ? "bg-blue-100 text-blue-700"
+            : "bg-gray-100 text-gray-600";
+
+        return (
+          <Link
+            key={p.id}
+            to={`/candidate/proof/${proofTaskId}`}
+            className="flex items-center justify-between bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-card)] px-4 py-3 shadow-[var(--shadow-soft)] hover:shadow-[var(--shadow-hover)] hover:-translate-y-[1px] transition"
+          >
+            <div>
+              <p className="font-medium text-[var(--color-text)]">
+                {p.proof_tasks?.title || "Untitled Task"}
+              </p>
+              <p className="text-xs text-[var(--color-text-muted)]">
+                {p.jobs?.title} @ {p.jobs?.company}
+              </p>
+            </div>
+
+            <span
+              className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${statusClasses}`}
+            >
+              {status === "submitted"
+                ? "Submitted"
+                : status === "in_progress"
+                ? "In Progress"
+                : status === "reviewed"
+                ? "Reviewed"
+                : "Not Started"}
+            </span>
+          </Link>
+        );
+      })}
+    </div>
   );
 }
