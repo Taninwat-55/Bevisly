@@ -11,7 +11,7 @@ import RequestResetPage from "@/pages/auth/RequestResetPage";
 
 // --- Candidate pages
 import CandidateLayout from "@/layout/CandidateLayout";
-import CandidateHome from "@/pages/candidate/CandidateHome";
+import CandidateHome from "@/pages/candidate/CandidateOverview";
 import CandidateDashboard from "@/pages/candidate/CandidateDashboard";
 import CandidateProofWorkspace from "@/pages/candidate/CandidateProofWorkspace";
 import CandidateFeedbackView from "@/pages/candidate/CandidateFeedbackView";
@@ -19,7 +19,7 @@ import CandidateProfile from "@/pages/candidate/CandidateProfile";
 
 // --- Employer pages
 import EmployerLayout from "@/layout/EmployerLayout";
-import EmployerHome from "@/pages/employer/EmployerHome";
+import EmployerHome from "@/pages/employer/EmployerOverview";
 import EmployerDashboard from "@/pages/employer/EmployerDashboard";
 import EmployerPostJob from "@/pages/employer/EmployerPostJob";
 import EmployerEditJob from "@/pages/employer/EmployerEditJob";

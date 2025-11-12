@@ -37,6 +37,11 @@ bevis-mvp/
 ├── frontend/
 │ ├── src/
 │ │ ├── components/ # Shared UI (Navbar, Sidebar, etc.)
+│ │ │ ├── jobs/
+│ │ │ │ ├── JobDetailsSection.tsx
+│ │ │ │ ├── JobInfosSection.tsx
+│ │ │ │ ├── ProofTasksSection.tsx
+│ │ │ │ ├── SubmitSection.tsx
 │ │ │ ├── landing/
 │ │ │ │ ├── FeaturedEmployerSection.tsx
 │ │ │ │ ├── FinalCTASection.tsx
@@ -66,8 +71,8 @@ bevis-mvp/
 │ │ │ │ ├── Notify.tsx
 │ │ │ │ ├── ScrollToTop.tsx
 │ │ │ │ ├── Toast.tsx
+│ │ │ │ ├── UserMenu.tsx
 │ │ │ ├── Navbar.tsx
-│ │ │ ├── ProofCardsGrid.tsx
 │ │ │ ├── Sidebar.tsx
 │ │ ├── context/ # AuthContext + AuthProvider
 │ │ │ ├── AuthContext.tsx
@@ -87,6 +92,7 @@ bevis-mvp/
 │ │ ├── lib/ # Supabase API functions
 │ │ │ ├── api/
 │ │ │ │ ├── admin.ts
+│ │ │ │ ├── employer.ts
 │ │ │ │ ├── feedback.ts
 │ │ │ │ ├── index.ts
 │ │ │ │ ├── jobs.ts
@@ -112,22 +118,22 @@ bevis-mvp/
 │ │ │ ├── candidate/ # Candidate pages (C1–C6)
 │ │ │ │ ├── CandidateDashboard.tsx
 │ │ │ │ ├── CandidateFeedbackView.tsx
-│ │ │ │ ├── CandidateHome.tsx
-│ │ │ │ ├── CandidateJobDetail.tsx
-│ │ │ │ ├── CandidateJobListings.tsx
+│ │ │ │ ├── CandidateOverview.tsx
 │ │ │ │ ├── CandidateProfile.tsx
 │ │ │ │ ├── CandidateProofWorkspace.tsx
 │ │ │ ├── employer/ # Employer pages (C1–C6)
 │ │ │ │ ├── EmployerDashboard.tsx
+│ │ │ │ ├── EmployerEditJob.tsx
 │ │ │ │ ├── EmployerFeedbackSuccess.tsx
-│ │ │ │ ├── EmployerHome.tsx
-│ │ │ │ ├── EmployerJobDetail.tsx
-│ │ │ │ ├── EmployerJobListings.tsx
+│ │ │ │ ├── EmployerOverview.tsx
 │ │ │ │ ├── EmployerPostJob.tsx
 │ │ │ │ ├── EmployerReviewProof.tsx
 │ │ │ │ ├── EmployerSubmissions.tsx
 │ │ │ │ ├── EmployerTalentManager.tsx
 │ │ │ │ ├── EmployerTalentPool.tsx
+│ │ │ ├── landing/
+│ │ │ │ ├── JobDetailPage.tsx
+│ │ │ │ ├── JobListingPage.tsx
 │ │ │ ├── landing/
 │ │ │ │ ├── LandingPage.tsx
 │ │ │ ├── LearnMore/
@@ -136,13 +142,9 @@ bevis-mvp/
 │ │ │ │ ├── InfoSections.tsx
 │ │ │ │ ├── LearnMorePage.tsx
 │ │ │ ├── shared/
+│ │ │ │ ├── AboutPage.tsx.
 │ │ │ │ ├── UserSettings.tsx.
-│ │ │ ├── AboutPage.tsx
-│ │ │ ├── JobListingPage.tsx
-│ │ │ ├── JobDetailPage.tsx
 │ │ │ ├── PublicJCandidateProfilePage.tsx
-│ │ │ ├── PublicJobDetailPage.tsx
-│ │ │ ├── PublicJobsPage.tsx
 │ │ │ ├── PublicLeaderboard.tsx
 │ │ └── routes/ # Protected routes + layout wrappers
 │ │ │ ├── ProtectedRoute.tsx
@@ -152,6 +154,7 @@ bevis-mvp/
 │ │ │ ├── candidate.ts
 │ │ │ ├── employer.ts
 │ │ │ ├── index.ts
+│ │ │ ├── job.ts
 │ │ │ ├── shared.ts
 │ └── index.css, main.tsx # Tailwind theme + root app (App.tsx)
 │
