@@ -16,21 +16,7 @@ import JobInfoSection from "@/components/jobs/JobInfoSection";
 import JobDetailsSection from "@/components/jobs/JobDetailsSection";
 import ProofTasksSection from "@/components/jobs/ProofTasksSection";
 import SubmitSection from "@/components/jobs/SubmitSection";
-
-// 🧾 Frontend-only relaxed form type
-export interface EmployerJobFormValues {
-  id?: string;
-  title: string;
-  description: string;
-  company: string;
-  location: string;
-  paid: boolean;
-  salary_range?: string;
-  job_type?: string;
-  department?: string;
-  work_mode?: string;
-  proof_tasks: ProofTask[];
-}
+import type { EmployerJobFormValues } from "@/types/employer";
 
 interface EmployerJobFormProps {
   mode?: "create" | "edit";
@@ -84,7 +70,12 @@ export default function EmployerJobForm({
     company: defaultValues?.company ?? "",
     location: defaultValues?.location ?? "",
     paid: defaultValues?.paid ?? false,
-    salary_range: defaultValues?.salary_range ?? "",
+    payment_amount: defaultValues?.payment_amount ?? null,
+    payment_currency: defaultValues?.payment_currency ?? "EUR",
+    show_salary_range: defaultValues?.show_salary_range ?? false,
+    salary_min: defaultValues?.salary_min ?? null,
+    salary_max: defaultValues?.salary_max ?? null,
+    pay_period: defaultValues?.pay_period ?? "monthly",
     job_type: defaultValues?.job_type ?? "Internship",
     department: defaultValues?.department ?? "Frontend",
     work_mode: defaultValues?.work_mode ?? "Remote",

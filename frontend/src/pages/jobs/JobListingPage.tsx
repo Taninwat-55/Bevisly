@@ -1,4 +1,3 @@
-// src/pages/jobs/JobListingPage.tsx
 /**
  * 🧭 JobListingPage.tsx
  * Unified job listing for candidates & employers.
@@ -24,16 +23,15 @@ import {
 import toast from "react-hot-toast";
 
 import type { SessionUser } from "@/context/AuthContext";
-import type { ProofTask, CandidateJob, EmployerJob } from "@/types";
+import type { Job } from "@/types/job"; // ✅ unified global type
+import type { ProofTask } from "@/types";
 
 import BackButton from "@/components/ui/BackButton";
 import MultiSelectFilter from "@/components/ui/MultiSelectFilter";
 import FilterChips from "@/components/ui/FilterChips";
 
 /* ─── Helpers ─────────────────────────────── */
-type JobListItem =
-  | (CandidateJob & { proof_tasks?: ProofTask[] })
-  | (EmployerJob & { proof_tasks?: ProofTask[] });
+type JobListItem = Job & { proof_tasks?: ProofTask[] };
 
 function hasProofTasks(
   job: JobListItem
@@ -51,9 +49,7 @@ export default function JobListingPage() {
   const { jobs: publicJobs, loading, error } = useJobs();
 
   // Employer jobs
-  const [employerJobs, setEmployerJobs] = useState<
-    (EmployerJob & { proof_tasks?: ProofTask[] })[]
-  >([]);
+  const [employerJobs, setEmployerJobs] = useState<JobListItem[]>([]);
   const [employerLoading, setEmployerLoading] = useState(false);
 
   /* ─── Filters ─────────────────────────────── */
@@ -100,7 +96,7 @@ export default function JobListingPage() {
 
   const isLoading = loading || employerLoading;
 
-  /* ─── Unique filter options (fix string|null issue) ─────────────────────────────── */
+  /* ─── Unique filter options ─────────────────────────────── */
   const allCompanies = useMemo(
     () =>
       Array.from(
@@ -119,11 +115,7 @@ export default function JobListingPage() {
 
   const allCategories = useMemo(() => {
     const departments = jobs
-      .map((j) =>
-        "department" in j && typeof j.department === "string"
-          ? j.department
-          : undefined
-      )
+      .map((j) => j.department ?? undefined)
       .filter((d): d is string => !!d);
 
     const proofTitles = jobs.flatMap((j) =>
@@ -137,6 +129,7 @@ export default function JobListingPage() {
   const filteredJobs = useMemo(() => {
     return jobs.filter((job) => {
       const proof = hasProofTasks(job) ? job.proof_tasks[0] : undefined;
+
       const textMatch =
         job.title.toLowerCase().includes(debouncedQuery.toLowerCase()) ||
         job.company?.toLowerCase().includes(debouncedQuery.toLowerCase()) ||
@@ -437,10 +430,19 @@ export default function JobListingPage() {
               )}
 
               {proof?.expected_time && (
-                <div className="flex items-center gap-1 text-xs text-[var(--color-text-muted)] mb-4">
+                <div className="flex items-center gap-1 text-xs text-[var(--color-text-muted)] mb-2">
                   <Clock size={13} className="opacity-80" /> Expected:{" "}
                   {proof.expected_time}
                 </div>
+              )}
+
+              {/* 💰 Salary Range */}
+              {job.show_salary_range && job.salary_min && job.salary_max && (
+                <p className="text-sm text-[var(--color-text)] font-medium mb-3">
+                  💰 {job.salary_min.toLocaleString()} –{" "}
+                  {job.salary_max.toLocaleString()}{" "}
+                  {job.payment_currency ?? "EUR"} /{job.pay_period ?? "month"}
+                </p>
               )}
 
               {role === "employer" ? (

@@ -17,13 +17,14 @@ export default function JobInfoSection({
   errors = {},
 }: JobInfoSectionProps) {
   return (
-    <section>
-      <h2 className="text-base font-semibold text-[var(--color-text)] mb-4">
+    <section className="space-y-8">
+      {/* ─── Header ─── */}
+      <h2 className="text-base font-semibold text-[var(--color-text)]">
         Job Information
       </h2>
 
-      {/* Grid layout for main fields */}
-      <div className="grid gap-5 sm:grid-cols-2">
+      {/* ─── Basic Info ─── */}
+      <div className="grid sm:grid-cols-2 gap-6">
         {/* Job Title */}
         <div>
           <label className="block text-sm font-medium text-[var(--color-text)] mb-1">
@@ -33,7 +34,6 @@ export default function JobInfoSection({
             type="text"
             value={values.title ?? ""}
             onChange={(e) => onChange("title", e.target.value)}
-            aria-invalid={!!errors.title}
             placeholder="e.g. Junior Frontend Developer"
             className={`w-full border rounded-[var(--radius-input)] p-2 bg-[var(--color-bg)] text-[var(--color-text)] focus:outline-none focus:ring-2 ${
               errors.title
@@ -42,7 +42,7 @@ export default function JobInfoSection({
             }`}
           />
           {errors.title && (
-            <p className="text-[var(--color-error)] text-xs mt-1">
+            <p className="text-xs text-[var(--color-error)] mt-1">
               {errors.title}
             </p>
           )}
@@ -57,7 +57,6 @@ export default function JobInfoSection({
             type="text"
             value={values.company ?? ""}
             onChange={(e) => onChange("company", e.target.value)}
-            aria-invalid={!!errors.company}
             placeholder="e.g. Bevis Labs"
             className={`w-full border rounded-[var(--radius-input)] p-2 bg-[var(--color-bg)] text-[var(--color-text)] focus:outline-none focus:ring-2 ${
               errors.company
@@ -66,15 +65,15 @@ export default function JobInfoSection({
             }`}
           />
           {errors.company && (
-            <p className="text-[var(--color-error)] text-xs mt-1">
+            <p className="text-xs text-[var(--color-error)] mt-1">
               {errors.company}
             </p>
           )}
         </div>
       </div>
 
-      {/* Location + Paid */}
-      <div className="grid gap-5 sm:grid-cols-2 mt-5">
+      {/* ─── Location & Paid Toggle ─── */}
+      <div className="grid sm:grid-cols-2 gap-6 items-start">
         <div>
           <label className="block text-sm font-medium text-[var(--color-text)] mb-1">
             Location
@@ -83,7 +82,6 @@ export default function JobInfoSection({
             type="text"
             value={values.location ?? ""}
             onChange={(e) => onChange("location", e.target.value)}
-            aria-invalid={!!errors.location}
             placeholder="e.g. Copenhagen, Remote"
             className={`w-full border rounded-[var(--radius-input)] p-2 bg-[var(--color-bg)] text-[var(--color-text)] focus:outline-none focus:ring-2 ${
               errors.location
@@ -92,34 +90,130 @@ export default function JobInfoSection({
             }`}
           />
           {errors.location && (
-            <p className="text-[var(--color-error)] text-xs mt-1">
+            <p className="text-xs text-[var(--color-error)] mt-1">
               {errors.location}
             </p>
           )}
         </div>
 
-        <div className="flex items-center mt-6">
+        {/* Paid toggle */}
+        <div className="flex items-center sm:mt-8">
           <input
+            id="paid"
             type="checkbox"
             checked={values.paid ?? false}
             onChange={(e) => onChange("paid", e.target.checked)}
             className="mr-2 accent-[var(--color-employer-dark)]"
           />
-          <label className="text-sm font-medium text-[var(--color-text)]">
+          <label
+            htmlFor="paid"
+            className="text-sm font-medium text-[var(--color-text)]"
+          >
             Paid Position
           </label>
         </div>
       </div>
 
-      {/* Description */}
-      <div className="mt-5">
+      {/* ─── Proof Task Payment ─── */}
+      {values.paid && (
+        <div className="space-y-3 border-t border-[var(--color-border)] pt-6">
+          <h3 className="text-sm font-semibold text-[var(--color-text)]">
+            Proof Task Payment
+          </h3>
+          <div className="grid sm:grid-cols-2 gap-4">
+            <input
+              type="number"
+              placeholder="Amount (e.g., 200)"
+              value={values.payment_amount ?? ""}
+              onChange={(e) =>
+                onChange("payment_amount", Number(e.target.value))
+              }
+              className="border border-[var(--color-border)] rounded-[var(--radius-input)] p-2 bg-[var(--color-bg)] text-[var(--color-text)]"
+            />
+            <select
+              value={values.payment_currency ?? "EUR"}
+              onChange={(e) => onChange("payment_currency", e.target.value)}
+              className="border border-[var(--color-border)] rounded-[var(--radius-input)] p-2 bg-[var(--color-bg)] text-[var(--color-text)]"
+            >
+              <option value="EUR">EUR</option>
+              <option value="SEK">SEK</option>
+              <option value="DKK">DKK</option>
+              <option value="USD">USD</option>
+              <option value="NOK">NOK</option>
+            </select>
+          </div>
+        </div>
+      )}
+
+      {/* ─── Salary Range Toggle ─── */}
+      <div className="flex items-center border-t border-[var(--color-border)] pt-6">
+        <input
+          id="show_salary_range"
+          type="checkbox"
+          checked={values.show_salary_range ?? false}
+          onChange={(e) => onChange("show_salary_range", e.target.checked)}
+          className="mr-2 accent-[var(--color-employer-dark)]"
+        />
+        <label
+          htmlFor="show_salary_range"
+          className="text-sm font-medium text-[var(--color-text)]"
+        >
+          Display salary range
+        </label>
+      </div>
+
+      {/* ─── Salary Range Fields ─── */}
+      {/* ─── Salary Range Fields ─── */}
+      {values.show_salary_range && (
+        <div className="space-y-3">
+          <div className="grid sm:grid-cols-3 gap-4">
+            <input
+              type="number"
+              placeholder="Min salary (e.g., 30000)"
+              value={values.salary_min ?? ""}
+              onChange={(e) => onChange("salary_min", Number(e.target.value))}
+              className="border border-[var(--color-border)] rounded-[var(--radius-input)] p-2 bg-[var(--color-bg)] text-[var(--color-text)]"
+            />
+            <input
+              type="number"
+              placeholder="Max salary (e.g., 45000)"
+              value={values.salary_max ?? ""}
+              onChange={(e) => onChange("salary_max", Number(e.target.value))}
+              className="border border-[var(--color-border)] rounded-[var(--radius-input)] p-2 bg-[var(--color-bg)] text-[var(--color-text)]"
+            />
+            <select
+              value={values.payment_currency ?? "EUR"}
+              onChange={(e) => onChange("payment_currency", e.target.value)}
+              className="border border-[var(--color-border)] rounded-[var(--radius-input)] p-2 bg-[var(--color-bg)] text-[var(--color-text)]"
+            >
+              <option value="EUR">EUR</option>
+              <option value="SEK">SEK</option>
+              <option value="DKK">DKK</option>
+              <option value="USD">USD</option>
+              <option value="NOK">NOK</option>
+            </select>
+          </div>
+
+          <select
+            value={values.pay_period ?? "monthly"}
+            onChange={(e) => onChange("pay_period", e.target.value)}
+            className="border border-[var(--color-border)] rounded-[var(--radius-input)] p-2 bg-[var(--color-bg)] text-[var(--color-text)]"
+          >
+            <option value="hourly">Hourly</option>
+            <option value="monthly">Monthly</option>
+            <option value="yearly">Yearly</option>
+          </select>
+        </div>
+      )}
+
+      {/* ─── Description ─── */}
+      <div className="border-t border-[var(--color-border)] pt-6">
         <label className="block text-sm font-medium text-[var(--color-text)] mb-1">
           Description
         </label>
         <textarea
           value={values.description ?? ""}
           onChange={(e) => onChange("description", e.target.value)}
-          aria-invalid={!!errors.description}
           rows={5}
           placeholder="Write a short summary of the position or project."
           className={`w-full border rounded-[var(--radius-input)] p-2 bg-[var(--color-bg)] text-[var(--color-text)] focus:outline-none focus:ring-2 ${
@@ -128,9 +222,11 @@ export default function JobInfoSection({
               : "border-[var(--color-border)] focus:ring-[var(--color-employer)]"
           }`}
         />
-        {/* <p className="text-xs text-[var(--color-text-muted)] mt-1">
-          Explain what candidates will learn or achieve by completing this job.
-        </p> */}
+        {errors.description && (
+          <p className="text-xs text-[var(--color-error)] mt-1">
+            {errors.description}
+          </p>
+        )}
       </div>
     </section>
   );
