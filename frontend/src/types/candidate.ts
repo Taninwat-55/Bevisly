@@ -47,3 +47,23 @@ export type CandidateFeedbackEntry = {
   proof_tasks: { title: string | null } | null;
   feedback: CandidateFeedback[];
 };
+
+export type DashboardProof = {
+  id: string;
+  status:
+    | "not_started"
+    | "in_progress"
+    | "submitted"
+    | "reviewed"
+    | string
+    | null;
+  created_at: string | null; 
+  proof_tasks?: {
+    id: string;
+    title: string;
+  } | null;
+  jobs?: {
+    title: string | null; 
+    company: string | null; 
+  } | null;
+};

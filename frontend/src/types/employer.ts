@@ -1,4 +1,5 @@
 // src/types/employer.ts
+import type { ProofTask } from "./shared";
 
 // Type representing a single job posted by an employer.
 export type EmployerJob = {
@@ -8,12 +9,17 @@ export type EmployerJob = {
   company: string | null;
   location: string | null;
   paid: boolean | null;
-  created_at: string | null;
-  featured?: boolean | null;
-  salary_range?: string | null;
+  payment_amount?: number | null;
+  payment_currency?: string | null;
+  show_salary_range?: boolean | null;
+  salary_min?: number | null;
+  salary_max?: number | null;
+  pay_period?: "hourly" | "monthly" | "yearly" | null;
   job_type?: string | null;
   department?: string | null;
   work_mode?: string | null;
+  created_at: string | null;
+  featured?: boolean | null;
 };
 
 /**
@@ -75,4 +81,24 @@ export type EmployerStats = {
   avgScore: number | null;
   submissions: EmployerRecentSubmission[];
 };
+
+
+export interface EmployerJobFormValues {
+  id?: string;
+  title: string;
+  description: string;
+  company: string;
+  location: string;
+  paid: boolean;
+  payment_amount?: number | null;
+  payment_currency?: string | null;
+  show_salary_range?: boolean; // toggle for salary visibility
+  salary_min?: number | null;
+  salary_max?: number | null;
+  pay_period?: "hourly" | "monthly" | "yearly" | null;
+  job_type?: string;
+  department?: string;
+  work_mode?: string;
+  proof_tasks: ProofTask[];
+}
 

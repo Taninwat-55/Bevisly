@@ -1,27 +1,9 @@
-//. src/hooks/useJobs.ts
 import { useEffect, useState } from "react";
 import { supabase } from "../lib/supabaseClient";
-
-export interface Job {
-  id: string;
-  title: string;
-  company?: string | null;
-  location?: string | null;
-  description?: string | null;
-  paid?: boolean | null;
-  proof_tasks?: {
-    id: string;
-    title: string;
-    description?: string | null;
-    expected_time?: string | null;
-    submission_format?: string | null;
-    ai_tools_allowed?: boolean | null;
-    duration_minutes?: number | null;
-  }[];
-}
+import type { CandidateJob } from "@/types";
 
 export function useJobs() {
-  const [jobs, setJobs] = useState<Job[]>([]);
+  const [jobs, setJobs] = useState<CandidateJob[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -34,8 +16,13 @@ export function useJobs() {
           title,
           company,
           location,
-          paid,
           description,
+          paid,
+          show_salary_range,
+          salary_min,
+          salary_max,
+          pay_period,
+          payment_currency,
           proof_tasks (
             id,
             title,
@@ -49,7 +36,7 @@ export function useJobs() {
         .order("created_at", { ascending: false });
 
       if (error) setError(error.message);
-      else setJobs((data as unknown as Job[]) || []);
+      else setJobs((data as unknown as CandidateJob[]) || []);
       setLoading(false);
     };
 
