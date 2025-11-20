@@ -59,21 +59,14 @@ export type Database = {
             foreignKeyName: "feedback_employer_id_fkey"
             columns: ["employer_id"]
             isOneToOne: false
-            referencedRelation: "users"
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
           {
             foreignKeyName: "feedback_reviewer_id_fkey"
             columns: ["reviewer_id"]
             isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "feedback_submission_id_fkey"
-            columns: ["submission_id"]
-            isOneToOne: false
-            referencedRelation: "submission_with_user"
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
           {
@@ -144,9 +137,9 @@ export type Database = {
           salary_max: number | null
           salary_min: number | null
           salary_range: string | null
-          show_salary_range: boolean | null
           status: string | null
           title: string
+          updated_at: string | null
           work_mode: string | null
         }
         Insert: {
@@ -169,9 +162,9 @@ export type Database = {
           salary_max?: number | null
           salary_min?: number | null
           salary_range?: string | null
-          show_salary_range?: boolean | null
           status?: string | null
           title: string
+          updated_at?: string | null
           work_mode?: string | null
         }
         Update: {
@@ -194,30 +187,24 @@ export type Database = {
           salary_max?: number | null
           salary_min?: number | null
           salary_range?: string | null
-          show_salary_range?: boolean | null
           status?: string | null
           title?: string
+          updated_at?: string | null
           work_mode?: string | null
         }
         Relationships: [
           {
-            foreignKeyName: "fk_jobs_employer"
+            foreignKeyName: "jobs_employer_id_fkey"
             columns: ["employer_id"]
             isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "jobs_employer_id_fkey"
-            columns: ["created_by"]
-            isOneToOne: false
-            referencedRelation: "users"
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
       }
       profiles: {
         Row: {
+          company_name: string | null
           created_at: string | null
           credits: number | null
           email: string | null
@@ -228,6 +215,7 @@ export type Database = {
           role: string | null
         }
         Insert: {
+          company_name?: string | null
           created_at?: string | null
           credits?: number | null
           email?: string | null
@@ -238,6 +226,7 @@ export type Database = {
           role?: string | null
         }
         Update: {
+          company_name?: string | null
           created_at?: string | null
           credits?: number | null
           email?: string | null
@@ -284,13 +273,6 @@ export type Database = {
           task_title?: string | null
         }
         Relationships: [
-          {
-            foreignKeyName: "proof_cards_submission_id_fkey"
-            columns: ["submission_id"]
-            isOneToOne: false
-            referencedRelation: "submission_with_user"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "proof_cards_submission_id_fkey"
             columns: ["submission_id"]
@@ -480,43 +462,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "submissions_user_id_users_reset_fk"
+            foreignKeyName: "submissions_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
-            referencedRelation: "users"
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
-      }
-      users: {
-        Row: {
-          auth_id: string | null
-          company_name: string | null
-          created_at: string | null
-          email: string | null
-          id: string
-          name: string | null
-          role: string
-        }
-        Insert: {
-          auth_id?: string | null
-          company_name?: string | null
-          created_at?: string | null
-          email?: string | null
-          id?: string
-          name?: string | null
-          role: string
-        }
-        Update: {
-          auth_id?: string | null
-          company_name?: string | null
-          created_at?: string | null
-          email?: string | null
-          id?: string
-          name?: string | null
-          role?: string
-        }
-        Relationships: []
       }
     }
     Views: {
@@ -530,55 +482,17 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "fk_jobs_employer"
+            foreignKeyName: "jobs_employer_id_fkey"
             columns: ["employer_id"]
             isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      submission_with_user: {
-        Row: {
-          candidate_email: string | null
-          candidate_name: string | null
-          company: string | null
-          created_at: string | null
-          hiring_stage: string | null
-          id: string | null
-          job_id: string | null
-          job_title: string | null
-          status: string | null
-          submission_link: string | null
-          updated_at: string | null
-          user_id: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "submissions_job_id_fkey"
-            columns: ["job_id"]
-            isOneToOne: false
-            referencedRelation: "employer_job_summary"
-            referencedColumns: ["job_id"]
-          },
-          {
-            foreignKeyName: "submissions_job_id_fkey"
-            columns: ["job_id"]
-            isOneToOne: false
-            referencedRelation: "jobs"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "submissions_user_id_users_reset_fk"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "users"
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
       }
     }
     Functions: {
+      delete_user_account: { Args: never; Returns: undefined }
       get_job_detail: {
         Args: { job_id_input: string }
         Returns: {
