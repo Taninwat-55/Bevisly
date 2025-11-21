@@ -18,7 +18,8 @@ import {
   FolderOpen,
   Plus,
   XCircle,
-  Trash2, // ✅ Added Trash icon
+  Trash2,
+  Clock,
 } from "lucide-react";
 import toast from "react-hot-toast";
 
@@ -320,6 +321,13 @@ export default function JobListingPage() {
             else navigate(`/jobs/${job.id}`);
           };
 
+          // ✅ Deadline Calc
+          let daysLeft: number | null = null;
+          if (job.expires_at) {
+            const diff = new Date(job.expires_at).getTime() - new Date().getTime();
+            daysLeft = Math.ceil(diff / (1000 * 60 * 60 * 24));
+          }
+
           return (
             <div
               key={job.id}
@@ -345,6 +353,16 @@ export default function JobListingPage() {
               <p className="text-sm text-[var(--color-text-muted)] mb-3">
                 <Briefcase size={14} className="inline mr-1 opacity-80" />
                 {job.company || "Unknown"} {job.location && `• ${job.location}`}
+
+                {/* ✅ Deadline Badge */}
+                {daysLeft !== null && daysLeft > 0 && (
+                   <span className={`ml-2 inline-flex items-center gap-1 text-xs font-medium ${
+                     daysLeft <= 3 ? "text-[var(--color-error)]" : "text-[var(--color-warning)]"
+                   }`}>
+                     <Clock size={12} />
+                     {daysLeft}d left
+                   </span>
+                )}
               </p>
 
               {proof && (

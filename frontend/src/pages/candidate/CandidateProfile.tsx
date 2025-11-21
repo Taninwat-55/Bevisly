@@ -20,27 +20,31 @@ export default function CandidateProfile() {
     useCandidateStats();
 
   const [joined, setJoined] = useState<string>("");
+  const [fullName, setFullName] = useState<string>(""); // ✅ Added state for name
   const [copied, setCopied] = useState(false);
   const [resumeUrl, setResumeUrl] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const [resumeUpdatedAt, setResumeUpdatedAt] = useState<string | null>(null);
 
-  /* 🗓️ Fetch join date */
+  /* 🗓️ Fetch profile info (join date + name) */
   useEffect(() => {
     if (!user?.id) return;
 
-    const fetchJoinDate = async () => {
+    const fetchProfile = async () => {
       const { data } = await supabase
-        .from("users")
-        .select("created_at")
+        .from("profiles")
+        .select("created_at, full_name") // ✅ Fetch full_name
         .eq("id", user.id)
         .single();
 
-      if (data?.created_at)
-        setJoined(new Date(data.created_at).toLocaleDateString());
+      if (data) {
+        if (data.created_at)
+          setJoined(new Date(data.created_at).toLocaleDateString());
+        if (data.full_name) setFullName(data.full_name); // ✅ Set name
+      }
     };
 
-    fetchJoinDate();
+    fetchProfile();
   }, [user?.id]);
 
   /* 🆕 Fetch existing resume */
@@ -183,6 +187,8 @@ export default function CandidateProfile() {
           Account Information
         </h2>
         <div className="space-y-2 text-sm text-[var(--color-text-muted)]">
+          {/* ✅ Show Display Name */}
+          <InfoRow label="Display Name" value={fullName || "—"} />
           <InfoRow label="Email" value={user?.email} />
           <InfoRow label="Role" value={user?.role} />
           <InfoRow label="Member Since" value={joined || "—"} />
@@ -275,7 +281,7 @@ export default function CandidateProfile() {
 
       {/* 📊 Performance Summary */}
       <motion.section
-        className="bg-[var(--color-surface)] rounded-[var(--radius-card)] shadow-[var(--shadow-soft)] border border-[var(--color-border)] p-6"
+        className="bg-[var(--color-surface)] rounded-[var(--radius-card)] shadow-[var(--shadow-soft)] border border-[var(--color-border)] p-6 mb-8"
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.05, duration: 0.25 }}

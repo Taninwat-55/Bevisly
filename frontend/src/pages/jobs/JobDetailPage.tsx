@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import type { Job } from "@/types/job";
+import { checkSubmissionStatus } from "@/lib/api/submissions";
 
 /* ─── Component ─────────────────────────────────────────────── */
 export default function JobDetailPage() {
@@ -27,6 +28,7 @@ export default function JobDetailPage() {
   const role: SessionUser["role"] = user?.role ?? null;
 
   const [job, setJob] = useState<Job | null>(null);
+  const [existingStatus, setExistingStatus] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [starting, setStarting] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
@@ -47,6 +49,13 @@ export default function JobDetailPage() {
 
       if (error) toast.error(error.message);
       else setJob(data as Job);
+
+      // ✅ Check active submission
+      if (user) {
+        const sub = await checkSubmissionStatus(id);
+        if (sub) setExistingStatus(sub.status);
+      }
+
       setLoading(false);
     };
     fetchJob();
@@ -77,6 +86,12 @@ export default function JobDetailPage() {
     }
     if (!proof) {
       toast.error("No proof task available for this job.");
+      return;
+    }
+
+    // ✅ If already applied/started, just go there
+    if (existingStatus) {
+      navigate(`/candidate/proof/${proof.id}`);
       return;
     }
 
@@ -126,6 +141,14 @@ export default function JobDetailPage() {
         </p>
         <div className="flex flex-wrap items-center gap-3 mt-4 text-sm text-[var(--color-text-muted)]">
           <span>📍 {job.location || "Remote"}</span>
+
+          {/* ✅ Deadline Info */}
+          {job.expires_at && (
+            <span className="flex items-center gap-1 text-[var(--color-warning)]">
+              <Clock size={14} />
+              Deadline: {new Date(job.expires_at).toLocaleDateString()}
+            </span>
+          )}
 
           {job.paid && (
             <span className="bg-[var(--color-candidate-light)] text-[var(--color-candidate-dark)] px-2 py-1 rounded-[var(--radius-button)] text-xs font-medium">

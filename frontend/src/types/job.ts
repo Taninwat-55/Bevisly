@@ -19,6 +19,8 @@ export interface Job {
   department?: string | null;
   work_mode?: string | null;
 
+  expires_at?: string | null;
+
   proof_tasks?: {
     id: string;
     title: string;
@@ -27,5 +29,6 @@ export interface Job {
     submission_format?: string | null;
     ai_tools_allowed?: boolean | null;
     duration_minutes?: number | null;
+    attachments?: string[] | null;
   }[];
 }

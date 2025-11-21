@@ -44,3 +44,15 @@ export async function getProfileResume(user_id: string) {
   if (error) throw error;
   return data;
 }
+
+export async function updateProfileName(full_name: string) {
+  const user = (await supabase.auth.getUser()).data.user;
+  if (!user) throw new Error("Not authenticated");
+
+  const { error } = await supabase
+    .from("profiles")
+    .update({ full_name })
+    .eq("id", user.id);
+
+  if (error) throw error;
+}
