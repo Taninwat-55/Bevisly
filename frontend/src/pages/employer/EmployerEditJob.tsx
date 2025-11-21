@@ -1,27 +1,26 @@
-/**
- * 📄 EmployerEditJob.tsx
- *
- * Wrapper page for editing an existing employer job.
- * Loads job data and passes it into EmployerJobForm in "edit" mode.
- *
- * URL: /employer/jobs/:id/edit
- */
-
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import EmployerJobForm from "./EmployerJobForm";
-import { getJobWithTasks, updateJobWithTasks } from "@/lib/api/jobs";
+import { getJobWithTasks, updateJobWithTasks, deleteJob } from "@/lib/api/jobs"; // ✅ Import deleteJob
 import type { EmployerJob, ProofTask } from "@/types";
+import { Trash2 } from "lucide-react";
 
 export default function EmployerEditJob() {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   const [job, setJob] = useState<Partial<
     EmployerJob & { proof_tasks: ProofTask[] }
   > | null>(null);
 
-  useEffect(() => {
-    if (id) getJobWithTasks(id).then(setJob).catch(console.error);
+ useEffect(() => {
+    if (id) {
+      getJobWithTasks(id)
+        .then((data) => {
+          setJob(data as unknown as EmployerJob & { proof_tasks: ProofTask[] });
+        })
+        .catch(console.error);
+    }
   }, [id]);
 
   if (!job)
@@ -43,11 +42,40 @@ export default function EmployerEditJob() {
     }
   };
 
+  // ✅ New Delete Handler
+  const handleDelete = async () => {
+    if (!id) return;
+    if (!confirm("Are you sure you want to delete this job? All candidate submissions will be lost.")) {
+      return;
+    }
+
+    try {
+      await deleteJob(id);
+      toast.success("Job deleted successfully");
+      navigate("/employer/jobs"); // Redirect to list
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to delete job");
+    }
+  };
+
   return (
     <div className="min-h-screen bg-[var(--color-bg)] px-8 py-10">
-      <h1 className="heading-lg mb-6 text-[var(--color-employer-dark)]">
-        ✏️ Edit Job
-      </h1>
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="heading-lg text-[var(--color-employer-dark)]">
+          ✏️ Edit Job
+        </h1>
+        
+        {/* ✅ Delete Button */}
+        <button 
+          onClick={handleDelete}
+          className="flex items-center gap-2 px-4 py-2 text-sm text-red-600 bg-red-50 border border-red-100 rounded-lg hover:bg-red-100 transition"
+        >
+          <Trash2 size={16} />
+          Delete Job
+        </button>
+      </div>
+
       <EmployerJobForm
         mode="edit"
         defaultValues={job}

@@ -106,10 +106,12 @@ export async function getEmployerSubmissionsWithFeedback(
       reflection,
       hiring_stage,
       employer_notes,
+      resume_url,
       proof_tasks ( id, title ),
-      jobs ( title ),
-      feedback ( stars )
-    `
+      jobs ( id, title ),
+      feedback ( stars ),
+      profiles:user_id ( full_name, email )
+    ` 
     )
     .in("job_id", ids)
     .order("created_at", { ascending: false });
@@ -235,8 +237,10 @@ export async function getSubmissionById(submission_id: string) {
       resume_url,
       created_at,
       proof_tasks ( id, title, description ),
-      jobs ( id, title, company )
-`)
+      jobs ( id, title, company ),
+      profiles:user_id ( full_name, email, resume_url ), 
+      feedback ( stars, strengths, improvements )
+`) 
     .eq("id", submission_id)
     .single();
 

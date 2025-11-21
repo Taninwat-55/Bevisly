@@ -109,7 +109,7 @@ export default function JobInfoSection({
             htmlFor="paid"
             className="text-sm font-medium text-[var(--color-text)]"
           >
-            Paid Position
+            Paid Task
           </label>
         </div>
       </div>

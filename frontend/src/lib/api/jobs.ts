@@ -56,7 +56,7 @@ export async function getJobWithTasks(job_id: string) {
       salary_max,
       pay_period,
       created_at,
-      created_by,
+      employer_id,  
       proof_tasks (
         id,
         title,
@@ -65,7 +65,7 @@ export async function getJobWithTasks(job_id: string) {
         submission_format,
         ai_tools_allowed
       )
-    `)
+    `) // 👆 Replaced 'created_by' with 'employer_id' (or just remove it if unused)
     .eq("id", job_id)
     .single();
 
@@ -245,5 +245,14 @@ export async function updateJobWithTasks(
     if (insertError) throw insertError;
   }
 
+  return true;
+}
+
+/* ──────────────────────────────────────────────
+ * ✅ Delete an existing job + proof tasks
+ * ────────────────────────────────────────────── */
+export async function deleteJob(job_id: string) {
+  const { error } = await supabase.from("jobs").delete().eq("id", job_id);
+  if (error) throw error;
   return true;
 }

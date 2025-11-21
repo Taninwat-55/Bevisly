@@ -23,6 +23,7 @@ import {
   ArrowRight,
 } from "lucide-react";
 import { motion } from "framer-motion";
+import { deleteJob } from "@/lib/api/jobs";
 
 export default function EmployerDashboard() {
   const { user } = useAuth();
@@ -141,6 +142,18 @@ export default function EmployerDashboard() {
       );
     }
   };
+
+  const handleDelete = async (e: React.MouseEvent, jobId: string) => {
+  e.stopPropagation();
+  if (!confirm("Are you sure you want to delete this job? Submissions will be lost.")) return;
+  try {
+    await deleteJob(jobId);
+    setJobs(prev => prev.filter(j => j.id !== jobId));
+    toast.success("Job deleted.");
+  } catch {
+    toast.error("Failed to delete job.");
+  }
+};
 
   // 🌀 Loading state
   if (loading)
@@ -300,6 +313,9 @@ export default function EmployerDashboard() {
                       >
                         {job.featured ? "Unfeature ⭐" : "Feature ⭐"}
                       </button>
+                      <button onClick={(e) => handleDelete(e, job.id)} className="text-xs text-[var(--color-error)] hover:underline">
+  Remove
+</button>
                     </div>
                   </div>
                 </motion.div>

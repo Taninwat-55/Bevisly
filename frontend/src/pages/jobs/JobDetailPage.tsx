@@ -214,7 +214,7 @@ export default function JobDetailPage() {
           {role === "employer" && (
             <div className="flex gap-3 mt-4">
               <button
-                onClick={() => navigate(`/employer/job/${id}/edit`)}
+                onClick={() => navigate(`/employer/jobs/${id}/edit`)}
                 className="bg-[var(--color-employer)] text-white px-4 py-2 rounded-[var(--radius-button)] hover:bg-[var(--color-employer-dark)] transition flex items-center gap-2"
               >
                 <Edit3 size={16} /> Edit Job

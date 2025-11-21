@@ -20,6 +20,7 @@ export type EmployerJob = {
   work_mode?: string | null;
   created_at: string | null;
   featured?: boolean | null;
+  status?: string | null; // ✅ Added this too as it's used in dashboard
 };
 
 /**
@@ -62,6 +63,13 @@ export type EmployerSubmission = {
 
   // 🆕 New — attach candidate resume for employers
   resume_url?: string | null;
+
+  // ✅ NEW: Profile data fetched via join
+  profiles?: {
+    full_name: string | null;
+    email: string | null;
+    resume_url?: string | null;
+  } | null;
 };
 
 // Used on EmployerHome.tsx for recent submissions section
@@ -101,4 +109,3 @@ export interface EmployerJobFormValues {
   work_mode?: string;
   proof_tasks: ProofTask[];
 }
-

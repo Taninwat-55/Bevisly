@@ -1,24 +1,19 @@
-import { useEffect, useState, useMemo, useRef } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { getEmployerSubmissionsWithFeedback } from "@/lib/api/submissions";
+import { getEmployerJobs } from "@/lib/api/jobs";
 import type { EmployerSubmission } from "@/types";
 import toast from "react-hot-toast";
-import { Loader2, Users } from "lucide-react";
+import { Loader2, Users, Briefcase } from "lucide-react";
 import TalentBoard from "@/components/talent/TalentBoard";
-import { supabase } from "@/lib/supabaseClient";
-import { motion, AnimatePresence } from "framer-motion";
 
 export default function EmployerTalentManager() {
   const { user } = useAuth();
   const [submissions, setSubmissions] = useState<EmployerSubmission[]>([]);
+  const [jobs, setJobs] = useState<{ id: string; title: string }[]>([]);
+  const [selectedJob, setSelectedJob] = useState<string>("all");
   const [loading, setLoading] = useState(true);
-  const [live, setLive] = useState(false);
 
-  // 🧠 ref to throttle rapid DB updates
-  const updateTimeout = useRef<NodeJS.Timeout | null>(null);
-  const batched = useRef(false);
-
-  /* ── Load once ─────────────────────────────── */
   useEffect(() => {
     if (!user?.id) return;
     let mounted = true;
@@ -26,8 +21,16 @@ export default function EmployerTalentManager() {
     (async () => {
       try {
         setLoading(true);
-        const data = await getEmployerSubmissionsWithFeedback(user.id);
-        if (mounted) setSubmissions(data);
+        // Load submissions and jobs in parallel
+        const [subsData, jobsData] = await Promise.all([
+          getEmployerSubmissionsWithFeedback(user.id),
+          getEmployerJobs(user.id),
+        ]);
+        
+        if (mounted) {
+          setSubmissions(subsData);
+          setJobs(jobsData);
+        }
       } catch (err) {
         console.error(err);
         toast.error("Failed to load candidates");
@@ -36,56 +39,14 @@ export default function EmployerTalentManager() {
       }
     })();
 
-    return () => {
-      mounted = false;
-    };
+    return () => { mounted = false; };
   }, [user?.id]);
 
-  /* ── Live Supabase updates (batched) ───────── */
-  useEffect(() => {
-    if (!user?.id) return;
-
-    const channel = supabase
-      .channel("submissions_live_sync")
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "submissions" },
-        (payload) => {
-          const updated = payload.new as EmployerSubmission;
-          if (!updated?.id) return;
-
-          // Optimistically patch or insert
-          setSubmissions((prev) => {
-            const idx = prev.findIndex((s) => s.id === updated.id);
-            if (idx === -1) return [updated, ...prev];
-            const clone = [...prev];
-            clone[idx] = { ...clone[idx], ...updated };
-            return clone;
-          });
-
-          // Debounced live pulse + batched toast
-          if (updateTimeout.current) clearTimeout(updateTimeout.current);
-          if (!batched.current) {
-            toast.success("Live updates synced");
-            batched.current = true;
-          }
-          setLive(true);
-          updateTimeout.current = setTimeout(() => {
-            batched.current = false;
-            setLive(false);
-          }, 2000);
-        }
-      )
-      .subscribe();
-
-    return () => {
-      if (updateTimeout.current) clearTimeout(updateTimeout.current);
-      supabase.removeChannel(channel);
-    };
-  }, [user?.id]);
-
-  /* ── Memoized prop (prevents rerender storms) ───────── */
-  const stableSubs = useMemo(() => submissions, [submissions]);
+  // Filter logic
+  const filteredSubs = useMemo(() => {
+    if (selectedJob === "all") return submissions;
+    return submissions.filter((s) => s.job_id === selectedJob);
+  }, [submissions, selectedJob]);
 
   if (loading)
     return (
@@ -94,39 +55,39 @@ export default function EmployerTalentManager() {
       </div>
     );
 
-  /* ── UI ─────────────── */
   return (
     <div className="min-h-screen bg-[var(--color-bg)] px-8 py-10 relative">
       <header className="flex items-center justify-between mb-8">
-        <div className="flex items-center gap-2">
-          <h1 className="heading-lg text-[var(--color-employer-dark)] flex items-center gap-2">
-            <Users size={20} /> Talent Manager
-          </h1>
-
-          {/* 🟢 Live Indicator */}
-          <AnimatePresence>
-            {live && (
-              <motion.div
-                initial={{ opacity: 0, y: -4 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -4 }}
-                transition={{ duration: 0.25 }}
-                className="flex items-center gap-1 text-xs text-[var(--color-success)]"
-              >
-                <span className="w-2 h-2 rounded-full bg-[var(--color-success)] animate-pulse" />
-                Live
-              </motion.div>
-            )}
-          </AnimatePresence>
+        <div className="space-y-1">
+          <div className="flex items-center gap-2">
+            <h1 className="heading-lg text-[var(--color-employer-dark)] flex items-center gap-2">
+              <Users size={20} /> Talent Manager
+            </h1>
+          </div>
+          <p className="text-[var(--color-text-muted)] text-sm">
+            Manage candidates across your hiring stages.
+          </p>
         </div>
 
-        <p className="text-[var(--color-text-muted)] text-sm">
-          Manage candidates across your hiring stages.
-        </p>
+        {/* Job Filter */}
+        <div className="flex items-center gap-2 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-button)] px-3 py-1.5 shadow-sm">
+          <Briefcase size={14} className="text-[var(--color-text-muted)]" />
+          <select
+            value={selectedJob}
+            onChange={(e) => setSelectedJob(e.target.value)}
+            className="text-sm bg-transparent text-[var(--color-text)] outline-none max-w-[200px]"
+          >
+            <option value="all">All Jobs</option>
+            {jobs.map((j) => (
+              <option key={j.id} value={j.id}>
+                {j.title}
+              </option>
+            ))}
+          </select>
+        </div>
       </header>
 
-      {/* 🧩 Board */}
-      <TalentBoard submissions={stableSubs} setSubmissions={setSubmissions} />
+      <TalentBoard submissions={filteredSubs} setSubmissions={setSubmissions} />
     </div>
   );
 }

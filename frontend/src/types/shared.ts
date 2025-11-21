@@ -45,11 +45,12 @@ export type ProfileLite = {
 
 // Minimal proof card info used in public + candidate profile grids
 export type ProofCardLite = {
-  id?: string;
+  id?: string | null;
   job_title: string | null;
   rating: number | null;
   comments: string | null;
   reviewed_at: string | null;
+  submission_id?: string | null; // Added this to match your query
 };
 
 export type FeaturedJob = {
