@@ -73,6 +73,13 @@ export type Database = {
             foreignKeyName: "feedback_submission_id_fkey"
             columns: ["submission_id"]
             isOneToOne: false
+            referencedRelation: "proof_cards"
+            referencedColumns: ["submission_id"]
+          },
+          {
+            foreignKeyName: "feedback_submission_id_fkey"
+            columns: ["submission_id"]
+            isOneToOne: false
             referencedRelation: "submissions"
             referencedColumns: ["id"]
           },
@@ -108,7 +115,7 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "feedback_messages_user_fk"
+            foreignKeyName: "feedback_messages_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
@@ -120,7 +127,6 @@ export type Database = {
         Row: {
           company: string | null
           created_at: string | null
-          created_by: string | null
           department: string | null
           description: string | null
           employer_id: string | null
@@ -136,7 +142,7 @@ export type Database = {
           required_skills: string[] | null
           salary_max: number | null
           salary_min: number | null
-          salary_range: string | null
+          show_salary_range: boolean | null
           status: string | null
           title: string
           updated_at: string | null
@@ -145,7 +151,6 @@ export type Database = {
         Insert: {
           company?: string | null
           created_at?: string | null
-          created_by?: string | null
           department?: string | null
           description?: string | null
           employer_id?: string | null
@@ -161,7 +166,7 @@ export type Database = {
           required_skills?: string[] | null
           salary_max?: number | null
           salary_min?: number | null
-          salary_range?: string | null
+          show_salary_range?: boolean | null
           status?: string | null
           title: string
           updated_at?: string | null
@@ -170,7 +175,6 @@ export type Database = {
         Update: {
           company?: string | null
           created_at?: string | null
-          created_by?: string | null
           department?: string | null
           description?: string | null
           employer_id?: string | null
@@ -186,7 +190,7 @@ export type Database = {
           required_skills?: string[] | null
           salary_max?: number | null
           salary_min?: number | null
-          salary_range?: string | null
+          show_salary_range?: boolean | null
           status?: string | null
           title?: string
           updated_at?: string | null
@@ -212,7 +216,7 @@ export type Database = {
           id: string
           resume_updated_at: string | null
           resume_url: string | null
-          role: string | null
+          role: string
         }
         Insert: {
           company_name?: string | null
@@ -223,7 +227,7 @@ export type Database = {
           id: string
           resume_updated_at?: string | null
           resume_url?: string | null
-          role?: string | null
+          role?: string
         }
         Update: {
           company_name?: string | null
@@ -234,92 +238,9 @@ export type Database = {
           id?: string
           resume_updated_at?: string | null
           resume_url?: string | null
-          role?: string | null
+          role?: string
         }
         Relationships: []
-      }
-      proof_cards: {
-        Row: {
-          candidate_name: string | null
-          comments: string | null
-          id: string
-          job_title: string | null
-          rating: number | null
-          reviewed_at: string | null
-          share_url: string | null
-          submission_id: string | null
-          task_title: string | null
-        }
-        Insert: {
-          candidate_name?: string | null
-          comments?: string | null
-          id?: string
-          job_title?: string | null
-          rating?: number | null
-          reviewed_at?: string | null
-          share_url?: string | null
-          submission_id?: string | null
-          task_title?: string | null
-        }
-        Update: {
-          candidate_name?: string | null
-          comments?: string | null
-          id?: string
-          job_title?: string | null
-          rating?: number | null
-          reviewed_at?: string | null
-          share_url?: string | null
-          submission_id?: string | null
-          task_title?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "proof_cards_submission_id_fkey"
-            columns: ["submission_id"]
-            isOneToOne: false
-            referencedRelation: "submissions"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      proof_pools: {
-        Row: {
-          created_at: string | null
-          id: string
-          job_id: string | null
-          top_percent: number | null
-          total_pool: number | null
-        }
-        Insert: {
-          created_at?: string | null
-          id?: string
-          job_id?: string | null
-          top_percent?: number | null
-          total_pool?: number | null
-        }
-        Update: {
-          created_at?: string | null
-          id?: string
-          job_id?: string | null
-          top_percent?: number | null
-          total_pool?: number | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "proof_pools_job_id_fkey"
-            columns: ["job_id"]
-            isOneToOne: false
-            referencedRelation: "employer_job_summary"
-            referencedColumns: ["job_id"]
-          },
-          {
-            foreignKeyName: "proof_pools_job_id_fkey"
-            columns: ["job_id"]
-            isOneToOne: false
-            referencedRelation: "jobs"
-            referencedColumns: ["id"]
-          },
-        ]
       }
       proof_tasks: {
         Row: {
@@ -332,7 +253,9 @@ export type Database = {
           id: string
           instructions: string | null
           job_id: string | null
+          recommended_platform: string | null
           submission_format: string | null
+          submission_type: string | null
           title: string
         }
         Insert: {
@@ -345,7 +268,9 @@ export type Database = {
           id?: string
           instructions?: string | null
           job_id?: string | null
+          recommended_platform?: string | null
           submission_format?: string | null
+          submission_type?: string | null
           title: string
         }
         Update: {
@@ -358,7 +283,9 @@ export type Database = {
           id?: string
           instructions?: string | null
           job_id?: string | null
+          recommended_platform?: string | null
           submission_format?: string | null
+          submission_type?: string | null
           title?: string
         }
         Relationships: [
@@ -396,7 +323,6 @@ export type Database = {
           status: string | null
           submission_link: string | null
           updated_at: string | null
-          uploaded_at: string | null
           user_id: string | null
         }
         Insert: {
@@ -416,7 +342,6 @@ export type Database = {
           status?: string | null
           submission_link?: string | null
           updated_at?: string | null
-          uploaded_at?: string | null
           user_id?: string | null
         }
         Update: {
@@ -436,7 +361,6 @@ export type Database = {
           status?: string | null
           submission_link?: string | null
           updated_at?: string | null
-          uploaded_at?: string | null
           user_id?: string | null
         }
         Relationships: [
@@ -489,6 +413,20 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      proof_cards: {
+        Row: {
+          candidate_name: string | null
+          comments: string | null
+          id: string | null
+          job_title: string | null
+          rating: number | null
+          reviewed_at: string | null
+          share_url: string | null
+          submission_id: string | null
+          task_title: string | null
+        }
+        Relationships: []
       }
     }
     Functions: {

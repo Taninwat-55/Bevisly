@@ -29,9 +29,12 @@ export default function BackButton({
     const path = location.pathname;
     if (/^\/jobs\/[a-zA-Z0-9_-]+$/.test(path)) {
       defaultLabel = "Back to Jobs";
-    } else if (/^\/candidate\/[a-zA-Z0-9_-]+$/.test(path)) {
-      defaultLabel = "Back to Leaderboard";
-    } else if (path.startsWith("/jobs")) {
+    } 
+    // 🔴 DELETE or COMMENT OUT these lines:
+    // else if (/^\/candidate\/[a-zA-Z0-9_-]+$/.test(path)) {
+    //   defaultLabel = "Back to Leaderboard";
+    // } 
+    else if (path.startsWith("/jobs")) {
       defaultLabel = "Back";
     } else {
       defaultLabel = "Back";
