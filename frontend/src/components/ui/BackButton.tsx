@@ -30,10 +30,6 @@ export default function BackButton({
     if (/^\/jobs\/[a-zA-Z0-9_-]+$/.test(path)) {
       defaultLabel = "Back to Jobs";
     } 
-    // 🔴 DELETE or COMMENT OUT these lines:
-    // else if (/^\/candidate\/[a-zA-Z0-9_-]+$/.test(path)) {
-    //   defaultLabel = "Back to Leaderboard";
-    // } 
     else if (path.startsWith("/jobs")) {
       defaultLabel = "Back";
     } else {

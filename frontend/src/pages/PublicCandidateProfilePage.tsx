@@ -111,7 +111,7 @@ export default function PublicCandidateProfilePage() {
       animate={{ opacity: 1 }}
       transition={{ duration: 0.25 }}
     >
-      <BackButton to="/leaderboard" />
+      <BackButton label="Back" />
 
       {/* 🏁 Header */}
       <header className="mb-8 text-center">

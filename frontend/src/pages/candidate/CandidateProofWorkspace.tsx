@@ -236,9 +236,9 @@ export default function CandidateProofWorkspace() {
             In Progress
           </span>
         </p>
-        <p className="body-base text-[var(--color-text-muted)] max-w-2xl mx-auto">
+        {/* <p className="body-base text-[var(--color-text-muted)] max-w-2xl mx-auto">
           {task.description || "Complete the proof as described below."}
-        </p>
+        </p> */}
       </header>
 
       {/* 🧩 Two-Column Workspace */}

@@ -2,7 +2,6 @@
 import { supabase } from "../supabaseClient";
 import type {
   CandidateSubmission,
-  // CandidateFeedback,
   EmployerSubmission,
   ProofTask,
   CandidateFeedbackEntry,
@@ -39,12 +38,6 @@ export async function getCandidateSubmissions(
 /**
  * ✅ Get all submissions for an employer’s jobs (for review dashboard)
  */
-// export async function getEmployerSubmissions(employer_id: string) {
-// 1️⃣ Get job IDs owned by employer
-// const { data: jobIds, error: jobErr } = await supabase
-//   .from("jobs")
-//   .select("id")
-//   .eq("created_by", employer_id);
 export async function getEmployerSubmissions(
   employer_id: string
 ): Promise<EmployerSubmission[]> {

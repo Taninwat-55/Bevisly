@@ -241,7 +241,7 @@ export default function EmployerDashboard() {
               return (
                 <motion.div
                   key={job.id}
-                  onClick={() => navigate(`/employer/job/${job.id}`)}
+                  onClick={() => navigate(`/employer/jobs/${job.id}`)}
                   whileHover={{ scale: 1.02 }}
                   className="cursor-pointer bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-card)] shadow-[var(--shadow-soft)] p-5 hover:shadow-[var(--shadow-hover)] transition group"
                 >

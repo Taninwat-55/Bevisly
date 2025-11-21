@@ -254,7 +254,40 @@ export async function updateJobWithTasks(
  * ✅ Delete an existing job + proof tasks
  * ────────────────────────────────────────────── */
 export async function deleteJob(job_id: string) {
-  const { error } = await supabase.from("jobs").delete().eq("id", job_id);
+  // 1. Delete all submissions related to this job
+  const { error: subError } = await supabase
+    .from("submissions")
+    .delete()
+    .eq("job_id", job_id);
+
+  if (subError) {
+    console.error("Error deleting submissions:", subError);
+    throw subError;
+  }
+
+  // 2. Delete all proof tasks related to this job
+  const { error: taskError } = await supabase
+    .from("proof_tasks")
+    .delete()
+    .eq("job_id", job_id);
+
+  if (taskError) {
+    console.error("Error deleting proof tasks:", taskError);
+    throw taskError;
+  }
+
+  // 3. Finally, delete the job itself
+  const { error, count } = await supabase
+    .from("jobs")
+    .delete({ count: "exact" }) // Request exact count of deleted rows
+    .eq("id", job_id);
+
   if (error) throw error;
+
+  // 🚨 Validation: If count is 0, RLS probably blocked the delete
+  if (count === 0) {
+    throw new Error("Job could not be deleted. You might be missing a DELETE policy in Supabase.");
+  }
+
   return true;
 }

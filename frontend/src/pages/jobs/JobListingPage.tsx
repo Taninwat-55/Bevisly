@@ -8,11 +8,10 @@ import { useState, useMemo, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useJobs } from "@/hooks/useJobs";
-import { getEmployerJobs, deleteJob } from "@/lib/api/jobs"; // ✅ Added deleteJob
+import { getEmployerJobs, deleteJob } from "@/lib/api/jobs"; 
 import {
   Loader2,
   Briefcase,
-  Clock,
   Search,
   LogIn,
   Edit3,
