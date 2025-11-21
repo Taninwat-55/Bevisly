@@ -28,8 +28,10 @@ export async function getAllJobs(): Promise<CandidateJob[]> {
       salary_max,
       pay_period,
       created_at,
+      expires_at, 
       proof_tasks ( id, title, expected_time )
-    `)
+    `) 
+    .eq("status", "active") 
     .order("created_at", { ascending: false });
 
   if (error) throw error;
@@ -56,6 +58,7 @@ export async function getJobWithTasks(job_id: string) {
       salary_max,
       pay_period,
       created_at,
+      expires_at,
       employer_id,  
       proof_tasks (
         id,
@@ -63,9 +66,10 @@ export async function getJobWithTasks(job_id: string) {
         description,
         expected_time,
         submission_format,
-        ai_tools_allowed
+        ai_tools_allowed,
+        attachments
       )
-    `) // 👆 Replaced 'created_by' with 'employer_id' (or just remove it if unused)
+    `) 
     .eq("id", job_id)
     .single();
 

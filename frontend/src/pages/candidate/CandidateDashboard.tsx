@@ -13,16 +13,20 @@ export default function CandidateDashboard() {
     jobsApplied: 0,
   });
   const [credits, setCredits] = useState<number>(0);
+  const [displayName, setDisplayName] = useState<string>(""); 
 
-  // 🪙 Fetch credits
+  // 🪙 Fetch credits AND profile name
   useEffect(() => {
     if (!user?.id) return;
     supabase
       .from("profiles")
-      .select("credits")
+      .select("credits, full_name") 
       .eq("id", user.id)
       .single()
-      .then(({ data }) => setCredits(data?.credits ?? 0));
+      .then(({ data }) => {
+        setCredits(data?.credits ?? 0);
+        setDisplayName(data?.full_name ?? ""); 
+      });
   }, [user?.id]);
 
   // 📊 Fetch stats
@@ -68,7 +72,8 @@ export default function CandidateDashboard() {
       {/* 🏁 Welcome */}
       <header className="mb-10">
         <h1 className="heading-lg flex items-center gap-2">
-          👋 Hi {user?.email?.split("@")[0]}
+          {/* ✅ Use Display Name if available, else fallback to email */}
+          👋 Hi, {displayName || user?.email?.split("@")[0]}!
         </h1>
         <p className="body-base text-[var(--color-text-muted)]">
           Ready to prove yourself? Here’s your progress at a glance.
@@ -104,6 +109,7 @@ export default function CandidateDashboard() {
           />
         </div>
       </section>
+      
       {/* 📜 Active Proofs Section */}
       <section className="mt-14">
         <h2 className="flex items-center gap-2 heading-md mb-4">
@@ -208,8 +214,12 @@ function ActiveProofs({ userId }: { userId?: string }) {
         jobs ( title, company )
       `)
       .eq("user_id", userId)
+      .in('status', ['in_progress', 'submitted'])
       .order("created_at", { ascending: false })
-      .then(({ data }) => setProofs(data ?? []));
+      .then(({ data }) => {
+          // @ts-ignore
+          setProofs(data ?? [])
+      });
   }, [userId]);
 
   if (!proofs.length)
@@ -222,7 +232,7 @@ function ActiveProofs({ userId }: { userId?: string }) {
   return (
     <div className="space-y-3">
       {proofs.map((p) => {
-        const proofTaskId = p.proof_tasks?.id;
+        const proofTaskId = p.proof_tasks?.id; 
         const status = p.status || "not_started";
 
         const statusClasses =
@@ -230,23 +240,17 @@ function ActiveProofs({ userId }: { userId?: string }) {
             ? "bg-green-100 text-green-700"
             : status === "in_progress"
             ? "bg-yellow-100 text-yellow-700"
-            : status === "reviewed"
-            ? "bg-blue-100 text-blue-700"
             : "bg-gray-100 text-gray-600";
 
         return (
           <Link
             key={p.id}
-            to={`/candidate/proof/${proofTaskId}`}
+            to={proofTaskId ? `/candidate/proof/${proofTaskId}` : "#"}
             className="flex items-center justify-between bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-card)] px-4 py-3 shadow-[var(--shadow-soft)] hover:shadow-[var(--shadow-hover)] hover:-translate-y-[1px] transition"
           >
             <div>
-              <p className="font-medium text-[var(--color-text)]">
-                {p.proof_tasks?.title || "Untitled Task"}
-              </p>
-              <p className="text-xs text-[var(--color-text-muted)]">
-                {p.jobs?.title} @ {p.jobs?.company}
-              </p>
+              <p className="font-medium text-[var(--color-text)]">{p.proof_tasks?.title || "Untitled Task"}</p>
+              <p className="text-xs text-[var(--color-text-muted)]">{p.jobs?.title} @ {p.jobs?.company}</p>
             </div>
 
             <span

@@ -1,12 +1,34 @@
+import { useEffect, useState } from "react";
 import HomeLayout from "@/layout/HomeLayout";
 import { useAuth } from "@/hooks/useAuth";
 import { useCandidateStats } from "@/hooks/useCandidateStats";
 import { Link } from "react-router-dom";
 import { Loader2 } from "lucide-react";
+import { supabase } from "@/lib/supabaseClient"; // ✅ Import supabase
 
 export default function CandidateHome() {
   const { user } = useAuth();
   const { proofsCompleted, avgScore, jobsApplied, credits, loading } = useCandidateStats();
+  const [displayName, setDisplayName] = useState<string>(""); // ✅ State for name
+
+  // 👤 Fetch profile name
+  useEffect(() => {
+    if (!user?.id) return;
+    
+    const fetchProfileName = async () => {
+      const { data } = await supabase
+        .from("profiles")
+        .select("full_name")
+        .eq("id", user.id)
+        .single();
+      
+      if (data?.full_name) {
+        setDisplayName(data.full_name);
+      }
+    };
+
+    fetchProfileName();
+  }, [user?.id]);
 
   if (loading) {
     return (
@@ -20,7 +42,8 @@ export default function CandidateHome() {
   return (
     <HomeLayout
       accentColor="var(--color-candidate-dark)"
-      title={`👋 Welcome back, ${user?.email?.split("@")[0] || "Candidate"}!`}
+      // ✅ Use Display Name if available
+      title={`👋 Welcome back, ${displayName || user?.email?.split("@")[0] || "Candidate"}!`}
       subtitle="Track your progress, explore new proof tasks, and grow your verified record."
     >
       {/* 📊 Quick Stats */}
