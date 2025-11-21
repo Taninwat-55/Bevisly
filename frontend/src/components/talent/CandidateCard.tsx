@@ -21,8 +21,19 @@ export default function CandidateCard({
 }: {
   submission: EmployerSubmission;
 }) {
-  const { id, user_id, proof_tasks, feedback, employer_notes, hiring_stage } =
-    submission;
+  const { 
+    id, 
+    // user_id, // ❌ Don't use this for display anymore
+    proof_tasks, 
+    feedback, 
+    employer_notes, 
+    hiring_stage,
+    profiles // ✅ Get profile data
+  } = submission;
+  
+  // Local state for notes (instant update fix)
+  const [currentNotes, setCurrentNotes] = useState(employer_notes);
+  
   const [open, setOpen] = useState(false);
   const [showNotes, setShowNotes] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -36,7 +47,12 @@ export default function CandidateCard({
     opacity: isDragging ? 0.5 : 1,
   };
 
-  // 🧠 Close dropdown on outside click
+  // Sync local state if prop updates
+  useEffect(() => {
+    setCurrentNotes(employer_notes);
+  }, [employer_notes]);
+
+  // Close dropdown on outside click
   useEffect(() => {
     const handler = (e: MouseEvent) => {
       if (
@@ -52,13 +68,16 @@ export default function CandidateCard({
 
   async function handleMove(stage: HiringStage) {
     try {
-      await updateHiringStage(id, stage, employer_notes ?? "");
+      await updateHiringStage(id, stage, currentNotes ?? "");
       toast.success(`Moved to ${stage}`);
       setOpen(false);
     } catch {
       toast.error("Failed to move candidate");
     }
   }
+
+  // ✅ Helper to get the best display name
+  const displayName = profiles?.full_name || profiles?.email?.split("@")[0] || "Unknown Candidate";
 
   return (
     <div
@@ -70,8 +89,10 @@ export default function CandidateCard({
       rounded-[var(--radius-button)] p-3 cursor-grab hover:shadow-[var(--shadow-soft)] transition`}
     >
       <div className="flex justify-between items-center mb-1">
-        <h4 className="font-medium text-sm text-[var(--color-text)] truncate flex items-center gap-1">
-          👤 {user_id || "Unknown"}
+        <h4 className="font-medium text-sm text-[var(--color-text)] truncate flex items-center gap-1" title={displayName}>
+          {/* ✅ Display Name Fix */}
+          👤 {displayName}
+          
           {submission.status === "reviewed" && submission.resume_url && (
             <a
               href={submission.resume_url}
@@ -122,36 +143,24 @@ export default function CandidateCard({
         </div>
       </div>
 
-      {/* Candidate Info */}
+      {/* Task Title */}
       <p className="text-xs text-[var(--color-text-muted)] truncate">
         {proof_tasks?.title || "Untitled task"}
       </p>
 
-      {/* 🆕 Candidate CV */}
-      {submission.status === "reviewed" && submission.resume_url && (
-        <a
-          href={submission.resume_url}
-          target="_blank"
-          rel="noopener noreferrer"
-          onPointerDown={(e) => e.stopPropagation()}
-          className="text-xs text-[var(--color-employer-dark)] hover:underline block mt-0.5"
-        >
-          📄 View CV
-        </a>
-      )}
-
       {/* Rating */}
       {feedback?.[0]?.stars ? (
-        <span className="text-xs text-yellow-500 font-medium">
+        <span className="text-xs text-yellow-500 font-medium block mt-1">
           ⭐ {feedback[0].stars}/5
         </span>
       ) : (
-        <span className="text-xs text-[var(--color-text-muted)]">—</span>
+        <span className="text-xs text-[var(--color-text-muted)] block mt-1">—</span>
       )}
 
-      {employer_notes && (
+      {/* Notes */}
+      {currentNotes && (
         <p className="text-xs text-[var(--color-text-muted)] italic mt-1 truncate">
-          📝 {employer_notes}
+          📝 {currentNotes}
         </p>
       )}
 
@@ -160,14 +169,18 @@ export default function CandidateCard({
         onClick={() => setShowNotes(true)}
         className="text-xs text-[var(--color-employer-dark)] hover:underline mt-1"
       >
-        {employer_notes ? "Edit Notes" : "Add Note"}
+        {currentNotes ? "Edit Notes" : "Add Note"}
       </button>
 
       {showNotes && (
         <NotesModal
-          submission={submission}
+          submission={{ ...submission, employer_notes: currentNotes }}
           onClose={() => setShowNotes(false)}
-          onSave={(updated) => console.log("Updated:", updated)}
+          onSave={(updated) => {
+            if (updated.employer_notes !== undefined) {
+              setCurrentNotes(updated.employer_notes);
+            }
+          }}
         />
       )}
     </div>
