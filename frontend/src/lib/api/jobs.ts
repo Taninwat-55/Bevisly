@@ -161,6 +161,7 @@ export async function createJobWithTasks(
         salary_max: values.salary_max ?? null,
         pay_period: values.pay_period ?? "monthly",
         employer_id: user.id,
+        expires_at: values.expires_at ?? null,
         is_public: true,
         job_type: values.job_type ?? null,
         department: values.department ?? null,
@@ -173,7 +174,7 @@ export async function createJobWithTasks(
   if (jobError) throw jobError;
 
   // 2️⃣ Create proof tasks (if any)
-  if (values.proof_tasks?.length) {
+  if (values.proof_tasks?.length && values.proof_tasks[0].title) {
     const proofInserts = values.proof_tasks.map((task) => ({
       job_id: job.id,
       title: task.title,
@@ -183,6 +184,7 @@ export async function createJobWithTasks(
       submission_type: task.submission_type ?? "link",
       recommended_platform: task.recommended_platform ?? null,
       ai_tools_allowed: task.ai_tools_allowed ?? false,
+      attachments: task.attachments ?? [],
     }));
 
     const { error: proofError } = await supabase

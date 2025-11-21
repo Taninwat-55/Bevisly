@@ -20,7 +20,8 @@ export type EmployerJob = {
   work_mode?: string | null;
   created_at: string | null;
   featured?: boolean | null;
-  status?: string | null; // ✅ Added this too as it's used in dashboard
+  status?: string | null; 
+  expires_at?: string | null;
 };
 
 /**

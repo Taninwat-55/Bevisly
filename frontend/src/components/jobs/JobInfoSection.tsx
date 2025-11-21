@@ -112,6 +112,22 @@ export default function JobInfoSection({
             Paid Task
           </label>
         </div>
+
+        {/* ✅ Job Duration / Expiry */}
+        <div>
+          <label className="block text-sm font-medium text-[var(--color-text)] mb-1">
+            Application Deadline
+          </label>
+          <input
+            type="date"
+            value={values.expires_at ? new Date(values.expires_at).toISOString().split('T')[0] : ""}
+            onChange={(e) => onChange("expires_at", new Date(e.target.value).toISOString())}
+            className="w-full border border-[var(--color-border)] rounded-[var(--radius-input)] p-2 bg-[var(--color-bg)] text-[var(--color-text)]"
+          />
+          <p className="text-xs text-[var(--color-text-muted)] mt-1">
+            Leave blank for no specific deadline.
+          </p>
+        </div>
       </div>
 
       {/* ─── Proof Task Payment ─── */}
@@ -163,7 +179,6 @@ export default function JobInfoSection({
       </div>
 
       {/* ─── Salary Range Fields ─── */}
-      {/* ─── Salary Range Fields ─── */}
       {values.show_salary_range && (
         <div className="space-y-3">
           <div className="grid sm:grid-cols-3 gap-4">
@@ -206,22 +221,28 @@ export default function JobInfoSection({
         </div>
       )}
 
-      {/* ─── Description ─── */}
+      {/* ✅ Description - Larger & Rich Text Placeholder */}
       <div className="border-t border-[var(--color-border)] pt-6">
         <label className="block text-sm font-medium text-[var(--color-text)] mb-1">
           Description
         </label>
-        <textarea
-          value={values.description ?? ""}
-          onChange={(e) => onChange("description", e.target.value)}
-          rows={5}
-          placeholder="Write a short summary of the position or project."
-          className={`w-full border rounded-[var(--radius-input)] p-2 bg-[var(--color-bg)] text-[var(--color-text)] focus:outline-none focus:ring-2 ${
-            errors.description
-              ? "border-[var(--color-error)] focus:ring-[var(--color-error)]"
-              : "border-[var(--color-border)] focus:ring-[var(--color-employer)]"
-          }`}
-        />
+        <div className="relative">
+          <textarea
+            value={values.description ?? ""}
+            onChange={(e) => onChange("description", e.target.value)}
+            rows={12} // ✅ Larger by default
+            placeholder="Describe the position, responsibilities, and requirements..."
+            className={`w-full border rounded-[var(--radius-input)] p-4 bg-[var(--color-bg)] text-[var(--color-text)] focus:outline-none focus:ring-2 resize-y ${
+              errors.description
+                ? "border-[var(--color-error)] focus:ring-[var(--color-error)]"
+                : "border-[var(--color-border)] focus:ring-[var(--color-employer)]"
+            }`}
+          />
+          {/* 💡 Rich text hint since we aren't installing a library yet */}
+          <p className="text-xs text-[var(--color-text-muted)] mt-2 flex items-center gap-2">
+            <span>💡 Tip: You can use <b>Markdown</b> for styling (e.g., **bold**, - bullets).</span>
+          </p>
+        </div>
         {errors.description && (
           <p className="text-xs text-[var(--color-error)] mt-1">
             {errors.description}

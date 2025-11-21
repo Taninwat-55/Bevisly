@@ -130,6 +130,7 @@ export type Database = {
           department: string | null
           description: string | null
           employer_id: string | null
+          expires_at: string | null
           featured: boolean | null
           id: string
           is_public: boolean | null
@@ -154,6 +155,7 @@ export type Database = {
           department?: string | null
           description?: string | null
           employer_id?: string | null
+          expires_at?: string | null
           featured?: boolean | null
           id?: string
           is_public?: boolean | null
@@ -178,6 +180,7 @@ export type Database = {
           department?: string | null
           description?: string | null
           employer_id?: string | null
+          expires_at?: string | null
           featured?: boolean | null
           id?: string
           is_public?: boolean | null
@@ -246,6 +249,7 @@ export type Database = {
         Row: {
           ai_generated: boolean | null
           ai_tools_allowed: boolean | null
+          attachments: string[] | null
           created_at: string | null
           description: string | null
           duration_minutes: number | null
@@ -261,6 +265,7 @@ export type Database = {
         Insert: {
           ai_generated?: boolean | null
           ai_tools_allowed?: boolean | null
+          attachments?: string[] | null
           created_at?: string | null
           description?: string | null
           duration_minutes?: number | null
@@ -276,6 +281,7 @@ export type Database = {
         Update: {
           ai_generated?: boolean | null
           ai_tools_allowed?: boolean | null
+          attachments?: string[] | null
           created_at?: string | null
           description?: string | null
           duration_minutes?: number | null

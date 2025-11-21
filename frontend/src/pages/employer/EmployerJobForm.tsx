@@ -44,10 +44,14 @@ function validateJobForm(values: {
   if (!t(values.location)) errors.location = "Location is required.";
   if (!t(values.description)) errors.description = "Description is required.";
 
-  if (!values.proof_tasks.length) {
-    errors.proof_tasks = "At least one proof task is required.";
-  } else if (!t(values.proof_tasks[0].title)) {
-    errors.proof_tasks = "Proof task title is required.";
+  if (values.proof_tasks.length > 0) {
+    // Only validate if they started adding a task but left it blank
+    const firstTask = values.proof_tasks[0];
+    
+    // ✅ FIX: Use (firstTask.title || "") to handle potential undefined
+    if (!(firstTask.title || "").trim() && (firstTask.description || firstTask.expected_time)) {
+       errors.proof_tasks = "Task title is required if you add a task.";
+    }
   }
 
   return errors;

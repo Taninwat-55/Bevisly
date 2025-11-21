@@ -14,6 +14,8 @@ export type ProofTask = {
   submission_type?: "link" | "file" | "text" | "mixed";
   recommended_platform?: string | null;
   ai_tools_allowed?: boolean | null;
+  attachments?: string[] | null; 
+  credits?: number | null; 
 };
 
 // Shape of a feedback record from the `feedback` table.
@@ -50,7 +52,7 @@ export type ProofCardLite = {
   rating: number | null;
   comments: string | null;
   reviewed_at: string | null;
-  submission_id?: string | null; // Added this to match your query
+  submission_id?: string | null; 
 };
 
 export type FeaturedJob = {
