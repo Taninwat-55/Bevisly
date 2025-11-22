@@ -141,6 +141,7 @@ export type Database = {
           payment_amount: number | null
           payment_currency: string | null
           required_skills: string[] | null
+          requirements: string | null
           salary_max: number | null
           salary_min: number | null
           show_salary_range: boolean | null
@@ -166,6 +167,7 @@ export type Database = {
           payment_amount?: number | null
           payment_currency?: string | null
           required_skills?: string[] | null
+          requirements?: string | null
           salary_max?: number | null
           salary_min?: number | null
           show_salary_range?: boolean | null
@@ -191,6 +193,7 @@ export type Database = {
           payment_amount?: number | null
           payment_currency?: string | null
           required_skills?: string[] | null
+          requirements?: string | null
           salary_max?: number | null
           salary_min?: number | null
           show_salary_range?: boolean | null

@@ -13,7 +13,6 @@ import {
   Loader2,
   Briefcase,
   Search,
-  LogIn,
   Edit3,
   FolderOpen,
   Plus,
@@ -317,7 +316,7 @@ export default function JobListingPage() {
           const proof = hasProofTasks(job) ? job.proof_tasks[0] : undefined;
           const handleCTA = () => {
             if (role === "employer") navigate(`/employer/jobs/${job.id}`);
-            else if (!user) navigate("/auth");
+            else if (!user) navigate(`/jobs/${job.id}`); // ✅ Visitors also go to detail page
             else navigate(`/jobs/${job.id}`);
           };
 
@@ -413,16 +412,14 @@ export default function JobListingPage() {
               ) : (
                 <button
                   onClick={handleCTA}
-                  className={`w-full py-2.5 rounded-[var(--radius-button)] font-medium transition ${
+                  className={`w-full py-2.5 rounded-[var(--radius-button)] font-medium transition flex items-center justify-center gap-2 ${
                     !user
-                      ? "bg-[var(--color-bg-hover)] border border-[var(--color-border)] text-[var(--color-text-muted)] hover:text-[var(--color-candidate-dark)]"
+                      ? "bg-[var(--color-surface)] border border-[var(--color-border)] text-[var(--color-text-muted)] hover:border-[var(--color-text-muted)] hover:text-[var(--color-text)]"
                       : "bg-[var(--color-candidate)] text-white hover:bg-[var(--color-candidate-dark)]"
                   }`}
                 >
                   {!user ? (
-                    <span className="inline-flex items-center gap-1 justify-center">
-                      <LogIn size={14} /> Sign in to Apply
-                    </span>
+                    "View Details →"
                   ) : (
                     "View Details →"
                   )}
