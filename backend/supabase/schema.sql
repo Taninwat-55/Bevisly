@@ -1,10 +1,14 @@
 -- ============================================================
 -- Bevis MVP Database Schema
--- Version: v0.2 (Consolidated)
--- Description: Core tables, Views, and Security Policies
+-- Version: v0.3 (Credits & Fairness Update)
+-- Description: Core tables, Views, Functions, and Security Policies
 -- ============================================================
 
--- 1. PROFILES (Linked to auth.users) -------------------------
+-- ============================================================
+-- 1. TABLES
+-- ============================================================
+
+-- 1.1 PROFILES (Linked to auth.users)
 create table public.profiles (
   id uuid references auth.users on delete cascade primary key,
   email text,
@@ -18,7 +22,7 @@ create table public.profiles (
 );
 alter table profiles enable row level security;
 
--- 2. JOBS ----------------------------------------------------
+-- 1.2 JOBS
 create table public.jobs (
   id uuid primary key default gen_random_uuid(),
   employer_id uuid references public.profiles(id) on delete cascade,
@@ -53,7 +57,7 @@ create table public.jobs (
 );
 alter table jobs enable row level security;
 
--- 3. PROOF TASKS ---------------------------------------------
+-- 1.3 PROOF TASKS
 create table public.proof_tasks (
   id uuid primary key default gen_random_uuid(),
   job_id uuid references public.jobs(id) on delete cascade,
@@ -75,7 +79,7 @@ create table public.proof_tasks (
 );
 alter table proof_tasks enable row level security;
 
--- 4. SUBMISSIONS ---------------------------------------------
+-- 1.4 SUBMISSIONS
 create table public.submissions (
   id uuid primary key default gen_random_uuid(),
   user_id uuid references public.profiles(id) on delete cascade,
@@ -103,7 +107,7 @@ create table public.submissions (
 );
 alter table submissions enable row level security;
 
--- 5. FEEDBACK ------------------------------------------------
+-- 1.5 FEEDBACK
 create table public.feedback (
   id uuid primary key default gen_random_uuid(),
   submission_id uuid references public.submissions(id) on delete cascade,
@@ -121,7 +125,7 @@ create table public.feedback (
 );
 alter table feedback enable row level security;
 
--- 6. FEEDBACK MESSAGES (Platform Feedback) -------------------
+-- 1.6 FEEDBACK MESSAGES (Platform Feedback)
 create table public.feedback_messages (
   id uuid primary key default gen_random_uuid(),
   user_id uuid references public.profiles(id) on delete set null,
@@ -133,8 +137,19 @@ create table public.feedback_messages (
 );
 alter table feedback_messages enable row level security;
 
+-- 1.7 CREDIT TRANSACTIONS (Ledger)
+create table public.credit_transactions (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid references public.profiles(id) on delete cascade not null,
+  amount int not null, -- Positive for earning, Negative for spending
+  reason text not null, -- 'submission_reward', 'quality_bonus', 'fairness_payout'
+  related_entity_id uuid, -- The submission_id or job_id linked to this
+  created_at timestamptz default now()
+);
+alter table credit_transactions enable row level security;
+
 -- ============================================================
--- VIEWS
+-- 2. VIEWS
 -- ============================================================
 
 -- View 1: Proof Cards (Public Profile)
@@ -170,7 +185,7 @@ left join feedback f on s.id = f.submission_id
 group by j.id;
 
 -- ============================================================
--- FUNCTIONS & TRIGGERS
+-- 3. FUNCTIONS & TRIGGERS
 -- ============================================================
 
 -- Helper: Check Admin Status (Securely)
@@ -217,6 +232,38 @@ begin
 end;
 $$;
 
+-- Helper: Distribute Credits Safely (Smart Contract)
+create or replace function distribute_credits(
+  p_user_id uuid, 
+  p_amount int, 
+  p_reason text, 
+  p_entity_id uuid default null
+)
+returns void
+language plpgsql
+security definer -- Runs with admin privileges so it can update balances safely
+as $$
+begin
+  -- A. Prevent Double Spending (Idempotency)
+  if exists (
+    select 1 from public.credit_transactions 
+    where related_entity_id = p_entity_id 
+    and reason = p_reason
+  ) then
+    return;
+  end if;
+
+  -- B. Log the transaction
+  insert into public.credit_transactions (user_id, amount, reason, related_entity_id)
+  values (p_user_id, p_amount, p_reason, p_entity_id);
+
+  -- C. Update the user's total balance
+  update public.profiles
+  set credits = coalesce(credits, 0) + p_amount
+  where id = p_user_id;
+end;
+$$;
+
 -- Trigger for New User
 -- (Uncomment if not already created in your instance)
 -- create trigger on_auth_user_created
@@ -224,7 +271,7 @@ $$;
 --   for each row execute procedure public.handle_new_user();
 
 -- ============================================================
--- RLS POLICIES
+-- 4. RLS POLICIES
 -- ============================================================
 
 -- PROFILES
@@ -308,3 +355,8 @@ create policy "Users can insert feedback messages"
 
 create policy "Admins can view all feedback messages"
   on feedback_messages for select using (is_admin());
+
+-- CREDIT TRANSACTIONS
+create policy "Users view own transactions" 
+  on credit_transactions for select 
+  using (auth.uid() = user_id);
