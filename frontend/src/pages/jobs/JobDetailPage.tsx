@@ -19,6 +19,7 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import type { Job } from "@/types/job";
 import { checkSubmissionStatus } from "@/lib/api/submissions";
+import { Helmet } from "react-helmet-async";
 
 /* ─── Component ─────────────────────────────────────────────── */
 export default function JobDetailPage() {
@@ -112,9 +113,58 @@ export default function JobDetailPage() {
     }, 600);
   };
 
+  // Construct Google Jobs Schema (JSON-LD)
+  // This tells Google: "This is a Job Posting"
+  const jobSchema = job ? JSON.stringify({
+    "@context": "https://schema.org/",
+    "@type": "JobPosting",
+    "title": job.title,
+    "description": job.description,
+    "datePosted": job.created_at,
+    "validThrough": job.expires_at || undefined,
+    "hiringOrganization": {
+      "@type": "Organization",
+      "name": job.company,
+      "sameAs": "https://bevis.app" // Your actual domain
+    },
+    "jobLocation": {
+      "@type": "Place",
+      "address": {
+        "@type": "PostalAddress",
+        "addressLocality": job.location || "Remote"
+      }
+    },
+    "baseSalary": job.show_salary_range ? {
+      "@type": "MonetaryAmount",
+      "currency": job.payment_currency || "EUR",
+      "value": {
+        "@type": "QuantitativeValue",
+        "minValue": job.salary_min,
+        "maxValue": job.salary_max,
+        "unitText": job.pay_period === "hourly" ? "HOUR" : "MONTH"
+      }
+    } : undefined
+  }) : null;
+
   /* ─── Render ─────────────────────────────────────────────── */
   return (
     <div className="min-h-screen bg-[var(--color-bg)] px-8 py-10 relative">
+      {job && (
+        <Helmet>
+          {/* Standard Meta Tags */}
+          <title>{`${job.title} at ${job.company} | Bevisly`}</title>
+          <meta name="description" content={`Apply for the ${job.title} role at ${job.company}. Verified proof-based hiring.`} />
+          
+          {/* Open Graph (Facebook/LinkedIn Cards) */}
+          <meta property="og:title" content={`${job.title} at ${job.company}`} />
+          <meta property="og:description" content={job.description?.slice(0, 150) + "..."} />
+          <meta property="og:type" content="website" />
+          
+          {/* Google Jobs Schema Script */}
+          <script type="application/ld+json">{jobSchema}</script>
+        </Helmet>
+      )}
+      
       {/* 🔙 Back Button */}
       <button
         onClick={() => navigate(-1)}

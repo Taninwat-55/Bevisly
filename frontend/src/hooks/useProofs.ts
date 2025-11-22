@@ -4,7 +4,7 @@ import { supabase } from "@/lib/supabaseClient";
 import { useAuth } from "@/hooks/useAuth";
 
 export type ProofCard = {
-  id: string;
+  id: string | null;
   submission_id: string | null;
   job_title: string | null;
   rating: number | null;

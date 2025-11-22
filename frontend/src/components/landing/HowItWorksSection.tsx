@@ -21,7 +21,7 @@ const candidateFlow = [
   {
     icon: CheckCircle2,
     title: "2. Get Reviewed",
-    text: "Employers assess your actual work and share structured feedback directly on Bevis.",
+    text: "Employers assess your actual work and share structured feedback directly on Bevisly.",
   },
   {
     icon: Award,
@@ -65,7 +65,7 @@ export default function HowItWorksSection() {
           transition={{ duration: 0.5 }}
           className="heading-lg mb-2"
         >
-          How Bevis Works
+          How Bevisly Works
         </motion.h2>
         <p className="body-base text-[var(--color-text-muted)] mb-12">
           One fair system where proof replaces promises — for both candidates and employers.

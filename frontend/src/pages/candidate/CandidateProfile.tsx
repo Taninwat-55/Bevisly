@@ -355,7 +355,7 @@ export default function CandidateProfile() {
           Public Profile
         </h2>
         <p className="text-sm text-[var(--color-text-muted)] mb-4">
-          Share your Bevis proof record with potential employers or peers.
+          Share your Bevisly proof record with potential employers or peers.
         </p>
 
         <div className="flex flex-col sm:flex-row items-center justify-center gap-3">

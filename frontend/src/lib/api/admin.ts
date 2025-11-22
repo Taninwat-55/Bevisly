@@ -1,13 +1,13 @@
 import { supabase } from "../supabaseClient";
 import type {
   AdminStats,
-  BevisUser,
+  BevislyUser,
   AdminJob,
   AdminFeedback,
 } from "../../types/admin";
 
 // 🧾 Fetch all users (Updated to query PROFILES)
-export async function getAllUsers(): Promise<BevisUser[]> {
+export async function getAllUsers(): Promise<BevislyUser[]> {
   const { data, error } = await supabase
     .from("profiles") // ✅ Changed from 'users'
     .select("id, email, role, created_at")
@@ -19,7 +19,7 @@ export async function getAllUsers(): Promise<BevisUser[]> {
     data?.map((u) => ({
       id: u.id,
       email: u.email ?? "",
-      role: (u.role as BevisUser["role"]) || "candidate",
+      role: (u.role as BevislyUser["role"]) || "candidate",
       created_at: u.created_at ?? new Date().toISOString(),
     })) ?? []
   );

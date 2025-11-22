@@ -96,7 +96,7 @@ export default function AuthPage() {
           (sessionUser.user_metadata.role as "candidate" | "employer" | "admin") ?? "candidate";
 
         localStorage.setItem(
-          "bevis_user",
+          "bevisly_user",
           JSON.stringify({ id: sessionUser.id, email: sessionUser.email, role })
         );
 
@@ -255,7 +255,7 @@ export default function AuthPage() {
 
         {/* Toggle */}
         <p className="text-sm mt-4 text-center text-[var(--color-text-muted)]">
-          {isLogin ? "New to Bevis?" : "Already have an account?"}{" "}
+          {isLogin ? "New to Bevisly?" : "Already have an account?"}{" "}
           <button
             type="button"
             onClick={() => setIsLogin(!isLogin)}

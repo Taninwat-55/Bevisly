@@ -1,5 +1,5 @@
 -- ============================================================
--- Bevis MVP Database Schema
+-- Bevisly MVP Database Schema
 -- Version: v0.4 (Final MVP Candidate)
 -- Description: Core tables, Views, Functions, and Security Policies
 -- ============================================================
@@ -166,7 +166,7 @@ select
   f.stars as rating,
   f.comments,
   f.created_at as reviewed_at,
-  'https://bevis.app/proof/' || s.id as share_url
+  'https://bevisly.app/proof/' || s.id as share_url
 from submissions s
 join profiles p on s.user_id = p.id
 join jobs j on s.job_id = j.id

@@ -1,13 +1,13 @@
-# 🧩 Bevis — Proof-Based Hiring Platform (MVP)
+# 🧩 Bevisly — Proof-Based Hiring Platform (MVP)
 
-Bevis is a proof-of-skill platform that turns real work into verified experience — creating a fair bridge between learning and employment.  
+Bevisly is a proof-of-skill platform that turns real work into verified experience — creating a fair bridge between learning and employment.  
 Through short, real-world proof tasks, candidates build credibility while employers hire based on verified ability, not promises.
 
 ---
 
 ## 🚀 Overview
 
-**Bevis MVP** is the first working prototype of the platform, designed to demonstrate the core “proof-of-skills” workflow for three user roles:
+**Bevisly MVP** is the first working prototype of the platform, designed to demonstrate the core “proof-of-skills” workflow for three user roles:
 
 | Role          | Description                                                          |
 | ------------- | -------------------------------------------------------------------- |
@@ -19,13 +19,13 @@ Through short, real-world proof tasks, candidates build credibility while employ
 
 ## 🧭 Tech Stack
 
-| Layer               | Technology                                             |
-| ------------------- | ------------------------------------------------------ |
-| **Frontend**        | React + Vite + TypeScript + Tailwind v4                |
-| **Backend**         | Supabase (PostgreSQL + Auth + Row Level Security)      |
+| Layer               | Technology                                                                          |
+| ------------------- | ----------------------------------------------------------------------------------- |
+| **Frontend**        | React + Vite + TypeScript + Tailwind v4                                             |
+| **Backend**         | Supabase (PostgreSQL + Auth + Row Level Security)                                   |
 | **UI Library**      | lucide-react (icons) + react-hot-toast (notifications) + framer-motion (animations) |
-| **State / Routing** | React Router v6 + Context API                          |
-| **Auth**            | Supabase Auth (email + password)                       |
+| **State / Routing** | React Router v6 + Context API                                                       |
+| **Auth**            | Supabase Auth (email + password)                                                    |
 
 ---
 
@@ -185,37 +185,37 @@ Components use semantic color variables for consistent theming.
 
 ## 🧩 Current MVP Scope (✅ Completed)
 
-| Code                 | Feature                                                              | Description                                                |
-| -------------------- | -------------------------------------------------------------------- | ---------------------------------------------------------- |
-| **C1**               | Dashboard                                                            | Candidate overview (proofs completed, average score, etc.) |
-| **C2**               | Job Listings                                                         | Browse available proof tasks/jobs                          |
-| **C3**               | Job Detail                                                           | See job and associated proof task details                  |
-| **C4**               | Proof Workspace                                                      | Submit proof via GitHub link + reflection                  |
-| **C5**               | Feedback View                                                        | See employer feedback, ratings, and comments               |
-| **C6**               | Profile                                                              | Candidate’s personal info + account overview               |
-| **E1**               | Employer Flow + Dashboard                                            | Employer overview (dashboard + home)                       |
-| **E2**               | Job Post + Management                                                | Post Proof-based job roles and manage open positions.      |
-| **E3**               | Review Submissions                                                   | Evaluate candidate proofs, give structured feedback.       |
-| **E4**               | Talent Pool + Manager                                                | Browse verified candidates, manage hiring pipeline.        |
-| **E5**               | Employer Feedback Flow                                               | Submit hiring feedback, final confirmation success page.   |
-| **Admin Dashboard**  | System overview (stats, quick access, and admin actions)             |
-| **Admin Users**      | View, promote, and manage user roles                                 |
-| **Admin Jobs**       | Browse all jobs with employer context                                |
-| **Admin Feedback Log**| View all candidate–employer proof feedback and ratings              |
-| **Admin Feedback Messages**| View user-submitted platform feedback (via floating feedback button) with filters and summaries              |
-| **Admin Data Viewer**| Inspect Supabase data (for dev/admin insight)                        |
-| **Explore Menu**     | New dropdown in navbar with Learn More and About pages               |
-| **Learn More Page**  | Interactive guide for candidates and employers explaining how Bevis works              |
-| **About Page**       | Mission, vision, and platform purpose (non-blockchain MVP version)   |
-| **Feedback Button**  | Universal floating feedback button for all users (bug reports, suggestions, etc.)   |
-| **Feedback Table (DB)**  | New feedback_messages table with RLS + linked to profiles        |
-| **Public Layout**    | Unified layout for /jobs, /leaderboard, /learn-more, /about, etc.    |
-| **Landing Page**     | Modular marketing layout with hero video, CTA, and proof concept     |
-| **Auth System**      | Full Supabase login + signup flow, role-based redirect               |
-| **Navbar & Sidebar** | Responsive navigation; role-aware menus for candidate/employer/admin |
-| **Toast**            | Unified `BevisToaster` + `notify` helper                             |
-| **Theme + Dark Mode**| Consistent color tokens, Tailwind v4 design system                   |
-| **Type Safety**.     | Updated Supabase types, admin/candidate/employer shared TypeScript interfaces         |
+| Code                        | Feature                                                                                         | Description                                                |
+| --------------------------- | ----------------------------------------------------------------------------------------------- | ---------------------------------------------------------- |
+| **C1**                      | Dashboard                                                                                       | Candidate overview (proofs completed, average score, etc.) |
+| **C2**                      | Job Listings                                                                                    | Browse available proof tasks/jobs                          |
+| **C3**                      | Job Detail                                                                                      | See job and associated proof task details                  |
+| **C4**                      | Proof Workspace                                                                                 | Submit proof via GitHub link + reflection                  |
+| **C5**                      | Feedback View                                                                                   | See employer feedback, ratings, and comments               |
+| **C6**                      | Profile                                                                                         | Candidate’s personal info + account overview               |
+| **E1**                      | Employer Flow + Dashboard                                                                       | Employer overview (dashboard + home)                       |
+| **E2**                      | Job Post + Management                                                                           | Post Proof-based job roles and manage open positions.      |
+| **E3**                      | Review Submissions                                                                              | Evaluate candidate proofs, give structured feedback.       |
+| **E4**                      | Talent Pool + Manager                                                                           | Browse verified candidates, manage hiring pipeline.        |
+| **E5**                      | Employer Feedback Flow                                                                          | Submit hiring feedback, final confirmation success page.   |
+| **Admin Dashboard**         | System overview (stats, quick access, and admin actions)                                        |
+| **Admin Users**             | View, promote, and manage user roles                                                            |
+| **Admin Jobs**              | Browse all jobs with employer context                                                           |
+| **Admin Feedback Log**      | View all candidate–employer proof feedback and ratings                                          |
+| **Admin Feedback Messages** | View user-submitted platform feedback (via floating feedback button) with filters and summaries |
+| **Admin Data Viewer**       | Inspect Supabase data (for dev/admin insight)                                                   |
+| **Explore Menu**            | New dropdown in navbar with Learn More and About pages                                          |
+| **Learn More Page**         | Interactive guide for candidates and employers explaining how Bevisly works                     |
+| **About Page**              | Mission, vision, and platform purpose (non-blockchain MVP version)                              |
+| **Feedback Button**         | Universal floating feedback button for all users (bug reports, suggestions, etc.)               |
+| **Feedback Table (DB)**     | New feedback_messages table with RLS + linked to profiles                                       |
+| **Public Layout**           | Unified layout for /jobs, /leaderboard, /learn-more, /about, etc.                               |
+| **Landing Page**            | Modular marketing layout with hero video, CTA, and proof concept                                |
+| **Auth System**             | Full Supabase login + signup flow, role-based redirect                                          |
+| **Navbar & Sidebar**        | Responsive navigation; role-aware menus for candidate/employer/admin                            |
+| **Toast**                   | Unified `BevislyToaster` + `notify` helper                                                      |
+| **Theme + Dark Mode**       | Consistent color tokens, Tailwind v4 design system                                              |
+| **Type Safety**.            | Updated Supabase types, admin/candidate/employer shared TypeScript interfaces                   |
 
 ---
 
@@ -254,7 +254,7 @@ Components use semantic color variables for consistent theming.
   - Candidate → `/`
   - Employer → `/employer`
   - Admin → `/admin`
-- Session caching via localStorage (`bevis_user`)
+- Session caching via localStorage (`bevisly_user`)
 
 ---
 
@@ -296,8 +296,8 @@ This allows instant role switching without re-login or DB changes.
 1. Clone & Install
 
 ```
-git clone https://github.com/Taninwat-55/bevis-mvp.git
-cd bevis-mvp/frontend
+git clone https://github.com/Taninwat-55/bevisly-mvp.git
+cd bevisly-mvp/frontend
 npm install
 ```
 
@@ -318,6 +318,6 @@ npm run dev
 
 ---
 
-**© 2025 Bevis — Proof-Based Hiring Platform (MVP)**
+**© 2025 Bevisly — Proof-Based Hiring Platform (MVP)**
 
 _Built with 💜 by Taninwat “Ice” Kaewpankan_

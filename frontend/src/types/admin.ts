@@ -7,7 +7,7 @@ export interface AdminStats {
   avg_feedback_score: string | number;
 }
 
-export interface BevisUser {
+export interface BevislyUser {
   id: string;
   email: string;
   role: "candidate" | "employer" | "admin";

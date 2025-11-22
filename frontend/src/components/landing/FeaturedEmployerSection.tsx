@@ -18,7 +18,7 @@ export default function FeaturedEmployersSection() {
         <div className="max-w-2xl mx-auto px-6">
           <h2 className="heading-md mb-3">⭐ Future Featured Employers</h2>
           <p className="body-base text-[var(--color-text-muted)]">
-            We’re partnering with early-stage startups and schools to launch the first proof-based roles on Bevis.
+            We’re partnering with early-stage startups and schools to launch the first proof-based roles on Bevisly.
           </p>
           <Link
             to="/auth?role=employer"

@@ -65,7 +65,7 @@ export default function ProblemSection() {
           transition={{ delay: 0.6 }}
           className="mt-16 text-sm text-[var(--color-text-muted)]"
         >
-          Bevis replaces guesswork with verifiable proof — turning every task into real evidence of skill.
+          Bevisly replaces guesswork with verifiable proof — turning every task into real evidence of skill.
         </motion.p>
       </div>
     </section>

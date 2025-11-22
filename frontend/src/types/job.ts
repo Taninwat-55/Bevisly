@@ -20,6 +20,9 @@ export interface Job {
   department?: string | null;
   work_mode?: string | null;
 
+  // 🕒 Timestamps
+  created_at?: string | null;
+  updated_at?: string | null;
   expires_at?: string | null;
 
   proof_tasks?: {

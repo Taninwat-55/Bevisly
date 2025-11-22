@@ -6,7 +6,7 @@ export default function LandingFooter() {
       <div className="mx-auto max-w-7xl px-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         {/* 💬 Brand statement */}
         <div className="text-sm text-[var(--color-text-muted)]">
-          © {new Date().getFullYear()} Bevis. Built for fairness — where real work replaces résumés.
+          © {new Date().getFullYear()} Bevisly. Built for fairness — where real work replaces résumés.
         </div>
 
         {/* 🌐 Footer nav */}
