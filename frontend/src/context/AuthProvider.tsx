@@ -8,28 +8,34 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<SessionUser | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // ✅ Logout handler
-  const signOut = async () => {
-    try {
-      // ✅ Show toast first — BevisToaster will handle rendering
-      toast.success("👋 You've been logged out successfully!", {
-        duration: 1800,
-      });
+  // Signout handler
+ const signOut = async () => {
+  try {
+    // 1. Clear Local Storage FIRST (Synchronous)
+    // This ensures that when the page reloads, the user is gone.
+    localStorage.removeItem("bevis_user");
+    localStorage.removeItem("overrideRole");
+    setUser(null);
 
-      // ✅ Immediately clear session data
-      await supabase.auth.signOut();
-      setUser(null);
-      localStorage.removeItem("bevis_user");
-      localStorage.removeItem("overrideRole");
+    // 2. Trigger Supabase SignOut (Fire and forget)
+    // We don't await this because we are about to force-reload the page anyway.
+    supabase.auth.signOut(); 
 
-      // ✅ Use replace() instead of setTimeout + href
-      // This avoids showing /auth and keeps the toast visible
-      setTimeout(() => window.location.replace("/"), 500);
-    } catch (err) {
-      console.error("Logout error:", err);
-      toast.error("Something went wrong during logout.");
-    }
-  };
+    // 3. Show toast 
+    // Note: Toast might disappear quickly due to reload, but it's good practice.
+    toast.success("👋 Logged out");
+
+    // 4. Force Redirect/Reload to Landing Page
+    // This wipes the app state cleanly.
+    window.location.replace("/");
+
+  } catch (err) {
+    console.error("Logout error:", err);
+    // Even if error, force clear to ensure user isn't stuck
+    localStorage.removeItem("bevis_user");
+    window.location.replace("/");
+  }
+};
 
   useEffect(() => {
     // 1️⃣ Try cached user first

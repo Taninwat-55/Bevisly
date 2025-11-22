@@ -1,3 +1,5 @@
+import { Link } from "react-router-dom";
+
 export default function LandingFooter() {
   return (
     <footer className="bg-[var(--color-bg)] border-t border-[var(--color-border)] py-10">
@@ -12,30 +14,10 @@ export default function LandingFooter() {
           className="flex flex-wrap justify-center gap-4 text-sm"
           aria-label="Footer navigation"
         >
-          <a
-            href="#about"
-            className="text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
-          >
-            About
-          </a>
-          <a
-            href="#how-it-works"
-            className="text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
-          >
-            How It Works
-          </a>
-          <a
-            href="#jobs"
-            className="text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
-          >
-            Jobs
-          </a>
-          <a
-            href="mailto:hello@bevis.test"
-            className="text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
-          >
-            Contact
-          </a>
+          <Link to="/about" className="text-[var(--color-text-muted)] hover:text-[var(--color-text)]">About</Link>
+          <Link to="/learn-more" className="text-[var(--color-text-muted)] hover:text-[var(--color-text)]">Learn More</Link>
+          <Link to="/jobs" className="text-[var(--color-text-muted)] hover:text-[var(--color-text)]">Jobs</Link>
+          <Link to="/privacy" className="text-[var(--color-text-muted)] hover:text-[var(--color-text)]">Privacy Policy</Link>
         </nav>
       </div>
     </footer>

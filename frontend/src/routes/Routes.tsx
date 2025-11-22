@@ -47,6 +47,7 @@ import LearnMorePage from "@/pages/LearnMore/LearnMorePage";
 import AboutPage from "@/pages/shared/AboutPage";
 import JobDetailPage from "@/pages/jobs/JobDetailPage";
 import JobListingPage from "@/pages/jobs/JobListingPage";
+import PrivacyPolicy from "@/pages/shared/PrivacyPolicy";
 
 export const router = createBrowserRouter([
   // 🌐 Public Pages with shared layout
@@ -59,6 +60,7 @@ export const router = createBrowserRouter([
       { path: "/leaderboard", element: <PublicLeaderboard /> },
       { path: "/candidate/:id", element: <PublicCandidateProfilePage /> },
       { path: "/learn-more", element: <LearnMorePage /> },
+      { path: "/privacy", element: <PrivacyPolicy /> },
       { path: "/about", element: <AboutPage /> },
     ],
   },
