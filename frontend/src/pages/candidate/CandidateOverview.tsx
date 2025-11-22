@@ -58,7 +58,7 @@ export default function CandidateHome() {
         <div className="bg-[var(--color-candidate)]/10 border border-[var(--color-border)] rounded-[var(--radius-card)] shadow-[var(--shadow-soft)] p-5 text-center">
           <p className="text-sm text-[var(--color-text-muted)]">
             You currently have{" "}
-            <strong className="text-[var(--color-candidate-dark)]">{credits}</strong> Bevis
+            <strong className="text-[var(--color-candidate-dark)]">{credits}</strong> Bevisly
             Credits — earn more through top-rated proofs.
           </p>
         </div>

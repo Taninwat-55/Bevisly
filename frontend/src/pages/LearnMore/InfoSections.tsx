@@ -27,7 +27,7 @@ export default function InfoSections({ accent }: InfoSectionsProps) {
         />
         <h3 className="heading-sm mb-2">Fairness & Transparency</h3>
         <p className="text-[var(--color-text-muted)] max-w-2xl mx-auto text-sm">
-          Bevis removes résumé bias by focusing on verified outcomes, not
+          Bevisly removes résumé bias by focusing on verified outcomes, not
           backgrounds. Equal tasks, equal metrics, equal opportunity — that’s
           our foundation.
         </p>
@@ -46,7 +46,7 @@ export default function InfoSections({ accent }: InfoSectionsProps) {
             </p>
           </li>
           <li className="py-2">
-            <strong>• Is Bevis free?</strong>
+            <strong>• Is Bevisly free?</strong>
             <p>
               Yes. You can join, complete proof tasks, and earn verified records
               at no cost.

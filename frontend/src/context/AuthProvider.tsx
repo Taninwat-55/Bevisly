@@ -19,7 +19,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       await supabase.auth.signOut();
 
       // 3. Clear our custom app keys
-      localStorage.removeItem("bevis_user");
+      localStorage.removeItem("bevisly_user");
       localStorage.removeItem("overrideRole");
 
       // Note: We DO NOT call setUser(null) here. 
@@ -34,7 +34,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } catch (err) {
       console.error("Logout error:", err);
       // Fallback: ensure storage is cleared even if the API call fails
-      localStorage.removeItem("bevis_user");
+      localStorage.removeItem("bevisly_user");
       localStorage.removeItem("overrideRole");
       window.location.replace("/");
     }
@@ -42,7 +42,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     // 1️⃣ Try cached user first
-    const cachedUser = localStorage.getItem("bevis_user");
+    const cachedUser = localStorage.getItem("bevisly_user");
     if (cachedUser) {
       setUser(JSON.parse(cachedUser));
     }
@@ -60,10 +60,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           role,
         };
         setUser(newUser);
-        localStorage.setItem("bevis_user", JSON.stringify(newUser));
+        localStorage.setItem("bevisly_user", JSON.stringify(newUser));
       } else {
         setUser(null);
-        localStorage.removeItem("bevis_user");
+        localStorage.removeItem("bevisly_user");
       }
       setLoading(false);
     });
@@ -87,10 +87,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             role,
           };
           setUser(newUser);
-          localStorage.setItem("bevis_user", JSON.stringify(newUser));
+          localStorage.setItem("bevisly_user", JSON.stringify(newUser));
         } else {
           setUser(null);
-          localStorage.removeItem("bevis_user");
+          localStorage.removeItem("bevisly_user");
           localStorage.removeItem("overrideRole");
         }
       }
@@ -102,7 +102,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   // 🪄 Listen to localStorage override changes globally
-  const [overrideVersion, setOverrideVersion] = useState(0);
+  const [, setOverrideVersion] = useState(0);
 
   useEffect(() => {
     const onStorageChange = (e: StorageEvent) => {

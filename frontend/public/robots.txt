@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /candidate/dashboard
+Disallow: /employer/dashboard
+Disallow: /admin
+
+Sitemap: https://your-domain.com/sitemap.xml

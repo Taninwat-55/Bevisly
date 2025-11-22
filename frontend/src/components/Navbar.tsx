@@ -24,7 +24,7 @@ export default function Navbar() {
 
   /* 🧭 Append Dashboard link for logged-in users */
   if (user) {
-    const storedUser = JSON.parse(localStorage.getItem("bevis_user") || "{}");
+    const storedUser = JSON.parse(localStorage.getItem("bevisly_user") || "{}");
     const role = localStorage.getItem("overrideRole") || storedUser?.role;
 
     navLinks.splice(1, 0, {
@@ -40,7 +40,7 @@ export default function Navbar() {
 
   /* 🧭 Go to dashboard based on role */
   const goToDashboard = () => {
-    const storedUser = JSON.parse(localStorage.getItem("bevis_user") || "{}");
+    const storedUser = JSON.parse(localStorage.getItem("bevisly_user") || "{}");
     const role = localStorage.getItem("overrideRole") || storedUser?.role;
     if (role === "admin") navigate("/admin");
     else if (role === "employer") navigate("/employer");
@@ -67,7 +67,7 @@ export default function Navbar() {
             onClick={() => (user ? goToDashboard() : navigate("/"))}
             className="text-lg font-semibold text-[var(--color-candidate-dark)] cursor-pointer select-none"
           >
-            Bevis
+            Bevisly
           </h1>
         </div>
 

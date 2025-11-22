@@ -21,7 +21,7 @@ export default function UserMenu() {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  const storedUser = JSON.parse(localStorage.getItem("bevis_user") || "{}");
+  const storedUser = JSON.parse(localStorage.getItem("bevisly_user") || "{}");
   const actualRole = storedUser?.role;
   const overrideRole = localStorage.getItem("overrideRole");
   const effectiveRole = overrideRole || actualRole;

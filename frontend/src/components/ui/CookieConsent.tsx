@@ -5,14 +5,14 @@ export default function CookieConsent() {
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
-    const consent = localStorage.getItem("bevis_cookie_consent");
+    const consent = localStorage.getItem("bevisly_cookie_consent");
     if (!consent) {
       setTimeout(() => setVisible(true), 1000);
     }
   }, []);
 
   const accept = () => {
-    localStorage.setItem("bevis_cookie_consent", "true");
+    localStorage.setItem("bevisly_cookie_consent", "true");
     setVisible(false);
   };
 

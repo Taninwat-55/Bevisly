@@ -23,7 +23,7 @@ export default function CandidateGuide() {
 
   return (
     <>
-      <h2 className="heading-md mb-6 text-center">How Candidates Use Bevis</h2>
+      <h2 className="heading-md mb-6 text-center">How Candidates Use Bevisly</h2>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
         {steps.map(({ icon: Icon, title, text }) => (
           <div

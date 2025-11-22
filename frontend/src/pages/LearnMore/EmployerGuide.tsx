@@ -7,7 +7,7 @@ export default function EmployerGuide() {
     {
       icon: Upload,
       title: "1. Post a Role",
-      text: "Describe your job and Bevis helps generate a relevant micro-proof task.",
+      text: "Describe your job and Bevisly helps generate a relevant micro-proof task.",
     },
     {
       icon: Eye,
@@ -23,7 +23,7 @@ export default function EmployerGuide() {
 
   return (
     <>
-      <h2 className="heading-md mb-6 text-center">How Employers Use Bevis</h2>
+      <h2 className="heading-md mb-6 text-center">How Employers Use Bevisly</h2>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
         {steps.map(({ icon: Icon, title, text }) => (
           <div

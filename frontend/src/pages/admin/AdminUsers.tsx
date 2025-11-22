@@ -1,16 +1,16 @@
 import { useEffect, useState, useMemo } from "react";
 import { getAllUsers, updateUserRole } from "@/lib/api/admin";
 import toast from "react-hot-toast";
-import type { BevisUser } from "@/types/admin";
+import type { BevislyUser } from "@/types/admin";
 import { ArrowDownUp, Search } from "lucide-react";
 import { motion } from "framer-motion";
 
 export default function AdminUsers() {
-  const [users, setUsers] = useState<BevisUser[]>([]);
+  const [users, setUsers] = useState<BevislyUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
-  const [roleFilter, setRoleFilter] = useState<"all" | BevisUser["role"]>(
+  const [roleFilter, setRoleFilter] = useState<"all" | BevislyUser["role"]>(
     "all"
   );
   const [sortOrder, setSortOrder] = useState<"newest" | "oldest">("newest");
@@ -35,14 +35,14 @@ export default function AdminUsers() {
     }
   };
 
-  const handleChangeRole = async (id: string, newRole: BevisUser["role"]) => {
+  const handleChangeRole = async (id: string, newRole: BevislyUser["role"]) => {
     setUpdating(id);
     try {
       await updateUserRole(id, newRole);
       toast.success(`✅ Role updated to ${newRole}`);
       setUsers((prev) =>
         prev.map((u) =>
-          u.id === id ? { ...u, role: newRole as BevisUser["role"] } : u
+          u.id === id ? { ...u, role: newRole as BevislyUser["role"] } : u
         )
       );
     } catch (err: unknown) {
@@ -155,7 +155,7 @@ export default function AdminUsers() {
         <select
           value={roleFilter}
           onChange={(e) =>
-            setRoleFilter(e.target.value as "all" | BevisUser["role"])
+            setRoleFilter(e.target.value as "all" | BevislyUser["role"])
           }
           className="border border-[var(--color-border)] rounded-[var(--radius-button)] px-3 py-2 text-sm bg-[var(--color-surface)]"
         >
@@ -226,7 +226,7 @@ export default function AdminUsers() {
                       onChange={(e) =>
                         handleChangeRole(
                           u.id,
-                          e.target.value as BevisUser["role"]
+                          e.target.value as BevislyUser["role"]
                         )
                       }
                       className={`border border-[var(--color-border)] rounded px-2 py-1 text-sm transition ${

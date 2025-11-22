@@ -21,9 +21,9 @@ export default function LearnMorePage() {
             background: `linear-gradient(to bottom right, color-mix(in srgb, ${accent} 10%, transparent), transparent)`,
           }}
         />
-        <h1 className="heading-lg mb-3 relative z-10">Learn How Bevis Works</h1>
+        <h1 className="heading-lg mb-3 relative z-10">Learn How Bevisly Works</h1>
         <p className="body-base text-[var(--color-text-muted)] max-w-2xl mx-auto relative z-10">
-          Discover how Bevis empowers both candidates and employers through
+          Discover how Bevisly empowers both candidates and employers through
           verified, proof-based hiring — where skill replaces guesswork.
         </p>
 

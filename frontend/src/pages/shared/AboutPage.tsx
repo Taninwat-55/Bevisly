@@ -7,9 +7,9 @@ export default function AboutPage() {
       {/* 🏁 Hero */}
       <section className="text-center py-24 border-b border-[var(--color-border)] bg-[var(--color-surface)] relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[color-mix(in srgb,var(--color-candidate)5%,transparent)] to-transparent opacity-60" />
-        <h1 className="heading-lg mb-4 relative z-10">About Bevis</h1>
+        <h1 className="heading-lg mb-4 relative z-10">About Bevisly</h1>
         <p className="body-base text-[var(--color-text-muted)] max-w-2xl mx-auto relative z-10">
-          Bevis is reimagining hiring through verified, proof-based experience — where
+          Bevisly is reimagining hiring through verified, proof-based experience — where
           skill speaks louder than words.
         </p>
       </section>
@@ -23,7 +23,7 @@ export default function AboutPage() {
           <h2 className="heading-md mb-2">Our Mission</h2>
           <p className="text-[var(--color-text-muted)] leading-relaxed">
             Our mission is to make hiring{" "}
-            <strong>fair, transparent, and skill-first</strong>. Bevis replaces
+            <strong>fair, transparent, and skill-first</strong>. Bevisly replaces
             guesswork and résumé bias with verified proof tasks — giving
             everyone an equal opportunity to show what they can actually do.
           </p>
@@ -52,7 +52,7 @@ export default function AboutPage() {
           </div>
           <h2 className="heading-md mb-2">Our Vision</h2>
           <p className="text-[var(--color-text-muted)] leading-relaxed">
-            Bevis aims to create a{" "}
+            Bevisly aims to create a{" "}
             <strong>new standard of proof-based hiring</strong> — where skill,
             effort, and feedback replace background checks and bias. We believe
             the future of hiring belongs to transparency and fairness.
@@ -65,12 +65,12 @@ export default function AboutPage() {
         <div className="inline-flex items-center justify-center rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-3 mb-4 text-[var(--color-candidate-dark)]">
           <Lightbulb size={22} />
         </div>
-        <h2 className="heading-md mb-3">How We’re Building Bevis</h2>
+        <h2 className="heading-md mb-3">How We’re Building Bevisly</h2>
         <p className="body-base text-[var(--color-text-muted)] max-w-2xl mx-auto mb-6">
-          Bevis starts simple — helping candidates complete small, real-world
+          Bevisly starts simple — helping candidates complete small, real-world
           proof tasks and earn verified recognition from employers. Each proof
           becomes part of a growing skill record — fair, data-backed, and
-          transparent. Soon, Bevis will introduce{" "}
+          transparent. Soon, Bevisly will introduce{" "}
           <strong>AI-assisted review</strong> and{" "}
           <strong>verifiable credentials</strong> to make this process even
           smarter and more reliable.
@@ -110,7 +110,7 @@ export default function AboutPage() {
       {/* 🚀 CTA */}
       <section className="text-center py-20 bg-[var(--color-surface)]">
         <h2 className="heading-md mb-4">
-          Join Bevis — where real work proves real skill.
+          Join Bevisly — where real work proves real skill.
         </h2>
         <div className="flex flex-wrap justify-center gap-3">
           <Link
