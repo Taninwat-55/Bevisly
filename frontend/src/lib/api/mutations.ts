@@ -55,27 +55,6 @@ export async function updateJobDetails(
   // ✅ Safely coerce to EmployerJob type
   return data as EmployerJob;
 }
-// export async function updateJobDetails(
-//   job_id: string,
-//   updates: {
-//     title?: string;
-//     description?: string;
-//     location?: string;
-//     paid?: boolean;
-//     company?: string;
-//     required_skills?: string[];
-//   }
-// ): Promise<EmployerJob> {
-//   const { data, error } = await supabase
-//     .from("jobs")
-//     .update(updates)
-//     .eq("id", job_id)
-//     .select()
-//     .single();
-
-//   if (error) throw error;
-//   return data;
-// }
 
 /**
  * ✅ Update a proof task (title, description, etc.)

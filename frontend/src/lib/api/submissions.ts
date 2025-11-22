@@ -292,7 +292,7 @@ export async function getSubmissionsByJob(job_id: string): Promise<EmployerSubmi
   return data as EmployerSubmission[];
 }
 
-// ✅ FIXED: Prevent duplicates by checking job_id + user_id first
+// Prevent duplicates by checking job_id + user_id first
 export async function startProof(job_id: string, proof_task_id?: string) {
   const user = (await supabase.auth.getUser()).data.user;
   if (!user) throw new Error("Not authenticated");
@@ -327,4 +327,56 @@ export async function startProof(job_id: string, proof_task_id?: string) {
 
   if (error) throw error;
   return data.id;
+}
+
+export async function saveDraft({
+  job_id,
+  submission_link,
+  text_response,
+  reflection,
+  file,
+}: {
+  job_id: string;
+  submission_link?: string;
+  text_response?: string;
+  reflection?: string;
+  file?: File | null;
+}) {
+  const user = (await supabase.auth.getUser()).data.user;
+  if (!user) throw new Error("Not authenticated");
+
+  let uploadedFileUrl: string | null = null;
+
+  // Handle file upload if a new file is provided
+  if (file) {
+    const filePath = `proofs/${user.id}/${Date.now()}-${file.name}`;
+    const { error: uploadErr } = await supabase.storage
+      .from("proofs")
+      .upload(filePath, file);
+    if (uploadErr) throw uploadErr;
+    const { data: publicUrlData } = supabase.storage
+      .from("proofs")
+      .getPublicUrl(filePath);
+    uploadedFileUrl = publicUrlData?.publicUrl || null;
+  }
+
+  // Update submission record
+  const { data, error } = await supabase
+    .from("submissions")
+    .update({
+      submission_link: submission_link || null,
+      // Only update file_url if a new file was uploaded, otherwise keep existing
+      ...(uploadedFileUrl ? { file_url: uploadedFileUrl } : {}),
+      text_response: text_response || null,
+      reflection,
+      status: "in_progress", // Force status to stay in_progress
+      updated_at: new Date().toISOString(), // Track last save
+    })
+    .eq("job_id", job_id)
+    .eq("user_id", user.id)
+    .select()
+    .single();
+
+  if (error) throw error;
+  return data;
 }
