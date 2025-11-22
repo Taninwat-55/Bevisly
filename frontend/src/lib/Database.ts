@@ -354,6 +354,7 @@ export type Database = {
           completed_at: string | null
           created_at: string | null
           employer_notes: string | null
+          file_url: string | null
           hiring_stage: string | null
           id: string
           job_id: string | null
@@ -366,6 +367,7 @@ export type Database = {
           started_at: string | null
           status: string | null
           submission_link: string | null
+          text_response: string | null
           updated_at: string | null
           user_id: string | null
         }
@@ -373,6 +375,7 @@ export type Database = {
           completed_at?: string | null
           created_at?: string | null
           employer_notes?: string | null
+          file_url?: string | null
           hiring_stage?: string | null
           id?: string
           job_id?: string | null
@@ -385,6 +388,7 @@ export type Database = {
           started_at?: string | null
           status?: string | null
           submission_link?: string | null
+          text_response?: string | null
           updated_at?: string | null
           user_id?: string | null
         }
@@ -392,6 +396,7 @@ export type Database = {
           completed_at?: string | null
           created_at?: string | null
           employer_notes?: string | null
+          file_url?: string | null
           hiring_stage?: string | null
           id?: string
           job_id?: string | null
@@ -404,6 +409,7 @@ export type Database = {
           started_at?: string | null
           status?: string | null
           submission_link?: string | null
+          text_response?: string | null
           updated_at?: string | null
           user_id?: string | null
         }

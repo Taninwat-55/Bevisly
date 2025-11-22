@@ -1,9 +1,4 @@
-/**
- * 🧭 JobDetailsSection.tsx
- * Provides job meta details like type, department/area, work mode, and pay.
- * Includes dynamic input for "Other" department option.
- */
-
+// src/components/jobs/JobDetailSection.tsx
 import { useState, useEffect } from "react";
 import type { EmployerJob } from "@/types";
 

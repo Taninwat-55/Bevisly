@@ -10,7 +10,7 @@ import {
 import { 
   Loader2, Clock, Package, Brain, CheckCircle2, 
   Upload, Paperclip, Download, Link as LinkIcon, 
-  FileText, AlignLeft, Lock 
+  FileText, AlignLeft, Lock, Info 
 } from "lucide-react";
 import { motion } from "framer-motion";
 import type { ProofTask } from "@/types/shared";
@@ -103,29 +103,31 @@ const [reflection, setReflection] = useState(""); // For the "Reflection" box
     init();
   }, [proof_task_id]);
 
-  async function handleSubmit(e: React.FormEvent) {
+async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (isLocked) return;
     if (!task) return toast.error("Task not found.");
 
-    // Validate based on mode
-    if (inputMode === "link" && !link.trim()) return toast.error("Please enter a link.");
-    if (inputMode === "file" && !file && !existingFileUrl) return toast.error("Please upload a file.");
-    if (inputMode === "text" && !textSubmission.trim()) return toast.error("Please write a response.");
+    // Validation: Ensure at least ONE thing is submitted
+    const hasLink = link.trim().length > 0;
+    const hasFile = !!file || !!existingFileUrl;
+    const hasText = textSubmission.trim().length > 0;
+
+    if (!hasLink && !hasFile && !hasText) {
+        return toast.error("Please add a link, upload a file, or write a text response.");
+    }
 
     setSubmitting(true);
     try {
       if (!task.job_id) throw new Error("Job ID missing");
       
-      // Decide what to send as the "link"
-      // For text mode, we save the text itself as the submission_link (or you could append it to reflection)
-      const finalLink = inputMode === "link" ? link : inputMode === "text" ? textSubmission : undefined;
-
+      // ✅ Send ALL 3 types of data
       await completeProof({
         job_id: task.job_id,
-        submission_link: finalLink, // Send textSubmission here if mode is text
+        submission_link: link || undefined,
+        text_response: textSubmission || undefined,
         reflection,
-        file: inputMode === "file" ? file : undefined,
+        file: file || undefined,
       });
       
       toast.success("🚀 Proof submitted!");
@@ -264,18 +266,27 @@ const [reflection, setReflection] = useState(""); // For the "Reflection" box
                         <div className="flex-1 min-w-0">
                             <p className="text-sm font-medium text-[var(--color-text)] truncate">Uploaded Submission</p>
                             <p className="text-xs text-[var(--color-text-muted)]">Click to view</p>
+                            <input ref={fileInputRef} type="file" disabled={isLocked} className="hidden" onChange={(e) => setFile(e.target.files?.[0] || null)} />
                         </div>
                         <Download size={16} className="text-[var(--color-text-muted)]" />
                     </a>
                 ) : (
+                    <>
                     <div
-                    onClick={() => !isLocked && fileInputRef.current?.click()}
-                    className={`flex flex-col items-center justify-center border border-[var(--color-border)] border-dashed bg-[var(--color-bg)] rounded-[var(--radius-button)] px-3 py-8 transition ${isLocked ? "opacity-50 cursor-not-allowed" : "cursor-pointer hover:bg-[var(--color-bg-hover)]"}`}
+                        onClick={() => !isLocked && fileInputRef.current?.click()}
+                        className={`flex flex-col items-center justify-center border border-[var(--color-border)] border-dashed bg-[var(--color-bg)] rounded-[var(--radius-button)] px-3 py-8 transition ${isLocked ? "opacity-50 cursor-not-allowed" : "cursor-pointer hover:bg-[var(--color-bg-hover)]"}`}
                     >
-                    <Upload size={24} className="text-[var(--color-candidate)] mb-2" />
-                    <span className="text-sm font-medium text-[var(--color-text)]">{file ? file.name : "Click to upload"}</span>
-                    <input ref={fileInputRef} type="file" disabled={isLocked} className="hidden" onChange={(e) => setFile(e.target.files?.[0] || null)} />
+                        <Upload size={24} className="text-[var(--color-candidate)] mb-2" />
+                        <span className="text-sm font-medium text-[var(--color-text)]">{file ? file.name : "Click to upload"}</span>
+                        <input ref={fileInputRef} type="file" disabled={isLocked} className="hidden" onChange={(e) => setFile(e.target.files?.[0] || null)} />
                     </div>
+                    <div className="flex items-start gap-2 mt-3 text-xs text-[var(--color-text-muted)] bg-[var(--color-surface)] p-2 rounded border border-[var(--color-border)]">
+                        <Info size={14} className="shrink-0 mt-0.5" />
+                        <p>
+                            Note: Only one file can be uploaded. If you have multiple files, please compress them into a single <strong>.zip</strong> file.
+                        </p>
+                    </div>
+                    </>
                 )}
               </div>
             )}

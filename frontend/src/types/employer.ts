@@ -52,7 +52,9 @@ export type EmployerSubmission = {
   job_id: string | null;
   created_at: string | null;
   status: string | null;
-  submission_link: string | null;
+  submission_link: string | null; // Used ONLY for External Links
+  file_url?: string | null;       // For uploaded files
+  text_response?: string | null;  // For text answers
   reflection: string | null;
   proof_tasks: { id: string; title: string | null } | null;
 

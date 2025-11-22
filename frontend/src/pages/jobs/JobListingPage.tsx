@@ -9,6 +9,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useJobs } from "@/hooks/useJobs";
 import { getEmployerJobs, deleteJob } from "@/lib/api/jobs"; 
+import { supabase } from "@/lib/supabaseClient"; // ✅ Added Import
 import {
   Loader2,
   Briefcase,
@@ -51,6 +52,9 @@ export default function JobListingPage() {
   // Employer jobs
   const [employerJobs, setEmployerJobs] = useState<JobListItem[]>([]);
   const [employerLoading, setEmployerLoading] = useState(false);
+  
+  // ✅ NEW: Track which jobs the candidate has already applied to
+  const [appliedJobIds, setAppliedJobIds] = useState<Set<string>>(new Set());
 
   /* ─── Filters ─────────────────────────────── */
   const [query, setQuery] = useState("");
@@ -82,18 +86,33 @@ export default function JobListingPage() {
     loadEmployerJobs();
   }, [role, user?.id]);
 
-  /* ─── ✅ Handle Delete ─────────────────────────────── */
+  /* ─── ✅ NEW: Fetch Applied Jobs (Candidate Only) ───── */
+  useEffect(() => {
+    if (role === "employer" || !user?.id) return; // Skip for employers or guests
+
+    const fetchApplied = async () => {
+      const { data } = await supabase
+        .from("submissions")
+        .select("job_id")
+        .eq("user_id", user.id);
+
+      if (data) {
+        const ids = data.map((s) => s.job_id).filter((id): id is string => !!id);
+        setAppliedJobIds(new Set(ids));
+      }
+    };
+    fetchApplied();
+  }, [role, user?.id]);
+
+  /* ─── Handle Delete ─────────────────────────────── */
   const handleDelete = async (e: React.MouseEvent, jobId: string) => {
-    e.stopPropagation(); // Prevent clicking the card itself
+    e.stopPropagation();
     
     if (!confirm("Are you sure you want to delete this job?")) return;
 
     try {
-      await deleteJob(jobId); // 1. API Call
-      
-      // 2. ✅ CRITICAL: Update Local State to remove the item from UI
+      await deleteJob(jobId);
       setEmployerJobs((prev) => prev.filter((job) => job.id !== jobId));
-      
       toast.success("Job removed successfully");
     } catch (err) {
       console.error(err);
@@ -110,8 +129,13 @@ export default function JobListingPage() {
 
   /* ─── Data source ─────────────────────────────── */
   const jobs: JobListItem[] = useMemo(() => {
-    return role === "employer" ? employerJobs : (publicJobs as JobListItem[]);
-  }, [role, employerJobs, publicJobs]);
+    if (role === "employer") return employerJobs;
+
+    // ✅ Filter out applied jobs for candidates
+    return (publicJobs as JobListItem[]).filter(
+      (job) => !appliedJobIds.has(job.id)
+    );
+  }, [role, employerJobs, publicJobs, appliedJobIds]);
 
   const isLoading = loading || employerLoading;
 
@@ -188,7 +212,6 @@ export default function JobListingPage() {
     });
   }, [jobs, debouncedQuery, filters, locations, companies, categories]);
 
-  // ... (Handlers match previous file) ...
   const handleRemoveChip = (type: string) => {
     switch (type) {
       case "query":
@@ -244,13 +267,35 @@ export default function JobListingPage() {
       </div>
     );
 
-  /* ─── Candidate empty state ─────────────────────────────── */
-  if (!jobs.length)
+  /* ─── Candidate empty state (After filtering applied jobs) ─── */
+  if (role !== "employer" && !filteredJobs.length) {
+    // Check if publicJobs has items but they were all filtered out by "applied" logic
+    if (publicJobs.length > 0 && appliedJobIds.size > 0 && jobs.length === 0) {
+        return (
+            <div className="min-h-screen bg-[var(--color-bg)] px-8 py-10 flex flex-col items-center justify-center text-center">
+                <div className="p-4 bg-[var(--color-success)]/10 rounded-full mb-4 text-[var(--color-success)]">
+                    <Clock size={32} />
+                </div>
+                <h2 className="heading-md mb-2">All caught up!</h2>
+                <p className="text-[var(--color-text-muted)] max-w-md">
+                    You've applied to all currently available jobs. Check your dashboard for updates on your submissions.
+                </p>
+                <button 
+                    onClick={() => navigate("/candidate/dashboard")}
+                    className="mt-6 px-5 py-2 bg-[var(--color-candidate)] text-white rounded-[var(--radius-button)] hover:brightness-110 transition"
+                >
+                    Go to Dashboard
+                </button>
+            </div>
+        );
+    }
+
     return (
       <div className="p-10 text-center text-[var(--color-text-muted)]">
-        No jobs available right now — check back soon!
+        No jobs match your search — try adjusting filters!
       </div>
     );
+  }
 
   /* ─── Main Layout ─────────────────────────────── */
   return (
@@ -283,8 +328,6 @@ export default function JobListingPage() {
       {/* Candidate/Public Filters */}
       {role !== "employer" && (
         <>
-          {/* ... (Your existing filter UI stays here) ... */}
-          {/* Copied the Filter section from your original file for completeness */}
           <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-card)] shadow-[var(--shadow-soft)] p-4 mb-4 space-y-4">
             <div className="relative">
               <Search size={16} className={`absolute left-3 top-1/2 -translate-y-1/2 transition-colors ${query ? "text-[var(--color-candidate)]" : "text-[var(--color-text-muted)]"}`} />
@@ -316,11 +359,9 @@ export default function JobListingPage() {
           const proof = hasProofTasks(job) ? job.proof_tasks[0] : undefined;
           const handleCTA = () => {
             if (role === "employer") navigate(`/employer/jobs/${job.id}`);
-            else if (!user) navigate(`/jobs/${job.id}`); // ✅ Visitors also go to detail page
             else navigate(`/jobs/${job.id}`);
           };
 
-          // ✅ Deadline Calc
           let daysLeft: number | null = null;
           if (job.expires_at) {
             const diff = new Date(job.expires_at).getTime() - new Date().getTime();
@@ -353,7 +394,6 @@ export default function JobListingPage() {
                 <Briefcase size={14} className="inline mr-1 opacity-80" />
                 {job.company || "Unknown"} {job.location && `• ${job.location}`}
 
-                {/* ✅ Deadline Badge */}
                 {daysLeft !== null && daysLeft > 0 && (
                    <span className={`ml-2 inline-flex items-center gap-1 text-xs font-medium ${
                      daysLeft <= 3 ? "text-[var(--color-error)]" : "text-[var(--color-warning)]"
@@ -375,7 +415,6 @@ export default function JobListingPage() {
                 </div>
               )}
 
-              {/* (Existing salary info code) */}
               {job.show_salary_range && job.salary_min && job.salary_max && (
                 <p className="text-sm text-[var(--color-text)] font-medium mb-3">
                   💰 {job.salary_min.toLocaleString()} –{" "}
@@ -400,7 +439,6 @@ export default function JobListingPage() {
                     <FolderOpen size={14} /> Subs
                   </button>
 
-                  {/* ✅ NEW DELETE BUTTON */}
                   <button
                     onClick={(e) => handleDelete(e, job.id)}
                     className="px-3 border border-[var(--color-border)] text-[var(--color-error)] py-2 rounded-[var(--radius-button)] hover:bg-[var(--color-error)] hover:text-white transition flex items-center justify-center"
@@ -418,11 +456,7 @@ export default function JobListingPage() {
                       : "bg-[var(--color-candidate)] text-white hover:bg-[var(--color-candidate-dark)]"
                   }`}
                 >
-                  {!user ? (
-                    "View Details →"
-                  ) : (
-                    "View Details →"
-                  )}
+                  {!user ? "View Details →" : "View Details →"}
                 </button>
               )}
             </div>

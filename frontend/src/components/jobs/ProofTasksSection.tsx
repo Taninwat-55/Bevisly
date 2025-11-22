@@ -1,10 +1,9 @@
-// src/components/jobs/ProofTasksSection.tsx
 import { useState } from "react";
 import { Trash2, UploadCloud, Paperclip, Clock } from "lucide-react";
 import { supabase } from "@/lib/supabaseClient";
 import toast from "react-hot-toast";
 import type { ProofTask } from "@/types";
-import MarkdownEditor from "@/components/ui/MarkdownEditor"; // ✅ Import
+import MarkdownEditor from "@/components/ui/MarkdownEditor";
 
 interface ProofTasksSectionProps {
   proofTasks: ProofTask[];
@@ -12,11 +11,18 @@ interface ProofTasksSectionProps {
   errors?: string;
 }
 
-const TIME_TIERS = [
-  { label: "Quick Task (~30 min)", minutes: 30, credits: 5 },
-  { label: "Standard Task (~1 hour)", minutes: 60, credits: 10 },
-  { label: "Extended Task (~2 hours)", minutes: 120, credits: 20 },
-  { label: "Deep Work (~4 hours)", minutes: 240, credits: 40 },
+// ✅ Simple, clean time options
+const TIME_OPTIONS = [
+  "15 mins",
+  "30 mins",
+  "45 mins",
+  "1 hour",
+  "1.5 hours",
+  "2 hours",
+  "3 hours",
+  "4 hours",
+  "1 day",
+  "Multiple days"
 ];
 
 export default function ProofTasksSection({
@@ -32,7 +38,7 @@ export default function ProofTasksSection({
     onChange(updated);
   };
 
-  // ✅ Handle File Upload for Task Assets
+  // Handle File Upload for Task Assets
   const handleFileUpload = async (index: number, files: FileList | null) => {
     if (!files || files.length === 0) return;
     setUploading(true);
@@ -61,26 +67,6 @@ export default function ProofTasksSection({
     } finally {
       setUploading(false);
     }
-  };
-
-  // ✅ Simple Credit Calculation Logic
-  const calculateCredits = (timeStr: string) => {
-    if (!timeStr) return 0;
-    const lower = timeStr.toLowerCase();
-    if (lower.includes("hour") || lower.includes("hr")) return 10;
-    if (lower.includes("30") || lower.includes("min")) return 5;
-    return 5;
-  };
-
-  const handleDurationChange = (index: number, minutes: number) => {
-    const tier = TIME_TIERS.find((t) => t.minutes === minutes);
-    const updated = [...proofTasks];
-    updated[index] = { 
-      ...updated[index], 
-      duration_minutes: minutes,
-      expected_time: tier ? tier.label : `${minutes} minutes` // Sync string for display
-    };
-    onChange(updated);
   };
 
   return (
@@ -121,7 +107,6 @@ export default function ProofTasksSection({
                 value={task.title}
                 onChange={(e) => handleChange(index, "title", e.target.value)}
                 placeholder="e.g. Build a Landing Page"
-                // ✅ FIXED: Added text color and standardized background
                 className="w-full border border-[var(--color-border)] rounded-[var(--radius-input)] p-2 bg-[var(--color-bg)] text-[var(--color-text)] focus:outline-none focus:ring-2 focus:ring-[var(--color-employer)]"
               />
             </div>
@@ -137,34 +122,6 @@ export default function ProofTasksSection({
               />
             </div>
 
-            {/* ─── ✅ NEW: Standardized Time & Credit Selector ─── */}
-          <div className="grid sm:grid-cols-2 gap-5">
-            <div>
-              <label className="block text-sm font-medium text-[var(--color-text)] mb-1">
-                Estimated Effort & Reward
-              </label>
-              <div className="relative">
-                <Clock size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)]" />
-                <select
-                  value={task.duration_minutes ?? 30}
-                  onChange={(e) => handleDurationChange(index, Number(e.target.value))}
-                  className="w-full pl-9 border border-[var(--color-border)] rounded-[var(--radius-input)] p-2 bg-[var(--color-bg)] text-[var(--color-text)] focus:outline-none focus:ring-2 focus:ring-[var(--color-employer)] appearance-none"
-                >
-                  {TIME_TIERS.map((tier) => (
-                    <option key={tier.minutes} value={tier.minutes}>
-                      {tier.label} — {tier.credits} Credits
-                    </option>
-                  ))}
-                </select>
-              </div>
-              
-              {/* Helper text to reinforce the value */}
-              <p className="text-xs text-[var(--color-text-muted)] mt-1.5">
-                This sets the proof value. Candidates earn <strong className="text-[var(--color-employer)]">{TIME_TIERS.find(t => t.minutes == (task.duration_minutes || 30))?.credits} credits</strong> for completion.
-              </p>
-            </div>
-          </div>
-
             {/* Attachments Upload */}
             <div>
               <label className="block text-sm font-medium text-[var(--color-text)] mb-2">
@@ -175,7 +132,7 @@ export default function ProofTasksSection({
               {task.attachments && task.attachments.length > 0 && (
                 <div className="flex flex-wrap gap-2 mb-3">
                   {task.attachments.map((url, i) => (
-                    <div key={i} className="flex items-center gap-1 text-xs bg-[var(--color-surface)] border border-[var(--color-border)] px-2 py-1 rounded">
+                    <div key={i} className="flex text-[var(--color-text)] items-center gap-1 text-xs bg-[var(--color-surface)] border border-[var(--color-border)] px-2 py-1 rounded">
                       <Paperclip size={12} />
                       <a href={url} target="_blank" rel="noreferrer" className="hover:underline max-w-[150px] truncate">
                         Attachment {i + 1}
@@ -197,23 +154,27 @@ export default function ProofTasksSection({
               </label>
             </div>
 
-            {/* Meta fields */}
+            {/* Meta fields (Expected Time) */}
             <div className="grid sm:grid-cols-2 gap-5">
               <div>
                 <label className="block text-sm font-medium text-[var(--color-text)] mb-1">
                   Expected Time
                 </label>
-                <input
-                  type="text"
-                  placeholder="e.g. 1 hour"
-                  value={task.expected_time ?? ""}
-                  onChange={(e) => handleChange(index, "expected_time", e.target.value)}
-                  // ✅ FIXED: Added text color and standardized background
-                  className="w-full border border-[var(--color-border)] rounded-[var(--radius-input)] p-2 bg-[var(--color-bg)] text-[var(--color-text)] focus:outline-none focus:ring-2 focus:ring-[var(--color-employer)]"
-                />
-                <p className="text-xs text-[var(--color-success)] mt-2">
-                  ✨ Candidates earn ~{calculateCredits(task.expected_time || "")} credits for this task.
-                </p>
+                <div className="relative">
+                  <Clock size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)]" />
+                  <select
+                    value={task.expected_time ?? ""}
+                    onChange={(e) => handleChange(index, "expected_time", e.target.value)}
+                    className="w-full pl-9 border border-[var(--color-border)] rounded-[var(--radius-input)] p-2 bg-[var(--color-bg)] text-[var(--color-text)] focus:outline-none focus:ring-2 focus:ring-[var(--color-employer)] appearance-none"
+                  >
+                    <option value="" disabled>Select duration</option>
+                    {TIME_OPTIONS.map((t) => (
+                      <option key={t} value={t}>
+                        {t}
+                      </option>
+                    ))}
+                  </select>
+                </div>
               </div>
             </div>
           </div>

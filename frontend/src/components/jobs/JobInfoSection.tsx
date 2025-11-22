@@ -1,9 +1,6 @@
-/**
- * 🧩 JobInfoSection.tsx
- * Handles basic job information including Description & Requirements.
- */
+// src/components/jobs/JobInfoSection.tsx
 import type { EmployerJob } from "@/types";
-import MarkdownEditor from "@/components/ui/MarkdownEditor"; // ✅ Import
+import MarkdownEditor from "@/components/ui/MarkdownEditor"; 
 
 interface JobInfoSectionProps {
   values: Partial<EmployerJob & { requirements?: string }>;

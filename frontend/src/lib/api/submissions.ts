@@ -148,14 +148,72 @@ export async function checkSubmissionStatus(job_id: string) {
   return data;
 }
 
+export async function getCandidateFeedback(user_id: string) {
+  const { data, error } = await supabase
+    .from("submissions")
+    .select(
+      `
+      id,
+      created_at,
+      status,
+      submission_link,       
+      reflection,            
+      jobs (title, company),
+      proof_tasks (title),
+      feedback (
+        strengths,
+        improvements,
+        stars,
+        comments,
+        created_at
+      )
+    `
+    )
+    .eq("user_id", user_id)
+    .order("created_at", { ascending: false });
+
+  if (error) throw error;
+  return data as CandidateFeedbackEntry[];
+}
+
+// 1. Update getSubmissionById to select new columns
+export async function getSubmissionById(submission_id: string) {
+  const { data, error } = await supabase
+    .from("submissions")
+    .select(`
+      id,
+      user_id,
+      job_id,
+      status,
+      submission_link,
+      file_url,       
+      text_response,  
+      reflection,
+      resume_url,
+      created_at,
+      proof_tasks ( id, title, description ),
+      jobs ( id, title, company ),
+      profiles:user_id ( full_name, email, resume_url ), 
+      feedback ( stars, strengths, improvements )
+`)
+    .eq("id", submission_id)
+    .single();
+
+  if (error) throw error;
+  return data;
+}
+
+// 2. Update submitProof to save all fields
 export async function submitProof({
   job_id,
   submission_link,
+  text_response, // ✅ Accept text separately
   reflection,
   file,
 }: {
   job_id: string;
   submission_link?: string;
+  text_response?: string;
   reflection?: string;
   file?: File | null;
 }) {
@@ -185,7 +243,9 @@ export async function submitProof({
   const { data, error } = await supabase
     .from("submissions")
     .update({
-      submission_link: uploadedFileUrl || submission_link || null,
+      submission_link: submission_link || null, // Only external link here
+      file_url: uploadedFileUrl || null,        // ✅ Save file here
+      text_response: text_response || null,     // ✅ Save text here
       reflection,
       status: "submitted",
       completed_at: new Date().toISOString(),
@@ -193,64 +253,21 @@ export async function submitProof({
     })
     .eq("job_id", job_id)
     .eq("user_id", user.id)
-    .select(); // 👈 REMOVED .single() to prevent crashing on duplicates
+    .select();
 
   if (error) throw error;
-  
-  // Return the first updated row if multiple exist
   return data?.[0];
 }
 
-export async function getCandidateFeedback(user_id: string) {
-  const { data, error } = await supabase
-    .from("submissions")
-    .select(
-      `
-      id,
-      created_at,
-      status,
-      submission_link,       
-      reflection,            
-      jobs (title, company),
-      proof_tasks (title),
-      feedback (
-        strengths,
-        improvements,
-        stars,
-        comments,
-        created_at
-      )
-    `
-    )
-    .eq("user_id", user_id)
-    .order("created_at", { ascending: false });
-
-  if (error) throw error;
-  return data as CandidateFeedbackEntry[];
-}
-
-export async function getSubmissionById(submission_id: string) {
-  const { data, error } = await supabase
-    .from("submissions")
-    .select(`
-      id,
-      user_id,
-      job_id,
-      status,
-      submission_link,
-      reflection,
-      resume_url,
-      created_at,
-      proof_tasks ( id, title, description ),
-      jobs ( id, title, company ),
-      profiles:user_id ( full_name, email, resume_url ), 
-      feedback ( stars, strengths, improvements )
-`)
-    .eq("id", submission_id)
-    .single();
-
-  if (error) throw error;
-  return data;
+// 3. Update completeProof signature to match
+export async function completeProof(params: {
+  job_id: string;
+  submission_link?: string;
+  text_response?: string;
+  reflection?: string;
+  file?: File | null;
+}) {
+  return submitProof(params);
 }
 
 export async function getSubmissionsByJob(job_id: string): Promise<EmployerSubmission[]> {
@@ -310,18 +327,4 @@ export async function startProof(job_id: string, proof_task_id?: string) {
 
   if (error) throw error;
   return data.id;
-}
-
-export async function completeProof({
-  job_id,
-  submission_link,
-  reflection,
-  file,
-}: {
-  job_id: string;
-  submission_link?: string;
-  reflection?: string;
-  file?: File | null;
-}) {
-  return submitProof({ job_id, submission_link, reflection, file });
 }
