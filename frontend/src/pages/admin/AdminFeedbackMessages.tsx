@@ -10,7 +10,6 @@ import {
   BarChart2,
 } from "lucide-react";
 import toast from "react-hot-toast";
-import BackButton from "@/components/ui/BackButton";
 import type { FeedbackMessage } from "@/types/admin";
 import { motion } from "framer-motion";
 
@@ -88,7 +87,6 @@ export default function AdminFeedbackMessages() {
     <div className="min-h-screen bg-[var(--color-bg)] text-[var(--color-text)] px-6 md:px-10 py-12 transition-colors">
       {/* 🧭 Header */}
       <header className="mb-8 flex flex-col gap-2">
-        <BackButton to="/admin" label="Back to Dashboard" className="w-fit" />
         <h1 className="heading-lg flex items-center gap-2">
           💬 Platform Feedback
         </h1>

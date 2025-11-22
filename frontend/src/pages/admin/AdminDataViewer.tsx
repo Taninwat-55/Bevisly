@@ -2,11 +2,10 @@ import { useEffect, useState } from "react";
 import { getTableData, getTableSchema } from "@/lib/api/admin";
 import toast from "react-hot-toast";
 import { ArrowDownUp, Database, RefreshCw, Search } from "lucide-react";
-import BackButton from "@/components/ui/BackButton";
 import { motion } from "framer-motion";
 
 export default function AdminDataViewer() {
-  const [table, setTable] = useState("users");
+  const [table, setTable] = useState("profiles");
   const [data, setData] = useState<{
     columns: string[];
     rows: Record<string, unknown>[];
@@ -72,7 +71,6 @@ export default function AdminDataViewer() {
     <div className="min-h-screen bg-[var(--color-bg)] text-[var(--color-text)] px-6 md:px-10 py-12 transition-colors">
       {/* 🧭 Header */}
       <header className="mb-8 flex flex-col gap-2">
-        <BackButton to="/admin" label="Back to Dashboard" className="w-fit" />
         <div className="flex flex-wrap items-center justify-between gap-3">
           <h1 className="heading-lg flex items-center gap-2">
             <Database size={22} /> Data Viewer
@@ -84,7 +82,7 @@ export default function AdminDataViewer() {
               onChange={(e) => setTable(e.target.value)}
               className="border border-[var(--color-border)] rounded-[var(--radius-button)] px-3 py-2 text-sm bg-[var(--color-surface)]"
             >
-              <option value="users">users</option>
+              <option value="profiles">profiles</option>
               <option value="jobs">jobs</option>
               <option value="submissions">submissions</option>
               <option value="feedback">feedback</option>

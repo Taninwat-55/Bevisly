@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
-import BackButton from "@/components/ui/BackButton";
 import { useTheme } from "@/hooks/useTheme";
 import { motion } from "framer-motion";
 import toast from "react-hot-toast";
@@ -72,7 +71,6 @@ export default function UserSettings() {
   return (
     <div className="min-h-screen bg-[var(--color-bg)] text-[var(--color-text)] px-6 md:px-10 py-12 transition-colors">
       <header className="mb-8 flex flex-col gap-2">
-        <BackButton to={`/${user?.role}`} label="Back" className="mb-2 border-transparent hover:border-[var(--color-border)]" />
         <h1 className="heading-lg flex items-center gap-2">⚙️ Account Settings</h1>
       </header>
 

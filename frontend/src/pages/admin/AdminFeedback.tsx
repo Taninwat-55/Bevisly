@@ -3,7 +3,6 @@ import { getAllFeedbackLogs } from "@/lib/api/admin";
 import type { AdminFeedback } from "@/types/admin";
 import toast from "react-hot-toast";
 import { ArrowDownUp, Star, Search } from "lucide-react";
-import BackButton from "@/components/ui/BackButton";
 import { motion } from "framer-motion";
 
 export default function AdminFeedback() {
@@ -83,7 +82,6 @@ export default function AdminFeedback() {
     <div className="min-h-screen bg-[var(--color-bg)] text-[var(--color-text)] px-6 md:px-10 py-12 transition-colors">
       {/* 🧭 Header */}
       <header className="mb-8 flex flex-col gap-2">
-        <BackButton to="/admin" label="Back to Dashboard" className="w-fit" />
         <div className="flex items-center justify-between flex-wrap gap-3">
           <h1 className="heading-lg flex items-center gap-2">
             🗂️ Feedback Logs
@@ -156,6 +154,7 @@ export default function AdminFeedback() {
               <th className="py-3 px-4 text-left font-medium">Rating</th>
               <th className="py-3 px-4 text-left font-medium">Comments</th>
               <th className="py-3 px-4 text-left font-medium">Created</th>
+              <th className="py-3 px-4 text-left font-medium">Action</th>
             </tr>
           </thead>
           <tbody>
@@ -190,7 +189,17 @@ export default function AdminFeedback() {
                   </td>
                   <td className="py-3 px-4 text-[var(--color-text-muted)] whitespace-nowrap">
                     {new Date(f.created_at).toLocaleDateString()}
-                  </td>
+                  </td>      
+                  <td className="py-3 px-4">
+          <a 
+            href={`/employer/review/${f.submission_id}`} 
+            target="_blank" 
+            rel="noreferrer"
+            className="text-[var(--color-employer)] hover:underline font-medium"
+          >
+            View Proof
+          </a>
+        </td>
                 </tr>
               ))
             ) : (

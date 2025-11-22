@@ -27,6 +27,7 @@ export interface AdminJob {
 
 export interface AdminFeedback {
   id: string;
+  submission_id: string;
   job_title: string;
   candidate_email: string;
   employer_email: string;

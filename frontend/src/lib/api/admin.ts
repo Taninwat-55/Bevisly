@@ -39,13 +39,12 @@ export async function getAllJobs(): Promise<AdminJob[]> {
       created_at,
       featured, 
       profiles!employer_id ( email ) 
-    ` // ✅ Changed users!employer_id to profiles!employer_id
+    ` 
     )
     .order("created_at", { ascending: false });
 
   if (error) throw error;
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   type RawJob = any; 
 
   return (
@@ -68,6 +67,7 @@ export async function getAllFeedbackLogs(): Promise<AdminFeedback[]> {
     .select(
       `
       id,
+      submission_id,
       rating,
       comments,
       stars,
@@ -77,13 +77,12 @@ export async function getAllFeedbackLogs(): Promise<AdminFeedback[]> {
         profiles!submissions_user_id_fkey ( email )
       ),
       employer:profiles!feedback_employer_id_fkey ( email )
-    ` // ✅ Updated joins to use profiles
+    ` 
     )
     .order("created_at", { ascending: false });
 
   if (error) throw error;
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   type RawFeedback = any;
 
   return (
@@ -95,12 +94,10 @@ export async function getAllFeedbackLogs(): Promise<AdminFeedback[]> {
       rating: f.rating ?? f.stars ?? null,
       comment: f.comments ?? "",
       created_at: f.created_at ?? new Date().toISOString(),
+      submission_id: f.submission_id,
     })) ?? []
   );
 }
-
-// ... Keep toggleFeaturedJob, updateUserRole, getAdminStats, etc. as they were ...
-// (Ensure updateUserRole updates 'profiles' table, not 'users')
 
 export async function updateUserRole(userId: string, newRole: string) {
   const { error } = await supabase
@@ -111,7 +108,6 @@ export async function updateUserRole(userId: string, newRole: string) {
   return true;
 }
 
-// ... Keep the rest of the file unchanged ...
 export async function toggleFeaturedJob(jobId: string, newState: boolean) {
   const { error } = await supabase
     .from("jobs")
@@ -158,7 +154,6 @@ export async function getAdminStats(): Promise<AdminStats> {
 }
 
 export async function getTableData(table: string, limit = 25, offset = 0) {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const sb = supabase as any; 
   const { data, error } = await sb
     .from(table)
@@ -171,19 +166,17 @@ export async function getTableData(table: string, limit = 25, offset = 0) {
 
 // 🧩 Fetch column schema (name + type) safely
 export async function getTableSchema(table: string) {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const sb = supabase as any;
   
   const { data, error } = await sb
     .from("information_schema.columns")
     .select("column_name, data_type")
-    .eq("table_name", table); // ✅ Now we use the 'table' variable to filter
+    .eq("table_name", table); 
 
   if (error) {
     console.warn("Schema fetch failed:", error.message);
     return [];
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return data?.filter((c: any) => typeof c.column_name === 'string') ?? [];
 }

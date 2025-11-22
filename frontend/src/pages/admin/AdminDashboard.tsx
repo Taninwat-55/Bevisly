@@ -1,4 +1,3 @@
-import { supabase } from "../../lib/supabaseClient";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import { useEffect, useState } from "react";
@@ -44,12 +43,6 @@ export default function AdminDashboard() {
     setOverride?.(role);
     toast.success(`🔁 Viewing as ${role}`);
     navigate(role === "admin" ? "/admin" : `/${role}`, { replace: true });
-  };
-
-  const promoteUser = async () => {
-    const { error } = await supabase.rpc("promote_to_admin");
-    if (error) toast.error(error.message);
-    else toast.success("✅ You are now an admin!");
   };
 
   return (
@@ -208,14 +201,6 @@ export default function AdminDashboard() {
             rounded-[var(--radius-button)] hover:brightness-110 transition shadow-[var(--shadow-soft)]"
           >
             <RefreshCcw size={16} /> Reset to Admin
-          </button>
-
-          <button
-            onClick={promoteUser}
-            className="flex items-center gap-2 bg-[var(--color-success)] text-white px-5 py-2
-            rounded-[var(--radius-button)] hover:brightness-110 transition shadow-[var(--shadow-soft)]"
-          >
-            <ShieldCheck size={16} /> Promote Current User
           </button>
         </div>
 
