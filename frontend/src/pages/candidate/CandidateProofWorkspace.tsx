@@ -38,9 +38,6 @@ const [reflection, setReflection] = useState(""); // For the "Reflection" box
   const [isLocked, setIsLocked] = useState(false);
   const [existingFileUrl, setExistingFileUrl] = useState<string | null>(null);
 
-  // Use textSubmission if in text mode
-  const finalLink = inputMode === "link" ? link : inputMode === "text" ? textSubmission : undefined;
-
   // Helper: Credit Calc
   const calculateCredits = (timeStr?: string | null) => {
     if (!timeStr) return 5;
