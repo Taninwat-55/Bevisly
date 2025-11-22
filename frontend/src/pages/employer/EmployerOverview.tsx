@@ -4,10 +4,12 @@ import { motion } from "framer-motion";
 import { useAuth } from "@/hooks/useAuth";
 import { getEmployerStats } from "@/lib/api/employer";
 import type { EmployerStats } from "@/types";
+import { supabase } from "@/lib/supabaseClient";
 
 export default function EmployerHome() {
   const { user } = useAuth();
   const [loading, setLoading] = useState(true);
+  const [companyName, setCompanyName] = useState("");
   const [stats, setStats] = useState<EmployerStats>({
     jobsPosted: 0,
     activeSubmissions: 0,
@@ -21,6 +23,14 @@ export default function EmployerHome() {
       try {
         const result = await getEmployerStats(user.id);
         setStats(result);
+
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("company_name")
+          .eq("id", user.id)
+          .single();
+        
+        if (profile?.company_name) setCompanyName(profile.company_name);
       } catch (err) {
         console.error("Error fetching employer stats:", err);
       } finally {
@@ -49,7 +59,7 @@ export default function EmployerHome() {
       <header className="mb-10">
         <div className="bg-gradient-to-r from-[var(--color-employer)]/10 to-transparent border border-[var(--color-border)] rounded-[var(--radius-card)] p-6 mb-8">
           <h1 className="heading-md text-[var(--color-employer-dark)] mb-1">
-            👋 Welcome back, {user?.email?.split("@")[0]}!
+            👋 Welcome back, {companyName || user?.email?.split("@")[0]}!
           </h1>
           <p className="body-base text-[var(--color-text-muted)]">
             Manage your hiring workflow and discover top talent.
@@ -77,10 +87,15 @@ export default function EmployerHome() {
         {submissions.length ? (
           <ul className="divide-y divide-[var(--color-border)]">
             {submissions.map((s) => (
-              <li key={s.id} className="py-3 text-sm">
-                <span className="font-medium">{s.proof_tasks?.title}</span>{" "}
-                <span className="text-[var(--color-text-muted)]">
-                  ({s.user_id})
+              <li key={s.id} className="py-3 text-sm flex justify-between items-center">
+                <div>
+                  <span className="font-medium text-[var(--color-text)]">{s.proof_tasks?.title}</span>
+                  <span className="text-[var(--color-text-muted)] ml-2">
+                    ({(s.user_id ?? "Unknown").slice(0, 8)}...)
+                  </span>
+                </div>
+                <span className="text-xs text-[var(--color-text-muted)]">
+                  {new Date(s.created_at ?? "").toLocaleDateString()}
                 </span>
               </li>
             ))}

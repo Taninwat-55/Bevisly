@@ -1,35 +1,52 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import BackButton from "@/components/ui/BackButton";
 import { useTheme } from "@/hooks/useTheme";
 import { motion } from "framer-motion";
 import toast from "react-hot-toast";
 import { supabase } from "@/lib/supabaseClient";
-import { updateProfileName } from "@/lib/api/profiles"; // ✅ Import
+import { updateProfileData } from "@/lib/api/profiles"; 
+import { User, Building2, Edit2, Check, X } from "lucide-react";
 
 export default function UserSettings() {
   const { user, signOut } = useAuth();
   const { isDark, toggleTheme } = useTheme();
+  
   const [emailNotif, setEmailNotif] = useState(true);
   const [deleting, setDeleting] = useState(false);
   
-  // ✅ Name state
-  const [fullName, setFullName] = useState(""); 
+  // Profile State
+  const [name, setName] = useState(""); 
+  const [isEditing, setIsEditing] = useState(false);
   const [loadingName, setLoadingName] = useState(false);
 
-  const handleSave = async () => {
-    if(fullName.trim()) {
-        setLoadingName(true);
-        try {
-            await updateProfileName(fullName);
-            toast.success("✅ Name & Settings saved!");
-        } catch {
-            toast.error("Failed to update name");
-        } finally {
-            setLoadingName(false);
+  const isEmployer = user?.role === "employer";
+  const label = isEmployer ? "Company Name" : "Display Name";
+  const field = isEmployer ? "company_name" : "full_name";
+
+  // 📥 Fetch existing name
+  useEffect(() => {
+    if (!user) return;
+    supabase.from("profiles").select("full_name, company_name").eq("id", user.id).single()
+      .then(({ data }) => {
+        if (data) {
+          const targetName = isEmployer ? data.company_name : data.full_name;
+          setName(targetName ?? ""); 
         }
-    } else {
-        toast.success("✅ Preferences saved!");
+      });
+  }, [user, isEmployer]);
+
+  const handleSaveName = async () => {
+    if (!name.trim()) return toast.error("Name cannot be empty");
+    setLoadingName(true);
+    try {
+      await updateProfileData(user!.id, { [field]: name });
+      toast.success(`✅ ${label} updated!`);
+      setIsEditing(false);
+    } catch {
+      toast.error("Failed to update name");
+    } finally {
+      setLoadingName(false);
     }
   };
 
@@ -39,16 +56,15 @@ export default function UserSettings() {
   };
 
   const handleDeleteAccount = async () => {
-    if (!window.confirm("⚠️ Are you sure? This will permanently delete your account. This cannot be undone.")) return;
+    if (!window.confirm("⚠️ This will permanently delete your account. Cannot be undone.")) return;
+    setDeleting(true);
     try {
-      setDeleting(true);
       const { error } = await supabase.rpc("delete_user_account");
       if (error) throw error;
       await signOut();
       window.location.href = "/";
     } catch {
       toast.error("Failed to delete account.");
-    } finally {
       setDeleting(false);
     }
   };
@@ -58,65 +74,121 @@ export default function UserSettings() {
       <header className="mb-8 flex flex-col gap-2">
         <BackButton to={`/${user?.role}`} label="Back" className="mb-2 border-transparent hover:border-[var(--color-border)]" />
         <h1 className="heading-lg flex items-center gap-2">⚙️ Account Settings</h1>
-        <p className="body-base text-[var(--color-text-muted)]">Manage your profile, preferences, and account.</p>
       </header>
 
       <motion.div
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        className="bg-[var(--color-surface)] rounded-[var(--radius-card)] shadow-[var(--shadow-soft)] border border-[var(--color-border)] p-6 space-y-8 max-w-2xl"
+        className="max-w-2xl space-y-6"
       >
-        <section>
-          <h2 className="heading-md mb-4">Profile</h2>
-          <div className="space-y-4 text-sm">
+        {/* 👤 Profile Section */}
+        <section className="bg-[var(--color-surface)] rounded-[var(--radius-card)] shadow-[var(--shadow-soft)] border border-[var(--color-border)] p-6">
+          <h2 className="heading-md mb-6 flex items-center gap-2">
+            {isEmployer ? <Building2 size={20} /> : <User size={20} />} 
+            Profile
+          </h2>
+          
+          <div className="space-y-6">
+            {/* Name Field with Edit Mode */}
             <div>
-                <label className="block font-medium text-[var(--color-text)] mb-1">Display Name</label>
-                <input 
+              <div className="flex justify-between items-center mb-2">
+                <label className="text-sm font-medium text-[var(--color-text-muted)]">{label}</label>
+                {!isEditing && (
+                  <button onClick={() => setIsEditing(true)} className="text-xs text-[var(--color-employer)] hover:underline flex items-center gap-1">
+                    <Edit2 size={12} /> Edit
+                  </button>
+                )}
+              </div>
+
+              {isEditing ? (
+                <div className="flex items-center gap-2">
+                  <input 
+                    autoFocus
                     type="text" 
-                    placeholder="Enter your full name" 
-                    value={fullName} 
-                    onChange={(e) => setFullName(e.target.value)}
-                    className="w-full border border-[var(--color-border)] rounded-[var(--radius-button)] px-3 py-2 bg-[var(--color-bg)] focus:ring-2 focus:ring-[var(--color-candidate)]"
-                />
-                <p className="text-xs text-[var(--color-text-muted)] mt-1">This name will appear to employers.</p>
+                    value={name} 
+                    onChange={(e) => setName(e.target.value)}
+                    className="flex-1 border border-[var(--color-border)] rounded-[var(--radius-button)] px-3 py-2 bg-[var(--color-bg)] focus:ring-2 focus:ring-[var(--color-candidate)] text-sm"
+                  />
+                  <button onClick={handleSaveName} disabled={loadingName} className="p-2 bg-green-100 text-green-700 rounded hover:bg-green-200 transition">
+                    <Check size={16} />
+                  </button>
+                  <button onClick={() => setIsEditing(false)} className="p-2 bg-gray-100 text-gray-600 rounded hover:bg-gray-200 transition">
+                    <X size={16} />
+                  </button>
+                </div>
+              ) : (
+                <p className="text-lg font-medium text-[var(--color-text)]">{name || "—"}</p>
+              )}
             </div>
-            <p><span className="font-medium text-[var(--color-text)]">Email:</span> <span className="text-[var(--color-text-muted)]">{user?.email ?? "—"}</span></p>
-            <p><span className="font-medium text-[var(--color-text)]">Role:</span> <span className="capitalize text-[var(--color-text-muted)]">{user?.role ?? "—"}</span></p>
-          </div>
-        </section>
 
-        <section>
-          <h2 className="heading-md mb-4">Preferences</h2>
-           <div className="flex flex-col gap-3 text-sm">
-            <label className="flex items-center justify-between cursor-pointer border border-[var(--color-border)] rounded-[var(--radius-button)] px-4 py-2 hover:bg-[var(--color-bg-hover)] transition">
-              <span>Email notifications</span>
-              <input type="checkbox" checked={emailNotif} onChange={() => setEmailNotif((prev) => !prev)} className="accent-[var(--color-candidate-dark)] cursor-pointer" />
-            </label>
-
-            <div className="flex items-center justify-between border border-[var(--color-border)] rounded-[var(--radius-button)] px-4 py-2 transition hover:bg-[var(--color-bg-hover)]">
-              <span className="text-sm">Dark mode</span>
-              <button onClick={toggleTheme} className="rounded-lg p-2 hover-bg-soft transition">
-                 {isDark ? "🌙" : "☀️"} 
-              </button>
+            <div className="pt-4 border-t border-[var(--color-border)]">
+                <label className="text-sm font-medium text-[var(--color-text-muted)]">Email</label>
+                <p className="text-[var(--color-text)] mt-1">{user?.email}</p>
             </div>
           </div>
         </section>
 
-        <section>
-          <h2 className="heading-md mb-4">Account</h2>
-          <div className="flex flex-wrap gap-3">
-            <button onClick={handleSave} disabled={loadingName} className="bg-[var(--color-candidate)] text-white px-5 py-2 rounded-[var(--radius-button)] hover:bg-[var(--color-candidate-dark)] transition shadow-[var(--shadow-soft)]">
-              {loadingName ? "Saving..." : "💾 Save Changes"}
+        {/* 🎛 Preferences Section (New Toggles) */}
+        <section className="bg-[var(--color-surface)] rounded-[var(--radius-card)] shadow-[var(--shadow-soft)] border border-[var(--color-border)] p-6">
+          <h2 className="heading-md mb-6">Preferences</h2>
+          
+          <div className="space-y-5">
+            {/* Dark Mode Toggle */}
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="font-medium text-[var(--color-text)]">Dark Mode</p>
+                <p className="text-xs text-[var(--color-text-muted)]">Switch between light and dark themes</p>
+              </div>
+              <ToggleSwitch checked={isDark} onChange={toggleTheme} />
+            </div>
+
+            <div className="border-t border-[var(--color-border)]" />
+
+            {/* Email Notifications Toggle */}
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="font-medium text-[var(--color-text)]">Email Notifications</p>
+                <p className="text-xs text-[var(--color-text-muted)]">Receive updates about your applications</p>
+              </div>
+              <ToggleSwitch checked={emailNotif} onChange={() => {
+                  setEmailNotif(!emailNotif);
+                  toast.success(emailNotif ? "Notifications disabled" : "Notifications enabled");
+              }} />
+            </div>
+          </div>
+        </section>
+
+        {/* ⚠️ Danger Zone */}
+        <section className="bg-[var(--color-surface)] rounded-[var(--radius-card)] shadow-[var(--shadow-soft)] border border-red-100 dark:border-red-900/30 p-6">
+          <h2 className="heading-md mb-4 text-red-600">Danger Zone</h2>
+          <div className="flex flex-wrap gap-4">
+            <button onClick={handleLogout} className="border border-[var(--color-border)] px-5 py-2.5 rounded-[var(--radius-button)] text-[var(--color-text)] hover:bg-[var(--color-bg-hover)] transition text-sm font-medium">
+              Log Out
             </button>
-            <button onClick={handleLogout} className="border border-[var(--color-border)] px-5 py-2 rounded-[var(--radius-button)] text-[var(--color-text)] hover:bg-[var(--color-bg-hover)] transition">
-              🚪 Log Out
-            </button>
-            <button onClick={handleDeleteAccount} disabled={deleting} className="bg-red-100 text-red-700 border border-red-200 px-5 py-2 rounded-[var(--radius-button)] hover:bg-red-200 transition ml-auto">
-              {deleting ? "Deleting..." : "⚠️ Delete Account"}
+            <button onClick={handleDeleteAccount} disabled={deleting} className="bg-red-50 text-red-600 border border-red-100 px-5 py-2.5 rounded-[var(--radius-button)] hover:bg-red-100 transition ml-auto text-sm font-medium">
+              {deleting ? "Deleting..." : "Delete Account"}
             </button>
           </div>
         </section>
       </motion.div>
     </div>
+  );
+}
+
+// 💅 Custom Toggle Component
+function ToggleSwitch({ checked, onChange }: { checked: boolean; onChange: () => void }) {
+  return (
+    <button 
+      onClick={onChange}
+      className={`w-12 h-6 rounded-full p-1 transition-colors duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[var(--color-candidate)] ${
+        checked ? 'bg-[var(--color-candidate)]' : 'bg-[var(--color-border)]'
+      }`}
+    >
+      <div 
+        className={`bg-white w-4 h-4 rounded-full shadow-sm transform transition-transform duration-300 ease-in-out ${
+          checked ? 'translate-x-6' : 'translate-x-0'
+        }`} 
+      />
+    </button>
   );
 }
