@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import toast from "react-hot-toast";
+import ReactMarkdown from "react-markdown"; // ✅ Import this
 import { createFeedback } from "@/lib/api/feedback";
 import { updateSubmissionStatus } from "@/lib/api/mutations";
 import { getSubmissionById, getSubmissionsByJob } from "@/lib/api/submissions";
@@ -112,11 +113,28 @@ export default function EmployerReviewProof() {
   if (fetching) return <div className="flex justify-center items-center min-h-screen"><Loader2 className="animate-spin" /></div>;
   if (!submission) return <div className="p-10 text-center">Submission not found.</div>;
 
-  // 🧠 Detect Submission Type
-  const subLink = submission.submission_link || "";
-  const isFile = subLink.includes("supabase") && subLink.includes("/storage/");
-  const isUrl = subLink.startsWith("http") && !isFile;
-  const isTextEntry = subLink && !isFile && !isUrl; // Fallback for text mode
+  // 🧠 FIXED: Logic to show ALL submission types if they exist
+  const rawLink = submission.submission_link;
+  const rawFile = submission.file_url;
+  const rawText = submission.text_response;
+
+  let displayFile = rawFile;
+  let displayText = rawText;
+  let displayLink = rawLink;
+
+  // Legacy Support logic
+  if (!displayFile && !displayText) {
+      if (rawLink && (rawLink.includes("/storage/v1/object/public/") || /\.(pdf|zip|docx|png|jpg|jpeg)$/i.test(rawLink))) {
+          displayFile = rawLink;
+          displayLink = null;
+      } 
+      else if (rawLink && !rawLink.startsWith("http")) {
+          displayText = rawLink;
+          displayLink = null;
+      }
+  }
+
+  const hasAnySubmission = displayFile || displayLink || displayText;
 
   return (
     <div className="min-h-screen bg-[var(--color-bg)] px-8 py-10 flex flex-col gap-6 transition-colors">
@@ -137,7 +155,7 @@ export default function EmployerReviewProof() {
 
       <div className="max-w-5xl mx-auto w-full grid grid-cols-1 lg:grid-cols-3 gap-6">
         
-        {/* LEFT COLUMN: CANDIDATE WORK (Span 2) */}
+        {/* LEFT COLUMN: CANDIDATE WORK */}
         <div className="lg:col-span-2 space-y-6">
             
             {/* 1. Candidate Identity */}
@@ -166,69 +184,83 @@ export default function EmployerReviewProof() {
                 </div>
             </section>
 
-            {/* 2. Work Submission (Link, File, or Text Answer) */}
+            {/* 2. Work Submission */}
             <section className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-card)] p-5 min-h-[160px]">
                 <h3 className="text-xs font-bold text-[var(--color-text-muted)] uppercase tracking-wider mb-3">Proof Submission</h3>
                 
-                {isFile ? (
-                    <div className="flex items-center gap-4 p-4 bg-[var(--color-bg)] border border-[var(--color-border)] rounded-[var(--radius-button)]">
-                        <div className="p-3 bg-[var(--color-surface)] rounded-full border border-[var(--color-border)] text-[var(--color-candidate)]">
-                            <FileText size={24} />
-                        </div>
-                        <div className="flex-1">
-                            <p className="text-sm font-medium text-[var(--color-text)]">Uploaded File</p>
-                            <p className="text-xs text-[var(--color-text-muted)]">The candidate uploaded a file proof.</p>
-                        </div>
-                        <a href={subLink} target="_blank" rel="noreferrer" className="flex items-center gap-2 px-4 py-2 bg-[var(--color-employer)] text-white rounded-[var(--radius-button)] hover:brightness-110 text-sm font-medium transition">
-                            <Download size={16} /> Download
-                        </a>
-                    </div>
-                ) : isUrl ? (
-                    <div className="flex items-center gap-4 p-4 bg-[var(--color-bg)] border border-[var(--color-border)] rounded-[var(--radius-button)]">
-                        <div className="p-3 bg-[var(--color-surface)] rounded-full border border-[var(--color-border)] text-[var(--color-candidate)]">
-                            <ExternalLink size={24} />
-                        </div>
-                        <div className="flex-1">
-                            <p className="text-sm font-medium text-[var(--color-text)]">External Link</p>
-                            <a href={subLink} target="_blank" rel="noreferrer" className="text-xs text-[var(--color-employer-dark)] hover:underline truncate block max-w-[300px]">
-                                {subLink}
+                <div className="space-y-4">
+                    {/* FILE BLOCK */}
+                    {displayFile && (
+                        <div className="flex items-center gap-4 p-4 bg-[var(--color-bg)] border border-[var(--color-border)] rounded-[var(--radius-button)]">
+                            <div className="p-3 bg-[var(--color-surface)] rounded-full border border-[var(--color-border)] text-[var(--color-candidate)]">
+                                <FileText size={24} />
+                            </div>
+                            <div className="flex-1">
+                                <p className="text-sm font-medium text-[var(--color-text)]">Uploaded File</p>
+                                <p className="text-xs text-[var(--color-text-muted)]">Click to download.</p>
+                            </div>
+                            <a href={displayFile} target="_blank" rel="noreferrer" className="flex items-center gap-2 px-4 py-2 bg-[var(--color-employer)] text-white rounded-[var(--radius-button)] hover:brightness-110 text-sm font-medium transition">
+                                <Download size={16} /> Download
                             </a>
                         </div>
-                        <a href={subLink} target="_blank" rel="noreferrer" className="flex items-center gap-2 px-4 py-2 border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text)] rounded-[var(--radius-button)] hover:bg-[var(--color-bg-hover)] text-sm font-medium transition">
-                            Open Link <ArrowRight size={14} />
-                        </a>
-                    </div>
-                ) : isTextEntry ? (
-                    <div className="p-4 bg-[var(--color-bg)] border border-[var(--color-border)] rounded-[var(--radius-button)]">
-                        <div className="flex items-center gap-2 mb-2 text-[var(--color-candidate)]">
-                            <AlignLeft size={16} /> <span className="text-xs font-bold uppercase">Text Response</span>
+                    )}
+
+                    {/* LINK BLOCK */}
+                    {displayLink && (
+                        <div className="flex items-center gap-4 p-4 bg-[var(--color-bg)] border border-[var(--color-border)] rounded-[var(--radius-button)]">
+                            <div className="p-3 bg-[var(--color-surface)] rounded-full border border-[var(--color-border)] text-[var(--color-candidate)]">
+                                <ExternalLink size={24} />
+                            </div>
+                            <div className="flex-1">
+                                <p className="text-sm font-medium text-[var(--color-text)]">External Link</p>
+                                <a href={displayLink} target="_blank" rel="noreferrer" className="text-xs text-[var(--color-employer-dark)] hover:underline truncate block max-w-[300px]">
+                                    {displayLink}
+                                </a>
+                            </div>
+                            <a href={displayLink} target="_blank" rel="noreferrer" className="flex items-center gap-2 px-4 py-2 border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text)] rounded-[var(--radius-button)] hover:bg-[var(--color-bg-hover)] text-sm font-medium transition">
+                                Open Link <ArrowRight size={14} />
+                            </a>
                         </div>
-                        <p className="text-sm text-[var(--color-text)] whitespace-pre-wrap leading-relaxed font-mono">
-                            {subLink}
-                        </p>
-                    </div>
-                ) : (
-                    <div className="p-6 text-center border border-dashed border-[var(--color-border)] rounded-xl text-[var(--color-text-muted)] italic">
-                        No primary submission found. Check reflections below.
-                    </div>
-                )}
+                    )}
+
+                    {/* TEXT BLOCK (with Markdown) */}
+                    {displayText && (
+                        <div className="p-4 bg-[var(--color-bg)] border border-[var(--color-border)] rounded-[var(--radius-button)]">
+                            <div className="flex items-center gap-2 mb-2 text-[var(--color-candidate)]">
+                                <AlignLeft size={16} /> <span className="text-xs font-bold uppercase">Text Response</span>
+                            </div>
+                            {/* ✅ Render with ReactMarkdown */}
+                            <div className="prose prose-sm dark:prose-invert max-w-none text-[var(--color-text)]">
+                                <ReactMarkdown>{displayText}</ReactMarkdown>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* EMPTY STATE */}
+                    {!hasAnySubmission && (
+                        <div className="p-6 text-center border border-dashed border-[var(--color-border)] rounded-xl text-[var(--color-text-muted)] italic">
+                            No primary submission found. Check reflections below.
+                        </div>
+                    )}
+                </div>
             </section>
 
-            {/* 3. Reflection (Separate Block) */}
+            {/* 3. Reflection (with Markdown) */}
             {submission.reflection && (
                 <section className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-card)] p-5">
                     <h3 className="text-xs font-bold text-[var(--color-text-muted)] uppercase tracking-wider mb-3">Candidate Reflection</h3>
                     <div className="relative p-4 bg-[var(--color-bg)] border border-[var(--color-border)] rounded-[var(--radius-button)]">
                         <Quote size={20} className="absolute top-4 left-4 text-[var(--color-border)] opacity-50" />
-                        <p className="text-sm text-[var(--color-text)] whitespace-pre-line leading-relaxed pl-8">
-                            {submission.reflection}
-                        </p>
+                        {/* ✅ Render with ReactMarkdown */}
+                        <div className="pl-8 prose prose-sm dark:prose-invert max-w-none text-[var(--color-text)]">
+                            <ReactMarkdown>{submission.reflection}</ReactMarkdown>
+                        </div>
                     </div>
                 </section>
             )}
         </div>
 
-        {/* RIGHT COLUMN: FEEDBACK FORM (Span 1) */}
+        {/* RIGHT COLUMN: FEEDBACK FORM */}
         <div className="lg:col-span-1">
             <section className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-card)] p-6 h-fit relative overflow-hidden sticky top-6">
             
@@ -246,6 +278,7 @@ export default function EmployerReviewProof() {
             </div>
 
             <div className="space-y-5">
+                {/* Rating (No Change) */}
                 <div>
                 <label className="block text-sm font-medium mb-2 text-[var(--color-text)]">Rating</label>
                 <div className="flex gap-2">
@@ -265,6 +298,7 @@ export default function EmployerReviewProof() {
                 </div>
                 </div>
 
+                {/* ✅ Fixed Contrast: Removed opacity, changed bg for disabled state */}
                 <div>
                 <label className="block text-sm font-medium mb-1 text-[var(--color-text)]">Strengths</label>
                 <textarea
@@ -272,7 +306,8 @@ export default function EmployerReviewProof() {
                     value={strengths}
                     onChange={(e) => setStrengths(e.target.value)}
                     rows={4}
-                    className="w-full border border-[var(--color-border)] rounded-lg p-3 bg-[var(--color-bg)] text-[var(--color-text)] text-sm disabled:opacity-70 focus:ring-2 focus:ring-[var(--color-employer)] outline-none"
+                    className="w-full border border-[var(--color-border)] rounded-lg p-3 bg-[var(--color-bg)] text-[var(--color-text)] text-sm focus:ring-2 focus:ring-[var(--color-employer)] outline-none
+                               disabled:opacity-100 disabled:bg-[var(--color-surface)] disabled:text-[var(--color-text-muted)]"
                     placeholder="What stood out?"
                 />
                 </div>
@@ -284,12 +319,14 @@ export default function EmployerReviewProof() {
                     value={improvements}
                     onChange={(e) => setImprovements(e.target.value)}
                     rows={4}
-                    className="w-full border border-[var(--color-border)] rounded-lg p-3 bg-[var(--color-bg)] text-[var(--color-text)] text-sm disabled:opacity-70 focus:ring-2 focus:ring-[var(--color-employer)] outline-none"
+                    className="w-full border border-[var(--color-border)] rounded-lg p-3 bg-[var(--color-bg)] text-[var(--color-text)] text-sm focus:ring-2 focus:ring-[var(--color-employer)] outline-none
+                               disabled:opacity-100 disabled:bg-[var(--color-surface)] disabled:text-[var(--color-text-muted)]"
                     placeholder="Constructive feedback..."
                 />
                 </div>
             </div>
 
+            {/* Navigation Buttons (No Change) */}
             <div className="flex items-center justify-between mt-8 pt-6 border-t border-[var(--color-border)]">
                 <button 
                     onClick={() => prevCandidate && navigate(`/employer/review/${prevCandidate.id}`)}
