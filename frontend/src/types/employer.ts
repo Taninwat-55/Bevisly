@@ -6,6 +6,7 @@ export type EmployerJob = {
   id: string;
   title: string;
   description: string | null;
+  requirements?: string | null;
   company: string | null;
   location: string | null;
   paid: boolean | null;
@@ -96,6 +97,7 @@ export interface EmployerJobFormValues {
   id?: string;
   title: string;
   description: string;
+  requirements: string;
   company: string;
   location: string;
   paid: boolean;

@@ -10,6 +10,7 @@ export type ProofTask = {
   title: string;
   description?: string | null;
   expected_time?: string | null;
+  duration_minutes?: number | null;
   submission_format?: string | null;
   submission_type?: "link" | "file" | "text" | "mixed";
   recommended_platform?: string | null;

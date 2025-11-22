@@ -5,6 +5,7 @@ export interface Job {
   company?: string | null;
   location?: string | null;
   description?: string | null;
+  requirements?: string | null;
   paid?: boolean | null;
 
   // 🆕 Salary-related fields
