@@ -1,7 +1,7 @@
 import { useEffect, useState, type ChangeEvent } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { getEmployerSubmissionsWithFeedback } from "@/lib/api/submissions";
-import { getEmployerJobs } from "@/lib/api/jobs"; // ✅ Import this
+import { getEmployerJobs } from "@/lib/api/jobs"; 
 import type { EmployerSubmission } from "@/types";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
@@ -22,8 +22,8 @@ export default function EmployerTalentPool() {
   const navigate = useNavigate();
 
   const [submissions, setSubmissions] = useState<EmployerSubmission[]>([]);
-  const [jobs, setJobs] = useState<{ id: string; title: string }[]>([]); // ✅ New state
-  const [selectedJob, setSelectedJob] = useState<string>("all"); // ✅ New filter state
+  const [jobs, setJobs] = useState<{ id: string; title: string }[]>([]); 
+  const [selectedJob, setSelectedJob] = useState<string>("all"); 
   const [loading, setLoading] = useState(true);
 
   const [statusFilter, setStatusFilter] = useState<
@@ -245,13 +245,26 @@ export default function EmployerTalentPool() {
                       }`}
                       onClick={() => navigate(`/employer/review/${s.id}`)}
                     >
-                      <td className="py-2 px-3 text-[var(--color-text)]">
+                      {/* <td className="py-2 px-3 text-[var(--color-text)]">
                         <div className="flex items-center gap-1">
                           <span>{s.profiles?.full_name || s.user_id}</span>
                           {s.status === "reviewed" && s.resume_url && (
                             <FileText size={13} className="text-[var(--color-employer-dark)]" />
                           )}
                         </div>
+                      </td> */}
+                      <td className="py-2 px-3">
+                        <span
+                          className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border ${
+                            s.status === "reviewed"
+                              ? "bg-blue-50 text-blue-700 border-blue-100 dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-800"
+                              : s.status === "hired"
+                              ? "bg-green-50 text-green-700 border-green-100 dark:bg-green-900/30 dark:text-green-300 dark:border-green-800"
+                              : "bg-yellow-50 text-yellow-700 border-yellow-100 dark:bg-yellow-900/30 dark:text-yellow-300 dark:border-yellow-800"
+                          }`}
+                        >
+                          {s.status}
+                        </span>
                       </td>
                       <td className="py-2 px-3 text-[var(--color-text-muted)]">
                         {s.jobs?.title || "—"}

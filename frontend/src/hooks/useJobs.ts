@@ -33,6 +33,7 @@ export function useJobs() {
             duration_minutes
           )
         `)
+        .eq("status", "active")
         .order("created_at", { ascending: false });
 
       if (error) setError(error.message);
