@@ -13,7 +13,6 @@ import {
   Filter,
   Award,
   Trophy,
-  FileText,
   Briefcase,
 } from "lucide-react";
 
