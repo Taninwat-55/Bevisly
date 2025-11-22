@@ -193,11 +193,12 @@ export async function submitProof({
     })
     .eq("job_id", job_id)
     .eq("user_id", user.id)
-    .select()
-    .single();
+    .select(); // 👈 REMOVED .single() to prevent crashing on duplicates
 
   if (error) throw error;
-  return data;
+  
+  // Return the first updated row if multiple exist
+  return data?.[0];
 }
 
 export async function getCandidateFeedback(user_id: string) {

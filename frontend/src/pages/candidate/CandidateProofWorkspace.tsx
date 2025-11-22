@@ -5,7 +5,7 @@ import {
   getProofTaskDetails, 
   startProof, 
   completeProof, 
-  checkSubmissionStatus // ✅ Import this
+  checkSubmissionStatus 
 } from "@/lib/api/submissions";
 import { 
   Loader2, Clock, Package, Brain, CheckCircle2, 
@@ -22,9 +22,11 @@ export default function CandidateProofWorkspace() {
 
   const [task, setTask] = useState<ProofTask | null>(null);
   
+  
   // Form State
   const [link, setLink] = useState("");
-  const [reflection, setReflection] = useState("");
+  const [textSubmission, setTextSubmission] = useState(""); // For the "Text Entry" tab
+const [reflection, setReflection] = useState(""); // For the "Reflection" box
   const [file, setFile] = useState<File | null>(null);
   
   // UI State
@@ -35,6 +37,9 @@ export default function CandidateProofWorkspace() {
   // ✅ New: Lock state
   const [isLocked, setIsLocked] = useState(false);
   const [existingFileUrl, setExistingFileUrl] = useState<string | null>(null);
+
+  // Use textSubmission if in text mode
+  const finalLink = inputMode === "link" ? link : inputMode === "text" ? textSubmission : undefined;
 
   // Helper: Credit Calc
   const calculateCredits = (timeStr?: string | null) => {
@@ -103,20 +108,25 @@ export default function CandidateProofWorkspace() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (isLocked) return; // 🛡️ Guard
+    if (isLocked) return;
     if (!task) return toast.error("Task not found.");
 
+    // Validate based on mode
     if (inputMode === "link" && !link.trim()) return toast.error("Please enter a link.");
     if (inputMode === "file" && !file && !existingFileUrl) return toast.error("Please upload a file.");
-    if (inputMode === "text" && !reflection.trim()) return toast.error("Please write a response.");
+    if (inputMode === "text" && !textSubmission.trim()) return toast.error("Please write a response.");
 
     setSubmitting(true);
     try {
       if (!task.job_id) throw new Error("Job ID missing");
       
+      // Decide what to send as the "link"
+      // For text mode, we save the text itself as the submission_link (or you could append it to reflection)
+      const finalLink = inputMode === "link" ? link : inputMode === "text" ? textSubmission : undefined;
+
       await completeProof({
         job_id: task.job_id,
-        submission_link: inputMode === "link" ? link : undefined,
+        submission_link: finalLink, // Send textSubmission here if mode is text
         reflection,
         file: inputMode === "file" ? file : undefined,
       });
@@ -128,7 +138,7 @@ export default function CandidateProofWorkspace() {
     } finally {
       setSubmitting(false);
     }
-  }
+}
 
   if (loading || !task) return (
     <div className="flex justify-center items-center min-h-screen text-[var(--color-text-muted)]">
@@ -279,9 +289,9 @@ export default function CandidateProofWorkspace() {
                 <label className="block text-sm font-medium mb-1 text-[var(--color-text)]">Your Response</label>
                 <textarea
                   rows={12}
-                  value={reflection}
+                  value={textSubmission}
                   disabled={isLocked}
-                  onChange={(e) => setReflection(e.target.value)}
+                  onChange={(e) => setTextSubmission(e.target.value)}
                   placeholder="Type your response here..."
                   className="w-full border border-[var(--color-border)] bg-[var(--color-bg)] text-[var(--color-text)] rounded-[var(--radius-button)] px-3 py-2 text-sm focus:ring-2 focus:ring-[var(--color-candidate-light)] resize-y disabled:opacity-60"
                 />

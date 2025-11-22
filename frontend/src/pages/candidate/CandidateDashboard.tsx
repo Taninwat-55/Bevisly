@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/lib/supabaseClient";
 import { useAuth } from "@/hooks/useAuth";
-import { Info, CreditCard, Target, Briefcase, CheckCircle } from "lucide-react";
+import { CreditCard, Target, Briefcase, CheckCircle } from "lucide-react";
 import type { DashboardProof } from "@/types";
 
 export default function CandidateDashboard() {
@@ -126,37 +126,17 @@ export default function CandidateDashboard() {
 
 function CreditCardStat({ credits }: { credits: number }) {
   return (
-    <div className="relative overflow-hidden rounded-[var(--radius-card)] border border-[var(--color-border)] shadow-[var(--shadow-soft)] bg-[var(--color-candidate)]/10 hover:bg-[var(--color-candidate)]/20 transition group">
-      <div className="absolute top-2 right-2 text-[var(--color-candidate)]/50">
-        <CreditCard size={18} />
+    <div className="bg-[var(--color-surface)] p-6 rounded-[var(--radius-card)] border border-[var(--color-border)] shadow-[var(--shadow-soft)] text-center hover:shadow-[var(--shadow-hover)] transition">
+      <div className="flex justify-center mb-2">
+        <div className="p-2 bg-[var(--color-candidate)]/10 rounded-full text-[var(--color-candidate)]">
+          <CreditCard size={24} />
+        </div>
       </div>
-      <div className="text-center p-6">
-        <div className="text-3xl font-bold text-[var(--color-candidate)] mb-1">
-          💳 {credits}
-        </div>
-        <div className="flex justify-center items-center gap-1">
-          <span className="text-sm font-medium text-[var(--color-text)]">
-            Credits
-          </span>
-          <div className="relative">
-            <Info
-              size={14}
-              className="text-[var(--color-text-muted)] cursor-pointer hover:text-[var(--color-candidate)]"
-            />
-            <div
-              className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-max
-                   bg-[var(--color-surface)] text-[var(--color-text)] text-xs 
-                   border border-[var(--color-border)] rounded px-2 py-1 
-                   shadow-[var(--shadow-soft)] opacity-0 group-hover:opacity-100
-                   transition pointer-events-none whitespace-nowrap"
-            >
-              Earn credits through high-rated proof completions
-            </div>
-          </div>
-        </div>
-        <p className="text-xs mt-1 text-[var(--color-text-muted)]">
-          Used to access premium proof challenges
-        </p>
+      <div className="text-3xl font-semibold text-[var(--color-candidate)] mb-1">
+        {credits}
+      </div>
+      <div className="text-sm text-[var(--color-text-muted)]">
+        Proof Credits
       </div>
     </div>
   );

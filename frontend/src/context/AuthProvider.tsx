@@ -1,4 +1,3 @@
-// src/context/AuthProvider.tsx
 import { useEffect, useState } from "react";
 import { supabase } from "../lib/supabaseClient";
 import { AuthContext, type SessionUser } from "./AuthContext";
@@ -8,34 +7,38 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<SessionUser | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Signout handler
- const signOut = async () => {
-  try {
-    // 1. Clear Local Storage FIRST (Synchronous)
-    // This ensures that when the page reloads, the user is gone.
-    localStorage.removeItem("bevis_user");
-    localStorage.removeItem("overrideRole");
-    setUser(null);
+  // ✅ FIXED Signout handler
+  const signOut = async () => {
+    try {
+      // 1. Show feedback immediately so the user knows something is happening
+      toast.success("👋 Logging out...");
 
-    // 2. Trigger Supabase SignOut (Fire and forget)
-    // We don't await this because we are about to force-reload the page anyway.
-    supabase.auth.signOut(); 
+      // 2. AWAIT the Supabase cleanup. 
+      // This is critical. We must wait for it to delete the 'sb-xxxx-auth-token' 
+      // from the browser's local storage/cookies.
+      await supabase.auth.signOut();
 
-    // 3. Show toast 
-    // Note: Toast might disappear quickly due to reload, but it's good practice.
-    toast.success("👋 Logged out");
+      // 3. Clear our custom app keys
+      localStorage.removeItem("bevis_user");
+      localStorage.removeItem("overrideRole");
 
-    // 4. Force Redirect/Reload to Landing Page
-    // This wipes the app state cleanly.
-    window.location.replace("/");
+      // Note: We DO NOT call setUser(null) here. 
+      // If we did, the ProtectedRoute would trigger and send you to /auth 
+      // for a split second before the reload happens. 
+      // We want to stay on the current screen until the hard reload wipes everything.
 
-  } catch (err) {
-    console.error("Logout error:", err);
-    // Even if error, force clear to ensure user isn't stuck
-    localStorage.removeItem("bevis_user");
-    window.location.replace("/");
-  }
-};
+      // 4. Force Redirect/Reload to Landing Page
+      // Now that the token is definitely gone, this reload will result in a logged-out state.
+      window.location.replace("/");
+
+    } catch (err) {
+      console.error("Logout error:", err);
+      // Fallback: ensure storage is cleared even if the API call fails
+      localStorage.removeItem("bevis_user");
+      localStorage.removeItem("overrideRole");
+      window.location.replace("/");
+    }
+  };
 
   useEffect(() => {
     // 1️⃣ Try cached user first
