@@ -1,6 +1,7 @@
 // src/components/jobs/JobInfoSection.tsx
 import type { EmployerJob } from "@/types";
 import MarkdownEditor from "@/components/ui/MarkdownEditor"; 
+import { Sparkles } from "lucide-react";
 
 interface JobInfoSectionProps {
   values: Partial<EmployerJob & { requirements?: string }>;
@@ -159,6 +160,22 @@ export default function JobInfoSection({
 
       {/* ─── ✅ RICH TEXT FIELDS ─── */}
       <div className="border-t border-[var(--color-border)] pt-6 space-y-6">
+        {/* 🤖 AI Tip Box */}
+        <div className="flex items-start gap-3 bg-[var(--color-candidate)]/5 border border-[var(--color-candidate)]/20 p-4 rounded-[var(--radius-card)]">
+          <div className="p-2 bg-[var(--color-surface)] rounded-full text-[var(--color-candidate)] shadow-sm">
+            <Sparkles size={16} />
+          </div>
+          <div className="text-sm">
+            <p className="font-medium text-[var(--color-text)] mb-1">
+              Need help writing?
+            </p>
+            <p className="text-[var(--color-text-muted)] leading-relaxed">
+              You can use AI tools like <strong>ChatGPT</strong>, <strong>Claude</strong>, or <strong>Gemini</strong> to draft your job description. Just prompt them: 
+              <em className="block mt-1 text-[var(--color-text)]">"Write a fun, engaging job description for a [Job Title] at [Company] focusing on [Key Skill]."</em>
+            </p>
+          </div>
+        </div>
+
         <MarkdownEditor 
           label="Job Description"
           placeholder="Describe the position, team, and day-to-day responsibilities..."
