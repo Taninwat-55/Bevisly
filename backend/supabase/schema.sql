@@ -1,6 +1,6 @@
 -- ============================================================
 -- Bevis MVP Database Schema
--- Version: v0.3 (Credits & Fairness Update)
+-- Version: v0.4 (Final MVP Candidate)
 -- Description: Core tables, Views, Functions, and Security Policies
 -- ============================================================
 
@@ -79,7 +79,7 @@ create table public.proof_tasks (
 );
 alter table proof_tasks enable row level security;
 
--- 1.4 SUBMISSIONS
+-- 1.4 SUBMISSIONS (Updated for Multi-Format)
 create table public.submissions (
   id uuid primary key default gen_random_uuid(),
   user_id uuid references public.profiles(id) on delete cascade,
@@ -87,9 +87,12 @@ create table public.submissions (
   proof_task_id uuid references public.proof_tasks(id),
   
   -- Content
-  submission_link text,
-  reflection text,
-  resume_url text, -- Snapshot of CV at submission time
+  submission_link text, -- External Link (http://...)
+  file_url text,        -- ✅ Uploaded File URL (Supabase Storage)
+  text_response text,   -- ✅ Direct Text Answer
+  reflection text,      -- Candidate's reflection/notes
+  
+  resume_url text,      -- Snapshot of CV at submission time
   resume_metadata jsonb,
   
   -- Status
@@ -360,3 +363,15 @@ create policy "Admins can view all feedback messages"
 create policy "Users view own transactions" 
   on credit_transactions for select 
   using (auth.uid() = user_id);
+
+-- STORAGE POLICIES (New)
+-- Ensure 'proofs' bucket is created in storage section first
+-- create policy "Allow authenticated uploads"
+--   on storage.objects for insert
+--   to authenticated
+--   with check ( bucket_id = 'proofs' );
+
+-- create policy "Allow public viewing"
+--   on storage.objects for select
+--   to public
+--   using ( bucket_id = 'proofs' );
