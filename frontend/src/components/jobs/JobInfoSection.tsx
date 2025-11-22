@@ -1,12 +1,12 @@
 /**
  * 🧩 JobInfoSection.tsx
- * Handles basic job information: title, company, location, paid toggle, and description.
+ * Handles basic job information including Description & Requirements.
  */
-
 import type { EmployerJob } from "@/types";
+import MarkdownEditor from "@/components/ui/MarkdownEditor"; // ✅ Import
 
 interface JobInfoSectionProps {
-  values: Partial<EmployerJob>;
+  values: Partial<EmployerJob & { requirements?: string }>;
   onChange: (field: keyof EmployerJob | string, value: unknown) => void;
   errors?: Record<string, string>;
 }
@@ -18,14 +18,12 @@ export default function JobInfoSection({
 }: JobInfoSectionProps) {
   return (
     <section className="space-y-8">
-      {/* ─── Header ─── */}
       <h2 className="text-base font-semibold text-[var(--color-text)]">
         Job Information
       </h2>
 
-      {/* ─── Basic Info ─── */}
+      {/* ─── Basic Info (Title & Company) ─── */}
       <div className="grid sm:grid-cols-2 gap-6">
-        {/* Job Title */}
         <div>
           <label className="block text-sm font-medium text-[var(--color-text)] mb-1">
             Job Title
@@ -41,14 +39,9 @@ export default function JobInfoSection({
                 : "border-[var(--color-border)] focus:ring-[var(--color-employer)]"
             }`}
           />
-          {errors.title && (
-            <p className="text-xs text-[var(--color-error)] mt-1">
-              {errors.title}
-            </p>
-          )}
+          {errors.title && <p className="text-xs text-[var(--color-error)] mt-1">{errors.title}</p>}
         </div>
 
-        {/* Company */}
         <div>
           <label className="block text-sm font-medium text-[var(--color-text)] mb-1">
             Company
@@ -64,15 +57,11 @@ export default function JobInfoSection({
                 : "border-[var(--color-border)] focus:ring-[var(--color-employer)]"
             }`}
           />
-          {errors.company && (
-            <p className="text-xs text-[var(--color-error)] mt-1">
-              {errors.company}
-            </p>
-          )}
+          {errors.company && <p className="text-xs text-[var(--color-error)] mt-1">{errors.company}</p>}
         </div>
       </div>
 
-      {/* ─── Location & Paid Toggle ─── */}
+      {/* ─── Location, Paid, Deadline ─── */}
       <div className="grid sm:grid-cols-2 gap-6 items-start">
         <div>
           <label className="block text-sm font-medium text-[var(--color-text)] mb-1">
@@ -89,14 +78,9 @@ export default function JobInfoSection({
                 : "border-[var(--color-border)] focus:ring-[var(--color-employer)]"
             }`}
           />
-          {errors.location && (
-            <p className="text-xs text-[var(--color-error)] mt-1">
-              {errors.location}
-            </p>
-          )}
+          {errors.location && <p className="text-xs text-[var(--color-error)] mt-1">{errors.location}</p>}
         </div>
 
-        {/* Paid toggle */}
         <div className="flex items-center sm:mt-8">
           <input
             id="paid"
@@ -105,15 +89,11 @@ export default function JobInfoSection({
             onChange={(e) => onChange("paid", e.target.checked)}
             className="mr-2 accent-[var(--color-employer-dark)]"
           />
-          <label
-            htmlFor="paid"
-            className="text-sm font-medium text-[var(--color-text)]"
-          >
+          <label htmlFor="paid" className="text-sm font-medium text-[var(--color-text)]">
             Paid Task
           </label>
         </div>
 
-        {/* ✅ Job Duration / Expiry */}
         <div>
           <label className="block text-sm font-medium text-[var(--color-text)] mb-1">
             Application Deadline
@@ -124,26 +104,19 @@ export default function JobInfoSection({
             onChange={(e) => onChange("expires_at", new Date(e.target.value).toISOString())}
             className="w-full border border-[var(--color-border)] rounded-[var(--radius-input)] p-2 bg-[var(--color-bg)] text-[var(--color-text)]"
           />
-          <p className="text-xs text-[var(--color-text-muted)] mt-1">
-            Leave blank for no specific deadline.
-          </p>
         </div>
       </div>
 
-      {/* ─── Proof Task Payment ─── */}
+      {/* ─── Payment Fields (Hidden if not paid) ─── */}
       {values.paid && (
         <div className="space-y-3 border-t border-[var(--color-border)] pt-6">
-          <h3 className="text-sm font-semibold text-[var(--color-text)]">
-            Proof Task Payment
-          </h3>
+          <h3 className="text-sm font-semibold text-[var(--color-text)]">Proof Task Payment</h3>
           <div className="grid sm:grid-cols-2 gap-4">
             <input
               type="number"
-              placeholder="Amount (e.g., 200)"
+              placeholder="Amount"
               value={values.payment_amount ?? ""}
-              onChange={(e) =>
-                onChange("payment_amount", Number(e.target.value))
-              }
+              onChange={(e) => onChange("payment_amount", Number(e.target.value))}
               className="border border-[var(--color-border)] rounded-[var(--radius-input)] p-2 bg-[var(--color-bg)] text-[var(--color-text)]"
             />
             <select
@@ -152,102 +125,59 @@ export default function JobInfoSection({
               className="border border-[var(--color-border)] rounded-[var(--radius-input)] p-2 bg-[var(--color-bg)] text-[var(--color-text)]"
             >
               <option value="EUR">EUR</option>
-              <option value="SEK">SEK</option>
-              <option value="DKK">DKK</option>
               <option value="USD">USD</option>
-              <option value="NOK">NOK</option>
+              <option value="DKK">DKK</option>
             </select>
           </div>
         </div>
       )}
 
-      {/* ─── Salary Range Toggle ─── */}
-      <div className="flex items-center border-t border-[var(--color-border)] pt-6">
-        <input
-          id="show_salary_range"
-          type="checkbox"
-          checked={values.show_salary_range ?? false}
-          onChange={(e) => onChange("show_salary_range", e.target.checked)}
-          className="mr-2 accent-[var(--color-employer-dark)]"
-        />
-        <label
-          htmlFor="show_salary_range"
-          className="text-sm font-medium text-[var(--color-text)]"
-        >
-          Display salary range
-        </label>
+      {/* ─── Salary Toggle & Fields ─── */}
+      <div className="border-t border-[var(--color-border)] pt-6">
+        <div className="flex items-center mb-4">
+          <input
+            id="show_salary_range"
+            type="checkbox"
+            checked={values.show_salary_range ?? false}
+            onChange={(e) => onChange("show_salary_range", e.target.checked)}
+            className="mr-2 accent-[var(--color-employer-dark)]"
+          />
+          <label htmlFor="show_salary_range" className="text-sm font-medium text-[var(--color-text)]">
+            Display salary range
+          </label>
+        </div>
+
+        {values.show_salary_range && (
+          <div className="grid sm:grid-cols-3 gap-4">
+            <input type="number" placeholder="Min" value={values.salary_min ?? ""} onChange={(e) => onChange("salary_min", Number(e.target.value))} className="border border-[var(--color-border)] rounded-[var(--radius-input)] p-2 bg-[var(--color-bg)]" />
+            <input type="number" placeholder="Max" value={values.salary_max ?? ""} onChange={(e) => onChange("salary_max", Number(e.target.value))} className="border border-[var(--color-border)] rounded-[var(--radius-input)] p-2 bg-[var(--color-bg)]" />
+            <select value={values.pay_period ?? "monthly"} onChange={(e) => onChange("pay_period", e.target.value)} className="border border-[var(--color-border)] rounded-[var(--radius-input)] p-2 bg-[var(--color-bg)]">
+              <option value="hourly">Hourly</option>
+              <option value="monthly">Monthly</option>
+              <option value="yearly">Yearly</option>
+            </select>
+          </div>
+        )}
       </div>
 
-      {/* ─── Salary Range Fields ─── */}
-      {values.show_salary_range && (
-        <div className="space-y-3">
-          <div className="grid sm:grid-cols-3 gap-4">
-            <input
-              type="number"
-              placeholder="Min salary (e.g., 30000)"
-              value={values.salary_min ?? ""}
-              onChange={(e) => onChange("salary_min", Number(e.target.value))}
-              className="border border-[var(--color-border)] rounded-[var(--radius-input)] p-2 bg-[var(--color-bg)] text-[var(--color-text)]"
-            />
-            <input
-              type="number"
-              placeholder="Max salary (e.g., 45000)"
-              value={values.salary_max ?? ""}
-              onChange={(e) => onChange("salary_max", Number(e.target.value))}
-              className="border border-[var(--color-border)] rounded-[var(--radius-input)] p-2 bg-[var(--color-bg)] text-[var(--color-text)]"
-            />
-            <select
-              value={values.payment_currency ?? "EUR"}
-              onChange={(e) => onChange("payment_currency", e.target.value)}
-              className="border border-[var(--color-border)] rounded-[var(--radius-input)] p-2 bg-[var(--color-bg)] text-[var(--color-text)]"
-            >
-              <option value="EUR">EUR</option>
-              <option value="SEK">SEK</option>
-              <option value="DKK">DKK</option>
-              <option value="USD">USD</option>
-              <option value="NOK">NOK</option>
-            </select>
-          </div>
+      {/* ─── ✅ RICH TEXT FIELDS ─── */}
+      <div className="border-t border-[var(--color-border)] pt-6 space-y-6">
+        <MarkdownEditor 
+          label="Job Description"
+          placeholder="Describe the position, team, and day-to-day responsibilities..."
+          value={values.description ?? ""}
+          onChange={(val) => onChange("description", val)}
+          error={errors.description}
+          rows={8}
+        />
 
-          <select
-            value={values.pay_period ?? "monthly"}
-            onChange={(e) => onChange("pay_period", e.target.value)}
-            className="border border-[var(--color-border)] rounded-[var(--radius-input)] p-2 bg-[var(--color-bg)] text-[var(--color-text)]"
-          >
-            <option value="hourly">Hourly</option>
-            <option value="monthly">Monthly</option>
-            <option value="yearly">Yearly</option>
-          </select>
-        </div>
-      )}
-
-      {/* ✅ Description - Larger & Rich Text Placeholder */}
-      <div className="border-t border-[var(--color-border)] pt-6">
-        <label className="block text-sm font-medium text-[var(--color-text)] mb-1">
-          Description
-        </label>
-        <div className="relative">
-          <textarea
-            value={values.description ?? ""}
-            onChange={(e) => onChange("description", e.target.value)}
-            rows={12} // ✅ Larger by default
-            placeholder="Describe the position, responsibilities, and requirements..."
-            className={`w-full border rounded-[var(--radius-input)] p-4 bg-[var(--color-bg)] text-[var(--color-text)] focus:outline-none focus:ring-2 resize-y ${
-              errors.description
-                ? "border-[var(--color-error)] focus:ring-[var(--color-error)]"
-                : "border-[var(--color-border)] focus:ring-[var(--color-employer)]"
-            }`}
-          />
-          {/* 💡 Rich text hint since we aren't installing a library yet */}
-          <p className="text-xs text-[var(--color-text-muted)] mt-2 flex items-center gap-2">
-            <span>💡 Tip: You can use <b>Markdown</b> for styling (e.g., **bold**, - bullets).</span>
-          </p>
-        </div>
-        {errors.description && (
-          <p className="text-xs text-[var(--color-error)] mt-1">
-            {errors.description}
-          </p>
-        )}
+        <MarkdownEditor 
+          label="Requirements & Skills"
+          placeholder="List requirements, tech stack, and qualifications..."
+          value={values.requirements ?? ""}
+          onChange={(val) => onChange("requirements", val)}
+          rows={6}
+        />
       </div>
     </section>
   );

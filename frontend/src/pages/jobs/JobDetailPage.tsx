@@ -139,6 +139,19 @@ export default function JobDetailPage() {
         <p className="body-base leading-relaxed text-[var(--color-text-muted)] whitespace-pre-line">
           {job.description || "No description provided."}
         </p>
+
+        {/* ✅ Requirements Section */}
+        {job.requirements && (
+          <div className="mt-8 pt-6 border-t border-[var(--color-border)]">
+            <h3 className="text-lg font-semibold text-[var(--color-text)] mb-3">
+              Requirements & Skills
+            </h3>
+            <div className="body-base leading-relaxed text-[var(--color-text-muted)] whitespace-pre-line">
+              {job.requirements}
+            </div>
+          </div>
+        )}
+
         <div className="flex flex-wrap items-center gap-3 mt-4 text-sm text-[var(--color-text-muted)]">
           <span>📍 {job.location || "Remote"}</span>
 

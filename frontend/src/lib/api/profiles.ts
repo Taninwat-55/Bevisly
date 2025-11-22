@@ -56,3 +56,12 @@ export async function updateProfileName(full_name: string) {
 
   if (error) throw error;
 }
+
+export async function updateProfileData(userId: string, data: { full_name?: string; company_name?: string }) {
+  const { error } = await supabase
+    .from("profiles")
+    .update(data)
+    .eq("id", userId);
+
+  if (error) throw error;
+}

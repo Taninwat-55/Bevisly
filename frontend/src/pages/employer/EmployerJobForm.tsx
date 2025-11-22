@@ -71,6 +71,7 @@ export default function EmployerJobForm({
   const [values, setValues] = useState<EmployerJobFormValues>({
     title: defaultValues?.title ?? "",
     description: defaultValues?.description ?? "",
+    requirements: defaultValues?.requirements ?? "",
     company: defaultValues?.company ?? "",
     location: defaultValues?.location ?? "",
     paid: defaultValues?.paid ?? false,

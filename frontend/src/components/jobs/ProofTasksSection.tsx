@@ -1,15 +1,23 @@
 // src/components/jobs/ProofTasksSection.tsx
 import { useState } from "react";
-import { Trash2, UploadCloud, Paperclip } from "lucide-react";
+import { Trash2, UploadCloud, Paperclip, Clock } from "lucide-react";
 import { supabase } from "@/lib/supabaseClient";
 import toast from "react-hot-toast";
 import type { ProofTask } from "@/types";
+import MarkdownEditor from "@/components/ui/MarkdownEditor"; // ✅ Import
 
 interface ProofTasksSectionProps {
   proofTasks: ProofTask[];
   onChange: (tasks: ProofTask[]) => void;
   errors?: string;
 }
+
+const TIME_TIERS = [
+  { label: "Quick Task (~30 min)", minutes: 30, credits: 5 },
+  { label: "Standard Task (~1 hour)", minutes: 60, credits: 10 },
+  { label: "Extended Task (~2 hours)", minutes: 120, credits: 20 },
+  { label: "Deep Work (~4 hours)", minutes: 240, credits: 40 },
+];
 
 export default function ProofTasksSection({
   proofTasks,
@@ -57,12 +65,22 @@ export default function ProofTasksSection({
 
   // ✅ Simple Credit Calculation Logic
   const calculateCredits = (timeStr: string) => {
-    // Simple heuristic: "30 min" -> 5 credits, "1 hour" -> 10 credits
     if (!timeStr) return 0;
     const lower = timeStr.toLowerCase();
     if (lower.includes("hour") || lower.includes("hr")) return 10;
     if (lower.includes("30") || lower.includes("min")) return 5;
-    return 5; // default
+    return 5;
+  };
+
+  const handleDurationChange = (index: number, minutes: number) => {
+    const tier = TIME_TIERS.find((t) => t.minutes === minutes);
+    const updated = [...proofTasks];
+    updated[index] = { 
+      ...updated[index], 
+      duration_minutes: minutes,
+      expected_time: tier ? tier.label : `${minutes} minutes` // Sync string for display
+    };
+    onChange(updated);
   };
 
   return (
@@ -103,23 +121,49 @@ export default function ProofTasksSection({
                 value={task.title}
                 onChange={(e) => handleChange(index, "title", e.target.value)}
                 placeholder="e.g. Build a Landing Page"
-                className="w-full border border-[var(--color-border)] rounded-[var(--radius-input)] p-2 bg-[var(--color-surface)]"
+                // ✅ FIXED: Added text color and standardized background
+                className="w-full border border-[var(--color-border)] rounded-[var(--radius-input)] p-2 bg-[var(--color-bg)] text-[var(--color-text)] focus:outline-none focus:ring-2 focus:ring-[var(--color-employer)]"
               />
             </div>
 
-            {/* Description - Larger */}
+            {/* Description - Markdown Editor */}
             <div>
-              <label className="block text-sm font-medium text-[var(--color-text)] mb-1">
-                Task Description & Instructions
-              </label>
-              <textarea
-                rows={6} // ✅ Larger default size
+              <MarkdownEditor
+                label="Task Description & Instructions"
                 value={task.description ?? ""}
-                onChange={(e) => handleChange(index, "description", e.target.value)}
-                placeholder="Detailed instructions for the candidate..."
-                className="w-full border border-[var(--color-border)] rounded-[var(--radius-input)] p-3 bg-[var(--color-surface)]"
+                onChange={(val) => handleChange(index, "description", val)}
+                placeholder="Detailed instructions for the candidate (you can use markdown)..."
+                rows={6}
               />
             </div>
+
+            {/* ─── ✅ NEW: Standardized Time & Credit Selector ─── */}
+          <div className="grid sm:grid-cols-2 gap-5">
+            <div>
+              <label className="block text-sm font-medium text-[var(--color-text)] mb-1">
+                Estimated Effort & Reward
+              </label>
+              <div className="relative">
+                <Clock size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)]" />
+                <select
+                  value={task.duration_minutes ?? 30}
+                  onChange={(e) => handleDurationChange(index, Number(e.target.value))}
+                  className="w-full pl-9 border border-[var(--color-border)] rounded-[var(--radius-input)] p-2 bg-[var(--color-bg)] text-[var(--color-text)] focus:outline-none focus:ring-2 focus:ring-[var(--color-employer)] appearance-none"
+                >
+                  {TIME_TIERS.map((tier) => (
+                    <option key={tier.minutes} value={tier.minutes}>
+                      {tier.label} — {tier.credits} Credits
+                    </option>
+                  ))}
+                </select>
+              </div>
+              
+              {/* Helper text to reinforce the value */}
+              <p className="text-xs text-[var(--color-text-muted)] mt-1.5">
+                This sets the proof value. Candidates earn <strong className="text-[var(--color-employer)]">{TIME_TIERS.find(t => t.minutes == (task.duration_minutes || 30))?.credits} credits</strong> for completion.
+              </p>
+            </div>
+          </div>
 
             {/* Attachments Upload */}
             <div>
@@ -164,15 +208,13 @@ export default function ProofTasksSection({
                   placeholder="e.g. 1 hour"
                   value={task.expected_time ?? ""}
                   onChange={(e) => handleChange(index, "expected_time", e.target.value)}
-                  className="w-full border border-[var(--color-border)] rounded-[var(--radius-input)] p-2 bg-[var(--color-surface)]"
+                  // ✅ FIXED: Added text color and standardized background
+                  className="w-full border border-[var(--color-border)] rounded-[var(--radius-input)] p-2 bg-[var(--color-bg)] text-[var(--color-text)] focus:outline-none focus:ring-2 focus:ring-[var(--color-employer)]"
                 />
-                {/* ✅ Automatic Credit Calc Preview */}
-                <p className="text-xs text-[var(--color-success)] mt-1">
+                <p className="text-xs text-[var(--color-success)] mt-2">
                   ✨ Candidates earn ~{calculateCredits(task.expected_time || "")} credits for this task.
                 </p>
               </div>
-
-              {/* Submission Type & Platform fields... (keep existing) */}
             </div>
           </div>
         </div>
