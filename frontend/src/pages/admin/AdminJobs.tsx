@@ -3,7 +3,6 @@ import { getAllJobs, toggleFeaturedJob } from "@/lib/api/admin";
 import type { AdminJob } from "@/types/admin";
 import toast from "react-hot-toast";
 import { ArrowDownUp, Search, Star } from "lucide-react";
-import BackButton from "@/components/ui/BackButton";
 import { motion } from "framer-motion";
 
 export default function AdminJobs() {
@@ -102,7 +101,6 @@ export default function AdminJobs() {
     <div className="min-h-screen bg-[var(--color-bg)] text-[var(--color-text)] px-6 md:px-10 py-12 transition-colors">
       {/* 🧭 Header */}
       <header className="mb-8 flex flex-col gap-2">
-        <BackButton to="/admin" label="Back to Dashboard" className="w-fit" />
         <h1 className="heading-lg flex items-center gap-2">💼 Job Overview</h1>
         <p className="body-base text-[var(--color-text-muted)]">
           Browse and manage all job postings across the platform.
