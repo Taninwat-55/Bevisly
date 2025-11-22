@@ -1,9 +1,4 @@
-/**
- * 🧩 EmployerJobForm.tsx
- *
- * Unified job creation/editing form for employers.
- * Composed of modular sections for cleaner UX & maintainable structure.
- */
+// src/pages/employer/EmployerJobForm.tsx
 
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -17,6 +12,8 @@ import JobDetailsSection from "@/components/jobs/JobDetailsSection";
 import ProofTasksSection from "@/components/jobs/ProofTasksSection";
 import SubmitSection from "@/components/jobs/SubmitSection";
 import type { EmployerJobFormValues } from "@/types/employer";
+import { FileText, ChevronDown } from "lucide-react"; 
+import { JOB_TEMPLATES } from "@/data/jobTemplates";
 
 interface EmployerJobFormProps {
   mode?: "create" | "edit";
@@ -98,6 +95,24 @@ export default function EmployerJobForm({
 
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [showTemplates, setShowTemplates] = useState(false);
+
+  const applyTemplate = (templateId: string) => {
+  const template = JOB_TEMPLATES.find((t) => t.id === templateId);
+  if (!template) return;
+
+  setValues((prev) => ({
+    ...prev,
+    title: template.title,
+    department: template.department,
+    description: template.description,
+    requirements: template.requirements,
+    proof_tasks: template.proof_tasks.map(t => ({...t, id: crypto.randomUUID()})), // ensure unique IDs
+  }));
+  
+  toast.success(`Loaded template: ${template.label}`);
+  setShowTemplates(false);
+};
 
   /* ─── Handlers ─────────────────────────────── */
   const handleChange = (field: string, value: unknown) => {
@@ -136,6 +151,48 @@ export default function EmployerJobForm({
 
   /* ─── Render ─────────────────────────────── */
   return (
+    <div className="space-y-6">
+    {/* 📝 Template Helper */}
+    <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-card)] p-5 shadow-[var(--shadow-soft)]">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h3 className="font-semibold text-[var(--color-text)] flex items-center gap-2">
+            <FileText size={18} className="text-[var(--color-employer)]" />
+            Speed up posting with a template
+          </h3>
+          <p className="text-sm text-[var(--color-text-muted)]">
+            Select a pre-filled job post to get started instantly.
+          </p>
+        </div>
+
+        <div className="relative">
+          <button
+            type="button"
+            onClick={() => setShowTemplates(!showTemplates)}
+            className="flex text-[var(--color-text)] items-center gap-2 px-4 py-2 bg-[var(--color-bg)] border border-[var(--color-border)] rounded-[var(--radius-button)] text-sm font-medium hover:bg-[var(--color-bg-hover)] transition"
+          >
+            Select a Template <ChevronDown size={14} />
+          </button>
+
+          {showTemplates && (
+            <div className="absolute right-0 top-full mt-2 w-64 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-card)] shadow-xl z-20 overflow-hidden">
+              {JOB_TEMPLATES.map((t) => (
+                <button
+                  key={t.id}
+                  type="button"
+                  onClick={() => applyTemplate(t.id)}
+                  className="w-full text-left px-4 py-3 text-sm hover:bg-[var(--color-bg-hover)] border-b border-[var(--color-border)] last:border-0 transition"
+                >
+                  <div className="font-medium text-[var(--color-text)]">{t.label}</div>
+                  <div className="text-xs text-[var(--color-text-muted)]">{t.category}</div>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+
     <form
       onSubmit={handleSubmit}
       className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-card)] shadow-[var(--shadow-soft)] p-8 space-y-8"
@@ -153,5 +210,6 @@ export default function EmployerJobForm({
       </div>
       <SubmitSection loading={loading} mode={mode} submitLabel={submitLabel} />
     </form>
+    </div>
   );
 }

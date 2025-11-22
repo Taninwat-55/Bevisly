@@ -1,4 +1,4 @@
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 
 interface BackButtonProps {
@@ -10,44 +10,37 @@ interface BackButtonProps {
 
 export default function BackButton({
   to,
-  label,
+  label = "Back",
   className = "",
   onClick,
 }: BackButtonProps) {
   const navigate = useNavigate();
-  const location = useLocation();
-
+  
   const handleClick = () => {
     if (onClick) return onClick();
-    if (to) navigate(to);
-    else if (window.history.state?.idx > 0) navigate(-1);
-    else navigate("/");
-  };
-
-  let defaultLabel = label;
-  if (!defaultLabel) {
-    const path = location.pathname;
-    if (/^\/jobs\/[a-zA-Z0-9_-]+$/.test(path)) {
-      defaultLabel = "Back to Jobs";
-    } 
-    else if (path.startsWith("/jobs")) {
-      defaultLabel = "Back";
+    if (to) {
+      navigate(to);
     } else {
-      defaultLabel = "Back";
+      // Fallback to home if no history to go back to
+      if (window.history.state && window.history.state.idx > 0) {
+        navigate(-1);
+      } else {
+        navigate("/");
+      }
     }
-  }
+  };
 
   return (
     <button
       onClick={handleClick}
-      className={`inline-flex w-fit items-center gap-1.5 rounded-[var(--radius-button)]
-  border border-[var(--color-border)] bg-[var(--color-surface)]
-  px-3 py-1.5 text-sm text-[var(--color-text-muted)]
-  hover:text-[var(--color-text)] hover:bg-[var(--color-bg-hover)]
-  hover:shadow-[var(--shadow-soft)] transition-all duration-150 ${className}`}
+      className={`group inline-flex items-center gap-2 text-sm font-medium 
+      text-[var(--color-text-muted)] hover:text-[var(--color-candidate)] 
+      transition-colors duration-200 py-2 ${className}`}
     >
-      <ArrowLeft size={14} />
-      {defaultLabel}
+      <div className="p-1.5 rounded-full border border-[var(--color-border)] bg-[var(--color-surface)] group-hover:border-[var(--color-candidate)] transition-colors">
+        <ArrowLeft size={14} />
+      </div>
+      {label}
     </button>
   );
 }

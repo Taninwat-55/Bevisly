@@ -5,6 +5,7 @@ import ScrollToTop from "@/components/ui/ScrollToTop";
 import FeedbackButton from "@/components/ui/FeedbackButton";
 import { Outlet, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
+import CookieConsent from "@/components/ui/CookieConsent";
 
 export default function PublicLayout() {
   const location = useLocation();
@@ -28,6 +29,7 @@ export default function PublicLayout() {
         </motion.main>
       </AnimatePresence>
 
+      <CookieConsent />
       <LandingFooter />
       <FeedbackButton />
     </div>
