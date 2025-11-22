@@ -14,6 +14,41 @@ export type Database = {
   }
   public: {
     Tables: {
+      credit_transactions: {
+        Row: {
+          amount: number
+          created_at: string | null
+          id: string
+          reason: string
+          related_entity_id: string | null
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string | null
+          id?: string
+          reason: string
+          related_entity_id?: string | null
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string | null
+          id?: string
+          reason?: string
+          related_entity_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "credit_transactions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       feedback: {
         Row: {
           ai_summary: string | null
@@ -440,6 +475,15 @@ export type Database = {
     }
     Functions: {
       delete_user_account: { Args: never; Returns: undefined }
+      distribute_credits: {
+        Args: {
+          p_amount: number
+          p_entity_id?: string
+          p_reason: string
+          p_user_id: string
+        }
+        Returns: undefined
+      }
       get_job_detail: {
         Args: { job_id_input: string }
         Returns: {
@@ -481,7 +525,9 @@ export type Database = {
         }[]
       }
       get_user_rank: { Args: { user_id: string }; Returns: number }
-      is_admin: { Args: { uid: string }; Returns: boolean }
+      is_admin:
+        | { Args: { uid: string }; Returns: boolean }
+        | { Args: never; Returns: boolean }
       promote_to_admin: { Args: never; Returns: undefined }
     }
     Enums: {

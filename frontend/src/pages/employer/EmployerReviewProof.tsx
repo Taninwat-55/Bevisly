@@ -6,7 +6,8 @@ import { updateSubmissionStatus } from "@/lib/api/mutations";
 import { getSubmissionById, getSubmissionsByJob } from "@/lib/api/submissions";
 import { useAuth } from "@/hooks/useAuth";
 import type { EmployerSubmission } from "@/types";
-import { Loader2, Star, ArrowRight, ArrowLeft, FileText, ExternalLink, User, Lock } from "lucide-react";
+import { Loader2, Star, ArrowRight, ArrowLeft, FileText, ExternalLink, User, Lock, Download, AlignLeft, Quote } from "lucide-react";
+import { distributeCredits } from "@/lib/api/credits";
 
 export default function EmployerReviewProof() {
   const { id } = useParams();
@@ -24,7 +25,6 @@ export default function EmployerReviewProof() {
   const [fetching, setFetching] = useState(true);
   const [currentIndex, setCurrentIndex] = useState<number>(0);
 
-  // ✅ CHECK: Is it already reviewed?
   const isReviewed = submission?.status === "reviewed" || (submission?.feedback && submission.feedback.length > 0);
 
   useEffect(() => {
@@ -34,7 +34,6 @@ export default function EmployerReviewProof() {
         const data = await getSubmissionById(id);
         setSubmission(data);
         
-        // ✅ Pre-fill if reviewed
         if (data.feedback?.[0]) {
           setStrengths(data.feedback[0].strengths || "");
           setImprovements(data.feedback[0].improvements || "");
@@ -63,8 +62,6 @@ export default function EmployerReviewProof() {
 
   async function handleSubmitFeedback(direction?: "next" | "previous") {
     if (!user?.id) return;
-    
-    // ✅ Skip API call if just navigating on a locked review
     if (isReviewed) {
         if (direction === "next" && nextCandidate) navigate(`/employer/review/${nextCandidate.id}`);
         else if (direction === "previous" && prevCandidate) navigate(`/employer/review/${prevCandidate.id}`);
@@ -82,7 +79,19 @@ export default function EmployerReviewProof() {
         improvements,
         stars,
       });
+
       await updateSubmissionStatus(submission.id, "reviewed");
+
+      if (stars >= 4) {
+        await distributeCredits(
+          submission.user_id, 
+          50, 
+          "quality_bonus", 
+          submission.id
+        );
+        toast.success("✨ Quality Bonus (50 Credits) awarded!");
+      }
+      
       toast.success("✅ Feedback submitted!");
 
       if (direction === "next" && nextCandidate) {
@@ -103,10 +112,15 @@ export default function EmployerReviewProof() {
   if (fetching) return <div className="flex justify-center items-center min-h-screen"><Loader2 className="animate-spin" /></div>;
   if (!submission) return <div className="p-10 text-center">Submission not found.</div>;
 
+  // 🧠 Detect Submission Type
+  const subLink = submission.submission_link || "";
+  const isFile = subLink.includes("supabase") && subLink.includes("/storage/");
+  const isUrl = subLink.startsWith("http") && !isFile;
+  const isTextEntry = subLink && !isFile && !isUrl; // Fallback for text mode
+
   return (
-    <div className="min-h-screen bg-[var(--color-bg)] px-8 py-10 flex flex-col gap-6">
-      {/* Header */}
-      <header className="max-w-4xl mx-auto w-full">
+    <div className="min-h-screen bg-[var(--color-bg)] px-8 py-10 flex flex-col gap-6 transition-colors">
+      <header className="max-w-5xl mx-auto w-full">
         <button onClick={() => navigate("/employer/submissions")} className="text-sm text-[var(--color-text-muted)] hover:text-[var(--color-text)] mb-4">← Back to Submissions</button>
         <div className="flex justify-between items-start">
           <div>
@@ -121,146 +135,188 @@ export default function EmployerReviewProof() {
         </div>
       </header>
 
-      <div className="max-w-4xl mx-auto w-full grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="max-w-5xl mx-auto w-full grid grid-cols-1 lg:grid-cols-3 gap-6">
         
-        {/* LEFT: Submission Content */}
-        <section className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-card)] p-6 space-y-6 h-fit">
-          <div>
-            <h3 className="text-sm font-bold text-[var(--color-text-muted)] uppercase tracking-wider mb-3">Candidate</h3>
-            <div className="flex items-center justify-between p-3 bg-[var(--color-bg)] rounded-lg border border-[var(--color-border)]">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-[var(--color-candidate)]/10 flex items-center justify-center text-[var(--color-candidate-dark)]">
-                  <User size={20} />
-                </div>
-                <div>
-                  <p className="font-medium text-[var(--color-text)]">{submission.profiles?.full_name || "Anonymous Candidate"}</p>
-                  <p className="text-xs text-[var(--color-text-muted)]">{submission.profiles?.email}</p>
-                </div>
-              </div>
-              <div className="flex gap-2">
-                 {/* Profile Link */}
-                 <Link to={`/candidate/${submission.user_id}`} target="_blank" className="p-2 hover:bg-[var(--color-surface)] rounded-md text-[var(--color-text-muted)]" title="View Profile">
-                    <ExternalLink size={18} />
-                 </Link>
-                 {/* Resume Link */}
-                 {submission.resume_url && (
-                    <a href={submission.resume_url} target="_blank" rel="noreferrer" className="p-2 hover:bg-[var(--color-surface)] rounded-md text-[var(--color-text-muted)]" title="View Resume">
-                        <FileText size={18} />
-                    </a>
-                 )}
-              </div>
-            </div>
-          </div>
-
-          <div>
-            <h3 className="text-sm font-bold text-[var(--color-text-muted)] uppercase tracking-wider mb-2">Submission</h3>
+        {/* LEFT COLUMN: CANDIDATE WORK (Span 2) */}
+        <div className="lg:col-span-2 space-y-6">
             
-            {/* Reflection / Text Answer */}
-            <div className="bg-[var(--color-bg)] p-4 rounded-lg border border-[var(--color-border)] text-sm leading-relaxed whitespace-pre-line min-h-[100px]">
-               {submission.reflection || <span className="italic text-[var(--color-text-muted)]">No written reflection provided.</span>}
-            </div>
-
-            {/* Link / File */}
-            {submission.submission_link && (
-                <div className="mt-4">
-                    <a href={submission.submission_link} target="_blank" rel="noreferrer" 
-                       className="flex items-center gap-2 text-[var(--color-employer)] hover:underline font-medium break-all">
-                        <ExternalLink size={16} />
-                        {submission.submission_link}
-                    </a>
+            {/* 1. Candidate Identity */}
+            <section className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-card)] p-5">
+                <h3 className="text-xs font-bold text-[var(--color-text-muted)] uppercase tracking-wider mb-3">Candidate</h3>
+                <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-full bg-[var(--color-candidate)]/10 flex items-center justify-center text-[var(--color-candidate-dark)]">
+                        <User size={20} />
+                        </div>
+                        <div>
+                        <p className="font-medium text-[var(--color-text)]">{submission.profiles?.full_name || "Anonymous"}</p>
+                        <p className="text-xs text-[var(--color-text-muted)]">{submission.profiles?.email}</p>
+                        </div>
+                    </div>
+                    <div className="flex gap-2">
+                        <Link to={`/candidate/${submission.user_id}`} target="_blank" className="p-2 hover:bg-[var(--color-bg)] rounded-md text-[var(--color-text-muted)] hover:text-[var(--color-text)]" title="View Profile">
+                            <ExternalLink size={18} />
+                        </Link>
+                        {submission.resume_url && (
+                            <a href={submission.resume_url} target="_blank" rel="noreferrer" className="p-2 hover:bg-[var(--color-bg)] rounded-md text-[var(--color-text-muted)] hover:text-[var(--color-text)]" title="View Resume">
+                                <FileText size={18} />
+                            </a>
+                        )}
+                    </div>
                 </div>
-            )}
-          </div>
-        </section>
+            </section>
 
-        {/* RIGHT: Feedback Form */}
-        <section className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-card)] p-6 h-fit relative overflow-hidden">
-          {/* ✅ LOCKED STATE OVERLAY */}
-          {isReviewed && (
-              <div className="absolute top-0 left-0 w-full h-1 bg-[var(--color-success)]" />
-          )}
-          
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="heading-md">Feedback</h2>
+            {/* 2. Work Submission (Link, File, or Text Answer) */}
+            <section className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-card)] p-5 min-h-[160px]">
+                <h3 className="text-xs font-bold text-[var(--color-text-muted)] uppercase tracking-wider mb-3">Proof Submission</h3>
+                
+                {isFile ? (
+                    <div className="flex items-center gap-4 p-4 bg-[var(--color-bg)] border border-[var(--color-border)] rounded-[var(--radius-button)]">
+                        <div className="p-3 bg-[var(--color-surface)] rounded-full border border-[var(--color-border)] text-[var(--color-candidate)]">
+                            <FileText size={24} />
+                        </div>
+                        <div className="flex-1">
+                            <p className="text-sm font-medium text-[var(--color-text)]">Uploaded File</p>
+                            <p className="text-xs text-[var(--color-text-muted)]">The candidate uploaded a file proof.</p>
+                        </div>
+                        <a href={subLink} target="_blank" rel="noreferrer" className="flex items-center gap-2 px-4 py-2 bg-[var(--color-employer)] text-white rounded-[var(--radius-button)] hover:brightness-110 text-sm font-medium transition">
+                            <Download size={16} /> Download
+                        </a>
+                    </div>
+                ) : isUrl ? (
+                    <div className="flex items-center gap-4 p-4 bg-[var(--color-bg)] border border-[var(--color-border)] rounded-[var(--radius-button)]">
+                        <div className="p-3 bg-[var(--color-surface)] rounded-full border border-[var(--color-border)] text-[var(--color-candidate)]">
+                            <ExternalLink size={24} />
+                        </div>
+                        <div className="flex-1">
+                            <p className="text-sm font-medium text-[var(--color-text)]">External Link</p>
+                            <a href={subLink} target="_blank" rel="noreferrer" className="text-xs text-[var(--color-employer-dark)] hover:underline truncate block max-w-[300px]">
+                                {subLink}
+                            </a>
+                        </div>
+                        <a href={subLink} target="_blank" rel="noreferrer" className="flex items-center gap-2 px-4 py-2 border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text)] rounded-[var(--radius-button)] hover:bg-[var(--color-bg-hover)] text-sm font-medium transition">
+                            Open Link <ArrowRight size={14} />
+                        </a>
+                    </div>
+                ) : isTextEntry ? (
+                    <div className="p-4 bg-[var(--color-bg)] border border-[var(--color-border)] rounded-[var(--radius-button)]">
+                        <div className="flex items-center gap-2 mb-2 text-[var(--color-candidate)]">
+                            <AlignLeft size={16} /> <span className="text-xs font-bold uppercase">Text Response</span>
+                        </div>
+                        <p className="text-sm text-[var(--color-text)] whitespace-pre-wrap leading-relaxed font-mono">
+                            {subLink}
+                        </p>
+                    </div>
+                ) : (
+                    <div className="p-6 text-center border border-dashed border-[var(--color-border)] rounded-xl text-[var(--color-text-muted)] italic">
+                        No primary submission found. Check reflections below.
+                    </div>
+                )}
+            </section>
+
+            {/* 3. Reflection (Separate Block) */}
+            {submission.reflection && (
+                <section className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-card)] p-5">
+                    <h3 className="text-xs font-bold text-[var(--color-text-muted)] uppercase tracking-wider mb-3">Candidate Reflection</h3>
+                    <div className="relative p-4 bg-[var(--color-bg)] border border-[var(--color-border)] rounded-[var(--radius-button)]">
+                        <Quote size={20} className="absolute top-4 left-4 text-[var(--color-border)] opacity-50" />
+                        <p className="text-sm text-[var(--color-text)] whitespace-pre-line leading-relaxed pl-8">
+                            {submission.reflection}
+                        </p>
+                    </div>
+                </section>
+            )}
+        </div>
+
+        {/* RIGHT COLUMN: FEEDBACK FORM (Span 1) */}
+        <div className="lg:col-span-1">
+            <section className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-card)] p-6 h-fit relative overflow-hidden sticky top-6">
+            
             {isReviewed && (
-                <span className="flex items-center gap-1 text-xs font-bold text-[var(--color-success)] bg-[var(--color-success)]/10 px-2 py-1 rounded-full">
-                    <Lock size={12} /> LOCKED
-                </span>
+                <div className="absolute top-0 left-0 w-full h-1 bg-[var(--color-success)]" />
             )}
-          </div>
+            
+            <div className="flex items-center justify-between mb-6">
+                <h2 className="heading-md">Feedback</h2>
+                {isReviewed && (
+                    <span className="flex items-center gap-1 text-xs font-bold text-[var(--color-success)] bg-[var(--color-success)]/10 px-2 py-1 rounded-full">
+                        <Lock size={12} /> LOCKED
+                    </span>
+                )}
+            </div>
 
-          <div className="space-y-5">
-            <div>
-              <label className="block text-sm font-medium mb-2">Rating</label>
-              <div className="flex gap-2">
-                {[1, 2, 3, 4, 5].map((val) => (
-                  <button
-                    key={val}
+            <div className="space-y-5">
+                <div>
+                <label className="block text-sm font-medium mb-2 text-[var(--color-text)]">Rating</label>
+                <div className="flex gap-2">
+                    {[1, 2, 3, 4, 5].map((val) => (
+                    <button
+                        key={val}
+                        disabled={isReviewed}
+                        onClick={() => setStars(val)}
+                        className={`transition-transform hover:scale-110 focus:outline-none ${isReviewed ? 'cursor-default' : ''}`}
+                    >
+                        <Star 
+                            size={32} 
+                            className={val <= stars ? "fill-[var(--color-employer)] text-[var(--color-employer)]" : "text-[var(--color-border)]"} 
+                        />
+                    </button>
+                    ))}
+                </div>
+                </div>
+
+                <div>
+                <label className="block text-sm font-medium mb-1 text-[var(--color-text)]">Strengths</label>
+                <textarea
                     disabled={isReviewed}
-                    onClick={() => setStars(val)}
-                    className={`transition-transform hover:scale-110 ${isReviewed ? 'cursor-default' : ''}`}
-                  >
-                    <Star 
-                        size={28} 
-                        className={val <= stars ? "fill-[var(--color-employer)] text-[var(--color-employer)]" : "text-[var(--color-border)]"} 
-                    />
-                  </button>
-                ))}
-              </div>
+                    value={strengths}
+                    onChange={(e) => setStrengths(e.target.value)}
+                    rows={4}
+                    className="w-full border border-[var(--color-border)] rounded-lg p-3 bg-[var(--color-bg)] text-[var(--color-text)] text-sm disabled:opacity-70 focus:ring-2 focus:ring-[var(--color-employer)] outline-none"
+                    placeholder="What stood out?"
+                />
+                </div>
+
+                <div>
+                <label className="block text-sm font-medium mb-1 text-[var(--color-text)]">Improvements</label>
+                <textarea
+                    disabled={isReviewed}
+                    value={improvements}
+                    onChange={(e) => setImprovements(e.target.value)}
+                    rows={4}
+                    className="w-full border border-[var(--color-border)] rounded-lg p-3 bg-[var(--color-bg)] text-[var(--color-text)] text-sm disabled:opacity-70 focus:ring-2 focus:ring-[var(--color-employer)] outline-none"
+                    placeholder="Constructive feedback..."
+                />
+                </div>
             </div>
 
-            <div>
-              <label className="block text-sm font-medium mb-1">Strengths</label>
-              <textarea
-                disabled={isReviewed}
-                value={strengths}
-                onChange={(e) => setStrengths(e.target.value)}
-                rows={4}
-                className="w-full border border-[var(--color-border)] rounded-lg p-3 bg-[var(--color-bg)] text-sm disabled:opacity-60"
-                placeholder="What did they do well?"
-              />
+            <div className="flex items-center justify-between mt-8 pt-6 border-t border-[var(--color-border)]">
+                <button 
+                    onClick={() => prevCandidate && navigate(`/employer/review/${prevCandidate.id}`)}
+                    disabled={!prevCandidate}
+                    className="flex items-center gap-2 text-sm text-[var(--color-text-muted)] hover:text-[var(--color-text)] disabled:opacity-30"
+                >
+                    <ArrowLeft size={16} /> Prev
+                </button>
+
+                <button
+                    onClick={() => handleSubmitFeedback("next")}
+                    disabled={loading || (!isReviewed && !stars)}
+                    className="bg-[var(--color-employer)] text-white px-6 py-2 rounded-lg hover:brightness-110 disabled:opacity-50 transition font-medium shadow-sm"
+                >
+                    {loading ? "Saving..." : isReviewed ? "Next Candidate" : "Submit Review"}
+                </button>
+
+                <button 
+                    onClick={() => nextCandidate && handleSubmitFeedback("next")}
+                    disabled={!nextCandidate}
+                    className={`flex items-center gap-2 text-sm text-[var(--color-text-muted)] hover:text-[var(--color-text)] disabled:opacity-30 ${!isReviewed ? 'hidden' : ''}`}
+                >
+                    Next <ArrowRight size={16} />
+                </button>
             </div>
-
-            <div>
-              <label className="block text-sm font-medium mb-1">Improvements</label>
-              <textarea
-                disabled={isReviewed}
-                value={improvements}
-                onChange={(e) => setImprovements(e.target.value)}
-                rows={4}
-                className="w-full border border-[var(--color-border)] rounded-lg p-3 bg-[var(--color-bg)] text-sm disabled:opacity-60"
-                placeholder="What could be better?"
-              />
-            </div>
-          </div>
-
-          {/* Navigation / Action Buttons */}
-          <div className="flex items-center justify-between mt-8 pt-6 border-t border-[var(--color-border)]">
-             <button 
-                onClick={() => prevCandidate && navigate(`/employer/review/${prevCandidate.id}`)}
-                disabled={!prevCandidate}
-                className="flex items-center gap-2 text-sm text-[var(--color-text-muted)] hover:text-[var(--color-text)] disabled:opacity-30"
-             >
-                <ArrowLeft size={16} /> Prev
-             </button>
-
-             <button
-                onClick={() => handleSubmitFeedback("next")}
-                disabled={loading || (!isReviewed && !stars)}
-                className="bg-[var(--color-employer)] text-white px-6 py-2 rounded-lg hover:brightness-110 disabled:opacity-50 transition font-medium shadow-sm"
-             >
-                {loading ? "Saving..." : isReviewed ? "Next Candidate" : "Submit Review"}
-             </button>
-
-             <button 
-                onClick={() => nextCandidate && handleSubmitFeedback("next")}
-                disabled={!nextCandidate}
-                className={`flex items-center gap-2 text-sm text-[var(--color-text-muted)] hover:text-[var(--color-text)] disabled:opacity-30 ${!isReviewed ? 'hidden' : ''}`}
-             >
-                Next <ArrowRight size={16} />
-             </button>
-          </div>
-        </section>
+            </section>
+        </div>
       </div>
     </div>
   );

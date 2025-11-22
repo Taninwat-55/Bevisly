@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { uploadResume, getProfileResume } from "@/lib/api/profiles";
+import { getCreditHistory } from "@/lib/api/credits";
 
 export default function CandidateProfile() {
   const { user } = useAuth();
@@ -20,11 +21,12 @@ export default function CandidateProfile() {
     useCandidateStats();
 
   const [joined, setJoined] = useState<string>("");
-  const [fullName, setFullName] = useState<string>(""); // ✅ Added state for name
+  const [fullName, setFullName] = useState<string>("");
   const [copied, setCopied] = useState(false);
   const [resumeUrl, setResumeUrl] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const [resumeUpdatedAt, setResumeUpdatedAt] = useState<string | null>(null);
+  const [transactions, setTransactions] = useState<any[]>([]);
 
   /* 🗓️ Fetch profile info (join date + name) */
   useEffect(() => {
@@ -43,8 +45,8 @@ export default function CandidateProfile() {
         if (data.full_name) setFullName(data.full_name); // ✅ Set name
       }
     };
-
     fetchProfile();
+    getCreditHistory(user.id).then(setTransactions).catch(console.error);
   }, [user?.id]);
 
   /* 🆕 Fetch existing resume */
@@ -294,6 +296,39 @@ export default function CandidateProfile() {
           <StatCard label="Average Score" value={`${avgScore || "—"}★`} />
           <StatCard label="Jobs Applied" value={jobsApplied} />
         </div>
+      </motion.section>
+
+      {/* 🪙 Credit History */}
+      <motion.section
+        className="bg-[var(--color-surface)] rounded-[var(--radius-card)] shadow-[var(--shadow-soft)] border border-[var(--color-border)] p-6 mb-8"
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.1, duration: 0.25 }}
+      >
+        <h2 className="heading-md mb-4 text-[var(--color-text)]">
+          Credit History
+        </h2>
+        {transactions.length === 0 ? (
+          <p className="text-sm text-[var(--color-text-muted)]">No transactions yet.</p>
+        ) : (
+          <div className="space-y-3">
+            {transactions.map((tx) => (
+              <div key={tx.id} className="flex justify-between items-center text-sm border-b border-[var(--color-border)] pb-2 last:border-0">
+                <div>
+                  <p className="font-medium text-[var(--color-text)] capitalize">
+                    {tx.reason.replace("_", " ")}
+                  </p>
+                  <p className="text-xs text-[var(--color-text-muted)]">
+                    {new Date(tx.created_at).toLocaleDateString()}
+                  </p>
+                </div>
+                <span className={`font-bold ${tx.amount > 0 ? "text-[var(--color-success)]" : "text-[var(--color-text)]"}`}>
+                  {tx.amount > 0 ? "+" : ""}{tx.amount} BP
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
       </motion.section>
 
       {/* 💳 Proof Cards */}
