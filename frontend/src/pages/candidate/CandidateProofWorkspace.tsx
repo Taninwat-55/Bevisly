@@ -5,12 +5,13 @@ import {
   getProofTaskDetails, 
   startProof, 
   completeProof, 
-  checkSubmissionStatus 
+  saveDraft,
+  checkSubmissionStatus,
 } from "@/lib/api/submissions";
 import { 
   Loader2, Clock, Package, Brain, CheckCircle2, 
   Upload, Paperclip, Download, Link as LinkIcon, 
-  FileText, AlignLeft, Lock, Info 
+  FileText, AlignLeft, Lock, Info, Save
 } from "lucide-react";
 import { motion } from "framer-motion";
 import type { ProofTask } from "@/types/shared";
@@ -21,7 +22,7 @@ export default function CandidateProofWorkspace() {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [task, setTask] = useState<ProofTask | null>(null);
-  
+  const [savingDraft, setSavingDraft] = useState(false);
   
   // Form State
   const [link, setLink] = useState("");
@@ -102,6 +103,28 @@ const [reflection, setReflection] = useState(""); // For the "Reflection" box
 
     init();
   }, [proof_task_id]);
+
+  async function handleSaveDraft(e: React.MouseEvent) {
+    e.preventDefault(); // Prevent form submission
+    if (isLocked || !task?.job_id) return;
+
+    setSavingDraft(true);
+    try {
+      await saveDraft({
+        job_id: task.job_id,
+        submission_link: link || undefined,
+        text_response: textSubmission || undefined,
+        reflection,
+        file: file || undefined, // Only sends if new file selected
+      });
+      toast.success("💾 Draft saved!");
+    } catch (err: any) {
+      console.error(err);
+      toast.error("Failed to save draft");
+    } finally {
+      setSavingDraft(false);
+    }
+  }
 
 async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -235,7 +258,6 @@ async function handleSubmit(e: React.FormEvent) {
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-5">
-            
             {/* 🔗 Link Input */}
             {inputMode === "link" && (
               <div>
@@ -321,19 +343,46 @@ async function handleSubmit(e: React.FormEvent) {
               </div>
             )}
 
-            {!isLocked ? (
+            <div className="flex gap-3 pt-4">
+              {/* 💾 Save Draft Button */}
+              {!isLocked && (
                 <button
-                type="submit"
-                disabled={submitting}
-                className="w-full py-2.5 rounded-[var(--radius-button)] bg-[var(--color-candidate)] text-white font-medium flex items-center justify-center gap-2 hover:bg-[var(--color-candidate-dark)] transition disabled:opacity-70"
+                  type="button"
+                  onClick={handleSaveDraft}
+                  disabled={submitting || savingDraft}
+                  className="flex-1 py-2.5 rounded-[var(--radius-button)] border border-[var(--color-border)] text-[var(--color-text-muted)] font-medium flex items-center justify-center gap-2 hover:bg-[var(--color-bg-hover)] hover:text-[var(--color-text)] transition disabled:opacity-70"
                 >
-                {submitting ? <Loader2 size={16} className="animate-spin" /> : <><CheckCircle2 size={16} /> Submit Proof</>}
+                  {savingDraft ? (
+                    <Loader2 size={16} className="animate-spin" />
+                  ) : (
+                    <>
+                      <Save size={16} /> Save Draft
+                    </>
+                  )}
                 </button>
-            ) : (
-                <div className="p-3 bg-[var(--color-success)]/10 border border-[var(--color-success)]/20 rounded-[var(--radius-button)] text-center text-sm text-[var(--color-success)] font-medium">
-                    Proof Submitted Successfully
+              )}
+
+              {/* 🚀 Submit Button */}
+              {!isLocked ? (
+                <button
+                  type="submit"
+                  disabled={submitting || savingDraft}
+                  className="flex-[2] py-2.5 rounded-[var(--radius-button)] bg-[var(--color-candidate)] text-white font-medium flex items-center justify-center gap-2 hover:bg-[var(--color-candidate-dark)] transition disabled:opacity-70"
+                >
+                  {submitting ? (
+                    <Loader2 size={16} className="animate-spin" />
+                  ) : (
+                    <>
+                      <CheckCircle2 size={16} /> Submit Proof
+                    </>
+                  )}
+                </button>
+              ) : (
+                <div className="w-full p-3 bg-[var(--color-success)]/10 border border-[var(--color-success)]/20 rounded-[var(--radius-button)] text-center text-sm text-[var(--color-success)] font-medium">
+                  Proof Submitted Successfully
                 </div>
-            )}
+              )}
+            </div>
           </form>
         </motion.section>
       </div>
