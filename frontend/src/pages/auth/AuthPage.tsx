@@ -55,14 +55,34 @@ export default function AuthPage() {
 
     try {
       setFormLoading(true);
-      const { error } = await supabase.auth.signUp({
+      // 1. Capture 'data' to check for immediate session
+      const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: { data: { role } },
       });
 
-      if (error) setFormError(error.message);
-      else notify.success("✅ Check your email for confirmation link.", role);
+      if (error) {
+        setFormError(error.message);
+        return;
+      }
+
+      // 2. Handle Logic based on Email Confirmation setting
+      if (data.session) {
+        // Case A: Email Confirmation is DISABLED (Dev Mode)
+        // User is logged in immediately.
+        notify.success("🎉 Account created! Logging you in...", role);
+
+        // The existing useEffect will detect the user and redirect automatically.
+      } else if (data.user) {
+        // Case B: Email Confirmation is ENABLED (Production)
+        // No session yet. User must verify email.
+        notify.success("✅ Success! Please check your email to confirm.", role);
+
+        // Optional: Switch back to login view so they aren't staring at the signup form
+        setIsLogin(true);
+      }
+
     } catch (err) {
       console.error("Error", err);
       setFormError("Unexpected error. Please try again.");
@@ -193,11 +213,10 @@ export default function AuthPage() {
                 required
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
-                className={`w-full border ${
-                  confirmPassword && password !== confirmPassword
+                className={`w-full border ${confirmPassword && password !== confirmPassword
                     ? "border-red-400"
                     : "border-[var(--color-border)]"
-                } rounded-button px-3 py-2 pr-10 text-sm focus:ring-2 focus:ring-candidate-light`}
+                  } rounded-button px-3 py-2 pr-10 text-sm focus:ring-2 focus:ring-candidate-light`}
               />
               <button
                 type="button"
