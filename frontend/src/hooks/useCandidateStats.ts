@@ -35,8 +35,8 @@ export function useCandidateStats(): CandidateStats {
         // 🧠 Feedback average
         const { data: feedbackData } = await supabase
           .from("feedback")
-          .select("stars")
-          .eq("submission_id.user_id", user.id);
+          .select("stars, submissions!inner(user_id)") 
+          .eq("submissions.user_id", user.id);
 
         const scores =
           feedbackData

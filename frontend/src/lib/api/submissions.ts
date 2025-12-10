@@ -189,6 +189,7 @@ export async function getSubmissionById(submission_id: string) {
       file_url,       
       text_response,  
       reflection,
+      video_url,
       resume_url,
       created_at,
       proof_tasks ( id, title, description ),
@@ -207,14 +208,16 @@ export async function getSubmissionById(submission_id: string) {
 export async function submitProof({
   job_id,
   submission_link,
-  text_response, // ✅ Accept text separately
+  text_response,
   reflection,
+  video_url, // ✅ Add this
   file,
 }: {
   job_id: string;
   submission_link?: string;
   text_response?: string;
   reflection?: string;
+  video_url?: string; // ✅ Add type
   file?: File | null;
 }) {
   const user = (await supabase.auth.getUser()).data.user;
@@ -243,10 +246,11 @@ export async function submitProof({
   const { data, error } = await supabase
     .from("submissions")
     .update({
-      submission_link: submission_link || null, // Only external link here
-      file_url: uploadedFileUrl || null,        // ✅ Save file here
-      text_response: text_response || null,     // ✅ Save text here
+      submission_link: submission_link || null,
+      file_url: uploadedFileUrl || null,
+      text_response: text_response || null,
       reflection,
+      video_url: video_url || null,
       status: "submitted",
       completed_at: new Date().toISOString(),
       resume_url: profile?.resume_url || null,
@@ -260,13 +264,7 @@ export async function submitProof({
 }
 
 // 3. Update completeProof signature to match
-export async function completeProof(params: {
-  job_id: string;
-  submission_link?: string;
-  text_response?: string;
-  reflection?: string;
-  file?: File | null;
-}) {
+export async function completeProof(params: any) {
   return submitProof(params);
 }
 

@@ -55,6 +55,7 @@ export type EmployerSubmission = {
   submission_link: string | null; // Used ONLY for External Links
   file_url?: string | null;       // For uploaded files
   text_response?: string | null;  // For text answers
+  video_url?: string | null;
   reflection: string | null;
   proof_tasks: { id: string; title: string | null } | null;
 
