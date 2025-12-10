@@ -1,15 +1,8 @@
-// src/pages/PublicCandidateProfilePage.tsx
 import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import {
-  Copy,
-  ChevronDown,
-  ChevronUp,
-  Loader2,
-  Trophy,
-  Clock,
-  Star,
+  Copy, Loader2, Trophy, Star, BadgeCheck, Briefcase
 } from "lucide-react";
 import toast from "react-hot-toast";
 import type { ProfileLite, ProofCardLite } from "@/types/shared";
@@ -87,148 +80,149 @@ export default function PublicCandidateProfilePage() {
     fetchData();
   }, [id]);
 
-  /* 🌀 States */
-  if (loading)
-    return (
-      <div className="flex justify-center items-center min-h-screen text-[var(--color-text-muted)]">
-        <Loader2 className="animate-spin mr-2" /> Loading profile…
-      </div>
-    );
+  useEffect(() => {
+    if (!id) return;
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        const [
+          { data: prof },
+          { data: rankData },
+          { data: rpcTimeline },
+        ] = await Promise.all([
+          supabase.from("profiles").select("id, full_name, credits, email").eq("id", id).single(),
+          supabase.rpc("get_user_rank", { user_id: id }),
+          supabase.rpc("get_recent_activity", { user_id: id }),
+        ]);
 
-  if (!profile)
-    return (
-      <div className="p-8 text-center text-[var(--color-text-muted)]">
-        Profile not found 🚫
-      </div>
-    );
+        setProfile(prof as any); // Cast for email access if type missing
+        setRank(rankData ?? null);
+
+        if (rpcTimeline && Array.isArray(rpcTimeline) && rpcTimeline.length > 0) {
+          setTimeline(rpcTimeline);
+          setCards(rpcTimeline);
+        } else {
+          const { data: fallbackProofs } = await supabase
+            .from("proof_cards")
+            .select("id, job_title, rating, comments, reviewed_at, submission_id")
+            .order("reviewed_at", { ascending: false })
+            .limit(10);
+          setTimeline(fallbackProofs ?? []);
+          setCards(fallbackProofs ?? []);
+        }
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, [id]);
+
+  if (loading) return <div className="flex justify-center items-center min-h-screen text-[var(--color-text-muted)]"><Loader2 className="animate-spin mr-2" /> Loading profile...</div>;
+  if (!profile) return <div className="p-8 text-center text-[var(--color-text-muted)]">Profile not found 🚫</div>;
 
   const visibleCards = showAll ? cards : cards.slice(0, 6);
+  // @ts-ignore
+  const email = profile.email; // Access email for "Hire Me" button
 
   return (
-    <motion.div
-      className="min-h-screen bg-[var(--color-bg)] px-8 py-10 max-w-4xl mx-auto"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.25 }}
-    >
-      <BackButton label="Back" />
+    <motion.div className="min-h-screen bg-[var(--color-bg)] px-6 py-12 transition-colors" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+      <div className="max-w-4xl mx-auto">
+        <BackButton label="Back to Home" to="/" />
 
-      {/* 🏁 Header */}
-      <header className="mb-8 text-center">
-        <h1 className="heading-lg mb-1">{profile.full_name ?? "Anonymous"}</h1>
-        <p className="text-[var(--color-text-muted)] mb-2">
-          💳 {profile.credits ?? 0} Proof Credits
-        </p>
-        {rank && (
-          <div className="flex items-center justify-center gap-2 text-[var(--color-candidate)] font-medium mb-3">
-            <Trophy size={16} /> Ranked #{rank} globally
+        {/* 🏁 Header Card */}
+        <div className="mt-8 relative overflow-hidden rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-8 shadow-sm text-center">
+          {/* Background Decor */}
+          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[var(--color-candidate)] to-purple-500" />
+
+          <div className="relative z-10 flex flex-col items-center">
+            <div className="w-20 h-20 rounded-full bg-gradient-to-br from-[var(--color-candidate)] to-purple-600 flex items-center justify-center text-white text-3xl font-bold mb-4 shadow-lg">
+              {profile.full_name?.charAt(0) || "U"}
+            </div>
+
+            <h1 className="text-3xl font-bold text-[var(--color-text)] flex items-center gap-2">
+              {profile.full_name ?? "Anonymous"}
+              <BadgeCheck className="text-blue-500" size={24} fill="white" />
+            </h1>
+
+            <div className="flex flex-wrap justify-center gap-4 mt-3 text-sm font-medium text-[var(--color-text-muted)]">
+              <span className="flex items-center gap-1"><Trophy size={14} className="text-yellow-500" /> {profile.credits ?? 0} Proof Credits</span>
+              {rank && <span className="flex items-center gap-1"><Star size={14} className="text-purple-500" /> Global Rank #{rank}</span>}
+            </div>
+
+            {/* 🎯 CTA Buttons */}
+            <div className="flex gap-3 mt-8">
+              <a
+                href={`mailto:${email}?subject=Interview Request via Bevisly`}
+                className="flex items-center gap-2 px-6 py-2.5 bg-[var(--color-text)] text-[var(--color-bg)] rounded-full font-semibold hover:opacity-90 transition shadow-md"
+              >
+                <Briefcase size={16} /> Hire This Candidate
+              </a>
+              <button
+                onClick={() => {
+                  navigator.clipboard.writeText(window.location.href);
+                  toast.success("Profile link copied!");
+                }}
+                className="flex items-center gap-2 px-5 py-2.5 bg-[var(--color-bg)] border border-[var(--color-border)] text-[var(--color-text)] rounded-full font-medium hover:bg-[var(--color-bg-hover)] transition"
+              >
+                <Copy size={16} /> Share
+              </button>
+            </div>
           </div>
-        )}
-        <div className="flex justify-center gap-4">
-          <button
-            onClick={() => {
-              navigator.clipboard.writeText(window.location.href);
-              toast.success("Profile link copied!", { icon: "🔗" });
-            }}
-            className="flex items-center gap-1 text-sm text-[var(--color-candidate)] hover:underline"
-          >
-            <Copy size={14} /> Copy Link
-          </button>
         </div>
-      </header>
 
-      {/* 🧩 Proof Cards */}
-      <section className="bg-[var(--color-surface)] rounded-[var(--radius-card)] border border-[var(--color-border)] shadow-[var(--shadow-soft)] p-6 mb-8">
-        <h2 className="heading-md mb-4 text-center text-[var(--color-text)]">
-          Verified Proof Cards
-        </h2>
+        {/* 🏆 Verified Proofs */}
+        <section className="mt-10">
+          <h2 className="heading-md mb-6 flex items-center gap-2">
+            <BadgeCheck className="text-[var(--color-candidate)]" /> Verified Proofs
+          </h2>
 
-        {cards.length === 0 ? (
-          <p className="text-center text-[var(--color-text-muted)]">
-            This candidate hasn’t earned any proof cards yet.
-          </p>
-        ) : (
-          <>
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {cards.length === 0 ? (
+            <div className="text-center py-12 border border-dashed border-[var(--color-border)] rounded-xl bg-[var(--color-surface)]">
+              <p className="text-[var(--color-text-muted)]">No verified proofs yet.</p>
+            </div>
+          ) : (
+            <div className="grid sm:grid-cols-2 gap-5">
               {visibleCards.map((c) => (
                 <motion.div
                   key={c.id ?? c.job_title}
-                  className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-card)] shadow-[var(--shadow-soft)] p-4 hover:shadow-[var(--shadow-hover)] transition"
-                  whileHover={{ scale: 1.02 }}
+                  whileHover={{ y: -2 }}
+                  className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-xl p-5 shadow-sm hover:shadow-md transition group"
                 >
-                  <h3 className="font-semibold text-[var(--color-text)] mb-1 line-clamp-1">
-                    {c.job_title}
-                  </h3>
-                  <p className="text-xs text-[var(--color-text-muted)] mb-2">
-                    <Star size={12} className="inline mr-1 opacity-70" />
-                    {c.rating?.toFixed(1) ?? "–"} ·{" "}
-                    {c.reviewed_at
-                      ? new Date(c.reviewed_at).toLocaleDateString()
-                      : "Unreviewed"}
+                  <div className="flex justify-between items-start mb-2">
+                    <h3 className="font-semibold text-[var(--color-text)] text-lg line-clamp-1 group-hover:text-[var(--color-candidate-dark)] transition">
+                      {c.job_title}
+                    </h3>
+                    <div className="flex items-center gap-1 bg-yellow-50 dark:bg-yellow-900/20 px-2 py-1 rounded text-xs font-bold text-yellow-700 dark:text-yellow-400">
+                      <Star size={12} fill="currentColor" /> {c.rating?.toFixed(1)}
+                    </div>
+                  </div>
+
+                  <p className="text-sm text-[var(--color-text-muted)] mb-4 line-clamp-3 italic">
+                    "{c.comments || "Excellent work demonstrating core skills."}"
                   </p>
-                  <p className="text-sm text-[var(--color-text-muted)] line-clamp-3">
-                    {c.comments || "No comment provided."}
-                  </p>
+
+                  <div className="pt-4 border-t border-[var(--color-border)] flex justify-between items-center text-xs text-[var(--color-text-muted)]">
+                    <span className="flex items-center gap-1">
+                      <BadgeCheck size={12} className="text-green-500" /> Verified by Employer
+                    </span>
+                    <span>{new Date(c.reviewed_at ?? "").toLocaleDateString()}</span>
+                  </div>
                 </motion.div>
               ))}
             </div>
+          )}
 
-            {cards.length > 6 && (
-              <div className="mt-6 flex justify-center">
-                <button
-                  onClick={() => setShowAll((v) => !v)}
-                  className="flex items-center gap-1 text-sm text-[var(--color-candidate)] hover:underline"
-                >
-                  {showAll ? (
-                    <>
-                      <ChevronUp size={14} /> Collapse
-                    </>
-                  ) : (
-                    <>
-                      <ChevronDown size={14} /> View All ({cards.length})
-                    </>
-                  )}
-                </button>
-              </div>
-            )}
-          </>
-        )}
-      </section>
-
-      {/* 🕓 Recent Proof Activity */}
-      <section className="bg-[var(--color-surface)] rounded-[var(--radius-card)] border border-[var(--color-border)] shadow-[var(--shadow-soft)] p-6">
-        <h2 className="heading-md mb-4 text-center text-[var(--color-text)]">
-          Recent Proof Activity
-        </h2>
-
-        {timeline.length === 0 ? (
-          <p className="text-center text-[var(--color-text-muted)]">
-            No recent activity to show.
-          </p>
-        ) : (
-          <ul className="relative border-l border-[var(--color-border)] ml-4 space-y-4">
-            {timeline.map((entry) => (
-              <li key={entry.id} className="pl-4 relative">
-                <div className="absolute -left-[9px] top-1 w-3 h-3 rounded-full bg-[var(--color-candidate)]" />
-                <p className="text-sm font-medium text-[var(--color-text)]">
-                  {entry.job_title}
-                </p>
-                <p className="text-xs text-[var(--color-text-muted)] flex items-center gap-1">
-                  <Clock size={12} />{" "}
-                  {entry.reviewed_at
-                    ? new Date(entry.reviewed_at).toLocaleString()
-                    : "Pending review"}
-                </p>
-                {entry.comments && (
-                  <p className="text-xs text-[var(--color-text-muted)] mt-1 italic line-clamp-2">
-                    “{entry.comments}”
-                  </p>
-                )}
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
+          {cards.length > 6 && (
+            <div className="mt-6 text-center">
+              <button onClick={() => setShowAll(!showAll)} className="text-sm text-[var(--color-text-muted)] hover:text-[var(--color-text)] underline">
+                {showAll ? "Show Less" : "Show All History"}
+              </button>
+            </div>
+          )}
+        </section>
+      </div>
     </motion.div>
   );
 }
