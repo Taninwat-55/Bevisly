@@ -1,6 +1,6 @@
 // src/components/jobs/JobInfoSection.tsx
 import type { EmployerJob } from "@/types";
-import MarkdownEditor from "@/components/ui/MarkdownEditor"; 
+import MarkdownEditor from "@/components/ui/MarkdownEditor";
 import { Sparkles } from "lucide-react";
 
 interface JobInfoSectionProps {
@@ -31,11 +31,10 @@ export default function JobInfoSection({
             value={values.title ?? ""}
             onChange={(e) => onChange("title", e.target.value)}
             placeholder="e.g. Junior Frontend Developer"
-            className={`w-full border rounded-[var(--radius-input)] p-2 bg-[var(--color-bg)] text-[var(--color-text)] focus:outline-none focus:ring-2 ${
-              errors.title
+            className={`w-full border rounded-[var(--radius-input)] p-2 bg-[var(--color-bg)] text-[var(--color-text)] focus:outline-none focus:ring-2 ${errors.title
                 ? "border-[var(--color-error)] focus:ring-[var(--color-error)]"
                 : "border-[var(--color-border)] focus:ring-[var(--color-employer)]"
-            }`}
+              }`}
           />
           {errors.title && <p className="text-xs text-[var(--color-error)] mt-1">{errors.title}</p>}
         </div>
@@ -49,11 +48,10 @@ export default function JobInfoSection({
             value={values.company ?? ""}
             onChange={(e) => onChange("company", e.target.value)}
             placeholder="e.g. Bevis Labs"
-            className={`w-full border rounded-[var(--radius-input)] p-2 bg-[var(--color-bg)] text-[var(--color-text)] focus:outline-none focus:ring-2 ${
-              errors.company
+            className={`w-full border rounded-[var(--radius-input)] p-2 bg-[var(--color-bg)] text-[var(--color-text)] focus:outline-none focus:ring-2 ${errors.company
                 ? "border-[var(--color-error)] focus:ring-[var(--color-error)]"
                 : "border-[var(--color-border)] focus:ring-[var(--color-employer)]"
-            }`}
+              }`}
           />
           {errors.company && <p className="text-xs text-[var(--color-error)] mt-1">{errors.company}</p>}
         </div>
@@ -70,11 +68,10 @@ export default function JobInfoSection({
             value={values.location ?? ""}
             onChange={(e) => onChange("location", e.target.value)}
             placeholder="e.g. Copenhagen, Remote"
-            className={`w-full border rounded-[var(--radius-input)] p-2 bg-[var(--color-bg)] text-[var(--color-text)] focus:outline-none focus:ring-2 ${
-              errors.location
+            className={`w-full border rounded-[var(--radius-input)] p-2 bg-[var(--color-bg)] text-[var(--color-text)] focus:outline-none focus:ring-2 ${errors.location
                 ? "border-[var(--color-error)] focus:ring-[var(--color-error)]"
                 : "border-[var(--color-border)] focus:ring-[var(--color-employer)]"
-            }`}
+              }`}
           />
           {errors.location && <p className="text-xs text-[var(--color-error)] mt-1">{errors.location}</p>}
         </div>
@@ -147,13 +144,55 @@ export default function JobInfoSection({
 
         {values.show_salary_range && (
           <div className="grid sm:grid-cols-3 gap-4 text-[var(--color-text)]">
-            <input type="number" placeholder="Min" value={values.salary_min ?? ""} onChange={(e) => onChange("salary_min", Number(e.target.value))} className="border border-[var(--color-border)] rounded-[var(--radius-input)] p-2 bg-[var(--color-bg)]" />
-            <input type="number" placeholder="Max" value={values.salary_max ?? ""} onChange={(e) => onChange("salary_max", Number(e.target.value))} className="border border-[var(--color-border)] rounded-[var(--radius-input)] p-2 bg-[var(--color-bg)]" />
-            <select value={values.pay_period ?? "monthly"} onChange={(e) => onChange("pay_period", e.target.value)} className="border border-[var(--color-border)] rounded-[var(--radius-input)] p-2 bg-[var(--color-bg)]">
-              <option value="hourly">Hourly</option>
-              <option value="monthly">Monthly</option>
-              <option value="yearly">Yearly</option>
-            </select>
+            {/* Min Input */}
+            <div className="relative">
+              {/* We use a generic symbol or hide it since currency is selectable now */}
+              <input
+                type="number"
+                placeholder="Min"
+                value={values.salary_min ?? ""}
+                onChange={(e) => onChange("salary_min", Number(e.target.value))}
+                className="w-full border border-[var(--color-border)] rounded-[var(--radius-input)] p-2 bg-[var(--color-bg)]"
+              />
+            </div>
+
+            {/* Max Input */}
+            <div className="relative">
+              <input
+                type="number"
+                placeholder="Max"
+                value={values.salary_max ?? ""}
+                onChange={(e) => onChange("salary_max", Number(e.target.value))}
+                className="w-full border border-[var(--color-border)] rounded-[var(--radius-input)] p-2 bg-[var(--color-bg)]"
+              />
+            </div>
+
+            {/* Currency & Period Selectors */}
+            <div className="flex gap-2">
+              <select
+                value={values.payment_currency ?? "EUR"}
+                onChange={(e) => onChange("payment_currency", e.target.value)}
+                className="w-20 border border-[var(--color-border)] rounded-[var(--radius-input)] p-2 bg-[var(--color-bg)] text-sm"
+              >
+                <option value="EUR">EUR</option>
+                <option value="USD">USD</option>
+                <option value="GBP">GBP</option>
+                <option value="DKK">DKK</option>
+                <option value="SEK">SEK</option>
+                <option value="THB">THB</option>
+              </select>
+
+              <select
+                value={values.pay_period ?? "monthly"}
+                onChange={(e) => onChange("pay_period", e.target.value)}
+                className="flex-1 border border-[var(--color-border)] rounded-[var(--radius-input)] p-2 bg-[var(--color-bg)] text-sm"
+              >
+                <option value="hourly">/ Hour</option>
+                <option value="monthly">/ Month</option>
+                <option value="yearly">/ Year</option>
+                <option value="project">/ Project</option>
+              </select>
+            </div>
           </div>
         )}
       </div>
@@ -170,13 +209,13 @@ export default function JobInfoSection({
               Need help writing?
             </p>
             <p className="text-[var(--color-text-muted)] leading-relaxed">
-              You can use AI tools like <strong>ChatGPT</strong>, <strong>Claude</strong>, or <strong>Gemini</strong> to draft your job description. Just prompt them: 
+              You can use AI tools like <strong>ChatGPT</strong>, <strong>Claude</strong>, or <strong>Gemini</strong> to draft your job description. Just prompt them:
               <em className="block mt-1 text-[var(--color-text)]">"Write a fun, engaging job description for a [Job Title] at [Company] focusing on [Key Skill]."</em>
             </p>
           </div>
         </div>
 
-        <MarkdownEditor 
+        <MarkdownEditor
           label="Job Description"
           placeholder="Describe the position, team, and day-to-day responsibilities..."
           value={values.description ?? ""}
@@ -185,7 +224,7 @@ export default function JobInfoSection({
           rows={8}
         />
 
-        <MarkdownEditor 
+        <MarkdownEditor
           label="Requirements & Skills"
           placeholder="List requirements, tech stack, and qualifications..."
           value={values.requirements ?? ""}

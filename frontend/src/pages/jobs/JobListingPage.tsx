@@ -9,7 +9,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useJobs } from "@/hooks/useJobs";
 import { getEmployerJobs, deleteJob } from "@/lib/api/jobs"; 
-import { supabase } from "@/lib/supabaseClient"; // ✅ Added Import
+import { supabase } from "@/lib/supabaseClient"; 
 import {
   Loader2,
   Briefcase,
