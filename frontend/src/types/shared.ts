@@ -12,7 +12,7 @@ export type ProofTask = {
   expected_time?: string | null;
   duration_minutes?: number | null;
   submission_format?: string | null;
-  submission_type?: "link" | "file" | "text" | "mixed";
+  submission_type?: "link" | "file" | "text" | "mixed" | "github_repo";
   recommended_platform?: string | null;
   ai_tools_allowed?: boolean | null;
   attachments?: string[] | null; 

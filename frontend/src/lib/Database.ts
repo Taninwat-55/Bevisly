@@ -370,6 +370,7 @@ export type Database = {
           text_response: string | null
           updated_at: string | null
           user_id: string | null
+          video_url: string | null
         }
         Insert: {
           completed_at?: string | null
@@ -391,6 +392,7 @@ export type Database = {
           text_response?: string | null
           updated_at?: string | null
           user_id?: string | null
+          video_url?: string | null
         }
         Update: {
           completed_at?: string | null
@@ -412,6 +414,7 @@ export type Database = {
           text_response?: string | null
           updated_at?: string | null
           user_id?: string | null
+          video_url?: string | null
         }
         Relationships: [
           {
@@ -532,8 +535,8 @@ export type Database = {
       }
       get_user_rank: { Args: { user_id: string }; Returns: number }
       is_admin:
-        | { Args: { uid: string }; Returns: boolean }
         | { Args: never; Returns: boolean }
+        | { Args: { uid: string }; Returns: boolean }
       promote_to_admin: { Args: never; Returns: undefined }
     }
     Enums: {
