@@ -9,9 +9,9 @@ import {
   checkSubmissionStatus,
 } from "@/lib/api/submissions";
 import {
-  Loader2, Clock, Package, Brain, CheckCircle2,
-  Upload, Paperclip, Download, Link as LinkIcon,
-  FileText, AlignLeft, Lock, Info, Save, Github, GitFork, Video
+  Loader2, Clock, Brain, CheckCircle2,
+  Upload, Download, Link as LinkIcon,
+  FileText, AlignLeft, Github, GitFork, Video
 } from "lucide-react";
 import { motion } from "framer-motion";
 import type { ProofTask } from "@/types/shared";
@@ -26,7 +26,7 @@ export default function CandidateProofWorkspace() {
 
   // 📝 Form State
   const [link, setLink] = useState("");
-  const [videoLink, setVideoLink] = useState(""); // ✅ New Video State
+  const [videoLink, setVideoLink] = useState("");
   const [textSubmission, setTextSubmission] = useState("");
   const [reflection, setReflection] = useState("");
   const [file, setFile] = useState<File | null>(null);
@@ -54,7 +54,7 @@ export default function CandidateProofWorkspace() {
         let mode: "link" | "file" | "text" = "link";
         if (taskData.submission_type === "file") mode = "file";
         else if (taskData.submission_type === "text") mode = "text";
-        else if (taskData.submission_type === "github_repo") mode = "link"; // Force link for Github
+        else if (taskData.submission_type === "github_repo") mode = "link";
         setInputMode(mode);
 
         if (taskData.job_id) {
@@ -63,9 +63,10 @@ export default function CandidateProofWorkspace() {
 
           if (existing) {
             setLink(existing.submission_link || "");
-            // Note: We can't easily extract videoLink back out from reflection without regex, 
-            // so we just leave it in the reflection box if editing.
             setReflection(existing.reflection || "");
+            // ✅ Load existing video link if available (assuming API returns it, otherwise it stays empty)
+            // If you added video_url to checkSubmissionStatus return, map it here:
+            // setVideoLink(existing.video_url || ""); 
 
             if (existing.submission_link && existing.submission_link.includes("supabase")) {
               setExistingFileUrl(existing.submission_link);
@@ -85,6 +86,26 @@ export default function CandidateProofWorkspace() {
 
     init();
   }, [proof_task_id]);
+
+  // ✅ Restored Draft Handler
+  const handleSaveDraft = async () => {
+    if (!task?.job_id) return;
+    setSavingDraft(true);
+    try {
+      await saveDraft({
+        job_id: task.job_id,
+        submission_link: link,
+        reflection,
+        // video_url: videoLink // If you updated saveDraft to accept video_url
+      });
+      toast.success("Draft saved");
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to save draft");
+    } finally {
+      setSavingDraft(false);
+    }
+  };
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -109,7 +130,7 @@ export default function CandidateProofWorkspace() {
         submission_link: link || undefined,
         text_response: textSubmission || undefined,
         reflection: reflection,
-        video_url: videoLink || undefined, 
+        video_url: videoLink || undefined,
         file: file || undefined,
       });
 
@@ -129,7 +150,7 @@ export default function CandidateProofWorkspace() {
   );
 
   const isRepoChallenge = task.submission_type === "github_repo";
-  const templateRepo = task.recommended_platform; // Contains the employer's repo URL
+  const templateRepo = task.recommended_platform;
 
   return (
     <motion.div className="min-h-screen bg-[var(--color-bg)] px-8 py-10">
@@ -153,7 +174,6 @@ export default function CandidateProofWorkspace() {
         <section className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-card)] shadow-[var(--shadow-soft)] p-6 h-fit space-y-5">
           <h2 className="heading-md text-[var(--color-text)] mb-3">📋 Task Brief</h2>
 
-          {/* ✅ Special Repo UI */}
           {isRepoChallenge && templateRepo && (
             <div className="mb-6 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800 rounded-lg">
               <h3 className="font-semibold text-blue-700 dark:text-blue-300 mb-2 flex items-center gap-2">
@@ -201,8 +221,8 @@ export default function CandidateProofWorkspace() {
                   onClick={() => !isLocked && setInputMode(tab.id as any)}
                   disabled={isLocked && inputMode !== tab.id}
                   className={`flex-1 pb-2 text-sm font-medium transition flex justify-center gap-2 ${inputMode === tab.id
-                      ? "text-[var(--color-candidate)] border-b-2 border-[var(--color-candidate)]"
-                      : "text-[var(--color-text-muted)] hover:text-[var(--color-text)] disabled:opacity-30"
+                    ? "text-[var(--color-candidate)] border-b-2 border-[var(--color-candidate)]"
+                    : "text-[var(--color-text-muted)] hover:text-[var(--color-text)] disabled:opacity-30"
                     }`}
                 >
                   <tab.icon size={14} /> {tab.label}
@@ -213,7 +233,6 @@ export default function CandidateProofWorkspace() {
 
           <form onSubmit={handleSubmit} className="space-y-6">
 
-            {/* 🔗 MAIN INPUT */}
             {inputMode === "link" && (
               <div className="space-y-4">
                 <div>
@@ -233,7 +252,6 @@ export default function CandidateProofWorkspace() {
                   </div>
                 </div>
 
-                {/* 🎥 VIDEO INPUT (Secondary) */}
                 {!isLocked && (
                   <div className="p-4 bg-indigo-50 dark:bg-indigo-900/10 border border-indigo-100 dark:border-indigo-800 rounded-xl transition-all hover:shadow-sm">
                     <div className="flex items-center gap-2 mb-2">
@@ -259,7 +277,6 @@ export default function CandidateProofWorkspace() {
               </div>
             )}
 
-            {/* 🗂 FILE INPUT */}
             {inputMode === "file" && (
               <div>
                 <label className="block text-sm font-medium mb-1 text-[var(--color-text)]">Upload File</label>
@@ -284,7 +301,6 @@ export default function CandidateProofWorkspace() {
               </div>
             )}
 
-            {/* 📝 TEXT INPUT */}
             {inputMode === "text" && (
               <div>
                 <label className="block text-sm font-medium mb-1 text-[var(--color-text)]">Response</label>
@@ -298,7 +314,6 @@ export default function CandidateProofWorkspace() {
               </div>
             )}
 
-            {/* ✍️ Reflection (Only if not using Text Mode, or if locked) */}
             {inputMode !== "text" && (
               <div>
                 <label className="block text-sm font-medium mb-1 text-[var(--color-text)]">Reflection / Notes</label>
@@ -318,14 +333,15 @@ export default function CandidateProofWorkspace() {
               <div className="flex gap-3 pt-2">
                 <button
                   type="button"
-                  onClick={() => saveDraft({ job_id: task.job_id!, submission_link: link, reflection })}
-                  className="flex-1 py-2.5 rounded-[var(--radius-button)] border border-[var(--color-border)] text-[var(--color-text-muted)] font-medium hover:bg-[var(--color-bg-hover)] transition"
+                  onClick={handleSaveDraft}
+                  disabled={submitting || savingDraft}
+                  className="flex-1 py-2.5 rounded-[var(--radius-button)] border border-[var(--color-border)] text-[var(--color-text-muted)] font-medium hover:bg-[var(--color-bg-hover)] transition flex items-center justify-center gap-2"
                 >
-                  Save Draft
+                  {savingDraft ? <Loader2 size={16} className="animate-spin" /> : "Save Draft"}
                 </button>
                 <button
                   type="submit"
-                  disabled={submitting}
+                  disabled={submitting || savingDraft}
                   className="flex-[2] py-2.5 rounded-[var(--radius-button)] bg-[var(--color-candidate)] text-white font-medium hover:bg-[var(--color-candidate-dark)] transition disabled:opacity-70 flex items-center justify-center gap-2"
                 >
                   {submitting ? <Loader2 size={16} className="animate-spin" /> : <CheckCircle2 size={16} />}
