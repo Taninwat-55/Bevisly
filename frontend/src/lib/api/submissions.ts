@@ -290,25 +290,23 @@ export async function getSubmissionsByJob(job_id: string): Promise<EmployerSubmi
   return data as EmployerSubmission[];
 }
 
-// Prevent duplicates by checking job_id + user_id first
 export async function startProof(job_id: string, proof_task_id?: string) {
   const user = (await supabase.auth.getUser()).data.user;
   if (!user) throw new Error("Not authenticated");
 
-  // 1. Check if ANY submission for this job exists (ignore specific task ID to enforce 1 per job)
+  // 1. Check if ANY submission for this job exists
   const { data: existing } = await supabase
     .from("submissions")
     .select("id, status")
     .eq("user_id", user.id)
     .eq("job_id", job_id)
-    .limit(1) // Handle bad data gracefully
     .maybeSingle();
 
   if (existing) {
-    return existing.id; // Don't create new one, just return existing
+    return existing.id; // Return existing ID peacefully
   }
 
-  // 2. Only insert if truly new
+  // 2. Try to insert
   const { data, error } = await supabase
     .from("submissions")
     .insert([
@@ -323,7 +321,21 @@ export async function startProof(job_id: string, proof_task_id?: string) {
     .select("id")
     .single();
 
-  if (error) throw error;
+  if (error) {
+    // ✅ HANDLE RACE CONDITION: 
+    // If error code is 23505 (Unique Violation), it means another request 
+    // created it 1ms ago. We just fetch that one instead of crashing.
+    if (error.code === '23505') {
+       const { data: retry } = await supabase
+         .from("submissions")
+         .select("id")
+         .eq("user_id", user.id)
+         .eq("job_id", job_id)
+         .single();
+       return retry?.id;
+    }
+    throw error;
+  }
   return data.id;
 }
 

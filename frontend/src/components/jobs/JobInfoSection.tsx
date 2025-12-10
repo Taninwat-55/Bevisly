@@ -146,7 +146,7 @@ export default function JobInfoSection({
         </div>
 
         {values.show_salary_range && (
-          <div className="grid sm:grid-cols-3 gap-4">
+          <div className="grid sm:grid-cols-3 gap-4 text-[var(--color-text)]">
             <input type="number" placeholder="Min" value={values.salary_min ?? ""} onChange={(e) => onChange("salary_min", Number(e.target.value))} className="border border-[var(--color-border)] rounded-[var(--radius-input)] p-2 bg-[var(--color-bg)]" />
             <input type="number" placeholder="Max" value={values.salary_max ?? ""} onChange={(e) => onChange("salary_max", Number(e.target.value))} className="border border-[var(--color-border)] rounded-[var(--radius-input)] p-2 bg-[var(--color-bg)]" />
             <select value={values.pay_period ?? "monthly"} onChange={(e) => onChange("pay_period", e.target.value)} className="border border-[var(--color-border)] rounded-[var(--radius-input)] p-2 bg-[var(--color-bg)]">
