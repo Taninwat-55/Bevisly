@@ -151,6 +151,20 @@ create table public.credit_transactions (
 );
 alter table credit_transactions enable row level security;
 
+-- 1.8 SAVED JOBS (Wishlist)
+create table public.saved_jobs (
+  user_id uuid references public.profiles(id) on delete cascade not null,
+  job_id uuid references public.jobs(id) on delete cascade not null,
+  created_at timestamptz default now(),
+  primary key (user_id, job_id) -- Prevents duplicate saves
+);
+alter table saved_jobs enable row level security;
+
+create policy "Users can manage their saved jobs" 
+  on public.saved_jobs 
+  for all 
+  using (auth.uid() = user_id);
+
 -- ============================================================
 -- 2. VIEWS
 -- ============================================================

@@ -13,47 +13,23 @@ const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SER
 
 // 🌍 CONFIG: Diverse Roles & Industries
 const JSEARCH_QUERIES = [
-    // 🎨 Design & Product
+    // 🇩🇰 DENMARK FOCUS
+    "Frontend Developer in Denmark",
+    "Product Manager in Copenhagen",
     "UX UI Designer in Copenhagen",
-    "Product Manager in Denmark",
-
-    // 💼 Business & Sales
     "Business Development Manager Denmark",
     "Sales Representative in Copenhagen",
-    "Account Manager in Sweden",
-
-    // 📣 Marketing & HR
-    "Digital Marketing Specialist Remote",
     "Social Media Manager in Denmark",
     "HR Specialist in Copenhagen",
 
-    // 💻 Tech (Keep some tech)
-    "Frontend Developer in Denmark",
-    "Software Engineer Remote",
+    // 🇸🇪 SWEDEN FOCUS
+    "Account Manager in Sweden",
+    "Software Engineer in Stockholm",
 
-    // Global Fallback
-    "Frontend Developer",
-    "Software Engineer",
-    "Product Manager",
-    "Product Designer",
-    "UX UI Designer",
-    "Business Development Manager",
-    "Sales Representative",
-    "Account Manager",
-    "Digital Marketing Specialist",
-    "Social Media Manager",
-    "HR Specialist",
-    "Frontend Developer",
-    "Software Engineer",
-    "Product Manager",
-    "Product Designer",
-    "UX UI Designer",
-    "Business Development Manager",
-    "Sales Representative",
-    "Account Manager",
-    "Digital Marketing Specialist",
-    "Social Media Manager",
-    "HR Specialist"
+    // 🌐 REMOTE / GLOBAL
+    "Remote Digital Marketing Specialist",
+    "Remote Software Engineer",
+    "Junior Frontend Developer Remote",
 ];
 
 const getField = (item, ...keys) => {
