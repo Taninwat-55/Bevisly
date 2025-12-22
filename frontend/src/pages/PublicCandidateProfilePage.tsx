@@ -16,7 +16,7 @@ export default function PublicCandidateProfilePage() {
   const [rank, setRank] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
   const [showAll, setShowAll] = useState(false);
-  const [timeline, setTimeline] = useState<ProofCardLite[]>([]);
+  // const [timeline, setTimeline] = useState<ProofCardLite[]>([]);
 
   /* 🧠 Fetch candidate + proofs + rank + recent activity */
   useEffect(() => {
@@ -54,7 +54,7 @@ export default function PublicCandidateProfilePage() {
           Array.isArray(rpcTimeline) &&
           rpcTimeline.length > 0
         ) {
-          setTimeline(rpcTimeline);
+          // setTimeline(rpcTimeline);
           setCards(rpcTimeline); // for visible proof cards too
         } else {
           // 🩹 fallback to direct query (if RPC not available or empty)
@@ -66,7 +66,7 @@ export default function PublicCandidateProfilePage() {
             .order("reviewed_at", { ascending: false })
             .limit(10);
           if (fbErr) console.error("Fallback proof fetch error:", fbErr);
-          setTimeline(fallbackProofs ?? []);
+          // setTimeline(fallbackProofs ?? []);
           setCards(fallbackProofs ?? []);
         }
       } catch (err) {
@@ -99,7 +99,7 @@ export default function PublicCandidateProfilePage() {
         setRank(rankData ?? null);
 
         if (rpcTimeline && Array.isArray(rpcTimeline) && rpcTimeline.length > 0) {
-          setTimeline(rpcTimeline);
+          // setTimeline(rpcTimeline);
           setCards(rpcTimeline);
         } else {
           const { data: fallbackProofs } = await supabase
@@ -107,7 +107,7 @@ export default function PublicCandidateProfilePage() {
             .select("id, job_title, rating, comments, reviewed_at, submission_id")
             .order("reviewed_at", { ascending: false })
             .limit(10);
-          setTimeline(fallbackProofs ?? []);
+          // setTimeline(fallbackProofs ?? []);
           setCards(fallbackProofs ?? []);
         }
       } catch (err) {

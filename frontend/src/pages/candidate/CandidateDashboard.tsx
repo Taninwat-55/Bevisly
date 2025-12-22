@@ -4,7 +4,6 @@ import { supabase } from "@/lib/supabaseClient";
 import { useAuth } from "@/hooks/useAuth";
 import { CreditCard, Target, Briefcase, CheckCircle, Heart } from "lucide-react";
 import type { DashboardProof } from "@/types";
-import { getSavedJobIds } from "@/lib/api/jobs";
 
 export default function CandidateDashboard() {
   const { user } = useAuth();
