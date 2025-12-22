@@ -154,17 +154,17 @@ export default function JobDetailPage() {
           {/* Standard Meta Tags */}
           <title>{`${job.title} at ${job.company} | Bevisly`}</title>
           <meta name="description" content={`Apply for the ${job.title} role at ${job.company}. Verified proof-based hiring.`} />
-          
+
           {/* Open Graph (Facebook/LinkedIn Cards) */}
           <meta property="og:title" content={`${job.title} at ${job.company}`} />
           <meta property="og:description" content={job.description?.slice(0, 150) + "..."} />
           <meta property="og:type" content="website" />
-          
+
           {/* Google Jobs Schema Script */}
           <script type="application/ld+json">{jobSchema}</script>
         </Helmet>
       )}
-      
+
       {/* 🔙 Back Button */}
       <button
         onClick={() => navigate(-1)}
@@ -279,22 +279,36 @@ export default function JobDetailPage() {
 
           {/* 🎯 Role-specific actions */}
           {role === "candidate" && (
-            <button
-              onClick={handleCTA}
-              className={`w-full py-3 rounded-[var(--radius-button)] font-medium transition ${
-                !user
-                  ? "bg-[var(--color-bg-hover)] border border-[var(--color-border)] text-[var(--color-text-muted)] hover:text-[var(--color-candidate-dark)]"
-                  : "bg-[var(--color-candidate)] text-white hover:bg-[var(--color-candidate-dark)]"
-              }`}
-            >
-              {!user ? (
-                <span className="inline-flex items-center gap-1 justify-center">
-                  <LogIn size={14} /> Sign in to Apply
-                </span>
+            <>
+              {/* 🆕 SCENARIO A: External Job */}
+              {job.apply_url ? (
+                <a
+                  href={job.apply_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="block w-full text-center py-3 rounded-[var(--radius-button)] font-medium bg-[var(--color-employer)] text-white hover:bg-[var(--color-employer-dark)] transition"
+                >
+                  Apply on Company Site ↗
+                </a>
               ) : (
-                "Start Proof Task"
+                /* 🔙 SCENARIO B: Bevisly Internal Job (Proof Task) */
+                <button
+                  onClick={handleCTA}
+                  className={`w-full py-3 rounded-[var(--radius-button)] font-medium transition ${!user
+                      ? "bg-[var(--color-bg-hover)] border border-[var(--color-border)] text-[var(--color-text-muted)] hover:text-[var(--color-candidate-dark)]"
+                      : "bg-[var(--color-candidate)] text-white hover:bg-[var(--color-candidate-dark)]"
+                    }`}
+                >
+                  {!user ? (
+                    <span className="inline-flex items-center gap-1 justify-center">
+                      <LogIn size={14} /> Sign in to Apply
+                    </span>
+                  ) : (
+                    "Start Proof Task"
+                  )}
+                </button>
               )}
-            </button>
+            </>
           )}
 
           {role === "employer" && (
