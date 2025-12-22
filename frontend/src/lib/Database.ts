@@ -160,6 +160,7 @@ export type Database = {
       }
       jobs: {
         Row: {
+          apply_url: string | null
           company: string | null
           created_at: string | null
           department: string | null
@@ -186,6 +187,7 @@ export type Database = {
           work_mode: string | null
         }
         Insert: {
+          apply_url?: string | null
           company?: string | null
           created_at?: string | null
           department?: string | null
@@ -212,6 +214,7 @@ export type Database = {
           work_mode?: string | null
         }
         Update: {
+          apply_url?: string | null
           company?: string | null
           created_at?: string | null
           department?: string | null

@@ -7,6 +7,7 @@ export interface Job {
   description?: string | null;
   requirements?: string | null;
   paid?: boolean | null;
+  apply_url?: string | null;
 
   // 🆕 Salary-related fields
   show_salary_range?: boolean | null;

@@ -1,18 +1,15 @@
-// src/pages/employer/EmployerJobForm.tsx
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import { createJobWithTasks } from "@/lib/api/jobs";
 import type { EmployerJob, ProofTask } from "@/types";
 
-// 🧱 Modular sections
 import JobInfoSection from "@/components/jobs/JobInfoSection";
 import JobDetailsSection from "@/components/jobs/JobDetailsSection";
 import ProofTasksSection from "@/components/jobs/ProofTasksSection";
 import SubmitSection from "@/components/jobs/SubmitSection";
 import type { EmployerJobFormValues } from "@/types/employer";
-import { FileText, ChevronDown } from "lucide-react"; 
+import { FileText, ChevronDown } from "lucide-react";
 import { JOB_TEMPLATES } from "@/data/jobTemplates";
 
 interface EmployerJobFormProps {
@@ -25,6 +22,15 @@ interface EmployerJobFormProps {
   onSuccess?: () => void;
 }
 
+/* ─── Constants ─── */
+const LIMITS = {
+  TITLE: 100,
+  COMPANY: 100,
+  LOCATION: 100,
+  DESCRIPTION: 10000, // ~2000 words
+  TASK_TITLE: 150,
+};
+
 /* ─── Validation ─────────────────────────────── */
 function validateJobForm(values: {
   title: string;
@@ -36,18 +42,41 @@ function validateJobForm(values: {
   const errors: Record<string, string> = {};
   const t = (v?: string | null) => (v ?? "").trim();
 
+  // 1. Required Fields
   if (!t(values.title)) errors.title = "Job title is required.";
   if (!t(values.company)) errors.company = "Company name is required.";
   if (!t(values.location)) errors.location = "Location is required.";
   if (!t(values.description)) errors.description = "Description is required.";
 
+  // 2. Length Limits (Security & UI Safety)
+  if (t(values.title).length > LIMITS.TITLE) {
+    errors.title = `Title is too long (max ${LIMITS.TITLE} chars).`;
+  }
+  if (t(values.company).length > LIMITS.COMPANY) {
+    errors.company = `Company name is too long (max ${LIMITS.COMPANY} chars).`;
+  }
+  if (t(values.location).length > LIMITS.LOCATION) {
+    errors.location = `Location is too long (max ${LIMITS.LOCATION} chars).`;
+  }
+  if (t(values.description).length > LIMITS.DESCRIPTION) {
+    errors.description = `Description is too long (max ${LIMITS.DESCRIPTION} chars).`;
+  }
+
+  // 3. Task Validation
   if (values.proof_tasks.length > 0) {
-    // Only validate if they started adding a task but left it blank
     const firstTask = values.proof_tasks[0];
-    
-    // ✅ FIX: Use (firstTask.title || "") to handle potential undefined
-    if (!(firstTask.title || "").trim() && (firstTask.description || firstTask.expected_time)) {
-       errors.proof_tasks = "Task title is required if you add a task.";
+
+    // Check if task is partially filled
+    const hasContent =
+      (firstTask.description || "").trim() ||
+      (firstTask.expected_time || "").trim();
+
+    if (hasContent && !(firstTask.title || "").trim()) {
+      errors.proof_tasks = "Task title is required if you add a task.";
+    }
+
+    if ((firstTask.title || "").length > LIMITS.TASK_TITLE) {
+      errors.proof_tasks = `Task title is too long (max ${LIMITS.TASK_TITLE} chars).`;
     }
   }
 
@@ -98,21 +127,21 @@ export default function EmployerJobForm({
   const [showTemplates, setShowTemplates] = useState(false);
 
   const applyTemplate = (templateId: string) => {
-  const template = JOB_TEMPLATES.find((t) => t.id === templateId);
-  if (!template) return;
+    const template = JOB_TEMPLATES.find((t) => t.id === templateId);
+    if (!template) return;
 
-  setValues((prev) => ({
-    ...prev,
-    title: template.title,
-    department: template.department,
-    description: template.description,
-    requirements: template.requirements,
-    proof_tasks: template.proof_tasks.map(t => ({...t, id: crypto.randomUUID()})), // ensure unique IDs
-  }));
-  
-  toast.success(`Loaded template: ${template.label}`);
-  setShowTemplates(false);
-};
+    setValues((prev) => ({
+      ...prev,
+      title: template.title,
+      department: template.department,
+      description: template.description,
+      requirements: template.requirements,
+      proof_tasks: template.proof_tasks.map(t => ({ ...t, id: crypto.randomUUID() })), // ensure unique IDs
+    }));
+
+    toast.success(`Loaded template: ${template.label}`);
+    setShowTemplates(false);
+  };
 
   /* ─── Handlers ─────────────────────────────── */
   const handleChange = (field: string, value: unknown) => {
@@ -152,64 +181,64 @@ export default function EmployerJobForm({
   /* ─── Render ─────────────────────────────── */
   return (
     <div className="space-y-6">
-    {/* 📝 Template Helper */}
-    <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-card)] p-5 shadow-[var(--shadow-soft)]">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h3 className="font-semibold text-[var(--color-text)] flex items-center gap-2">
-            <FileText size={18} className="text-[var(--color-employer)]" />
-            Speed up posting with a template
-          </h3>
-          <p className="text-sm text-[var(--color-text-muted)]">
-            Select a pre-filled job post to get started instantly.
-          </p>
+      {/* 📝 Template Helper */}
+      <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-card)] p-5 shadow-[var(--shadow-soft)]">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <h3 className="font-semibold text-[var(--color-text)] flex items-center gap-2">
+              <FileText size={18} className="text-[var(--color-employer)]" />
+              Speed up posting with a template
+            </h3>
+            <p className="text-sm text-[var(--color-text-muted)]">
+              Select a pre-filled job post to get started instantly.
+            </p>
+          </div>
+
+          <div className="relative">
+            <button
+              type="button"
+              onClick={() => setShowTemplates(!showTemplates)}
+              className="flex text-[var(--color-text)] items-center gap-2 px-4 py-2 bg-[var(--color-bg)] border border-[var(--color-border)] rounded-[var(--radius-button)] text-sm font-medium hover:bg-[var(--color-bg-hover)] transition"
+            >
+              Select a Template <ChevronDown size={14} />
+            </button>
+
+            {showTemplates && (
+              <div className="absolute right-0 top-full mt-2 w-64 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-card)] shadow-xl z-20 overflow-hidden">
+                {JOB_TEMPLATES.map((t) => (
+                  <button
+                    key={t.id}
+                    type="button"
+                    onClick={() => applyTemplate(t.id)}
+                    className="w-full text-left px-4 py-3 text-sm hover:bg-[var(--color-bg-hover)] border-b border-[var(--color-border)] last:border-0 transition"
+                  >
+                    <div className="font-medium text-[var(--color-text)]">{t.label}</div>
+                    <div className="text-xs text-[var(--color-text-muted)]">{t.category}</div>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
+      </div>
 
-        <div className="relative">
-          <button
-            type="button"
-            onClick={() => setShowTemplates(!showTemplates)}
-            className="flex text-[var(--color-text)] items-center gap-2 px-4 py-2 bg-[var(--color-bg)] border border-[var(--color-border)] rounded-[var(--radius-button)] text-sm font-medium hover:bg-[var(--color-bg-hover)] transition"
-          >
-            Select a Template <ChevronDown size={14} />
-          </button>
-
-          {showTemplates && (
-            <div className="absolute right-0 top-full mt-2 w-64 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-card)] shadow-xl z-20 overflow-hidden">
-              {JOB_TEMPLATES.map((t) => (
-                <button
-                  key={t.id}
-                  type="button"
-                  onClick={() => applyTemplate(t.id)}
-                  className="w-full text-left px-4 py-3 text-sm hover:bg-[var(--color-bg-hover)] border-b border-[var(--color-border)] last:border-0 transition"
-                >
-                  <div className="font-medium text-[var(--color-text)]">{t.label}</div>
-                  <div className="text-xs text-[var(--color-text-muted)]">{t.category}</div>
-                </button>
-              ))}
-            </div>
-          )}
+      <form
+        onSubmit={handleSubmit}
+        className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-card)] shadow-[var(--shadow-soft)] p-8 space-y-8"
+      >
+        <JobInfoSection values={values} onChange={handleChange} errors={errors} />
+        <div className="border-t border-[var(--color-border)] pt-8">
+          <JobDetailsSection values={values} onChange={handleChange} />
         </div>
-      </div>
-    </div>
-
-    <form
-      onSubmit={handleSubmit}
-      className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-card)] shadow-[var(--shadow-soft)] p-8 space-y-8"
-    >
-      <JobInfoSection values={values} onChange={handleChange} errors={errors} />
-      <div className="border-t border-[var(--color-border)] pt-8">
-        <JobDetailsSection values={values} onChange={handleChange} />
-      </div>
-      <div className="border-t border-[var(--color-border)] pt-8">
-        <ProofTasksSection
-          proofTasks={values.proof_tasks}
-          onChange={(tasks) => handleChange("proof_tasks", tasks)}
-          errors={errors.proof_tasks}
-        />
-      </div>
-      <SubmitSection loading={loading} mode={mode} submitLabel={submitLabel} />
-    </form>
+        <div className="border-t border-[var(--color-border)] pt-8">
+          <ProofTasksSection
+            proofTasks={values.proof_tasks}
+            onChange={(tasks) => handleChange("proof_tasks", tasks)}
+            errors={errors.proof_tasks}
+          />
+        </div>
+        <SubmitSection loading={loading} mode={mode} submitLabel={submitLabel} />
+      </form>
     </div>
   );
 }
