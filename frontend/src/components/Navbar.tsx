@@ -33,8 +33,8 @@ export default function Navbar() {
         role === "admin"
           ? "/admin"
           : role === "employer"
-          ? "/employer"
-          : "/candidate",
+            ? "/employer"
+            : "/candidate",
     });
   }
 
@@ -63,12 +63,13 @@ export default function Navbar() {
             {mobileOpen ? <X size={22} /> : <Menu size={22} />}
           </button>
 
-          <h1
+          <div
             onClick={() => (user ? goToDashboard() : navigate("/"))}
-            className="text-lg font-semibold text-[var(--color-candidate-dark)] cursor-pointer select-none"
+            className="flex items-center gap-2 cursor-pointer select-none"
           >
-            Bevisly
-          </h1>
+            <img src="/logo.png" alt="Bevisly" className="h-8 w-auto" />
+            <span className="text-lg font-semibold text-[var(--color-candidate-dark)]">Bevisly</span>
+          </div>
         </div>
 
         {/* ─── Center: Main Nav Links ─── */}
@@ -77,11 +78,10 @@ export default function Navbar() {
             <Link
               key={label}
               to={to}
-              className={`hover:text-[var(--color-text)] transition-colors ${
-                location.pathname === to
+              className={`hover:text-[var(--color-text)] transition-colors ${location.pathname === to
                   ? "text-[var(--color-text)] font-semibold"
                   : ""
-              }`}
+                }`}
             >
               {label}
             </Link>
