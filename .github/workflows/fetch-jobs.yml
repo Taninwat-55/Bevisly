@@ -1,0 +1,27 @@
+name: Manual Job Fetch
+
+on:
+  workflow_dispatch: # 👈 This makes it a button you click manually
+
+jobs:
+  run-script:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Install dependencies
+        run: npm install node-fetch dotenv @supabase/supabase-js
+
+      - name: Run Aggregator
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          RAPID_API_KEY: ${{ secrets.RAPID_API_KEY }}
+          HOST_JSEARCH: "jsearch.p.rapidapi.com"
+        run: node backfill.js
