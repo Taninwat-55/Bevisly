@@ -8,6 +8,7 @@ export type CandidateJob = {
   paid: boolean | null;
   created_at: string | null;
   expires_at?: string | null;
+  apply_url?: string | null;
   proof_tasks?: {
     id: string;
     title: string;

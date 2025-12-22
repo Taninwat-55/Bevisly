@@ -8,8 +8,8 @@ import { useState, useMemo, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useJobs } from "@/hooks/useJobs";
-import { getEmployerJobs, deleteJob } from "@/lib/api/jobs"; 
-import { supabase } from "@/lib/supabaseClient"; 
+import { getEmployerJobs, deleteJob, getSavedJobIds, toggleSavedJob } from "@/lib/api/jobs";
+import { supabase } from "@/lib/supabaseClient";
 import {
   Loader2,
   Briefcase,
@@ -20,6 +20,7 @@ import {
   XCircle,
   Trash2,
   Clock,
+  Heart
 } from "lucide-react";
 import toast from "react-hot-toast";
 
@@ -45,6 +46,7 @@ export default function JobListingPage() {
   const { user } = useAuth();
   const role: SessionUser["role"] = user?.role ?? null;
   const navigate = useNavigate();
+  const [savedJobIds, setSavedJobIds] = useState<string[]>([]);
 
   // Candidate/public jobs
   const { jobs: publicJobs, loading, error } = useJobs();
@@ -52,7 +54,7 @@ export default function JobListingPage() {
   // Employer jobs
   const [employerJobs, setEmployerJobs] = useState<JobListItem[]>([]);
   const [employerLoading, setEmployerLoading] = useState(false);
-  
+
   // ✅ NEW: Track which jobs the candidate has already applied to
   const [appliedJobIds, setAppliedJobIds] = useState<Set<string>>(new Set());
 
@@ -104,10 +106,38 @@ export default function JobListingPage() {
     fetchApplied();
   }, [role, user?.id]);
 
+  // Load saved jobs when user logs in
+  useEffect(() => {
+    if (user) {
+      getSavedJobIds(user.id).then(setSavedJobIds);
+    }
+  }, [user]);
+
+  // Handle the click
+  const handleToggleSave = async (e: React.MouseEvent, jobId: string) => {
+    e.preventDefault(); // Stop clicking the whole card
+    e.stopPropagation();
+
+    if (!user) {
+      toast.error("Sign in to save jobs");
+      return;
+    }
+
+    // Optimistic Update (Immediate UI change)
+    const isSaved = savedJobIds.includes(jobId);
+    setSavedJobIds(prev => isSaved ? prev.filter(id => id !== jobId) : [...prev, jobId]);
+
+    if (isSaved) toast.success("Removed from wishlist");
+    else toast.success("Saved to wishlist");
+
+    // Database Update
+    await toggleSavedJob(user.id, jobId);
+  };
+
   /* ─── Handle Delete ─────────────────────────────── */
   const handleDelete = async (e: React.MouseEvent, jobId: string) => {
     e.stopPropagation();
-    
+
     if (!confirm("Are you sure you want to delete this job?")) return;
 
     try {
@@ -193,11 +223,11 @@ export default function JobListingPage() {
       const categoryMatch =
         categories.length > 0
           ? hasProofTasks(job) &&
-            job.proof_tasks.some((p) =>
-              categories.some((c) =>
-                p.title.toLowerCase().includes(c.toLowerCase())
-              )
+          job.proof_tasks.some((p) =>
+            categories.some((c) =>
+              p.title.toLowerCase().includes(c.toLowerCase())
             )
+          )
           : true;
 
       return (
@@ -271,23 +301,23 @@ export default function JobListingPage() {
   if (role !== "employer" && !filteredJobs.length) {
     // Check if publicJobs has items but they were all filtered out by "applied" logic
     if (publicJobs.length > 0 && appliedJobIds.size > 0 && jobs.length === 0) {
-        return (
-            <div className="min-h-screen bg-[var(--color-bg)] px-8 py-10 flex flex-col items-center justify-center text-center">
-                <div className="p-4 bg-[var(--color-success)]/10 rounded-full mb-4 text-[var(--color-success)]">
-                    <Clock size={32} />
-                </div>
-                <h2 className="heading-md mb-2">All caught up!</h2>
-                <p className="text-[var(--color-text-muted)] max-w-md">
-                    You've applied to all currently available jobs. Check your dashboard for updates on your submissions.
-                </p>
-                <button 
-                    onClick={() => navigate("/candidate/dashboard")}
-                    className="mt-6 px-5 py-2 bg-[var(--color-candidate)] text-white rounded-[var(--radius-button)] hover:brightness-110 transition"
-                >
-                    Go to Dashboard
-                </button>
-            </div>
-        );
+      return (
+        <div className="min-h-screen bg-[var(--color-bg)] px-8 py-10 flex flex-col items-center justify-center text-center">
+          <div className="p-4 bg-[var(--color-success)]/10 rounded-full mb-4 text-[var(--color-success)]">
+            <Clock size={32} />
+          </div>
+          <h2 className="heading-md mb-2">All caught up!</h2>
+          <p className="text-[var(--color-text-muted)] max-w-md">
+            You've applied to all currently available jobs. Check your dashboard for updates on your submissions.
+          </p>
+          <button
+            onClick={() => navigate("/candidate/dashboard")}
+            className="mt-6 px-5 py-2 bg-[var(--color-candidate)] text-white rounded-[var(--radius-button)] hover:brightness-110 transition"
+          >
+            Go to Dashboard
+          </button>
+        </div>
+      );
     }
 
     return (
@@ -375,19 +405,39 @@ export default function JobListingPage() {
                          rounded-[var(--radius-card)] shadow-[var(--shadow-soft)]
                          p-6 transition-all hover:shadow-[var(--shadow-hover)] hover:-translate-y-[2px]"
             >
-              <div className="flex items-start justify-between mb-2">
+              {/* ❤️ WISHLIST BUTTON (Fixed & Visible) */}
+              <button
+                onClick={(e) => handleToggleSave(e, job.id)}
+                className="absolute top-4 right-4 z-20 p-2.5 rounded-full bg-white border border-[var(--color-border)] shadow-sm text-[var(--color-text-muted)] hover:text-red-500 hover:border-red-200 transition-all"
+                title={savedJobIds.includes(job.id) ? "Unsave" : "Save for later"}
+              >
+                <Heart
+                  size={18}
+                  className={
+                    savedJobIds.includes(job.id)
+                      ? "fill-red-500 text-red-500"
+                      : "text-gray-400"
+                  }
+                />
+              </button>
+
+              {/* Header Container - Added padding-right to avoid Heart button */}
+              <div className="flex flex-col items-start gap-2 mb-3 pr-12">
                 <h3 className="text-lg font-semibold text-[var(--color-text)] leading-tight">
                   {job.title}
                 </h3>
-                <span
-                  className={`px-2 py-1 rounded-full text-xs font-medium ${
-                    job.paid
-                      ? "bg-[var(--color-success)]/10 text-[var(--color-success)]"
-                      : "bg-[var(--color-candidate-light)]/10 text-[var(--color-candidate-dark)]"
-                  }`}
-                >
-                  {job.paid ? "Paid" : "XP only"}
-                </span>
+
+                {/* XP Badge - Only Shows if Internal Job (!apply_url) */}
+                {!job.apply_url && (
+                  <span
+                    className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold border ${job.paid
+                        ? "bg-green-50 text-green-700 border-green-200"
+                        : "bg-amber-50 text-amber-700 border-amber-200"
+                      }`}
+                  >
+                    {job.paid ? "💰 Paid" : "⚡ 150 XP"}
+                  </span>
+                )}
               </div>
 
               <p className="text-sm text-[var(--color-text-muted)] mb-3">
@@ -395,12 +445,11 @@ export default function JobListingPage() {
                 {job.company || "Unknown"} {job.location && `• ${job.location}`}
 
                 {daysLeft !== null && daysLeft > 0 && (
-                   <span className={`ml-2 inline-flex items-center gap-1 text-xs font-medium ${
-                     daysLeft <= 3 ? "text-[var(--color-error)]" : "text-[var(--color-warning)]"
-                   }`}>
-                     <Clock size={12} />
-                     {daysLeft}d left
-                   </span>
+                  <span className={`ml-2 inline-flex items-center gap-1 text-xs font-medium ${daysLeft <= 3 ? "text-[var(--color-error)]" : "text-[var(--color-warning)]"
+                    }`}>
+                    <Clock size={12} />
+                    {daysLeft}d left
+                  </span>
                 )}
               </p>
 
@@ -431,7 +480,7 @@ export default function JobListingPage() {
                   >
                     <Edit3 size={14} /> Edit
                   </button>
-                  
+
                   <button
                     onClick={() => navigate(`/employer/submissions`)}
                     className="flex-1 border border-[var(--color-border)] text-[var(--color-text-muted)] py-2 rounded-[var(--radius-button)] hover:bg-[var(--color-border)] transition flex items-center justify-center gap-1"
@@ -450,11 +499,10 @@ export default function JobListingPage() {
               ) : (
                 <button
                   onClick={handleCTA}
-                  className={`w-full py-2.5 rounded-[var(--radius-button)] font-medium transition flex items-center justify-center gap-2 ${
-                    !user
-                      ? "bg-[var(--color-surface)] border border-[var(--color-border)] text-[var(--color-text-muted)] hover:border-[var(--color-text-muted)] hover:text-[var(--color-text)]"
-                      : "bg-[var(--color-candidate)] text-white hover:bg-[var(--color-candidate-dark)]"
-                  }`}
+                  className={`w-full py-2.5 rounded-[var(--radius-button)] font-medium transition flex items-center justify-center gap-2 ${!user
+                    ? "bg-[var(--color-surface)] border border-[var(--color-border)] text-[var(--color-text-muted)] hover:border-[var(--color-text-muted)] hover:text-[var(--color-text)]"
+                    : "bg-[var(--color-candidate)] text-white hover:bg-[var(--color-candidate-dark)]"
+                    }`}
                 >
                   {!user ? "View Details →" : "View Details →"}
                 </button>

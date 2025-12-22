@@ -2,8 +2,9 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/lib/supabaseClient";
 import { useAuth } from "@/hooks/useAuth";
-import { CreditCard, Target, Briefcase, CheckCircle } from "lucide-react";
+import { CreditCard, Target, Briefcase, CheckCircle, Heart } from "lucide-react";
 import type { DashboardProof } from "@/types";
+import { getSavedJobIds } from "@/lib/api/jobs";
 
 export default function CandidateDashboard() {
   const { user } = useAuth();
@@ -13,19 +14,20 @@ export default function CandidateDashboard() {
     jobsApplied: 0,
   });
   const [credits, setCredits] = useState<number>(0);
-  const [displayName, setDisplayName] = useState<string>(""); 
+  const [displayName, setDisplayName] = useState<string>("");
+  const [savedJobs, setSavedJobs] = useState<any[]>([]);
 
   // 🪙 Fetch credits AND profile name
   useEffect(() => {
     if (!user?.id) return;
     supabase
       .from("profiles")
-      .select("credits, full_name") 
+      .select("credits, full_name")
       .eq("id", user.id)
       .single()
       .then(({ data }) => {
         setCredits(data?.credits ?? 0);
-        setDisplayName(data?.full_name ?? ""); 
+        setDisplayName(data?.full_name ?? "");
       });
   }, [user?.id]);
 
@@ -54,7 +56,7 @@ export default function CandidateDashboard() {
       const avgScore =
         scored && scored.length
           ? scored.reduce((acc, cur) => acc + (cur.score ?? 0), 0) /
-            scored.length
+          scored.length
           : 0;
 
       setStats({
@@ -66,6 +68,23 @@ export default function CandidateDashboard() {
 
     fetchStats();
   }, [user?.id]);
+
+  // 📥 Load Saved Jobs
+  useEffect(() => {
+    async function loadSaved() {
+      if (!user) return;
+      const { data } = await supabase
+        .from("saved_jobs")
+        .select("job_id, jobs (*)") // Join to get full job details
+        .eq("user_id", user.id);
+
+      if (data) {
+        const jobs = data.map((item: any) => item.jobs).filter(Boolean);
+        setSavedJobs(jobs);
+      }
+    }
+    loadSaved();
+  }, [user]);
 
   return (
     <div className="min-h-screen bg-[var(--color-bg)] px-8 py-10 transition-colors">
@@ -109,7 +128,7 @@ export default function CandidateDashboard() {
           />
         </div>
       </section>
-      
+
       {/* 📜 Active Proofs Section */}
       <section className="mt-14">
         <h2 className="flex items-center gap-2 heading-md mb-4">
@@ -117,6 +136,55 @@ export default function CandidateDashboard() {
         </h2>
 
         <ActiveProofs userId={user?.id} />
+      </section>
+
+      {/* ❤️ SAVED JOBS SECTION */}
+      <section className="mt-12 mb-8">
+        <div className="flex items-center gap-3 mb-6">
+          <div className="p-2 bg-red-50 text-red-600 rounded-lg">
+            <Heart size={24} />
+          </div>
+          <h2 className="text-xl font-bold text-[var(--color-text)]">Saved Jobs</h2>
+        </div>
+
+        {savedJobs.length === 0 ? (
+          <div className="p-8 text-center border border-dashed border-[var(--color-border)] rounded-[var(--radius-card)] bg-[var(--color-bg)]">
+            <p className="text-[var(--color-text-muted)]">You haven't saved any jobs yet.</p>
+            <Link to="/jobs" className="text-[var(--color-candidate)] font-medium hover:underline mt-2 inline-block">
+              Browse Jobs →
+            </Link>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {savedJobs.map((job) => (
+              <div
+                key={job.id}
+                className="group relative bg-white border border-[var(--color-border)] p-5 rounded-[var(--radius-card)] shadow-sm hover:shadow-md transition-all hover:-translate-y-1"
+              >
+                <div className="mb-3">
+                  <h3 className="font-semibold text-lg text-[var(--color-text)] line-clamp-1" title={job.title}>
+                    {job.title}
+                  </h3>
+                  <p className="text-sm text-[var(--color-text-muted)] flex items-center gap-1">
+                    <Briefcase size={14} /> {job.company || "Unknown Company"}
+                  </p>
+                </div>
+
+                <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-50">
+                  <span className="text-xs font-medium bg-gray-100 text-gray-600 px-2 py-1 rounded">
+                    {job.location || "Remote"}
+                  </span>
+                  <Link
+                    to={`/jobs/${job.id}`}
+                    className="text-sm font-semibold text-[var(--color-candidate)] hover:text-[var(--color-candidate-dark)] flex items-center gap-1"
+                  >
+                    View Job →
+                  </Link>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </section>
     </div>
   );
@@ -197,8 +265,8 @@ function ActiveProofs({ userId }: { userId?: string }) {
       .in('status', ['in_progress', 'submitted'])
       .order("created_at", { ascending: false })
       .then(({ data }) => {
-          // @ts-ignore
-          setProofs(data ?? [])
+        // @ts-ignore
+        setProofs(data ?? [])
       });
   }, [userId]);
 
@@ -212,15 +280,15 @@ function ActiveProofs({ userId }: { userId?: string }) {
   return (
     <div className="space-y-3">
       {proofs.map((p) => {
-        const proofTaskId = p.proof_tasks?.id; 
+        const proofTaskId = p.proof_tasks?.id;
         const status = p.status || "not_started";
 
         const statusClasses =
           status === "submitted"
             ? "bg-green-100 text-green-700"
             : status === "in_progress"
-            ? "bg-yellow-100 text-yellow-700"
-            : "bg-gray-100 text-gray-600";
+              ? "bg-yellow-100 text-yellow-700"
+              : "bg-gray-100 text-gray-600";
 
         return (
           <Link
@@ -239,10 +307,10 @@ function ActiveProofs({ userId }: { userId?: string }) {
               {status === "submitted"
                 ? "Submitted"
                 : status === "in_progress"
-                ? "In Progress"
-                : status === "reviewed"
-                ? "Reviewed"
-                : "Not Started"}
+                  ? "In Progress"
+                  : status === "reviewed"
+                    ? "Reviewed"
+                    : "Not Started"}
             </span>
           </Link>
         );

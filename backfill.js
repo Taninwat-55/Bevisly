@@ -1,6 +1,5 @@
 /*
-  🚀 BEVISLY AGGREGATOR SCRIPT (FIXED DESCRIPTIONS)
-  Sources: JSearch, Internships API, YC Jobs
+  🚀 BEVISLY AGGREGATOR (Diverse Roles + Limit 5)
   Run: node backfill.js
 */
 
@@ -12,6 +11,51 @@ dotenv.config();
 
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
 
+// 🌍 CONFIG: Diverse Roles & Industries
+const JSEARCH_QUERIES = [
+    // 🎨 Design & Product
+    "UX UI Designer in Copenhagen",
+    "Product Manager in Denmark",
+
+    // 💼 Business & Sales
+    "Business Development Manager Denmark",
+    "Sales Representative in Copenhagen",
+    "Account Manager in Sweden",
+
+    // 📣 Marketing & HR
+    "Digital Marketing Specialist Remote",
+    "Social Media Manager in Denmark",
+    "HR Specialist in Copenhagen",
+
+    // 💻 Tech (Keep some tech)
+    "Frontend Developer in Denmark",
+    "Software Engineer Remote",
+
+    // Global Fallback
+    "Frontend Developer",
+    "Software Engineer",
+    "Product Manager",
+    "Product Designer",
+    "UX UI Designer",
+    "Business Development Manager",
+    "Sales Representative",
+    "Account Manager",
+    "Digital Marketing Specialist",
+    "Social Media Manager",
+    "HR Specialist",
+    "Frontend Developer",
+    "Software Engineer",
+    "Product Manager",
+    "Product Designer",
+    "UX UI Designer",
+    "Business Development Manager",
+    "Sales Representative",
+    "Account Manager",
+    "Digital Marketing Specialist",
+    "Social Media Manager",
+    "HR Specialist"
+];
+
 const getField = (item, ...keys) => {
     for (const key of keys) {
         if (item[key]) return item[key];
@@ -19,147 +63,86 @@ const getField = (item, ...keys) => {
     return null;
 };
 
-// Helper to clean up messy location data
 const cleanLocation = (locData) => {
     if (!locData) return "Remote";
-
-    // 1. If it's that specific JSON array you found
     if (Array.isArray(locData) && locData[0]?.["@type"] === "Place") {
         const addr = locData[0].address;
         if (addr) {
-            // Join parts like: "El Segundo, California, US"
             return [addr.addressLocality, addr.addressRegion, addr.addressCountry]
-                .filter(Boolean) // Remove empty parts
+                .filter(Boolean)
                 .join(", ");
         }
     }
-
-    // 2. If it's already a string, just return it
-    if (typeof locData === 'string') {
-        return locData;
-    }
-
-    // 3. Fallback for other weird object formats
+    if (typeof locData === 'string') return locData;
     return "Remote";
 };
 
-const SOURCES = [
-    {
-        name: "JSearch",
-        host: process.env.HOST_JSEARCH,
-        // 🔧 FIX 1: Broader query to ensure we get results (JSearch has real descriptions!)
-        url: (host) => `https://${host}/search?query=Frontend%20Developer&page=1&num_pages=1`,
-        getData: (json) => json.data,
-    },
-    {
-        name: "Internships API",
-        host: process.env.HOST_INTERNSHIPS,
-        url: (host) => `https://${host}/active-jb-7d`,
-        getData: (json) => Array.isArray(json) ? json : (json.jobs || json.data),
-    },
-    {
-        name: "YC Startup Jobs",
-        host: process.env.HOST_YC,
-        url: (host) => `https://${host}/active-jb-7d`,
-        getData: (json) => Array.isArray(json) ? json : (json.jobs || json.data),
-    }
-];
-
 async function runAggregator() {
-    console.log("⚡ Starting Job Aggregation...");
+    console.log("⚡ Starting Diverse Job Aggregation (Limit: 5 per category)...");
 
-    for (const source of SOURCES) {
-        if (!source.host) {
-            console.log(`⚠️ Skipping ${source.name}: No Host defined in .env`);
-            continue;
-        }
-
-        console.log(`\n📡 Fetching from: ${source.name}...`);
+    for (const query of JSEARCH_QUERIES) {
+        console.log(`\n📡 Searching: "${query}"...`);
 
         try {
-            const endpoint = source.url(source.host);
-            const res = await fetch(endpoint, {
+            // date_posted=month ensures we get results even if volume is low
+            const url = `https://${process.env.HOST_JSEARCH}/search?query=${encodeURIComponent(query)}&page=1&num_pages=1&date_posted=month`;
+
+            const res = await fetch(url, {
                 method: 'GET',
                 headers: {
                     'X-RapidAPI-Key': process.env.RAPID_API_KEY,
-                    'X-RapidAPI-Host': source.host
+                    'X-RapidAPI-Host': process.env.HOST_JSEARCH
                 }
             });
 
             if (!res.ok) {
-                console.error(`❌ API Error (${source.name}): ${res.status}`);
+                console.error(`   ❌ API Error: ${res.status}`);
                 continue;
             }
 
-            const responseBody = await res.json();
-            const rawJobs = source.getData(responseBody) || [];
+            const json = await res.json();
+            // ✂️ LIMIT TO 5 RESULTS HERE
+            const rawJobs = (json.data || []).slice(0, 5);
 
             if (rawJobs.length === 0) {
-                console.log(`⚠️ No jobs found for ${source.name}`);
+                console.log(`   ⚠️ No results found.`);
                 continue;
             }
 
-            const normalizedJobs = [];
+            const jobsToInsert = [];
             for (const raw of rawJobs) {
-                // 1. Basic Fields
-                const title = getField(raw, 'job_title', 'title', 'role', 'position');
-                const company = getField(raw, 'employer_name', 'organization', 'company_name', 'company');
-                // Get raw data first
-                const rawLocation = getField(raw, 'job_city', 'location', 'locations_raw');
-                // Then clean it
-                const location = cleanLocation(rawLocation);
-                const url = getField(raw, 'job_apply_link', 'url', 'link', 'apply_url');
+                const title = getField(raw, 'job_title', 'title');
+                const company = getField(raw, 'employer_name', 'company');
+                const rawLoc = getField(raw, 'job_city', 'location', 'locations_raw');
+                const location = cleanLocation(rawLoc);
+                const url = getField(raw, 'job_apply_link', 'url', 'apply_url');
+                const desc = getField(raw, 'job_description', 'description') || "Check link for details.";
 
-                // 🛡️ QUALITY FILTER 1: Must have a real Company Name
-                if (!company || company === "Unknown Company" || company === "null") {
-                    console.log(`   Start skipping: ${title} (Missing Company)`);
-                    continue;
-                }
-
-                // 2. Description Logic
-                let desc = getField(raw, 'job_description', 'description', 'body');
-
-                if (!desc) {
-                    const companyInfo = raw.linkedin_org_description
-                        ? `\n\n**About ${company}:**\n${raw.linkedin_org_description}`
-                        : "";
-
-                    // 🛡️ QUALITY FILTER 2: If we have NO description AND NO company info, skip it?
-                    // Uncomment the next 3 lines if you want to be super strict:
-                    // if (!companyInfo) {
-                    //    console.log(`   Skipping: ${title} (No Content)`);
-                    //    continue;
-                    // }
-
-                    desc = `**${title}** at **${company}**\n\nThis is a verified listing. Click the "Apply" button to view the full job requirements, salary, and details on their official career page.${companyInfo}`;
-                }
-
-                // 3. Clean up JSearch locations
-                const finalLoc = raw.job_country ? `${location}, ${raw.job_country}` : location;
+                if (!company || company === "Unknown Company") continue;
 
                 if (title && url) {
-                    normalizedJobs.push({
+                    jobsToInsert.push({
                         title: title,
                         company: company,
-                        location: finalLoc,
+                        location: location,
                         description: desc.slice(0, 5000),
                         apply_url: url,
                         job_type: "Full-time",
-                        is_public: true
+                        is_public: true,
+                        // Add a tag so we know it's a backfilled job
+                        department: query.split(" ")[0] // simple category guess
                     });
                 }
             }
 
-            console.log(`✅ Found ${normalizedJobs.length} valid jobs. Inserting...`);
-
-            if (normalizedJobs.length > 0) {
-                const { error } = await supabase.from("jobs").insert(normalizedJobs);
-                if (error) console.error("❌ DB Insert Error:", error.message);
-                else console.log(`🎉 Success! Added ${normalizedJobs.length} jobs.`);
+            if (jobsToInsert.length > 0) {
+                const { error } = await supabase.from("jobs").insert(jobsToInsert);
+                if (error) console.error("   ❌ DB Insert Error:", error.message);
+                else console.log(`   🎉 Added ${jobsToInsert.length} jobs.`);
             }
 
         } catch (err) {
-            console.error(`❌ Critical Error in ${source.name}:`, err.message);
+            console.error(`   ❌ Critical Error:`, err.message);
         }
     }
 
