@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { supabase } from "../lib/supabaseClient";
 import type { CandidateJob } from "@/types";
+import { getAllJobs } from "@/lib/api/jobs"; 
 
 export function useJobs() {
   const [jobs, setJobs] = useState<CandidateJob[]>([]);
@@ -9,36 +9,15 @@ export function useJobs() {
 
   useEffect(() => {
     const fetchJobs = async () => {
-      const { data, error } = await supabase
-        .from("jobs")
-        .select(`
-          id,
-          title,
-          company,
-          location,
-          description,
-          paid,
-          show_salary_range,
-          salary_min,
-          salary_max,
-          pay_period,
-          payment_currency,
-          proof_tasks (
-            id,
-            title,
-            description,
-            expected_time,
-            submission_format,
-            ai_tools_allowed,
-            duration_minutes
-          )
-        `)
-        .eq("status", "active")
-        .order("created_at", { ascending: false });
-
-      if (error) setError(error.message);
-      else setJobs((data as unknown as CandidateJob[]) || []);
-      setLoading(false);
+      try {
+        // Use the centralized API function that fetches apply_url
+        const data = await getAllJobs();
+        setJobs(data || []);
+      } catch (err: any) {
+        setError(err.message || "Failed to fetch jobs");
+      } finally {
+        setLoading(false);
+      }
     };
 
     fetchJobs();

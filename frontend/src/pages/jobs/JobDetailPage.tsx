@@ -30,6 +30,7 @@ export default function JobDetailPage() {
 
   const [job, setJob] = useState<Job | null>(null);
   const [existingStatus, setExistingStatus] = useState<string | null>(null);
+  const hasApplied = !!existingStatus;
   const [loading, setLoading] = useState(true);
   const [starting, setStarting] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
@@ -229,6 +230,20 @@ export default function JobDetailPage() {
         </div>
       </section>
 
+      {/* 🎯 EXTERNAL JOB APPLY BUTTON (No Proof Task needed) */}
+      {job.apply_url && (
+        <section className="mb-10">
+          <a
+            href={job.apply_url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="block w-full text-center py-4 rounded-[var(--radius-button)] font-semibold text-lg bg-[var(--color-employer)] text-white hover:bg-[var(--color-employer-dark)] transition shadow-md hover:shadow-lg"
+          >
+            Apply on Company Site ↗
+          </a>
+        </section>
+      )}
+
       {/* 🧩 Proof Task Section */}
       {proof && (
         <section className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-card)] shadow-[var(--shadow-soft)] p-6 mb-10">
@@ -278,39 +293,45 @@ export default function JobDetailPage() {
           </ul>
 
           {/* 🎯 Role-specific actions */}
-          {role === "candidate" && (
-            <>
-              {/* 🆕 SCENARIO A: External Job */}
-              {job.apply_url ? (
-                <a
-                  href={job.apply_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="block w-full text-center py-3 rounded-[var(--radius-button)] font-medium bg-[var(--color-employer)] text-white hover:bg-[var(--color-employer-dark)] transition"
-                >
-                  Apply on Company Site ↗
-                </a>
-              ) : (
-                /* 🔙 SCENARIO B: Bevisly Internal Job (Proof Task) */
-                <button
-                  onClick={handleCTA}
-                  className={`w-full py-3 rounded-[var(--radius-button)] font-medium transition ${!user
-                      ? "bg-[var(--color-bg-hover)] border border-[var(--color-border)] text-[var(--color-text-muted)] hover:text-[var(--color-candidate-dark)]"
-                      : "bg-[var(--color-candidate)] text-white hover:bg-[var(--color-candidate-dark)]"
-                    }`}
-                >
-                  {!user ? (
-                    <span className="inline-flex items-center gap-1 justify-center">
-                      <LogIn size={14} /> Sign in to Apply
-                    </span>
-                  ) : (
-                    "Start Proof Task"
-                  )}
-                </button>
-              )}
-            </>
+          {/* 🎯 ACTION BUTTONS SECTION - FIXED (No Outer Wrapper) */}
+
+          {/* 1. EXTERNAL JOB (Backfilled) - Show to Guests & Candidates */}
+          {job.apply_url && (!user || role === "candidate") && (
+            <a
+              href={job.apply_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block w-full text-center py-3 rounded-[var(--radius-button)] font-medium bg-[var(--color-employer)] text-white hover:bg-[var(--color-employer-dark)] transition shadow-sm mb-4"
+            >
+              Apply on Company Site ↗
+            </a>
           )}
 
+          {/* 2. INTERNAL JOB (Bevisly Task) - Show to Guests & Candidates */}
+          {!job.apply_url && (!user || role === "candidate") && (
+            <button
+              onClick={handleCTA}
+              disabled={hasApplied}
+              className={`w-full py-3 rounded-[var(--radius-button)] font-medium transition ${hasApplied
+                ? "bg-green-100 text-green-700 cursor-default"
+                : !user
+                  ? "bg-[var(--color-bg-hover)] border border-[var(--color-border)] text-[var(--color-text-muted)] hover:text-[var(--color-candidate-dark)]"
+                  : "bg-[var(--color-candidate)] text-white hover:bg-[var(--color-candidate-dark)] shadow-sm"
+                }`}
+            >
+              {hasApplied ? (
+                "✅ Application Submitted"
+              ) : !user ? (
+                <span className="inline-flex items-center gap-1 justify-center">
+                  <LogIn size={18} /> Sign in to Start Proof
+                </span>
+              ) : (
+                "Start Proof Task"
+              )}
+            </button>
+          )}
+
+          {/* 3. EMPLOYER ACTIONS - Only show to Employers */}
           {role === "employer" && (
             <div className="flex gap-3 mt-4">
               <button
@@ -328,6 +349,7 @@ export default function JobDetailPage() {
             </div>
           )}
 
+          {/* 4. ADMIN ACTIONS - Only show to Admins */}
           {role === "admin" && (
             <div className="flex gap-3 mt-4">
               <button
@@ -338,6 +360,7 @@ export default function JobDetailPage() {
               </button>
             </div>
           )}
+
         </section>
       )}
 

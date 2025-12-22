@@ -28,7 +28,8 @@ export async function getAllJobs(): Promise<CandidateJob[]> {
       salary_max,
       pay_period,
       created_at,
-      expires_at, 
+      expires_at,
+      apply_url,
       proof_tasks ( id, title, expected_time )
     `) 
     .eq("status", "active") 
@@ -300,4 +301,32 @@ export async function deleteJob(job_id: string) {
   }
 
   return true;
+}
+
+export async function getSavedJobIds(userId: string) {
+  const { data } = await supabase
+    .from("saved_jobs")
+    .select("job_id")
+    .eq("user_id", userId);
+  return data ? data.map((r) => r.job_id) : [];
+}
+
+export async function toggleSavedJob(userId: string, jobId: string) {
+  // Check if exists
+  const { data } = await supabase
+    .from("saved_jobs")
+    .select("*")
+    .eq("user_id", userId)
+    .eq("job_id", jobId)
+    .single();
+
+  if (data) {
+    // Unsave (Delete)
+    await supabase.from("saved_jobs").delete().eq("user_id", userId).eq("job_id", jobId);
+    return false; // Result: Not Saved
+  } else {
+    // Save (Insert)
+    await supabase.from("saved_jobs").insert({ user_id: userId, job_id: jobId });
+    return true; // Result: Saved
+  }
 }
