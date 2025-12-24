@@ -24,7 +24,7 @@ export default function CandidateProofWorkspace() {
   const [task, setTask] = useState<ProofTask | null>(null);
   const [savingDraft, setSavingDraft] = useState(false);
 
-  // 📝 Form State
+  // Form State
   const [link, setLink] = useState("");
   const [videoLink, setVideoLink] = useState("");
   const [textSubmission, setTextSubmission] = useState("");
@@ -64,7 +64,7 @@ export default function CandidateProofWorkspace() {
           if (existing) {
             setLink(existing.submission_link || "");
             setReflection(existing.reflection || "");
-            // ✅ Load existing video link if available (assuming API returns it, otherwise it stays empty)
+            // Load existing video link if available (assuming API returns it, otherwise it stays empty)
             // If you added video_url to checkSubmissionStatus return, map it here:
             // setVideoLink(existing.video_url || ""); 
 
@@ -87,7 +87,7 @@ export default function CandidateProofWorkspace() {
     init();
   }, [proof_task_id]);
 
-  // ✅ Restored Draft Handler
+  // Restored Draft Handler
   const handleSaveDraft = async () => {
     if (!task?.job_id) return;
     setSavingDraft(true);
@@ -96,7 +96,6 @@ export default function CandidateProofWorkspace() {
         job_id: task.job_id,
         submission_link: link,
         reflection,
-        // video_url: videoLink // If you updated saveDraft to accept video_url
       });
       toast.success("Draft saved");
     } catch (error) {

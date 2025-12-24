@@ -58,7 +58,7 @@ export default function HowItWorksSection() {
       className="bg-[var(--color-surface)] py-24 border-t border-[var(--color-border)]"
     >
       <div className="mx-auto max-w-7xl px-6 text-center">
-        {/* 🌍 Header */}
+        {/* Header */}
         <motion.h2
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -71,7 +71,7 @@ export default function HowItWorksSection() {
           One fair system where proof replaces promises — for both candidates and employers.
         </p>
 
-        {/* 🔁 Role Toggle */}
+        {/* Role Toggle */}
         <div className="flex justify-center mb-12">
           <div className="inline-flex border border-[var(--color-border)] rounded-[var(--radius-button)] overflow-hidden shadow-[var(--shadow-soft)]">
             <button
@@ -97,7 +97,7 @@ export default function HowItWorksSection() {
           </div>
         </div>
 
-        {/* 🪜 Step Cards */}
+        {/* Step Cards */}
         <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
           {items.map(({ icon: Icon, title, text }, i) => (
             <motion.div
@@ -126,7 +126,7 @@ export default function HowItWorksSection() {
           ))}
         </div>
 
-        {/* 🚀 CTA bridge */}
+        {/* CTA bridge */}
         <div className="mt-16 flex flex-wrap justify-center gap-4">
           <Link
             to="/auth?role=candidate"

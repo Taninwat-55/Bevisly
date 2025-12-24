@@ -1,6 +1,4 @@
 /**
- * 📄 EmployerPostJob.tsx
- *
  * Wrapper page for creating a new employer job.
  * Uses EmployerJobForm in "create" mode.
  *

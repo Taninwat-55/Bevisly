@@ -1,4 +1,3 @@
-// src/routes/Routes.tsx
 import { createBrowserRouter } from "react-router-dom";
 import App from "../App";
 import AuthPage from "../pages/auth/AuthPage";
@@ -50,7 +49,7 @@ import JobListingPage from "@/pages/jobs/JobListingPage";
 import PrivacyPolicy from "@/pages/shared/PrivacyPolicy";
 
 export const router = createBrowserRouter([
-  // 🌐 Public Pages with shared layout
+  // Public Pages with shared layout
   {
     element: <PublicLayout />,
     children: [
@@ -65,12 +64,12 @@ export const router = createBrowserRouter([
     ],
   },
 
-  // 🔐 Auth
+  // Auth
   { path: "/auth", element: <AuthPage /> },
   { path: "/auth/forgot", element: <RequestResetPage /> },
   { path: "/auth/reset", element: <ResetPasswordPage /> },
 
-  // 🎓 Candidate (protected)
+  // Candidate (protected)
   {
     path: "/candidate",
     element: (
@@ -95,7 +94,7 @@ export const router = createBrowserRouter([
     ],
   },
 
-  // 🏢 Employer
+  // Employer
   {
     path: "/employer",
     element: (
@@ -124,7 +123,7 @@ export const router = createBrowserRouter([
     ],
   },
 
-  // 🧩 Admin
+  // Admin
   {
     path: "/admin",
     element: (

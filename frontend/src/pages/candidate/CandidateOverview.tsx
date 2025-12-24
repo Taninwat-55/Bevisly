@@ -4,14 +4,14 @@ import { useAuth } from "@/hooks/useAuth";
 import { useCandidateStats } from "@/hooks/useCandidateStats";
 import { Link } from "react-router-dom";
 import { Loader2 } from "lucide-react";
-import { supabase } from "@/lib/supabaseClient"; // ✅ Import supabase
+import { supabase } from "@/lib/supabaseClient"; 
 
 export default function CandidateHome() {
   const { user } = useAuth();
   const { proofsCompleted, avgScore, jobsApplied, credits, loading } = useCandidateStats();
-  const [displayName, setDisplayName] = useState<string>(""); // ✅ State for name
+  const [displayName, setDisplayName] = useState<string>(""); 
 
-  // 👤 Fetch profile name
+  // Fetch profile name
   useEffect(() => {
     if (!user?.id) return;
     
@@ -42,18 +42,18 @@ export default function CandidateHome() {
   return (
     <HomeLayout
       accentColor="var(--color-candidate-dark)"
-      // ✅ Use Display Name if available
+      // Use Display Name if available
       title={`👋 Welcome back, ${displayName || user?.email?.split("@")[0] || "Candidate"}!`}
       subtitle="Track your progress, explore new proof tasks, and grow your verified record."
     >
-      {/* 📊 Quick Stats */}
+      {/* Quick Stats */}
       <div className="sm:col-span-2 lg:col-span-3 grid sm:grid-cols-3 gap-4 mb-2">
         <StatCard label="Proofs Completed" value={proofsCompleted} />
         <StatCard label="Average Score" value={avgScore ? `${avgScore}★` : "—"} />
         <StatCard label="Jobs Applied" value={jobsApplied} />
       </div>
 
-      {/* 💳 Credits */}
+      {/* Credits */}
       <div className="sm:col-span-2 lg:col-span-3">
         <div className="bg-[var(--color-candidate)]/10 border border-[var(--color-border)] rounded-[var(--radius-card)] shadow-[var(--shadow-soft)] p-5 text-center">
           <p className="text-sm text-[var(--color-text-muted)]">
@@ -64,9 +64,9 @@ export default function CandidateHome() {
         </div>
       </div>
 
-      {/* 🎯 Action Cards */}
+      {/* Action Cards */}
       <ActionCard
-        title="🎯 Explore Proof Tasks"
+        title="Explore Proof Tasks"
         desc="Browse available roles and challenges that match your skills."
         href="/jobs"
       />

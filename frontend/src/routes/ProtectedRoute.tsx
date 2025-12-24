@@ -1,4 +1,3 @@
-// src/routes/ProtectedRoute.tsx
 import { Navigate, Outlet } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import type { ReactNode } from "react";
@@ -14,7 +13,7 @@ export default function ProtectedRoute({
 }: ProtectedRouteProps) {
   const { user, loading } = useAuth();
 
-  // ⏳ Wait for auth to resolve
+  // Wait for auth to resolve
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen text-gray-500">
@@ -23,18 +22,18 @@ export default function ProtectedRoute({
     );
   }
 
-  // 🚫 No user → redirect to login
+  // No user → redirect to login
   if (!user) {
     return <Navigate to="/auth" replace />;
   }
 
-  // 🔒 Wrong role → redirect to their own dashboard
+  // Wrong role → redirect to their own dashboard
   if (allowedRole && user.role !== allowedRole) {
     if (user.role === "admin") return <Navigate to="/admin" replace />;
     if (user.role === "employer") return <Navigate to="/employer" replace />;
     return <Navigate to="/candidate/dashboard" replace />;
   }
 
-  // ✅ Authorized → render either children or nested routes
+  // Authorized → render either children or nested routes
   return <>{children || <Outlet />}</>;
 }

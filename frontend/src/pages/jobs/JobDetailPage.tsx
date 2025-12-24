@@ -52,7 +52,7 @@ export default function JobDetailPage() {
       if (error) toast.error(error.message);
       else setJob(data as Job);
 
-      // ✅ Check active submission
+      // Check active submission
       if (user) {
         const sub = await checkSubmissionStatus(id);
         if (sub) setExistingStatus(sub.status);
@@ -91,7 +91,7 @@ export default function JobDetailPage() {
       return;
     }
 
-    // ✅ If already applied/started, just go there
+    // If already applied/started, just go there
     if (existingStatus) {
       navigate(`/candidate/proof/${proof.id}`);
       return;
@@ -126,7 +126,7 @@ export default function JobDetailPage() {
     "hiringOrganization": {
       "@type": "Organization",
       "name": job.company,
-      "sameAs": "https://bevis.app" // Your actual domain
+      "sameAs": "https://bevisly.com" 
     },
     "jobLocation": {
       "@type": "Place",
@@ -166,7 +166,7 @@ export default function JobDetailPage() {
         </Helmet>
       )}
 
-      {/* 🔙 Back Button */}
+      {/* Back Button */}
       <button
         onClick={() => navigate(-1)}
         className="mb-6 text-sm text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition"
@@ -174,7 +174,7 @@ export default function JobDetailPage() {
         ← Back
       </button>
 
-      {/* 🏁 Job Header */}
+      {/* Job Header */}
       <header className="mb-8">
         <h1 className="heading-lg mb-1 text-[var(--color-text)]">
           {job.title}
@@ -184,14 +184,14 @@ export default function JobDetailPage() {
         </p>
       </header>
 
-      {/* 📄 Job Description */}
+      {/* Job Description */}
       <section className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-card)] shadow-[var(--shadow-soft)] p-6 mb-8">
         <h2 className="heading-md mb-2">About the Role</h2>
         <p className="body-base leading-relaxed text-[var(--color-text-muted)] whitespace-pre-line">
           {job.description || "No description provided."}
         </p>
 
-        {/* ✅ Requirements Section */}
+        {/* Requirements Section */}
         {job.requirements && (
           <div className="mt-8 pt-6 border-t border-[var(--color-border)]">
             <h3 className="text-lg font-semibold text-[var(--color-text)] mb-3">
@@ -206,7 +206,7 @@ export default function JobDetailPage() {
         <div className="flex flex-wrap items-center gap-3 mt-4 text-sm text-[var(--color-text-muted)]">
           <span>📍 {job.location || "Remote"}</span>
 
-          {/* ✅ Deadline Info */}
+          {/* Deadline Info */}
           {job.expires_at && (
             <span className="flex items-center gap-1 text-[var(--color-warning)]">
               <Clock size={14} />
@@ -230,7 +230,7 @@ export default function JobDetailPage() {
         </div>
       </section>
 
-      {/* 🎯 EXTERNAL JOB APPLY BUTTON (No Proof Task needed) */}
+      {/* EXTERNAL JOB APPLY BUTTON (No Proof Task needed) */}
       {job.apply_url && (
         <section className="mb-10">
           <a
@@ -244,7 +244,7 @@ export default function JobDetailPage() {
         </section>
       )}
 
-      {/* 🧩 Proof Task Section */}
+      {/* Proof Task Section */}
       {proof && (
         <section className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-card)] shadow-[var(--shadow-soft)] p-6 mb-10">
           <div className="flex items-center justify-between mb-4">
@@ -292,9 +292,7 @@ export default function JobDetailPage() {
             </li>
           </ul>
 
-          {/* 🎯 Role-specific actions */}
-          {/* 🎯 ACTION BUTTONS SECTION - FIXED (No Outer Wrapper) */}
-
+          {/* Role-specific actions */}
           {/* 1. EXTERNAL JOB (Backfilled) - Show to Guests & Candidates */}
           {job.apply_url && (!user || role === "candidate") && (
             <a
@@ -364,7 +362,7 @@ export default function JobDetailPage() {
         </section>
       )}
 
-      {/* 💬 Confirmation Modal */}
+      {/* Confirmation Modal */}
       <AnimatePresence>
         {showConfirm && proof && (
           <motion.div

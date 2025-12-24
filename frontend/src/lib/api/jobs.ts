@@ -1,4 +1,3 @@
-// src/lib/api/jobs.ts
 import { supabase } from "../supabaseClient";
 import type {
   EmployerJob,
@@ -8,7 +7,7 @@ import type {
 } from "@/types";
 
 /* ──────────────────────────────────────────────
- * ✅ Fetch all public jobs (for candidates)
+ * Fetch all public jobs (for candidates)
  * Includes salary range and pay fields for transparency
  * ────────────────────────────────────────────── */
 export async function getAllJobs(): Promise<CandidateJob[]> {
@@ -40,7 +39,7 @@ export async function getAllJobs(): Promise<CandidateJob[]> {
 }
 
 /* ──────────────────────────────────────────────
- * ✅ Fetch single job + its proof tasks
+ * Fetch single job + its proof tasks
  * ────────────────────────────────────────────── */
 export async function getJobWithTasks(job_id: string) {
   const { data, error } = await supabase
@@ -79,7 +78,7 @@ export async function getJobWithTasks(job_id: string) {
 }
 
 /* ──────────────────────────────────────────────
- * ✅ Fetch all jobs created by the logged-in employer
+ * Fetch all jobs created by the logged-in employer
  * ────────────────────────────────────────────── */
 export async function getEmployerJobs(
   employer_id: string
@@ -112,7 +111,7 @@ export async function getEmployerJobs(
 }
 
 /* ──────────────────────────────────────────────
- * ✅ Employer job summary (dashboard view)
+ * Employer job summary (dashboard view)
  * ────────────────────────────────────────────── */
 export async function getEmployerJobSummary(
   employer_id: string
@@ -127,7 +126,7 @@ export async function getEmployerJobSummary(
 }
 
 /* ──────────────────────────────────────────────
- * ✅ Featured jobs for homepage
+ * Featured jobs for homepage
  * ────────────────────────────────────────────── */
 export async function getFeaturedJobs() {
   const { data, error } = await supabase
@@ -144,7 +143,7 @@ export async function getFeaturedJobs() {
 }
 
 /* ──────────────────────────────────────────────
- * ✅ Create a job + associated proof tasks
+ * Create a job + associated proof tasks
  * ────────────────────────────────────────────── */
 export async function createJobWithTasks(
   values: Partial<EmployerJob & { proof_tasks?: ProofTask[] }>
@@ -206,7 +205,7 @@ export async function createJobWithTasks(
 }
 
 /* ──────────────────────────────────────────────
- * ✅ Update an existing job + proof tasks
+ * Update an existing job + proof tasks
  * ────────────────────────────────────────────── */
 export async function updateJobWithTasks(
   job_id: string,
@@ -262,7 +261,7 @@ export async function updateJobWithTasks(
 }
 
 /* ──────────────────────────────────────────────
- * ✅ Delete an existing job + proof tasks
+ * Delete an existing job + proof tasks
  * ────────────────────────────────────────────── */
 export async function deleteJob(job_id: string) {
   // 1. Delete all submissions related to this job
@@ -312,7 +311,6 @@ export async function getSavedJobIds(userId: string) {
 }
 
 export async function toggleSavedJob(userId: string, jobId: string) {
-  // Check if exists
   const { data } = await supabase
     .from("saved_jobs")
     .select("*")

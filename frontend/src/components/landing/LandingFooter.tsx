@@ -4,12 +4,12 @@ export default function LandingFooter() {
   return (
     <footer className="bg-[var(--color-bg)] border-t border-[var(--color-border)] py-10">
       <div className="mx-auto max-w-7xl px-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-        {/* 💬 Brand statement */}
+        {/* Brand statement */}
         <div className="text-sm text-[var(--color-text-muted)]">
           © {new Date().getFullYear()} Bevisly. Built for fairness — where real work replaces résumés.
         </div>
 
-        {/* 🌐 Footer nav */}
+        {/* Footer nav */}
         <nav
           className="flex flex-wrap justify-center gap-4 text-sm"
           aria-label="Footer navigation"

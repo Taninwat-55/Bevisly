@@ -11,7 +11,7 @@ export default function FeaturedEmployersSection() {
     getFeaturedJobs().then(setJobs).catch(console.error);
   }, []);
 
-  // 🌱 Empty state — pre-launch fallback
+  // Empty state — pre-launch fallback
   if (!jobs.length) {
     return (
       <section className="relative py-20 border-t border-[var(--color-border)] bg-[var(--color-surface)] text-center">
@@ -31,10 +31,10 @@ export default function FeaturedEmployersSection() {
     );
   }
 
-  // 🌟 Featured employer cards (if data exists)
+  // Featured employer cards (if data exists)
   return (
     <section className="relative py-20 border-t border-[var(--color-border)] bg-[var(--color-surface)] overflow-hidden">
-      {/* ✨ shimmer overlay */}
+      {/* shimmer overlay */}
       <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[var(--color-employer)]/5 to-transparent animate-[shimmer_5s_linear_infinite]" />
 
       <div className="relative max-w-7xl mx-auto px-6">

@@ -197,9 +197,9 @@ export default function JobInfoSection({
         )}
       </div>
 
-      {/* ─── ✅ RICH TEXT FIELDS ─── */}
+      {/* ─── RICH TEXT FIELDS ─── */}
       <div className="border-t border-[var(--color-border)] pt-6 space-y-6">
-        {/* 🤖 AI Tip Box */}
+        {/* AI Tip Box */}
         <div className="flex items-start gap-3 bg-[var(--color-candidate)]/5 border border-[var(--color-candidate)]/20 p-4 rounded-[var(--radius-card)]">
           <div className="p-2 bg-[var(--color-surface)] rounded-full text-[var(--color-candidate)] shadow-sm">
             <Sparkles size={16} />

@@ -1,5 +1,3 @@
-// src/types/shared.ts
-
 /**
  * Shared type used by both candidate and employer flows.
  * Mirrors `proof_tasks` table shape used in both.

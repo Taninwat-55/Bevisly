@@ -1,10 +1,9 @@
-// src/lib/api/credits.ts
 import { supabase } from "../supabaseClient";
 
 export type CreditReason = "submission_reward" | "quality_bonus" | "fairness_payout";
 
 /**
- * 🪙 Distribute Credits (RPC)
+ * Distribute Credits (RPC)
  * Safely awards credits to a user via the backend function.
  */
 export async function distributeCredits(
@@ -24,7 +23,7 @@ export async function distributeCredits(
 }
 
 /**
- * 📜 Get Credit History
+ * Get Credit History
  */
 export async function getCreditHistory(userId: string) {
   const { data, error } = await supabase

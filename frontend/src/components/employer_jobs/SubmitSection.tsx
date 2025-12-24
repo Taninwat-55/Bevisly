@@ -1,5 +1,5 @@
 /**
- * 🚀 SubmitSection.tsx
+ * 
  * Handles submission button for job form.
  */
 

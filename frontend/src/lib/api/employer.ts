@@ -1,9 +1,8 @@
-// src/lib/api/employer.ts
 import { supabase } from "../supabaseClient";
 import type { EmployerStats, EmployerRecentSubmission } from "@/types";
 
 /**
- * ✅ Fetch core stats for EmployerHome:
+ * Fetch core stats for EmployerHome:
  * - Total jobs posted
  * - Active submissions count
  * - Average feedback score
@@ -31,7 +30,7 @@ export async function getEmployerStats(
     };
   }
 
-  // 2️⃣ Count active submissions
+  // Count active submissions
   const { count: activeCount, error: subErr } = await supabase
     .from("submissions")
     .select("*", { count: "exact", head: true })
@@ -40,7 +39,7 @@ export async function getEmployerStats(
 
   if (subErr) throw subErr;
 
-  // 3️⃣ Fetch latest submissions (with proof + feedback)
+  // Fetch latest submissions (with proof + feedback)
   const { data: subs, error: recentErr } = await supabase
     .from("submissions")
     .select(`
@@ -58,7 +57,7 @@ export async function getEmployerStats(
   if (recentErr) throw recentErr;
   const submissions = (subs || []) as EmployerRecentSubmission[];
 
-  // 4️⃣ Calculate average score
+  // Calculate average score
   const stars =
     subs
       ?.flatMap((s) => s.feedback?.map((f) => f.stars))

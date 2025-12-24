@@ -22,12 +22,12 @@ export default function AuthPage() {
   const navigate = useNavigate();
   const emailRef = useRef<HTMLInputElement>(null);
 
-  // 🧭 Auto-focus email
+  // Auto-focus email
   useEffect(() => {
     emailRef.current?.focus();
   }, [isLogin]);
 
-  // 🔐 Redirect if already logged in
+  // Redirect if already logged in
   useEffect(() => {
     if (!authLoading && user) {
       if (user.role === "employer") navigate("/employer");
@@ -36,7 +36,7 @@ export default function AuthPage() {
     }
   }, [user, authLoading, navigate]);
 
-  // 🟣 Sign Up
+  // Sign Up
   async function handleSignUp() {
     setFormError(null);
 
@@ -91,7 +91,7 @@ export default function AuthPage() {
     }
   }
 
-  // 🟦 Log In
+  // Log In
   async function handleLogin() {
     setFormError(null);
 
@@ -139,7 +139,7 @@ export default function AuthPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-[var(--color-bg)] overflow-hidden">
-      {/* 🔙 Consistent Back Button */}
+      {/* Consistent Back Button */}
       <div className="absolute left-4 top-4">
         <BackButton
           label={isLogin ? "Back to Home" : "Back to Login"}

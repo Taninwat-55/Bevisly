@@ -42,7 +42,7 @@ export default function EmployerEditJob() {
     }
   };
 
-  // ✅ New Delete Handler
+  // New Delete Handler
   const handleDelete = async () => {
     if (!id) return;
     if (!confirm("Are you sure you want to delete this job? All candidate submissions will be lost.")) {
@@ -52,7 +52,7 @@ export default function EmployerEditJob() {
     try {
       await deleteJob(id);
       toast.success("Job deleted successfully");
-      navigate("/employer/jobs"); // Redirect to list
+      navigate("/employer/jobs"); 
     } catch (err) {
       console.error(err);
       toast.error("Failed to delete job");
@@ -66,7 +66,7 @@ export default function EmployerEditJob() {
           ✏️ Edit Job
         </h1>
         
-        {/* ✅ Delete Button */}
+        {/* Delete Button */}
         <button 
           onClick={handleDelete}
           className="flex items-center gap-2 px-4 py-2 text-sm text-red-600 bg-red-50 border border-red-100 rounded-lg hover:bg-red-100 transition"

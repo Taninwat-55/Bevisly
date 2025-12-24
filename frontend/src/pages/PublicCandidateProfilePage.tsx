@@ -18,7 +18,7 @@ export default function PublicCandidateProfilePage() {
   const [showAll, setShowAll] = useState(false);
   // const [timeline, setTimeline] = useState<ProofCardLite[]>([]);
 
-  /* 🧠 Fetch candidate + proofs + rank + recent activity */
+  /* Fetch candidate + proofs + rank + recent activity */
   useEffect(() => {
     if (!id) return;
 
@@ -48,7 +48,7 @@ export default function PublicCandidateProfilePage() {
         setProfile(prof ?? null);
         setRank(rankData ?? null);
 
-        // ✅ Prefer RPC result if available
+        // Prefer RPC result if available
         if (
           rpcTimeline &&
           Array.isArray(rpcTimeline) &&
@@ -57,7 +57,7 @@ export default function PublicCandidateProfilePage() {
           // setTimeline(rpcTimeline);
           setCards(rpcTimeline); // for visible proof cards too
         } else {
-          // 🩹 fallback to direct query (if RPC not available or empty)
+          // Fallback to direct query (if RPC not available or empty)
           const { data: fallbackProofs, error: fbErr } = await supabase
             .from("proof_cards")
             .select(
@@ -131,9 +131,8 @@ export default function PublicCandidateProfilePage() {
       <div className="max-w-4xl mx-auto">
         <BackButton label="Back to Home" to="/" />
 
-        {/* 🏁 Header Card */}
+        {/* Header Card */}
         <div className="mt-8 relative overflow-hidden rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-8 shadow-sm text-center">
-          {/* Background Decor */}
           <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[var(--color-candidate)] to-purple-500" />
 
           <div className="relative z-10 flex flex-col items-center">
@@ -151,7 +150,7 @@ export default function PublicCandidateProfilePage() {
               {rank && <span className="flex items-center gap-1"><Star size={14} className="text-purple-500" /> Global Rank #{rank}</span>}
             </div>
 
-            {/* 🎯 CTA Buttons */}
+            {/* CTA Buttons */}
             <div className="flex gap-3 mt-8">
               <a
                 href={`mailto:${email}?subject=Interview Request via Bevisly`}
@@ -172,7 +171,7 @@ export default function PublicCandidateProfilePage() {
           </div>
         </div>
 
-        {/* 🏆 Verified Proofs */}
+        {/* Verified Proofs */}
         <section className="mt-10">
           <h2 className="heading-md mb-6 flex items-center gap-2">
             <BadgeCheck className="text-[var(--color-candidate)]" /> Verified Proofs

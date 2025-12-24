@@ -85,7 +85,7 @@ export default function AdminFeedbackMessages() {
   /* ─────────────────────────────── UI ─────────────────────────────── */
   return (
     <div className="min-h-screen bg-[var(--color-bg)] text-[var(--color-text)] px-6 md:px-10 py-12 transition-colors">
-      {/* 🧭 Header */}
+      {/* Header */}
       <header className="mb-8 flex flex-col gap-2">
         <h1 className="heading-lg flex items-center gap-2">
           💬 Platform Feedback
@@ -96,7 +96,7 @@ export default function AdminFeedbackMessages() {
         </p>
       </header>
 
-      {/* 📊 Summary */}
+      {/* Summary */}
       {!loading && summary.total > 0 && (
         <motion.div
           initial={{ opacity: 0, y: 6 }}
@@ -138,7 +138,7 @@ export default function AdminFeedbackMessages() {
         </motion.div>
       )}
 
-      {/* 🔍 Filters */}
+      {/* Filters */}
       <div className="flex flex-wrap items-center gap-3 mb-6">
         <div className="relative flex-1 min-w-[240px]">
           <Search
@@ -165,7 +165,7 @@ export default function AdminFeedbackMessages() {
         </button>
       </div>
 
-      {/* ⏳ Loading */}
+      {/* Loading */}
       {loading && (
         <div className="flex flex-col items-center justify-center py-20 text-[var(--color-text-muted)]">
           <Loader2 size={24} className="animate-spin mb-2" />
@@ -173,7 +173,7 @@ export default function AdminFeedbackMessages() {
         </div>
       )}
 
-      {/* 📋 Table */}
+      {/* Table */}
       {!loading && filteredMessages.length > 0 && (
         <motion.div
           initial={{ opacity: 0, y: 8 }}
@@ -253,7 +253,7 @@ export default function AdminFeedbackMessages() {
         </motion.div>
       )}
 
-      {/* 🚫 Empty */}
+      {/* Empty */}
       {!loading && filteredMessages.length === 0 && (
         <motion.div
           initial={{ opacity: 0 }}

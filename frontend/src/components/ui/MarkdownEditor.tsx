@@ -1,5 +1,5 @@
 /**
- * 📝 MarkdownEditor.tsx
+ * 
  * A lightweight text editor with markdown shortcuts.
  */
 import { Bold, Italic, List, Heading1, Link as LinkIcon, Quote } from "lucide-react";

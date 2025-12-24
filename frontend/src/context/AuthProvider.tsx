@@ -7,7 +7,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<SessionUser | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // ✅ FIXED Signout handler
   const signOut = async () => {
     try {
       // 1. Show feedback immediately so the user knows something is happening
@@ -41,13 +40,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   useEffect(() => {
-    // 1️⃣ Try cached user first
+    // Try cached user first
     const cachedUser = localStorage.getItem("bevisly_user");
     if (cachedUser) {
       setUser(JSON.parse(cachedUser));
     }
 
-    // 2️⃣ Always confirm current Supabase session
+    // Always confirm current Supabase session
     supabase.auth.getSession().then(({ data }) => {
       const sessionUser = data.session?.user;
       if (sessionUser) {
@@ -68,7 +67,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setLoading(false);
     });
 
-    // 3️⃣ Auth change listener
+    // Auth change listener
     const { data: listener } = supabase.auth.onAuthStateChange(
       (event, session) => {
         if (event === "PASSWORD_RECOVERY") {
@@ -101,7 +100,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
   }, []);
 
-  // 🪄 Listen to localStorage override changes globally
+  // Listen to localStorage override changes globally
   const [, setOverrideVersion] = useState(0);
 
   useEffect(() => {
@@ -114,7 +113,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return () => window.removeEventListener("storage", onStorageChange);
   }, []);
 
-  // 🔁 React to same-tab override changes immediately
+  // React to same-tab override changes immediately
   useEffect(() => {
     const originalSetItem = localStorage.setItem;
     localStorage.setItem = function (key, value) {
@@ -130,7 +129,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
   }, []);
 
-  // 🔁 Apply local override
+  // Apply local override
   const overrideRole = localStorage.getItem("overrideRole");
   const effectiveUser = user
     ? { ...user, role: (overrideRole as SessionUser["role"]) || user.role }

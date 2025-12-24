@@ -94,7 +94,7 @@ export default function AdminUsers() {
   /* ─────────────── Render ─────────────── */
   return (
     <div className="min-h-screen bg-[var(--color-bg)] text-[var(--color-text)] px-6 md:px-10 py-12 transition-colors">
-      {/* 🧭 Header */}
+      {/* Header */}
       <header className="mb-8 flex flex-col gap-2">
         <h1 className="heading-lg flex items-center gap-2">
           👥 User Management
@@ -104,7 +104,7 @@ export default function AdminUsers() {
         </p>
       </header>
 
-      {/* 🧮 Role Summary */}
+      {/* Role Summary */}
       <motion.section
         initial={{ opacity: 0, y: 6 }}
         animate={{ opacity: 1, y: 0 }}
@@ -136,7 +136,7 @@ export default function AdminUsers() {
         </div>
       </motion.section>
 
-      {/* 🔍 Filters */}
+      {/* Filters */}
       <div className="flex flex-wrap items-center gap-3 mb-6">
         <div className="relative">
           <Search
@@ -176,7 +176,7 @@ export default function AdminUsers() {
         </button>
       </div>
 
-      {/* 📋 Table */}
+      {/* Table */}
       <motion.div
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
@@ -254,7 +254,7 @@ export default function AdminUsers() {
         </table>
       </motion.div>
 
-      {/* 📄 Pagination */}
+      {/* Pagination */}
       {filteredUsers.length > 0 && (
         <div className="flex flex-col sm:flex-row items-center justify-between gap-3 mt-6 text-sm">
           <div className="text-[var(--color-text-muted)]">

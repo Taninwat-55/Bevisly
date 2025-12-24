@@ -28,7 +28,7 @@ export default function Sidebar({ role }: SidebarProps) {
   const [collapsed, setCollapsed] = useState(false);
   const resolvedRole = role || user?.role || "candidate";
 
-  /* 🎨 Accent color per role */
+  /* Accent color per role */
   const accentColorMap = {
     candidate: "var(--color-candidate-dark)",
     employer: "var(--color-employer-dark)",
@@ -36,7 +36,7 @@ export default function Sidebar({ role }: SidebarProps) {
   } as const;
   const accentColor = accentColorMap[resolvedRole];
 
-  /* 📂 Role-based links */
+  /* Role-based links */
   const links =
     resolvedRole === "employer"
       ? [

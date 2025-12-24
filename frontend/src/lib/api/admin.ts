@@ -6,10 +6,10 @@ import type {
   AdminFeedback,
 } from "../../types/admin";
 
-// 🧾 Fetch all users (Updated to query PROFILES)
+// Fetch all users (Updated to query PROFILES)
 export async function getAllUsers(): Promise<BevislyUser[]> {
   const { data, error } = await supabase
-    .from("profiles") // ✅ Changed from 'users'
+    .from("profiles") 
     .select("id, email, role, created_at")
     .order("created_at", { ascending: false });
 
@@ -25,7 +25,7 @@ export async function getAllUsers(): Promise<BevislyUser[]> {
   );
 }
 
-// 🧾 Fetch all jobs (Updated to join PROFILES)
+// Fetch all jobs (Updated to join PROFILES)
 export async function getAllJobs(): Promise<AdminJob[]> {
   const { data, error } = await supabase
     .from("jobs")
@@ -55,12 +55,12 @@ export async function getAllJobs(): Promise<AdminJob[]> {
       company: job.company ?? "—",
       location: job.location ?? "—",
       created_at: job.created_at ?? new Date().toISOString(),
-      employer_email: job.profiles?.email ?? "—", // ✅ Access profiles
+      employer_email: job.profiles?.email ?? "—", 
     })) ?? []
   );
 }
 
-// 🧾 Fetch all feedback logs
+// Fetch all feedback logs
 export async function getAllFeedbackLogs(): Promise<AdminFeedback[]> {
   const { data, error } = await supabase
     .from("feedback")
@@ -89,7 +89,7 @@ export async function getAllFeedbackLogs(): Promise<AdminFeedback[]> {
     (data as RawFeedback[])?.map((f) => ({
       id: f.id,
       job_title: f.submissions?.jobs?.title ?? "—",
-      candidate_email: f.submissions?.profiles?.email ?? "—", // ✅ Access profiles
+      candidate_email: f.submissions?.profiles?.email ?? "—", 
       employer_email: f.employer?.email ?? "—",
       rating: f.rating ?? f.stars ?? null,
       comment: f.comments ?? "",
@@ -101,7 +101,7 @@ export async function getAllFeedbackLogs(): Promise<AdminFeedback[]> {
 
 export async function updateUserRole(userId: string, newRole: string) {
   const { error } = await supabase
-    .from("profiles") // ✅ Changed from 'users'
+    .from("profiles") 
     .update({ role: newRole })
     .eq("id", userId);
   if (error) throw error;
@@ -118,7 +118,6 @@ export async function toggleFeaturedJob(jobId: string, newState: boolean) {
 }
 
 export async function getAdminStats(): Promise<AdminStats> {
-  // Fetch all feedback rows
   const { data, error } = await supabase.from("feedback").select("rating, stars");
   if (error) throw error;
 
@@ -127,7 +126,7 @@ export async function getAdminStats(): Promise<AdminStats> {
     { count: total_jobs },
     { count: total_submissions },
   ] = await Promise.all([
-    supabase.from("profiles").select("*", { count: "exact", head: true }), // ✅ profiles
+    supabase.from("profiles").select("*", { count: "exact", head: true }), 
     supabase.from("jobs").select("*", { count: "exact", head: true }),
     supabase.from("submissions").select("*", { count: "exact", head: true }),
   ]);
@@ -164,7 +163,7 @@ export async function getTableData(table: string, limit = 25, offset = 0) {
   return { columns, rows: data ?? [] };
 }
 
-// 🧩 Fetch column schema (name + type) safely
+// Fetch column schema (name + type) safely
 export async function getTableSchema(table: string) {
   const sb = supabase as any;
   

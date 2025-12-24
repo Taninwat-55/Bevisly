@@ -23,7 +23,7 @@ export default function HeroSection() {
 
   return (
     <section className="relative overflow-hidden border-b border-[var(--color-border)]">
-      {/* 🎥 Background */}
+      {/* Background */}
       {!isMobile ? (
         <video
           className="absolute inset-0 w-full h-full object-cover"
@@ -43,10 +43,10 @@ export default function HeroSection() {
         />
       )}
 
-      {/* 🌫️ Overlay */}
+      {/* Overlay */}
       <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black/90" />
 
-      {/* 🧠 Content */}
+      {/* Content */}
       <div className="relative z-10 mx-auto max-w-7xl px-6 py-32 text-center text-white">
         <motion.h1
           initial={{ opacity: 0, y: 10 }}
@@ -72,7 +72,7 @@ export default function HeroSection() {
           discover top talent in hours — not weeks.
         </motion.p>
 
-        {/* 🔍 Search */}
+        {/* Search */}
         <form
           onSubmit={handleSubmit}
           className="relative max-w-xl mx-auto mt-10 mb-6"
@@ -90,7 +90,7 @@ export default function HeroSection() {
           />
         </form>
 
-        {/* 🏷️ Quick Categories */}
+        {/* Quick Categories */}
         <div className="flex flex-wrap justify-center gap-3 text-sm mb-10">
           {["Frontend", "UI/UX", "Marketing", "Data", "Writing"].map((cat) => (
             <button
@@ -105,7 +105,7 @@ export default function HeroSection() {
           ))}
         </div>
 
-        {/* 🚀 CTA Buttons */}
+        {/* CTA Buttons */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -126,7 +126,7 @@ export default function HeroSection() {
           </Link>
         </motion.div>
 
-        {/* 🌍 Trust strip */}
+        {/* Trust strip */}
         {/* <p className="mt-10 text-xs text-white/60">
           Trusted by startups like <span className="font-semibold">Trailr.ai</span>,{" "}
           <span className="font-semibold">Looply</span>, and{" "}

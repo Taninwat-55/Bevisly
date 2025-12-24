@@ -1,4 +1,3 @@
-// src/lib/api/submissions.ts
 import { supabase } from "../supabaseClient";
 import type {
   CandidateSubmission,
@@ -8,7 +7,7 @@ import type {
 } from "@/types";
 
 /**
- * ✅ Get all submissions by a candidate (for candidate dashboard/profile)
+ * Get all submissions by a candidate (for candidate dashboard/profile)
  */
 export async function getCandidateSubmissions(
   user_id: string
@@ -36,7 +35,7 @@ export async function getCandidateSubmissions(
 }
 
 /**
- * ✅ Get all submissions for an employer’s jobs (for review dashboard)
+ * Get all submissions for an employer’s jobs (for review dashboard)
  */
 export async function getEmployerSubmissions(
   employer_id: string
@@ -113,7 +112,7 @@ export async function getEmployerSubmissionsWithFeedback(
 }
 
 /**
- * ✅ Get details for a single proof task (for job detail / proof workspace)
+ * Get details for a single proof task (for job detail / proof workspace)
  */
 export async function getProofTaskDetails(
   proof_task_id: string
@@ -127,11 +126,10 @@ export async function getProofTaskDetails(
     .maybeSingle();
 
   if (error) throw error;
-  // ✅ FIX: Cast the result to ProofTask | null to satisfy the union type
+  // Cast the result to ProofTask | null to satisfy the union type
   return (data as ProofTask | null) ?? null;
 }
 
-// ✅ FIXED: Added .limit(1) to handle existing duplicates gracefully
 export async function checkSubmissionStatus(job_id: string) {
   const user = (await supabase.auth.getUser()).data.user;
   if (!user) return null;

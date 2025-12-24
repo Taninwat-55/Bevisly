@@ -6,8 +6,8 @@ import { notify } from "@/components/ui/Notify";
 
 export default function FeedbackButton() {
   const { user } = useAuth();
-  const [open, setOpen] = useState(false); // modal state
-  const [expanded, setExpanded] = useState(false); // tab expanded/collapsed
+  const [open, setOpen] = useState(false); 
+  const [expanded, setExpanded] = useState(false); 
   const [category, setCategory] = useState("general");
   const [message, setMessage] = useState("");
   const [email, setEmail] = useState("");

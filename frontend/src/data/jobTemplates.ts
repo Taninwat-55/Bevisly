@@ -1,6 +1,5 @@
 import type { ProofTask } from "@/types";
 
-// ✅ Define a task type where 'title' is required, but 'id'/'job_id' are omitted
 type TemplateTask = Omit<ProofTask, "id" | "job_id">; 
 
 export interface JobTemplate {
@@ -11,7 +10,7 @@ export interface JobTemplate {
   department: string;
   description: string;
   requirements: string;
-  proof_tasks: TemplateTask[]; // ✅ Use the stricter type here
+  proof_tasks: TemplateTask[]; 
 }
 
 export const JOB_TEMPLATES: JobTemplate[] = [

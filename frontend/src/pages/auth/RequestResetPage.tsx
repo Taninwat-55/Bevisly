@@ -31,7 +31,6 @@ export default function RequestResetPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-[var(--color-bg)] relative">
-      {/* 🔙 Consistent Back Button */}
       <div className="absolute left-4 top-4">
         <BackButton
           to="/auth"

@@ -23,7 +23,7 @@ export default function ProblemSection() {
   return (
     <section id="problems" className="bg-[var(--color-bg)] py-24 border-t border-[var(--color-border)]">
       <div className="max-w-7xl mx-auto px-6 text-center">
-        {/* 🧠 Section heading */}
+        {/* Section heading */}
         <motion.h2
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -36,7 +36,7 @@ export default function ProblemSection() {
           The hiring gap is real — here’s what’s broken.
         </p>
 
-        {/* 🪜 Problem cards */}
+        {/* Problem cards */}
         <div className="grid gap-8 md:grid-cols-3 text-left">
           {problems.map((p, i) => (
             <motion.div
@@ -58,7 +58,7 @@ export default function ProblemSection() {
           ))}
         </div>
 
-        {/* 🌍 Bridge line to next section */}
+        {/* Bridge line to next section */}
         <motion.p
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}

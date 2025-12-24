@@ -28,7 +28,7 @@ export default function CandidateCard({
     feedback, 
     employer_notes, 
     hiring_stage,
-    profiles // ✅ Get profile data
+    profiles 
   } = submission;
   
   // Local state for notes (instant update fix)
@@ -76,7 +76,7 @@ export default function CandidateCard({
     }
   }
 
-  // ✅ Helper to get the best display name
+  // Helper to get the best display name
   const displayName = profiles?.full_name || profiles?.email?.split("@")[0] || "Unknown Candidate";
 
   return (
@@ -90,7 +90,7 @@ export default function CandidateCard({
     >
       <div className="flex justify-between items-center mb-1">
         <h4 className="font-medium text-sm text-[var(--color-text)] truncate flex items-center gap-1" title={displayName}>
-          {/* ✅ Display Name Fix */}
+          {/* Display Name Fix */}
           👤 {displayName}
           
           {submission.status === "reviewed" && submission.resume_url && (

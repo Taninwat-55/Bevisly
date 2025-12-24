@@ -1,10 +1,5 @@
-// src/components/ui/Toast.tsx
 import { Toaster } from "react-hot-toast";
 
-/**
- * 🎨 Bevis Toast System — Adaptive, readable, and on-brand.
- * Works in both light/dark modes with consistent visuals.
- */
 export const BevisToaster = () => (
   <Toaster
     position="top-right"

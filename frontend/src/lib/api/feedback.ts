@@ -1,9 +1,8 @@
-// src/lib/api/feedback.ts
 import { supabase } from "../supabaseClient";
 import type { Feedback } from "@/types";
 
 /**
- * ✅ Fetch feedback for a specific submission (for employer or admin review)
+ * Fetch feedback for a specific submission (for employer or admin review)
  */
 export async function getFeedbackBySubmission(
   submission_id: string
@@ -19,7 +18,7 @@ export async function getFeedbackBySubmission(
 }
 
 /**
- * ✅ Add new feedback entry (used in EmployerReview.tsx)
+ * Add new feedback entry (used in EmployerReview.tsx)
  */
 export async function createFeedback(entry: {
   submission_id: string;
@@ -39,7 +38,7 @@ export async function createFeedback(entry: {
 }
 
 /**
- * ✅ Optionally update existing feedback (future-proof)
+ * Optionally update existing feedback (future-proof)
  */
 export async function updateFeedback(
   feedback_id: string,

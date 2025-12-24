@@ -1,5 +1,4 @@
 /**
- * 🧭 JobListingPage.tsx
  * Unified job listing for candidates & employers.
  * Combines modern filtering + search + back navigation.
  */
@@ -55,7 +54,7 @@ export default function JobListingPage() {
   const [employerJobs, setEmployerJobs] = useState<JobListItem[]>([]);
   const [employerLoading, setEmployerLoading] = useState(false);
 
-  // ✅ NEW: Track which jobs the candidate has already applied to
+  // Track which jobs the candidate has already applied to
   const [appliedJobIds, setAppliedJobIds] = useState<Set<string>>(new Set());
 
   /* ─── Filters ─────────────────────────────── */
@@ -88,9 +87,9 @@ export default function JobListingPage() {
     loadEmployerJobs();
   }, [role, user?.id]);
 
-  /* ─── ✅ NEW: Fetch Applied Jobs (Candidate Only) ───── */
+  /* Fetch Applied Jobs (Candidate Only) */
   useEffect(() => {
-    if (role === "employer" || !user?.id) return; // Skip for employers or guests
+    if (role === "employer" || !user?.id) return;
 
     const fetchApplied = async () => {
       const { data } = await supabase
@@ -161,7 +160,7 @@ export default function JobListingPage() {
   const jobs: JobListItem[] = useMemo(() => {
     if (role === "employer") return employerJobs;
 
-    // ✅ Filter out applied jobs for candidates
+    // Filter out applied jobs for candidates
     return (publicJobs as JobListItem[]).filter(
       (job) => !appliedJobIds.has(job.id)
     );
@@ -405,7 +404,7 @@ export default function JobListingPage() {
                          rounded-[var(--radius-card)] shadow-[var(--shadow-soft)]
                          p-6 transition-all hover:shadow-[var(--shadow-hover)] hover:-translate-y-[2px]"
             >
-              {/* ❤️ WISHLIST BUTTON (Fixed & Visible) */}
+              {/* WISHLIST BUTTON */}
               <button
                 onClick={(e) => handleToggleSave(e, job.id)}
                 className="absolute top-4 right-4 z-20 p-2.5 rounded-full bg-white border border-[var(--color-border)] shadow-sm text-[var(--color-text-muted)] hover:text-red-500 hover:border-red-200 transition-all"

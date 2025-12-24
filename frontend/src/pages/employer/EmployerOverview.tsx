@@ -55,7 +55,7 @@ export default function EmployerHome() {
       animate={{ opacity: 1 }}
       transition={{ duration: 0.25 }}
     >
-      {/* 🏠 Header */}
+      {/* Header */}
       <header className="mb-10">
         <div className="bg-gradient-to-r from-[var(--color-employer)]/10 to-transparent border border-[var(--color-border)] rounded-[var(--radius-card)] p-6 mb-8">
           <h1 className="heading-md text-[var(--color-employer-dark)] mb-1">
@@ -71,7 +71,7 @@ export default function EmployerHome() {
         </div>
       </header>
 
-      {/* 📊 Stats */}
+      {/* Stats */}
       <section className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-10">
         <StatCard label="Jobs Posted" value={jobsPosted} />
         <StatCard label="Active Submissions" value={activeSubmissions} />
@@ -81,7 +81,7 @@ export default function EmployerHome() {
         />
       </section>
 
-      {/* 🧩 Recent Submissions */}
+      {/* Recent Submissions */}
       <section className="bg-[var(--color-surface)] p-6 rounded-[var(--radius-card)] border border-[var(--color-border)] shadow-[var(--shadow-soft)] mb-10">
         <h2 className="heading-md mb-3">Recent Submissions</h2>
         {submissions.length ? (
@@ -107,10 +107,10 @@ export default function EmployerHome() {
         )}
       </section>
 
-      {/* 🔗 Quick Actions */}
+      {/* Quick Actions */}
       <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         <ActionCard
-          title="💼 Post a Job"
+          title="Post a Job"
           desc="Create a new proof-based task and start collecting candidate submissions."
           href="/employer/jobs/new"
         />

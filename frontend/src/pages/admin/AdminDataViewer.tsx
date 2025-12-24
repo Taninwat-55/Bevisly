@@ -51,7 +51,7 @@ export default function AdminDataViewer() {
     }
   };
 
-  // 🔍 Filter and sort
+  // Filter and sort
   const filteredRows = data.rows.filter((row) =>
     searchTerm
       ? Object.values(row)
@@ -69,7 +69,7 @@ export default function AdminDataViewer() {
 
   return (
     <div className="min-h-screen bg-[var(--color-bg)] text-[var(--color-text)] px-6 md:px-10 py-12 transition-colors">
-      {/* 🧭 Header */}
+      {/* Header */}
       <header className="mb-8 flex flex-col gap-2">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <h1 className="heading-lg flex items-center gap-2">
@@ -125,7 +125,7 @@ export default function AdminDataViewer() {
         </p>
       </header>
 
-      {/* 📊 Table */}
+      {/* Table */}
       <motion.div
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
@@ -175,7 +175,7 @@ export default function AdminDataViewer() {
         )}
       </motion.div>
 
-      {/* 📄 Pagination */}
+      {/* Pagination */}
       {!loading && data.rows.length > 0 && (
         <div className="flex flex-col sm:flex-row items-center justify-between gap-3 mt-6 text-sm">
           <span className="text-[var(--color-text-muted)]">
@@ -185,7 +185,7 @@ export default function AdminDataViewer() {
           </span>
 
           <div className="flex items-center gap-3">
-            {/* ⬅️ Prev */}
+            {/* Prev */}
             <button
               onClick={() => setPage((p) => Math.max(1, p - 1))}
               disabled={page === 1}
@@ -196,7 +196,7 @@ export default function AdminDataViewer() {
 
             <span>Page {page}</span>
 
-            {/* ➡️ Next */}
+            {/* Next */}
             <button
               onClick={() => {
                 // Only move forward if more results exist
@@ -228,7 +228,7 @@ export default function AdminDataViewer() {
         </div>
       )}
 
-      {/* 🧬 Schema */}
+      {/* Schema */}
       {schema.length > 0 && (
         <motion.div
           initial={{ opacity: 0 }}
