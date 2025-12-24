@@ -1,7 +1,7 @@
 import { toast } from "react-hot-toast";
 
 /**
- * 💬 Helper functions for easy branded calls across the app.
+ * Helper functions for easy branded calls across the app.
  * Example: `notify.success("Job posted!")`
  */
 export const notify = {

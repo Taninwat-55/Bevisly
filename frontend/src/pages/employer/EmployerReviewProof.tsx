@@ -149,7 +149,7 @@ export default function EmployerReviewProof() {
     if (fetching) return <div className="flex justify-center items-center min-h-screen"><Loader2 className="animate-spin" /></div>;
     if (!submission) return <div className="p-10 text-center">Submission not found.</div>;
 
-    // 🧠 FIXED: Logic to show ALL submission types if they exist
+    // Logic to show ALL submission types if they exist
     const rawLink = submission.submission_link;
     const rawFile = submission.file_url;
     const rawText = submission.text_response;
@@ -226,7 +226,7 @@ export default function EmployerReviewProof() {
 
                         <div className="space-y-4">
 
-                            {/* ✅ NEW: DEDICATED VIDEO SECTION */}
+                            {/* DEDICATED VIDEO SECTION */}
                             {submission.video_url && (
                                 <div className="mb-6">
                                     <div className="flex items-center gap-2 mb-2 text-indigo-600 dark:text-indigo-400 text-sm font-medium">
@@ -235,7 +235,7 @@ export default function EmployerReviewProof() {
                                     {/* Use the helper to embed, or fallback to a link card */}
                                     {getVideoEmbed(submission.video_url || null) || (
                                         <a
-                                            href={submission.video_url || "#"} 
+                                            href={submission.video_url || "#"}
                                             target="_blank"
                                             rel="noreferrer"
                                             className="flex items-center justify-between p-3 bg-[var(--color-bg)] border border-[var(--color-border)] rounded-lg hover:bg-[var(--color-bg-hover)] transition group"
@@ -310,7 +310,7 @@ export default function EmployerReviewProof() {
                             <h3 className="text-xs font-bold text-[var(--color-text-muted)] uppercase tracking-wider mb-3">Candidate Reflection</h3>
                             <div className="relative p-4 bg-[var(--color-bg)] border border-[var(--color-border)] rounded-[var(--radius-button)]">
                                 <Quote size={20} className="absolute top-4 left-4 text-[var(--color-border)] opacity-50" />
-                                {/* ✅ Render with ReactMarkdown */}
+                                {/* Render with ReactMarkdown */}
                                 <div className="pl-8 prose prose-sm dark:prose-invert max-w-none text-[var(--color-text)]">
                                     <ReactMarkdown>{submission.reflection}</ReactMarkdown>
                                 </div>
@@ -356,8 +356,6 @@ export default function EmployerReviewProof() {
                                     ))}
                                 </div>
                             </div>
-
-                            {/* ✅ Fixed Contrast: Removed opacity, changed bg for disabled state */}
                             <div>
                                 <label className="block text-sm font-medium mb-1 text-[var(--color-text)]">Strengths</label>
                                 <textarea

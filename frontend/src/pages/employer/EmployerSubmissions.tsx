@@ -1,6 +1,4 @@
 /**
- * 🧩 EmployerSubmissions.tsx
- *
  * Employer dashboard for reviewing candidate submissions.
  * Includes dropdown filter, sorting, and feedback modal.
  */
@@ -105,7 +103,7 @@ export default function EmployerSubmissions() {
   /* ─── Main Layout ─────────────────────────────── */
   return (
     <div className="min-h-screen bg-[var(--color-bg)] px-8 py-10 relative">
-      {/* 🧭 Header */}
+      {/* Header */}
       <header className="mb-8">
         <h1 className="heading-lg text-[var(--color-employer-dark)]">
           Candidate Submissions
@@ -115,7 +113,7 @@ export default function EmployerSubmissions() {
         </p>
       </header>
 
-      {/* 📊 Stats Bar */}
+      {/* Stats Bar */}
       <div className="flex flex-wrap items-center gap-4 mb-6">
         <div className="flex gap-6 text-sm">
           <p className="text-[var(--color-text)]">
@@ -194,7 +192,7 @@ export default function EmployerSubmissions() {
         </div>
       </div>
 
-      {/* 🧾 Submissions List */}
+      {/* Submissions List */}
       {filtered.length === 0 ? (
         <div className="text-center text-[var(--color-text-muted)] py-20 border border-dashed border-[var(--color-border)] rounded-xl">
           <p className="mb-2">No submissions found.</p>
@@ -267,7 +265,7 @@ export default function EmployerSubmissions() {
         </ul>
       )}
 
-      {/* 🪟 Feedback Modal */}
+      {/* Feedback Modal */}
       {selectedFeedback && (
         <div
           className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-30 animate-fadeIn"
@@ -276,7 +274,6 @@ export default function EmployerSubmissions() {
         >
           <div
             ref={(el) => {
-              // Focus trap setup
               if (el) {
                 const focusable = el.querySelectorAll<HTMLElement>(
                   'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'

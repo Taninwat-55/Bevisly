@@ -1,4 +1,3 @@
-// src/lib/api/pools.ts 
 // import { supabase } from "@/lib/supabaseClient";
 // import type { Database } from "@/lib/Database";
 

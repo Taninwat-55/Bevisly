@@ -57,7 +57,7 @@ export default function AdminDashboard() {
         </p>
       </header>
 
-      {/* 🧾 System Overview */}
+      {/* System Overview */}
       <section className="mb-12">
         <h2 className="heading-md mb-5">System Overview</h2>
         <motion.div
@@ -117,7 +117,7 @@ export default function AdminDashboard() {
         </motion.div>
       </section>
 
-      {/* 🚀 Quick Access */}
+      {/* Quick Access */}
       <section className="mb-12">
         <h2 className="heading-md mb-5">Quick Access</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -185,7 +185,7 @@ export default function AdminDashboard() {
         </div>
       </section>
 
-      {/* 🛠 Admin Actions */}
+      {/* Admin Actions */}
       <motion.section
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}

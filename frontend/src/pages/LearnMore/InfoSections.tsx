@@ -7,7 +7,7 @@ interface InfoSectionsProps {
 export default function InfoSections({ accent }: InfoSectionsProps) {
   return (
     <>
-      {/* 🔁 Proof Loop */}
+      {/* Proof Loop */}
       <section className="text-center border-t border-[var(--color-border)] pt-12 mt-12">
         <Repeat size={32} className="mx-auto mb-4 opacity-80" />
         <h3 className="heading-sm mb-2">The Proof Loop</h3>
@@ -18,7 +18,7 @@ export default function InfoSections({ accent }: InfoSectionsProps) {
         </p>
       </section>
 
-      {/* ⚖️ Fairness */}
+      {/* Fairness */}
       <section className="text-center border-t border-[var(--color-border)] pt-12 mt-12">
         <ShieldCheck
           size={32}
@@ -33,7 +33,7 @@ export default function InfoSections({ accent }: InfoSectionsProps) {
         </p>
       </section>
 
-      {/* ❓ FAQ */}
+      {/* FAQ */}
       <section className="text-center border-t border-[var(--color-border)] pt-12 mt-12">
         <HelpCircle size={28} className="mx-auto mb-4 opacity-80" />
         <h3 className="heading-sm mb-2">Common Questions</h3>

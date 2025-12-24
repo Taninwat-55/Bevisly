@@ -23,7 +23,7 @@ export default function UserSettings() {
   const label = isEmployer ? "Company Name" : "Display Name";
   const field = isEmployer ? "company_name" : "full_name";
 
-  // 📥 Fetch existing name
+  // Fetch existing name
   useEffect(() => {
     if (!user) return;
     supabase.from("profiles").select("full_name, company_name").eq("id", user.id).single()
@@ -79,7 +79,7 @@ export default function UserSettings() {
         animate={{ opacity: 1, y: 0 }}
         className="max-w-2xl space-y-6"
       >
-        {/* 👤 Profile Section */}
+        {/* Profile Section */}
         <section className="bg-[var(--color-surface)] rounded-[var(--radius-card)] shadow-[var(--shadow-soft)] border border-[var(--color-border)] p-6">
           <h2 className="heading-md mb-6 flex items-center gap-2">
             {isEmployer ? <Building2 size={20} /> : <User size={20} />} 
@@ -126,7 +126,7 @@ export default function UserSettings() {
           </div>
         </section>
 
-        {/* 🎛 Preferences Section (New Toggles) */}
+        {/* Preferences Section (New Toggles) */}
         <section className="bg-[var(--color-surface)] rounded-[var(--radius-card)] shadow-[var(--shadow-soft)] border border-[var(--color-border)] p-6">
           <h2 className="heading-md mb-6">Preferences</h2>
           
@@ -156,7 +156,7 @@ export default function UserSettings() {
           </div>
         </section>
 
-        {/* ⚠️ Danger Zone */}
+        {/* Danger Zone */}
         <section className="bg-[var(--color-surface)] rounded-[var(--radius-card)] shadow-[var(--shadow-soft)] border border-red-100 dark:border-red-900/30 p-6">
           <h2 className="heading-md mb-4 text-red-600">Danger Zone</h2>
           <div className="flex flex-wrap gap-4">
@@ -173,7 +173,7 @@ export default function UserSettings() {
   );
 }
 
-// 💅 Custom Toggle Component
+// Custom Toggle Component
 function ToggleSwitch({ checked, onChange }: { checked: boolean; onChange: () => void }) {
   return (
     <button 

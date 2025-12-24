@@ -8,7 +8,7 @@ export default function WhyProofSection() {
       className="bg-[var(--color-bg)] py-24 border-t border-[var(--color-border)]"
     >
       <div className="mx-auto max-w-7xl px-6">
-        {/* 🧠 Header */}
+        {/* Header */}
         <motion.header
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -21,9 +21,9 @@ export default function WhyProofSection() {
           </p>
         </motion.header>
 
-        {/* 💡 Dual Columns */}
+        {/* Dual Columns */}
         <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
-          {/* 🎓 Candidates */}
+          {/* Candidates */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -51,7 +51,7 @@ export default function WhyProofSection() {
             </ul>
           </motion.div>
 
-          {/* 🏢 Employers */}
+          {/* Employers */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -80,7 +80,7 @@ export default function WhyProofSection() {
           </motion.div>
         </div>
 
-        {/* 🌉 Bridge Line */}
+        {/* Bridge Line */}
         <motion.p
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}

@@ -13,7 +13,7 @@ export default function Navbar() {
 
   const [mobileOpen, setMobileOpen] = useState(false);
 
-  /* 🌐 Global navigation links */
+  /* Global navigation links */
   const navLinks = [
     { label: "Home", to: "/" },
     { label: "Jobs", to: "/jobs" },
@@ -22,7 +22,7 @@ export default function Navbar() {
     { label: "About", to: "/about" },
   ];
 
-  /* 🧭 Append Dashboard link for logged-in users */
+  /* Append Dashboard link for logged-in users */
   if (user) {
     const storedUser = JSON.parse(localStorage.getItem("bevisly_user") || "{}");
     const role = localStorage.getItem("overrideRole") || storedUser?.role;
@@ -38,7 +38,7 @@ export default function Navbar() {
     });
   }
 
-  /* 🧭 Go to dashboard based on role */
+  /* Go to dashboard based on role */
   const goToDashboard = () => {
     const storedUser = JSON.parse(localStorage.getItem("bevisly_user") || "{}");
     const role = localStorage.getItem("overrideRole") || storedUser?.role;

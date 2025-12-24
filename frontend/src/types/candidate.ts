@@ -1,4 +1,3 @@
-// src/types/candidate.ts
 export type CandidateJob = {
   id: string;
   title: string;

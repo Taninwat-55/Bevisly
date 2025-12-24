@@ -4,7 +4,7 @@ import { Target, Eye, Lightbulb } from "lucide-react";
 export default function AboutPage() {
   return (
     <div className="min-h-screen bg-[var(--color-bg)] text-[var(--color-text)]">
-      {/* 🏁 Hero */}
+      {/* Hero */}
       <section className="text-center py-24 border-b border-[var(--color-border)] bg-[var(--color-surface)] relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[color-mix(in srgb,var(--color-candidate)5%,transparent)] to-transparent opacity-60" />
         <h1 className="heading-lg mb-4 relative z-10">About Bevisly</h1>
@@ -14,7 +14,7 @@ export default function AboutPage() {
         </p>
       </section>
 
-      {/* 💡 Mission */}
+      {/* Mission */}
       <section className="max-w-5xl mx-auto px-6 py-20 grid md:grid-cols-2 gap-10 items-center border-b border-[var(--color-border)]">
         <div className="fade-in-up">
           <div className="inline-flex items-center justify-center rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-3 mb-4 text-[var(--color-candidate-dark)]">
@@ -37,7 +37,7 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* 🔭 Vision */}
+      {/* Vision */}
       <section className="max-w-5xl mx-auto px-6 py-20 grid md:grid-cols-2 gap-10 items-center border-b border-[var(--color-border)] bg-[color-mix(in srgb,var(--color-surface) 98%,var(--color-bg))]">
         <div className="order-2 md:order-1 bg-[var(--color-bg)] border border-[var(--color-border)] rounded-[var(--radius-card)] shadow-[var(--shadow-soft)] p-6 fade-in-up">
           <p className="italic text-[var(--color-text-muted)]">
@@ -60,7 +60,7 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* ⚙️ How We're Building It */}
+      {/* How We're Building It */}
       <section className="max-w-4xl mx-auto px-6 py-24 text-center border-b border-[var(--color-border)]">
         <div className="inline-flex items-center justify-center rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-3 mb-4 text-[var(--color-candidate-dark)]">
           <Lightbulb size={22} />
@@ -77,7 +77,7 @@ export default function AboutPage() {
         </p>
       </section>
 
-      {/* 👥 Team Section (hidden for now — ready to enable later) */}
+      {/* Team Section (hidden for now — ready to enable later) */}
       {/*
       <section className="max-w-6xl mx-auto px-6 py-20 text-center border-b border-[var(--color-border)]">
         <div className="inline-flex items-center justify-center rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-3 mb-4">
@@ -107,7 +107,7 @@ export default function AboutPage() {
       </section>
       */}
 
-      {/* 🚀 CTA */}
+      {/* CTA */}
       <section className="text-center py-20 bg-[var(--color-surface)]">
         <h2 className="heading-md mb-4">
           Join Bevisly — where real work proves real skill.

@@ -1,4 +1,3 @@
-// src/layout/PublicLayout.tsx
 import Navbar from "@/components/Navbar";
 import LandingFooter from "@/components/landing/LandingFooter";
 import ScrollToTop from "@/components/ui/ScrollToTop";
@@ -15,7 +14,7 @@ export default function PublicLayout() {
       <Navbar />
       <ScrollToTop />
 
-      {/* ✨ Animated route outlet */}
+      {/* Animated route outlet */}
       <AnimatePresence mode="wait">
         <motion.main
           key={location.pathname}

@@ -1,4 +1,3 @@
-// src/types/admin.ts
 export interface AdminStats {
   total_users: number;
   total_jobs: number;

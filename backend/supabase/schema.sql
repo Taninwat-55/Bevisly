@@ -88,8 +88,8 @@ create table public.submissions (
   
   -- Content
   submission_link text, -- External Link (http://...)
-  file_url text,        -- ✅ Uploaded File URL (Supabase Storage)
-  text_response text,   -- ✅ Direct Text Answer
+  file_url text,        -- Uploaded File URL (Supabase Storage)
+  text_response text,   -- Direct Text Answer
   reflection text,      -- Candidate's reflection/notes
   
   resume_url text,      -- Snapshot of CV at submission time

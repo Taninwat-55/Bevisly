@@ -25,14 +25,14 @@ export function useCandidateStats(): CandidateStats {
 
     const fetchStats = async () => {
       try {
-        // 🧩 Proofs completed
+        // Proofs completed
         const { count: totalProofs } = await supabase
           .from("submissions")
           .select("*", { count: "exact", head: true })
           .eq("user_id", user.id)
           .eq("status", "reviewed");
 
-        // 🧠 Feedback average
+        // Feedback average
         const { data: feedbackData } = await supabase
           .from("feedback")
           .select("stars, submissions!inner(user_id)") 
@@ -50,13 +50,13 @@ export function useCandidateStats(): CandidateStats {
               )
             : null;
 
-        // 💼 Jobs applied
+        // Jobs applied
         const { count: appliedCount } = await supabase
           .from("submissions")
           .select("*", { count: "exact", head: true })
           .eq("user_id", user.id);
 
-        // 💳 Credits
+        // Credits
         const { data: profile } = await supabase
           .from("profiles")
           .select("credits")

@@ -26,7 +26,7 @@ export default function ProofTasksSection({
     const updated = [...proofTasks];
     updated[index] = { ...updated[index], [field]: value };
 
-    // 🤖 Auto-fill instructions if switching to Code Challenge
+    // Auto-fill instructions if switching to Code Challenge
     if (field === "submission_type" && value === "github_repo") {
       if (!updated[index].description) {
         updated[index].description =
@@ -92,7 +92,7 @@ export default function ProofTasksSection({
           </button>
 
           <div className="space-y-5">
-            {/* 🏷️ Task Type Selector */}
+            {/* Task Type Selector */}
             <div>
               <label className="block text-sm font-medium text-[var(--color-text)] mb-2">Task Type</label>
               <div className="flex gap-3">
@@ -131,7 +131,7 @@ export default function ProofTasksSection({
               />
             </div>
 
-            {/* 🔗 GitHub Template URL (Conditional) */}
+            {/* GitHub Template URL (Conditional) */}
             {task.submission_type === "github_repo" && (
               <div className="p-4 bg-blue-50 dark:bg-blue-900/10 border border-blue-100 dark:border-blue-800 rounded-lg animate-in fade-in slide-in-from-top-2">
                 <label className="block text-sm font-semibold text-blue-900 dark:text-blue-100 mb-1">

@@ -1,4 +1,3 @@
-// src/layout/AdminLayout.tsx
 import Sidebar from "@/components/Sidebar";
 import { Outlet } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
@@ -6,10 +5,10 @@ import { motion, AnimatePresence } from "framer-motion";
 export default function AdminLayout() {
   return (
     <div className="flex min-h-screen bg-[var(--color-bg)] text-[var(--color-text)] transition-colors">
-      {/* 🧭 Sidebar */}
+      {/* Sidebar */}
       <Sidebar role="admin" />
 
-      {/* 🧩 Main Content Area */}
+      {/* Main Content Area */}
       <div className="flex-1 flex flex-col border-l border-[var(--color-border)] bg-[var(--color-bg)] overflow-hidden">
         {/* Inner scroll area */}
         <AnimatePresence mode="wait">

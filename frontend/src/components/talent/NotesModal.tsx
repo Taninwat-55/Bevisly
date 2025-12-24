@@ -19,7 +19,7 @@ export default function NotesModal({
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
 
-  // 🧠 Auto-save after typing delay (500ms)
+  // Auto-save after typing delay (500ms)
   useEffect(() => {
     if (!submission) return;
     if (!note.trim()) return;

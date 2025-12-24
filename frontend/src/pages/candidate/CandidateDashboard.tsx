@@ -16,7 +16,7 @@ export default function CandidateDashboard() {
   const [displayName, setDisplayName] = useState<string>("");
   const [savedJobs, setSavedJobs] = useState<any[]>([]);
 
-  // 🪙 Fetch credits AND profile name
+  // Fetch credits AND profile name
   useEffect(() => {
     if (!user?.id) return;
     supabase
@@ -30,7 +30,7 @@ export default function CandidateDashboard() {
       });
   }, [user?.id]);
 
-  // 📊 Fetch stats
+  // Fetch stats
   useEffect(() => {
     const fetchStats = async () => {
       if (!user?.id) return;
@@ -68,7 +68,7 @@ export default function CandidateDashboard() {
     fetchStats();
   }, [user?.id]);
 
-  // 📥 Load Saved Jobs
+  // Load Saved Jobs
   useEffect(() => {
     async function loadSaved() {
       if (!user) return;
@@ -87,10 +87,10 @@ export default function CandidateDashboard() {
 
   return (
     <div className="min-h-screen bg-[var(--color-bg)] px-8 py-10 transition-colors">
-      {/* 🏁 Welcome */}
+      {/* Welcome */}
       <header className="mb-10">
         <h1 className="heading-lg flex items-center gap-2">
-          {/* ✅ Use Display Name if available, else fallback to email */}
+          {/* Use Display Name if available, else fallback to email */}
           👋 Hi, {displayName || user?.email?.split("@")[0]}!
         </h1>
         <p className="body-base text-[var(--color-text-muted)]">
@@ -98,7 +98,7 @@ export default function CandidateDashboard() {
         </p>
       </header>
 
-      {/* 🌟 Stats Overview */}
+      {/* Stats Overview */}
       <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-14">
         <CreditCardStat credits={credits} />
         <StatCard label="Proofs Completed" value={stats.proofsCompleted} />
@@ -106,7 +106,7 @@ export default function CandidateDashboard() {
         <StatCard label="Jobs Applied" value={stats.jobsApplied} />
       </section>
 
-      {/* 🚀 Quick Access */}
+      {/* Quick Access */}
       <section>
         <h2 className="flex items-center gap-2 heading-md mb-4">
           <Target size={20} /> Quick Access
@@ -128,7 +128,7 @@ export default function CandidateDashboard() {
         </div>
       </section>
 
-      {/* 📜 Active Proofs Section */}
+      {/* Active Proofs Section */}
       <section className="mt-14">
         <h2 className="flex items-center gap-2 heading-md mb-4">
           <CheckCircle size={20} /> My Active Proofs
@@ -137,7 +137,7 @@ export default function CandidateDashboard() {
         <ActiveProofs userId={user?.id} />
       </section>
 
-      {/* ❤️ SAVED JOBS SECTION */}
+      {/* SAVED JOBS SECTION */}
       <section className="mt-12 mb-8">
         <div className="flex items-center gap-3 mb-6">
           <div className="p-2 bg-red-50 text-red-600 rounded-lg">

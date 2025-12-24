@@ -36,7 +36,7 @@ export default function EmployerDashboard() {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
 
-  // 📦 Load employer data
+  // Load employer data
   useEffect(() => {
     if (!user?.id) return;
     (async () => {
@@ -59,7 +59,7 @@ export default function EmployerDashboard() {
     })();
   }, [user?.id]);
 
-  // 🧮 Quick metrics
+  // Quick metrics
   const totalJobs = jobs.length;
   const totalSubmissions = submissions.length;
   const totalHires = submissions.filter((s) => s.status === "hired").length;
@@ -71,7 +71,7 @@ export default function EmployerDashboard() {
     return (ratings.reduce((sum, r) => sum + r, 0) / ratings.length).toFixed(1);
   }, [summaries]);
 
-  // 🔍 Filtered jobs
+  // Filtered jobs
   const filteredJobs = useMemo(() => {
     return jobs
       .filter((job) => {
@@ -91,7 +91,7 @@ export default function EmployerDashboard() {
   const findSummary = (jobId: string) =>
     summaries.find((s) => s.job_id === jobId);
 
-  // 🧩 Universal job action handler
+  // Universal job action handler
   const handleJobAction = async (
     e: React.MouseEvent,
     job: EmployerJob,
@@ -109,17 +109,17 @@ export default function EmployerDashboard() {
         prev.map((j) =>
           j.id === job.id
             ? {
-                ...j,
-                ...(action === "status"
-                  ? {
-                      status:
-                        updated.status === "active" ||
-                        updated.status === "closed"
-                          ? updated.status
-                          : null,
-                    }
-                  : { featured: !!updated.featured }),
-              }
+              ...j,
+              ...(action === "status"
+                ? {
+                  status:
+                    updated.status === "active" ||
+                      updated.status === "closed"
+                      ? updated.status
+                      : null,
+                }
+                : { featured: !!updated.featured }),
+            }
             : j
         )
       );
@@ -130,8 +130,8 @@ export default function EmployerDashboard() {
             ? "✅ Job reopened successfully."
             : "🛑 Job closed successfully."
           : updated.featured
-          ? "⭐ Job featured successfully!"
-          : "Job unfeatured."
+            ? "⭐ Job featured successfully!"
+            : "Job unfeatured."
       );
     } catch (err) {
       console.error(err);
@@ -144,18 +144,18 @@ export default function EmployerDashboard() {
   };
 
   const handleDelete = async (e: React.MouseEvent, jobId: string) => {
-  e.stopPropagation();
-  if (!confirm("Are you sure you want to delete this job? Submissions will be lost.")) return;
-  try {
-    await deleteJob(jobId);
-    setJobs(prev => prev.filter(j => j.id !== jobId));
-    toast.success("Job deleted.");
-  } catch {
-    toast.error("Failed to delete job.");
-  }
-};
+    e.stopPropagation();
+    if (!confirm("Are you sure you want to delete this job? Submissions will be lost.")) return;
+    try {
+      await deleteJob(jobId);
+      setJobs(prev => prev.filter(j => j.id !== jobId));
+      toast.success("Job deleted.");
+    } catch {
+      toast.error("Failed to delete job.");
+    }
+  };
 
-  // 🌀 Loading state
+  // Loading state
   if (loading)
     return (
       <div className="flex items-center justify-center min-h-screen text-[var(--color-text-muted)]">
@@ -170,7 +170,7 @@ export default function EmployerDashboard() {
       animate={{ opacity: 1 }}
       transition={{ duration: 0.25 }}
     >
-      {/* 🧭 Header */}
+      {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-4 mb-4">
         <div>
           <h1 className="heading-lg">Employer Dashboard</h1>
@@ -186,7 +186,7 @@ export default function EmployerDashboard() {
         </button>
       </div>
 
-      {/* 📊 Metrics Overview */}
+      {/* Metrics Overview */}
       <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <MetricCard
           title="Jobs Posted"
@@ -206,7 +206,7 @@ export default function EmployerDashboard() {
         />
       </section>
 
-      {/* 🔍 Search + Filter */}
+      {/* Search + Filter */}
       <div className="flex flex-wrap items-center gap-3 mb-6">
         <input
           type="text"
@@ -227,7 +227,7 @@ export default function EmployerDashboard() {
         </select>
       </div>
 
-      {/* 💼 Job Performance */}
+      {/* Job Performance */}
       <section>
         <h2 className="heading-md mb-4">Your Jobs Overview</h2>
         {filteredJobs.length === 0 ? (
@@ -284,14 +284,13 @@ export default function EmployerDashboard() {
                     )}
                   </div>
 
-                  {/* 🧩 Status + Actions */}
+                  {/* Status + Actions */}
                   <div className="flex justify-between items-center pt-2 border-t border-[var(--color-border)] mt-3">
                     <span
-                      className={`text-xs font-medium px-2 py-1 rounded-full ${
-                        job.status === "active"
+                      className={`text-xs font-medium px-2 py-1 rounded-full ${job.status === "active"
                           ? "bg-green-100 text-green-700"
                           : "bg-red-100 text-red-700"
-                      }`}
+                        }`}
                     >
                       {job.status === "active" ? "Active" : "Closed"}
                     </span>
@@ -305,17 +304,16 @@ export default function EmployerDashboard() {
                       </button>
                       <button
                         onClick={(e) => handleJobAction(e, job, "featured")}
-                        className={`text-xs ${
-                          job.featured
+                        className={`text-xs ${job.featured
                             ? "text-yellow-600 hover:underline"
                             : "text-[var(--color-employer)] hover:underline"
-                        }`}
+                          }`}
                       >
                         {job.featured ? "Unfeature ⭐" : "Feature ⭐"}
                       </button>
                       <button onClick={(e) => handleDelete(e, job.id)} className="text-xs text-[var(--color-error)] hover:underline">
-  Remove
-</button>
+                        Remove
+                      </button>
                     </div>
                   </div>
                 </motion.div>
@@ -325,7 +323,7 @@ export default function EmployerDashboard() {
         )}
       </section>
 
-      {/* 🕓 Recent Submissions */}
+      {/* Recent Submissions */}
       <section>
         <h2 className="heading-md mb-4">Recent Proof Submissions</h2>
         {submissions.length === 0 ? (
@@ -353,15 +351,14 @@ export default function EmployerDashboard() {
                   </p>
                 </div>
                 <span
-                  className={`px-2 py-1 rounded-full text-xs ${
-                    s.status === "pending"
+                  className={`px-2 py-1 rounded-full text-xs ${s.status === "pending"
                       ? "bg-yellow-100 text-yellow-700"
                       : s.status === "reviewed"
-                      ? "bg-blue-100 text-blue-700"
-                      : s.status === "hired"
-                      ? "bg-green-100 text-green-700"
-                      : "bg-gray-100 text-gray-600"
-                  }`}
+                        ? "bg-blue-100 text-blue-700"
+                        : s.status === "hired"
+                          ? "bg-green-100 text-green-700"
+                          : "bg-gray-100 text-gray-600"
+                    }`}
                 >
                   {s.status}
                 </span>

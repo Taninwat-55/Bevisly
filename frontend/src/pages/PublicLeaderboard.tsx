@@ -1,4 +1,3 @@
-// src/pages/PublicLeaderboard.tsx
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/lib/supabaseClient";
@@ -47,7 +46,7 @@ export default function PublicLeaderboard() {
     >
       <BackButton to="/" />
 
-      {/* 🏁 Header */}
+      {/* Header */}
       <header className="text-center mb-8">
         <h1 className="heading-lg mb-2 flex items-center justify-center gap-2">
           <Trophy className="text-[var(--color-candidate)]" /> Top Proof Earners
@@ -58,7 +57,7 @@ export default function PublicLeaderboard() {
         </p>
       </header>
 
-      {/* 🏆 Leaderboard */}
+      {/* Leaderboard */}
       <section className="bg-[var(--color-surface)] rounded-[var(--radius-card)] border border-[var(--color-border)] shadow-[var(--shadow-soft)] p-6">
         {leaders.length === 0 ? (
           <p className="text-center text-[var(--color-text-muted)]">

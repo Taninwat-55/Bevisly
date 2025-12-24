@@ -13,7 +13,7 @@ export default function LearnMorePage() {
 
   return (
     <div className="min-h-screen bg-[var(--color-bg)] text-[var(--color-text)]">
-      {/* 🧭 Header */}
+      {/* Header */}
       <header className="border-b border-[var(--color-border)] bg-[var(--color-surface)] py-20 text-center relative overflow-hidden">
         <div
           className="absolute inset-0 opacity-60"
@@ -52,12 +52,12 @@ export default function LearnMorePage() {
         </div>
       </header>
 
-      {/* 🧩 Content */}
+      {/* Content */}
       <main className="max-w-6xl mx-auto px-6 py-16">
         {mode === "candidate" ? <CandidateGuide /> : <EmployerGuide />}
       </main>
 
-      {/* 🚀 CTA */}
+      {/* CTA */}
       <footer className="text-center border-t border-[var(--color-border)] py-20 bg-[var(--color-surface)]">
         <h2 className="heading-md mb-4">
           Ready to experience proof-based hiring?

@@ -42,7 +42,7 @@ export default function EmployerTalentPool() {
           getEmployerJobs(user!.id),
         ]);
         setSubmissions(subsData);
-        setJobs(jobsData); // ✅ Save jobs
+        setJobs(jobsData);
       } catch (err) {
         console.error(err);
         toast.error("Failed to load data");
@@ -103,7 +103,7 @@ export default function EmployerTalentPool() {
 
   return (
     <div className="min-h-screen bg-[var(--color-bg)] px-8 py-10 space-y-8">
-      {/* 🧭 Header */}
+      {/* Header */}
       <header className="flex items-center justify-between flex-wrap gap-4">
         <div>
           <h1 className="heading-lg text-[var(--color-employer-dark)] flex items-center gap-2">
@@ -116,7 +116,7 @@ export default function EmployerTalentPool() {
         </div>
       </header>
 
-      {/* 📊 Summary */}
+      {/* Summary */}
       <section className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-card)] p-5 text-center shadow-[var(--shadow-soft)]">
           <UserCheck className="mx-auto mb-1 text-[var(--color-success)]" />
@@ -138,11 +138,11 @@ export default function EmployerTalentPool() {
         </div>
       </section>
 
-      {/* 🔍 Filters & Sort */}
+      {/* Filters & Sort */}
       <section className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-3 flex-wrap">
 
-          {/* ✅ Job Filter */}
+          {/* Job Filter */}
           <div className="flex items-center gap-2">
             <Briefcase size={14} className="text-[var(--color-text-muted)]" />
             <select
@@ -213,10 +213,8 @@ export default function EmployerTalentPool() {
         </div>
       </section>
 
-      {/* 👥 Candidate List */}
+      {/* Candidate List */}
       <section className="bg-[var(--color-surface)] p-6 rounded-[var(--radius-card)] border border-[var(--color-border)] shadow-[var(--shadow-soft)] transition-colors">
-        {/* (Table code remains the same as before) */}
-        {/* ... table ... */}
         <div className="overflow-x-auto">
           <table className="w-full border-collapse text-sm">
             <thead>
@@ -244,7 +242,7 @@ export default function EmployerTalentPool() {
                       }`}
                     onClick={() => navigate(`/employer/review/${s.id}`)}
                   >
-                    {/* 1. CANDIDATE NAME (Uncommented & Fixed) */}
+                    {/* 1. CANDIDATE NAME */}
                     <td className="py-2 px-3 text-[var(--color-text)] font-medium">
                       <div className="flex items-center gap-2">
                         {/* Fallback to email if name is missing */}
@@ -274,7 +272,7 @@ export default function EmployerTalentPool() {
                       {rating ? <span className="font-medium text-yellow-600">⭐ {rating}/5</span> : "-"}
                     </td>
 
-                    {/* 6. STATUS (Moved here to match header) */}
+                    {/* 6. STATUS */}
                     <td className="py-2 px-3">
                       <span
                         className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border ${s.status === "reviewed"

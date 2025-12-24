@@ -11,17 +11,17 @@ function JobPreviewCard({ job }: { job: CandidateJob }) {
       to={`/jobs/${job.id}`}
       className="block rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-5 hover:shadow-md hover:-translate-y-0.5 transition-all"
     >
-      {/* 🏢 Company */}
+      {/* Company */}
       <div className="text-xs text-[var(--color-text-muted)] flex items-center gap-1 mb-1">
         <Briefcase size={14} /> {job.company ?? "Company"}
       </div>
 
-      {/* 💼 Job title */}
+      {/* Job title */}
       <h3 className="font-semibold text-[var(--color-text)] mb-1 line-clamp-1">
         {job.title}
       </h3>
 
-      {/* 📍 Meta info */}
+      {/* Meta info */}
       <div className="flex items-center gap-2 text-xs text-[var(--color-text-muted)]">
         {job.location && (
           <span className="flex items-center gap-1">
@@ -67,7 +67,7 @@ export default function JobListingsSection() {
 
         {err && <p className="body-base text-[var(--color-error)]">{err}</p>}
 
-        {/* 🕳 Empty state */}
+        {/* Empty state */}
         {!err && (!jobs || jobs.length === 0) && (
           <div className="text-center py-16 text-[var(--color-text-muted)]">
             <Building2
@@ -87,7 +87,7 @@ export default function JobListingsSection() {
           </div>
         )}
 
-        {/* 🧩 Job cards */}
+        {/* Job cards */}
         {!err && jobs && jobs.length > 0 && (
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
             {jobs.slice(0, 6).map((job) => (
@@ -96,7 +96,7 @@ export default function JobListingsSection() {
           </div>
         )}
 
-        {/* 🔗 Footer link */}
+        {/* Footer link */}
         {jobs && jobs.length > 0 && (
           <div className="mt-10 text-center">
             <Link

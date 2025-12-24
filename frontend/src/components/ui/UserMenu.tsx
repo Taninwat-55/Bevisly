@@ -53,7 +53,7 @@ export default function UserMenu() {
 
   return (
     <div className="relative flex items-center gap-3" ref={dropdownRef}>
-      {/* 🔔 Notifications */}
+      {/* Notifications */}
       <button
         onClick={() => toast("No new notifications 📬")}
         className="text-[var(--color-text-muted)] hover:text-[var(--color-candidate-dark)] transition"
@@ -62,7 +62,7 @@ export default function UserMenu() {
         <Bell size={20} strokeWidth={1.75} />
       </button>
 
-      {/* 👤 Account */}
+      {/* Account */}
       <button
         onClick={() => setDropdownOpen(!dropdownOpen)}
         className={`rounded-full p-[6px] hover:bg-[var(--color-bg-hover)] transition ${

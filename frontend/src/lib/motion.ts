@@ -1,4 +1,3 @@
-// src/lib/motion.ts
 import { type Variants } from "framer-motion";
 
 /**

@@ -93,7 +93,7 @@ export default function EmployerJobForm({
 }: EmployerJobFormProps) {
   const navigate = useNavigate();
 
-  // 🧠 Unified job state
+  // Unified job state
   const [values, setValues] = useState<EmployerJobFormValues>({
     title: defaultValues?.title ?? "",
     description: defaultValues?.description ?? "",
@@ -181,7 +181,7 @@ export default function EmployerJobForm({
   /* ─── Render ─────────────────────────────── */
   return (
     <div className="space-y-6">
-      {/* 📝 Template Helper */}
+      {/* Template Helper */}
       <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-card)] p-5 shadow-[var(--shadow-soft)]">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>

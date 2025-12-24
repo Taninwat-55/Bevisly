@@ -1,4 +1,3 @@
-// src/types/employer.ts
 import type { ProofTask } from "./shared";
 
 // Type representing a single job posted by an employer.
@@ -62,14 +61,14 @@ export type EmployerSubmission = {
   jobs?: { title: string | null } | null;
   feedback?: { stars: number | null }[] | null;
 
-  // 🧭 Talent Manager fields
+  // Talent Manager fields
   hiring_stage?: HiringStage | null;
   employer_notes?: string | null;
 
-  // 🆕 New — attach candidate resume for employers
+  // attach candidate resume for employers
   resume_url?: string | null;
 
-  // ✅ NEW: Profile data fetched via join
+  // Profile data fetched via join
   profiles?: {
     full_name: string | null;
     email: string | null;

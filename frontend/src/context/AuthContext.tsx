@@ -1,4 +1,3 @@
-// src/context/AuthContext.tsx
 import { createContext } from "react";
 
 export type SessionUser = {
@@ -7,12 +6,12 @@ export type SessionUser = {
   role: "candidate" | "employer" | "admin" | null;
 };
 
-// ✅ Extended context type
+// Extended context type
 export type AuthContextType = {
   user: SessionUser | null;
   loading: boolean;
   signOut: () => Promise<void>;
-  setOverride?: (role: SessionUser["role"]) => void; // ← new optional helper
+  setOverride?: (role: SessionUser["role"]) => void; 
 };
 
 export const AuthContext = createContext<AuthContextType>({

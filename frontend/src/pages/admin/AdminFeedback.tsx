@@ -33,7 +33,7 @@ export default function AdminFeedback() {
     }
   };
 
-  // 🔍 Filter, search, and sort
+  // Filter, search, and sort
   const filteredFeedbacks = useMemo(() => {
     let result = feedbacks;
     const term = searchTerm.toLowerCase();
@@ -80,7 +80,7 @@ export default function AdminFeedback() {
 
   return (
     <div className="min-h-screen bg-[var(--color-bg)] text-[var(--color-text)] px-6 md:px-10 py-12 transition-colors">
-      {/* 🧭 Header */}
+      {/* Header */}
       <header className="mb-8 flex flex-col gap-2">
         <div className="flex items-center justify-between flex-wrap gap-3">
           <h1 className="heading-lg flex items-center gap-2">
@@ -139,7 +139,7 @@ export default function AdminFeedback() {
         </p>
       </header>
 
-      {/* 📋 Table */}
+      {/* Table */}
       <motion.div
         initial={{ opacity: 0, y: 6 }}
         animate={{ opacity: 1, y: 0 }}
@@ -216,7 +216,7 @@ export default function AdminFeedback() {
         </table>
       </motion.div>
 
-      {/* 📄 Pagination */}
+      {/* Pagination */}
       {filteredFeedbacks.length > 0 && (
         <div className="flex flex-col sm:flex-row items-center justify-between gap-3 mt-6 text-sm">
           <div className="text-[var(--color-text-muted)]">

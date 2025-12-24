@@ -1,9 +1,8 @@
-// src/lib/api/mutations.ts
 import { supabase } from "../supabaseClient";
 import type { Feedback, EmployerJob } from "@/types";
 
 /**
- * ✅ Employer leaves feedback on a candidate submission
+ * Employer leaves feedback on a candidate submission
  */
 export async function addFeedback({
   submission_id,
@@ -37,7 +36,7 @@ export async function addFeedback({
 }
 
 /**
- * ✅ Update an existing job
+ * Update an existing job
  */
 export async function updateJobDetails(
   job_id: string,
@@ -52,12 +51,12 @@ export async function updateJobDetails(
 
   if (error) throw error;
 
-  // ✅ Safely coerce to EmployerJob type
+  // Safely coerce to EmployerJob type
   return data as EmployerJob;
 }
 
 /**
- * ✅ Update a proof task (title, description, etc.)
+ * Update a proof task (title, description, etc.)
  */
 export async function updateProofTask(
   proof_task_id: string,
@@ -81,7 +80,7 @@ export async function updateProofTask(
 }
 
 /**
- * ✅ Update submission status (e.g., "reviewed", "shortlisted")
+ * Update submission status (e.g., "reviewed", "shortlisted")
  */
 export async function updateSubmissionStatus(
   submission_id: string,
@@ -115,7 +114,7 @@ export async function updateHiringStage(
 }
 
 /**
- * ✅ Toggle job active/closed state
+ * Toggle job active/closed state
  */
 export async function toggleJobStatus(job_id: string, currentStatus?: string) {
   const newStatus = currentStatus === "active" ? "closed" : "active";

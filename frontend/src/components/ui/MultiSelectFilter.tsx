@@ -18,19 +18,19 @@ export default function MultiSelectFilter({
   const [search, setSearch] = useState("");
   const ref = useRef<HTMLDivElement>(null);
 
-  // --- Close on outside click
+  // Close on outside click
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
       if (ref.current && !ref.current.contains(e.target as Node)) {
         setOpen(false);
-        setSearch(""); // clear search when closing
+        setSearch(""); 
       }
     }
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // --- Filtered options based on search
+  // Filtered options based on search
   const filteredOptions = useMemo(() => {
     return options.filter((opt) =>
       opt.toLowerCase().includes(search.toLowerCase().trim())

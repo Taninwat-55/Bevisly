@@ -28,28 +28,28 @@ export default function CandidateProfile() {
   const [resumeUpdatedAt, setResumeUpdatedAt] = useState<string | null>(null);
   const [transactions, setTransactions] = useState<any[]>([]);
 
-  /* 🗓️ Fetch profile info (join date + name) */
+  /* Fetch profile info (join date + name) */
   useEffect(() => {
     if (!user?.id) return;
 
     const fetchProfile = async () => {
       const { data } = await supabase
         .from("profiles")
-        .select("created_at, full_name") // ✅ Fetch full_name
+        .select("created_at, full_name") 
         .eq("id", user.id)
         .single();
 
       if (data) {
         if (data.created_at)
           setJoined(new Date(data.created_at).toLocaleDateString());
-        if (data.full_name) setFullName(data.full_name); // ✅ Set name
+        if (data.full_name) setFullName(data.full_name);
       }
     };
     fetchProfile();
     getCreditHistory(user.id).then(setTransactions).catch(console.error);
   }, [user?.id]);
 
-  /* 🆕 Fetch existing resume */
+  /* Fetch existing resume */
   useEffect(() => {
     if (!user?.id) return;
     getProfileResume(user.id)
@@ -60,7 +60,7 @@ export default function CandidateProfile() {
       .catch(() => {});
   }, [user?.id]);
 
-  /* 🆕 Handle CV upload */
+  /* Handle CV upload */
   const handleUploadCV = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -84,7 +84,7 @@ export default function CandidateProfile() {
     }
   };
 
-  /* 🧹 Reset stored preferences (e.g., skip modals) */
+  /* Reset stored preferences (e.g., skip modals) */
   const handleResetPreferences = () => {
     const keys = Object.keys(localStorage);
     let resetCount = 0;
@@ -101,7 +101,7 @@ export default function CandidateProfile() {
     );
   };
 
-  /* 📋 Copy public link */
+  /* Copy public link */
   const handleCopyLink = () => {
     navigator.clipboard.writeText(
       `${window.location.origin}/candidate/${user?.id}`
@@ -111,7 +111,6 @@ export default function CandidateProfile() {
     setTimeout(() => setCopied(false), 1500);
   };
 
-  // 🧩 Extract & clean file name from URL (e.g. "1762740193705-_CV%20-%20Eng.pdf")
   const extractFileName = (url: string | null) => {
     if (!url) return null;
     try {
@@ -135,7 +134,7 @@ export default function CandidateProfile() {
     }
   };
 
-  // 🧩 Format date nicely (e.g. "Nov 10, 2025")
+  // Format date nicely (e.g. "Nov 10, 2025")
   const formatDate = (dateStr: string | null) => {
     if (!dateStr) return null;
     const date = new Date(dateStr);
@@ -160,7 +159,6 @@ export default function CandidateProfile() {
     window.URL.revokeObjectURL(url);
   };
 
-  // 🧠 Keep everything below as-is
   if (loading)
     return (
       <div className="flex justify-center items-center min-h-screen text-[var(--color-text-muted)]">
@@ -170,7 +168,7 @@ export default function CandidateProfile() {
 
   return (
     <div className="min-h-screen bg-[var(--color-bg)] px-8 py-10 transition-colors">
-      {/* 👤 Header */}
+      {/* Header */}
       <header className="mb-10 text-center">
         <h1 className="heading-lg text-[var(--color-text)]">👤 My Profile</h1>
         <p className="body-base mt-1 text-[var(--color-text-muted)]">
@@ -178,7 +176,7 @@ export default function CandidateProfile() {
         </p>
       </header>
 
-      {/* 🧩 Account Info */}
+      {/* Account Info */}
       <motion.section
         className="bg-[var(--color-surface)] rounded-[var(--radius-card)] shadow-[var(--shadow-soft)] border border-[var(--color-border)] p-6 mb-8"
         initial={{ opacity: 0, y: 10 }}
@@ -189,7 +187,7 @@ export default function CandidateProfile() {
           Account Information
         </h2>
         <div className="space-y-2 text-sm text-[var(--color-text-muted)]">
-          {/* ✅ Show Display Name */}
+          {/* Show Display Name */}
           <InfoRow label="Display Name" value={fullName || "—"} />
           <InfoRow label="Email" value={user?.email} />
           <InfoRow label="Role" value={user?.role} />
@@ -197,7 +195,7 @@ export default function CandidateProfile() {
           <InfoRow label="Proof Credits" value={credits ?? "—"} />
         </div>
 
-        {/* 🆕 Upload CV Section */}
+        {/* Upload CV Section */}
         <div className="mt-6 pt-4 border-t border-[var(--color-border)]">
           <h3 className="text-sm font-medium text-[var(--color-text)] mb-2 flex items-center gap-2">
             <FileText size={14} /> Resume / CV
@@ -207,8 +205,6 @@ export default function CandidateProfile() {
             <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
               <div className="flex flex-col text-sm">
                 <div className="flex items-center gap-3 flex-wrap">
-                  {/* 🌐 Open in new tab */}
-                  {/* 🗓️ Filename + updated date */}
                   <span className="text-[var(--color-text-muted)] text-xs mt-1 block">
                     📄 {extractFileName(resumeUrl)}{" "}
                     {resumeUpdatedAt && (
@@ -225,7 +221,7 @@ export default function CandidateProfile() {
                     Open CV
                   </a>
 
-                  {/* 💾 Download */}
+                  {/* Download */}
                   <button
                     onClick={handleDownloadCV}
                     className="text-[var(--color-employer-dark)] underline hover:text-[var(--color-employer)] transition text-sm"
@@ -265,7 +261,7 @@ export default function CandidateProfile() {
           </p>
         </div>
 
-        {/* 🔄 Reset Preferences */}
+        {/* Reset Preferences */}
         <div className="mt-6 pt-4 border-t border-[var(--color-border)]">
           <button
             onClick={handleResetPreferences}
@@ -281,7 +277,7 @@ export default function CandidateProfile() {
         </div>
       </motion.section>
 
-      {/* 📊 Performance Summary */}
+      {/* Performance Summary */}
       <motion.section
         className="bg-[var(--color-surface)] rounded-[var(--radius-card)] shadow-[var(--shadow-soft)] border border-[var(--color-border)] p-6 mb-8"
         initial={{ opacity: 0, y: 10 }}
@@ -298,7 +294,7 @@ export default function CandidateProfile() {
         </div>
       </motion.section>
 
-      {/* 🪙 Credit History */}
+      {/* Credit History */}
       <motion.section
         className="bg-[var(--color-surface)] rounded-[var(--radius-card)] shadow-[var(--shadow-soft)] border border-[var(--color-border)] p-6 mb-8"
         initial={{ opacity: 0, y: 10 }}
@@ -331,7 +327,7 @@ export default function CandidateProfile() {
         )}
       </motion.section>
 
-      {/* 💳 Proof Cards */}
+      {/* Proof Cards */}
       <motion.section
         className="mt-8 bg-[var(--color-surface)] rounded-[var(--radius-card)] shadow-[var(--shadow-soft)] border border-[var(--color-border)] p-6"
         initial={{ opacity: 0, y: 10 }}
@@ -344,7 +340,7 @@ export default function CandidateProfile() {
         <ProofCardsGrid />
       </motion.section>
 
-      {/* 🌍 Public Profile */}
+      {/* Public Profile */}
       <motion.section
         className="mt-8 bg-[var(--color-surface)] rounded-[var(--radius-card)] shadow-[var(--shadow-soft)] border border-[var(--color-border)] p-6 text-center"
         initial={{ opacity: 0, y: 10 }}
@@ -396,7 +392,6 @@ function InfoRow({
   label: string;
   value: string | number | null | undefined;
 }) {
-  // 🧠 Format helper
   const formatValue = (val: string | number | null | undefined) => {
     if (val == null || val === "") return "—";
 

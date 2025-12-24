@@ -1,4 +1,3 @@
-// src/components/jobs/JobDetailSection.tsx
 import { useState, useEffect } from "react";
 import type { EmployerJob } from "@/types";
 
@@ -44,7 +43,7 @@ export default function JobDetailsSection({
   ];
   const workModes = ["Remote", "Hybrid", "On-site"];
 
-  // 🔁 If department is manually typed, sync it back
+  // If department is manually typed, sync it back
   useEffect(() => {
     if (values.department !== "Other" && values.department !== customDept) {
       setCustomDept("");
@@ -93,7 +92,7 @@ export default function JobDetailsSection({
             ))}
           </select>
 
-          {/* 🧱 Custom department field (only visible if "Other" is selected) */}
+          {/* Custom department field (only visible if "Other" is selected) */}
           {values.department === "Other" && (
             <input
               type="text"

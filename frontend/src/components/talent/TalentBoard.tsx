@@ -25,7 +25,7 @@ const STAGES: { key: HiringStage; label: string; emoji: string }[] = [
   { key: "rejected", label: "Rejected", emoji: "❌" },
 ];
 
-// 🧭 Custom collision: prioritize columns
+// Custom collision: prioritize columns
 const collisionDetectionStrategy: CollisionDetection = (args) => {
   const intersections = rectIntersection(args);
   if (intersections.length > 0) {
@@ -52,7 +52,7 @@ export default function TalentBoard({
   const [canScrollRight, setCanScrollRight] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  // 🧮 Grouped columns (memoized)
+  // Grouped columns (memoized)
   const grouped = useMemo(() => {
     const groups: Record<HiringStage, EmployerSubmission[]> = {
       new: [],

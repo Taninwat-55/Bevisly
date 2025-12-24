@@ -1,5 +1,5 @@
 /*
-  🚀 BEVISLY AGGREGATOR (Diverse Roles + Limit 5)
+  BEVISLY AGGREGATOR (Diverse Roles + Limit 5)
   Run: node backfill.js
 */
 
@@ -11,7 +11,7 @@ dotenv.config();
 
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
 
-// 🌍 CONFIG: Diverse Roles & Industries
+// CONFIG: Diverse Roles & Industries
 const JSEARCH_QUERIES = [
     // 🇩🇰 DENMARK FOCUS
     "Frontend Developer in Denmark",
@@ -77,7 +77,7 @@ async function runAggregator() {
             }
 
             const json = await res.json();
-            // ✂️ LIMIT TO 5 RESULTS HERE
+            // LIMIT TO 5 RESULTS
             const rawJobs = (json.data || []).slice(0, 5);
 
             if (rawJobs.length === 0) {
@@ -105,8 +105,7 @@ async function runAggregator() {
                         apply_url: url,
                         job_type: "Full-time",
                         is_public: true,
-                        // Add a tag so we know it's a backfilled job
-                        department: query.split(" ")[0] // simple category guess
+                        department: query.split(" ")[0]
                     });
                 }
             }
