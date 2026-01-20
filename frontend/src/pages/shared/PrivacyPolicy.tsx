@@ -5,7 +5,7 @@ export default function PrivacyPolicy() {
     <div className="min-h-screen bg-[var(--color-bg)] text-[var(--color-text)] px-6 py-12 transition-colors">
       <div className="max-w-3xl mx-auto">
         <BackButton to="/" />
-        
+
         <article className="mt-8 prose dark:prose-invert max-w-none">
           <h1 className="heading-lg mb-2">Privacy Policy</h1>
           <p className="text-[var(--color-text-muted)] mb-8 text-sm">
@@ -16,8 +16,8 @@ export default function PrivacyPolicy() {
             <div>
               <h2 className="text-lg font-semibold text-[var(--color-text)] mb-2">1. Introduction</h2>
               <p>
-                Welcome to Bevisly ("we," "our," or "us"). We respect your privacy and are committed to protecting 
-                your personal data. This privacy policy will inform you as to how we look after your personal data 
+                Welcome to Bevisly ("we," "our," or "us"). We respect your privacy and are committed to protecting
+                your personal data. This privacy policy will inform you as to how we look after your personal data
                 when you visit our website and tell you about your privacy rights and how the law protects you.
               </p>
             </div>
@@ -48,7 +48,7 @@ export default function PrivacyPolicy() {
             <div>
               <h2 className="text-lg font-semibold text-[var(--color-text)] mb-2">4. Data Security</h2>
               <p>
-                We have put in place appropriate security measures to prevent your personal data from being accidentally lost, 
+                We have put in place appropriate security measures to prevent your personal data from being accidentally lost,
                 used or accessed in an unauthorized way, altered or disclosed. Your data is stored securely on Supabase servers located in the EU/US (depending on configuration).
               </p>
             </div>
@@ -66,11 +66,14 @@ export default function PrivacyPolicy() {
               </ul>
             </div>
 
-            {/* TODO: Update the email address when we have a real email address */}
             <div>
               <h2 className="text-lg font-semibold text-[var(--color-text)] mb-2">6. Contact Us</h2>
               <p>
-                If you have any questions about this privacy policy or our privacy practices, please contact us via the Feedback button on the site.
+                If you have any questions about this privacy policy or our privacy practices, please contact us at{" "}
+                <a href="mailto:support@bevisly.com" className="text-[var(--color-candidate)] underline hover:no-underline">
+                  support@bevisly.com
+                </a>{" "}
+                or use the Feedback button on the site.
               </p>
             </div>
           </section>

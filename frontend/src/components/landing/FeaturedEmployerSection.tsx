@@ -8,7 +8,8 @@ export default function FeaturedEmployersSection() {
   const [jobs, setJobs] = useState<FeaturedJob[]>([]);
 
   useEffect(() => {
-    getFeaturedJobs().then(setJobs).catch(console.error);
+    // Silent catch is acceptable - empty state UI handles the fallback gracefully
+    getFeaturedJobs().then(setJobs).catch(() => { });
   }, []);
 
   // Empty state — pre-launch fallback

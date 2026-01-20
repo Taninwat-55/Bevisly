@@ -13,13 +13,16 @@ export default function EmployerEditJob() {
     EmployerJob & { proof_tasks: ProofTask[] }
   > | null>(null);
 
- useEffect(() => {
+  useEffect(() => {
     if (id) {
       getJobWithTasks(id)
         .then((data) => {
           setJob(data as unknown as EmployerJob & { proof_tasks: ProofTask[] });
         })
-        .catch(console.error);
+        .catch((err) => {
+          console.error(err);
+          toast.error("Failed to load job details");
+        });
     }
   }, [id]);
 
@@ -52,7 +55,7 @@ export default function EmployerEditJob() {
     try {
       await deleteJob(id);
       toast.success("Job deleted successfully");
-      navigate("/employer/jobs"); 
+      navigate("/employer/jobs");
     } catch (err) {
       console.error(err);
       toast.error("Failed to delete job");
@@ -65,9 +68,9 @@ export default function EmployerEditJob() {
         <h1 className="heading-lg text-[var(--color-employer-dark)]">
           ✏️ Edit Job
         </h1>
-        
+
         {/* Delete Button */}
-        <button 
+        <button
           onClick={handleDelete}
           className="flex items-center gap-2 px-4 py-2 text-sm text-red-600 bg-red-50 border border-red-100 rounded-lg hover:bg-red-100 transition"
         >
