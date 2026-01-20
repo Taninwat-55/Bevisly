@@ -3,6 +3,21 @@ import { supabase } from "../lib/supabaseClient";
 import { AuthContext, type SessionUser } from "./AuthContext";
 import toast from "react-hot-toast";
 
+// Helper function to fetch role from the profiles table (database is source of truth)
+async function fetchRoleFromDB(userId: string): Promise<SessionUser["role"]> {
+  const { data, error } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", userId)
+    .single();
+
+  if (error) {
+    console.warn("Failed to fetch role from profiles:", error.message);
+    return "candidate"; // fallback
+  }
+  return (data?.role as SessionUser["role"]) ?? "candidate";
+}
+
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<SessionUser | null>(null);
   const [loading, setLoading] = useState(true);
@@ -46,13 +61,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setUser(JSON.parse(cachedUser));
     }
 
-    // Always confirm current Supabase session
-    supabase.auth.getSession().then(({ data }) => {
+    // Always confirm current Supabase session and fetch role from DB
+    supabase.auth.getSession().then(async ({ data }) => {
       const sessionUser = data.session?.user;
       if (sessionUser) {
-        const role =
-          (sessionUser.user_metadata.role as SessionUser["role"]) ??
-          "candidate";
+        const role = await fetchRoleFromDB(sessionUser.id);
         const newUser = {
           id: sessionUser.id,
           email: sessionUser.email!,
@@ -67,9 +80,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setLoading(false);
     });
 
-    // Auth change listener
+    // Auth change listener - fetch role from database
     const { data: listener } = supabase.auth.onAuthStateChange(
-      (event, session) => {
+      async (event, session) => {
         if (event === "PASSWORD_RECOVERY") {
           window.location.href = "/auth/reset";
           return;
@@ -77,9 +90,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
         const sessionUser = session?.user;
         if (sessionUser) {
-          const role =
-            (sessionUser.user_metadata.role as SessionUser["role"]) ??
-            "candidate";
+          const role = await fetchRoleFromDB(sessionUser.id);
           const newUser = {
             id: sessionUser.id,
             email: sessionUser.email!,

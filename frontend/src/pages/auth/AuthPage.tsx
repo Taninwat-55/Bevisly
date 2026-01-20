@@ -112,8 +112,14 @@ export default function AuthPage() {
       const { data: sessionData } = await supabase.auth.getSession();
       const sessionUser = sessionData.session?.user;
       if (sessionUser) {
-        const role =
-          (sessionUser.user_metadata.role as "candidate" | "employer" | "admin") ?? "candidate";
+        // Fetch role from database (source of truth)
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("role")
+          .eq("id", sessionUser.id)
+          .single();
+
+        const role = (profile?.role as "candidate" | "employer" | "admin") ?? "candidate";
 
         localStorage.setItem(
           "bevisly_user",
@@ -214,8 +220,8 @@ export default function AuthPage() {
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 className={`w-full border ${confirmPassword && password !== confirmPassword
-                    ? "border-red-400"
-                    : "border-[var(--color-border)]"
+                  ? "border-red-400"
+                  : "border-[var(--color-border)]"
                   } rounded-button px-3 py-2 pr-10 text-sm focus:ring-2 focus:ring-candidate-light`}
               />
               <button
