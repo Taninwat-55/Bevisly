@@ -152,7 +152,24 @@ export async function getAdminStats(): Promise<AdminStats> {
   };
 }
 
+// Allowed tables for admin data viewer (security whitelist)
+const ALLOWED_TABLES = [
+  'profiles',
+  'jobs', 
+  'submissions',
+  'feedback',
+  'proof_tasks',
+  'saved_jobs',
+  'credit_transactions',
+  'feedback_messages',
+];
+
 export async function getTableData(table: string, limit = 25, offset = 0) {
+  // Security: Validate table name against whitelist
+  if (!ALLOWED_TABLES.includes(table)) {
+    throw new Error(`Access denied: Table '${table}' is not in the allowed list`);
+  }
+  
   const sb = supabase as any; 
   const { data, error } = await sb
     .from(table)
@@ -165,6 +182,11 @@ export async function getTableData(table: string, limit = 25, offset = 0) {
 
 // Fetch column schema (name + type) safely
 export async function getTableSchema(table: string) {
+  // Security: Validate table name against whitelist
+  if (!ALLOWED_TABLES.includes(table)) {
+    throw new Error(`Access denied: Table '${table}' is not in the allowed list`);
+  }
+  
   const sb = supabase as any;
   
   const { data, error } = await sb

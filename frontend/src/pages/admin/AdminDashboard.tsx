@@ -36,7 +36,10 @@ export default function AdminDashboard() {
   useEffect(() => {
     getAdminStats()
       .then(setStats)
-      .catch((err) => console.error("Stats load error:", err));
+      .catch((err) => {
+        console.error("Stats load error:", err);
+        toast.error("Failed to load dashboard stats");
+      });
   }, []);
 
   const handleOverride = (role: "candidate" | "employer" | "admin") => {
