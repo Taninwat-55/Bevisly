@@ -16,7 +16,7 @@ export default function RequestResetPage() {
     try {
       setLoading(true);
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/auth/reset`,
+        redirectTo: 'https://bevisly.com/auth/reset',
       });
       if (error) throw error;
       notify.success("📧 Reset link sent! Check your inbox.");
