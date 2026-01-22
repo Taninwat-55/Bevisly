@@ -122,7 +122,42 @@ export async function getEmployerJobSummary(
     .eq("employer_id", employer_id);
 
   if (error) throw error;
+  if (error) throw error;
   return data;
+}
+
+/* ──────────────────────────────────────────────
+ * Fetch all jobs for a company (multi-tenant)
+ * ────────────────────────────────────────────── */
+export async function getCompanyJobs(
+  company_id: string
+): Promise<(EmployerJob & { proof_tasks?: ProofTask[] })[]> {
+  const { data, error } = await supabase
+    .from("jobs")
+    .select(`
+      id,
+      title,
+      description,
+      company,
+      location,
+      paid,
+      status,
+      company_id,
+      payment_amount,
+      payment_currency,
+      show_salary_range,
+      salary_min,
+      salary_max,
+      pay_period,
+      created_at,
+      featured,
+      proof_tasks ( id, title, expected_time, ai_tools_allowed )
+    `)
+    .eq("company_id", company_id)
+    .order("created_at", { ascending: false });
+
+  if (error) throw error;
+  return data as (EmployerJob & { proof_tasks?: ProofTask[] })[];
 }
 
 /* ──────────────────────────────────────────────
@@ -168,6 +203,7 @@ export async function createJobWithTasks(
         salary_max: values.salary_max ?? null,
         pay_period: values.pay_period ?? "monthly",
         employer_id: user.id,
+        company_id: values.company_id ?? null, // Multi-tenant
         expires_at: values.expires_at ?? null,
         is_public: true,
         job_type: values.job_type ?? null,

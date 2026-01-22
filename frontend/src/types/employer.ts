@@ -22,6 +22,7 @@ export type EmployerJob = {
   featured?: boolean | null;
   status?: string | null; 
   expires_at?: string | null;
+  company_id?: string | null; // Multi-tenant: Links to companies table
 };
 
 /**
@@ -31,6 +32,7 @@ export type EmployerJob = {
 export type EmployerJobSummary = {
   job_id: string | null;
   employer_id: string | null;
+  company_id: string | null; // Multi-tenant
   title: string | null;
   submissions_count: number | null;
   avg_score: number | null;
