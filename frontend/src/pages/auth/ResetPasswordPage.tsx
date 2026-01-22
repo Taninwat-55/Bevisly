@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../../lib/supabaseClient";
-import { notify } from "@/components/ui/Notify";
+import { notify } from "@/components/common/Notify";
 import { Eye, EyeOff } from "lucide-react";
 
 export default function ResetPasswordPage() {

@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/lib/supabaseClient";
 import { Loader2, Trophy } from "lucide-react";
-import BackButton from "@/components/ui/BackButton";
+import BackButton from "@/components/common/BackButton";
 import { motion } from "framer-motion";
 
 type ProfileLite = {

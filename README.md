@@ -1,323 +1,228 @@
-# 🧩 Bevisly — Proof-Based Hiring Platform (MVP)
+<p align="center">
+  <img src="frontend/public/bevisly-logo.svg" alt="Bevisly Logo" width="120" height="120" />
+</p>
 
-Bevisly is a proof-of-skill platform that turns real work into verified experience — creating a fair bridge between learning and employment.  
-Through short, real-world proof tasks, candidates build credibility while employers hire based on verified ability, not promises.
+<h1 align="center">Bevisly</h1>
 
----
+<p align="center">
+  <strong>Proof-Based Hiring Platform</strong><br/>
+  Transforming real work into verified experience
+</p>
 
-## 🚀 Overview
+<p align="center">
+  <a href="#features">Features</a> •
+  <a href="#tech-stack">Tech Stack</a> •
+  <a href="#getting-started">Getting Started</a> •
+  <a href="#architecture">Architecture</a> •
+  <a href="#contributing">Contributing</a>
+</p>
 
-**Bevisly MVP** is the first working prototype of the platform, designed to demonstrate the core “proof-of-skills” workflow for three user roles:
-
-| Role          | Description                                                          |
-| ------------- | -------------------------------------------------------------------- |
-| **Candidate** | Completes proof tasks and receives feedback from employers.          |
-| **Employer**  | Posts jobs, defines proof tasks, and reviews candidate submissions.  |
-| **Admin**     | Oversees the system, manages user roles, and monitors platform data. |
-
----
-
-## 🧭 Tech Stack
-
-| Layer               | Technology                                                                          |
-| ------------------- | ----------------------------------------------------------------------------------- |
-| **Frontend**        | React + Vite + TypeScript + Tailwind v4                                             |
-| **Backend**         | Supabase (PostgreSQL + Auth + Row Level Security)                                   |
-| **UI Library**      | lucide-react (icons) + react-hot-toast (notifications) + framer-motion (animations) |
-| **State / Routing** | React Router v6 + Context API                                                       |
-| **Auth**            | Supabase Auth (email + password)                                                    |
+<p align="center">
+  <img src="https://img.shields.io/badge/React-18.x-61DAFB?logo=react" alt="React" />
+  <img src="https://img.shields.io/badge/TypeScript-5.x-3178C6?logo=typescript" alt="TypeScript" />
+  <img src="https://img.shields.io/badge/Supabase-PostgreSQL-3FCF8E?logo=supabase" alt="Supabase" />
+  <img src="https://img.shields.io/badge/Vite-5.x-646CFF?logo=vite" alt="Vite" />
+</p>
 
 ---
 
-## 🧱 Project Structure
+## Overview
 
-```
-bevis-mvp/
-│
-├── frontend/
-│ ├── src/
-│ │ ├── components/ # Shared UI (Navbar, Sidebar, etc.)
-│ │ │ ├── jobs/
-│ │ │ │ ├── JobDetailsSection.tsx
-│ │ │ │ ├── JobInfosSection.tsx
-│ │ │ │ ├── ProofTasksSection.tsx
-│ │ │ │ ├── SubmitSection.tsx
-│ │ │ ├── landing/
-│ │ │ │ ├── FeaturedEmployerSection.tsx
-│ │ │ │ ├── FinalCTASection.tsx
-│ │ │ │ ├── HeroSection.tsx
-│ │ │ │ ├── HowItWorksSection.tsx
-│ │ │ │ ├── JobListingsSection.tsx
-│ │ │ │ ├── LandingFooter.tsx
-│ │ │ │ ├── LandingNavbar.tsx
-│ │ │ │ ├── ProblemSection.tsx
-│ │ │ │ ├── WhyProofSection.tsx
-│ │ │ ├── proofs/
-│ │ │ │ ├── ProofCard.tsx
-│ │ │ │ ├── ProofCardsGrid.tsx
-│ │ │ │ ├── ProofDetailModal.tsx
-│ │ │ ├── talent/
-│ │ │ │ ├── CandidateCard.tsx
-│ │ │ │ ├── index.ts
-│ │ │ │ ├── NotesModal.tsx
-│ │ │ │ ├── StageColumn.tsx
-│ │ │ │ ├── TalentBoard.tsx
-│ │ │ ├── ui/
-│ │ │ │ ├── BackButton.tsx
-│ │ │ │ ├── Breadcrumb.tsx
-│ │ │ │ ├── FeedbackButton.tsx
-│ │ │ │ ├── FilterChips.tsx
-│ │ │ │ ├── MultiSelectFilter.tsx
-│ │ │ │ ├── Notify.tsx
-│ │ │ │ ├── ScrollToTop.tsx
-│ │ │ │ ├── Toast.tsx
-│ │ │ │ ├── UserMenu.tsx
-│ │ │ ├── Navbar.tsx
-│ │ │ ├── Sidebar.tsx
-│ │ ├── context/ # AuthContext + AuthProvider
-│ │ │ ├── AuthContext.tsx
-│ │ │ ├── AuthProvider.tsx
-│ │ ├── hooks/ # useAuth, useJobs, useProofs
-│ │ │ ├── useAuth.ts
-│ │ │ ├── useCandidateStats.ts
-│ │ │ ├── useJobs.ts
-│ │ │ ├── useProofs.ts
-│ │ │ ├── useTheme.ts
-│ │ ├── layout/
-│ │ │ ├── AdminLayout.tsx
-│ │ │ ├── CandidateLayout.tsx
-│ │ │ ├── EmployerLayout.tsx
-│ │ │ ├── HomeLayout.tsx
-│ │ │ ├── PublicLayout.tsx
-│ │ ├── lib/ # Supabase API functions
-│ │ │ ├── api/
-│ │ │ │ ├── admin.ts
-│ │ │ │ ├── employer.ts
-│ │ │ │ ├── feedback.ts
-│ │ │ │ ├── index.ts
-│ │ │ │ ├── jobs.ts
-│ │ │ │ ├── mutations.ts
-│ │ │ │ ├── pools.ts
-│ │ │ │ ├── submissions.ts
-│ │ │ ├── Database.ts
-│ │ │ ├── error.ts
-│ │ │ ├── motion.ts
-│ │ │ ├── SupabaseClient.ts
-│ │ ├── pages/
-│ │ │ ├── admin/ # Admin Dashboard
-│ │ │ │ ├── AdminDashboard.tsx
-│ │ │ │ ├── AdminDataViewer.tsx
-│ │ │ │ ├── AdminFeedback.tsx
-│ │ │ │ ├── AdminFeedbackMessages.tsx
-│ │ │ │ ├── AdminJobs.tsx
-│ │ │ │ ├── AdminUsers.tsx
-│ │ │ ├── auth/ # Login / Signup
-│ │ │ │ ├── AuthPage.tsx
-│ │ │ │ ├── RequestResetPage.tsx
-│ │ │ │ ├── ResetPasswordPage.tsx
-│ │ │ ├── candidate/ # Candidate pages (C1–C6)
-│ │ │ │ ├── CandidateDashboard.tsx
-│ │ │ │ ├── CandidateFeedbackView.tsx
-│ │ │ │ ├── CandidateOverview.tsx
-│ │ │ │ ├── CandidateProfile.tsx
-│ │ │ │ ├── CandidateProofWorkspace.tsx
-│ │ │ ├── employer/ # Employer pages (C1–C6)
-│ │ │ │ ├── EmployerDashboard.tsx
-│ │ │ │ ├── EmployerEditJob.tsx
-│ │ │ │ ├── EmployerFeedbackSuccess.tsx
-│ │ │ │ ├── EmployerOverview.tsx
-│ │ │ │ ├── EmployerPostJob.tsx
-│ │ │ │ ├── EmployerReviewProof.tsx
-│ │ │ │ ├── EmployerSubmissions.tsx
-│ │ │ │ ├── EmployerTalentManager.tsx
-│ │ │ │ ├── EmployerTalentPool.tsx
-│ │ │ ├── landing/
-│ │ │ │ ├── JobDetailPage.tsx
-│ │ │ │ ├── JobListingPage.tsx
-│ │ │ ├── landing/
-│ │ │ │ ├── LandingPage.tsx
-│ │ │ ├── LearnMore/
-│ │ │ │ ├── CandidateGuide.tsx
-│ │ │ │ ├── EmployerGuide.tsx
-│ │ │ │ ├── InfoSections.tsx
-│ │ │ │ ├── LearnMorePage.tsx
-│ │ │ ├── shared/
-│ │ │ │ ├── AboutPage.tsx.
-│ │ │ │ ├── UserSettings.tsx.
-│ │ │ ├── PublicJCandidateProfilePage.tsx
-│ │ │ ├── PublicLeaderboard.tsx
-│ │ └── routes/ # Protected routes + layout wrappers
-│ │ │ ├── ProtectedRoute.tsx
-│ │ │ ├── Routes.tsx
-│ │ └── types/
-│ │ │ ├── admin.ts
-│ │ │ ├── candidate.ts
-│ │ │ ├── employer.ts
-│ │ │ ├── index.ts
-│ │ │ ├── job.ts
-│ │ │ ├── shared.ts
-│ └── index.css, main.tsx # Tailwind theme + root app (App.tsx)
-│
-└── backend/supabase/
-│ ├── sql/
-│ │ ├── 01_init_schema.sql
-│ │ ├── 02_add_feedback_table.sql
-│ │ ├── 03_add_submit_proof_rpc.sql
-│ ├── schema.sql # Database schema, RLS policies, RPCs
-└── config/ # Supabase CLI metadata
-└── .gitignore
-```
+**Bevisly** is a proof-of-skill platform that creates a fair bridge between learning and employment. Through short, real-world proof tasks, candidates build credibility while employers hire based on verified ability — not just résumés.
+
+### The Problem We Solve
+
+| Traditional Hiring | Bevisly Approach |
+|-------------------|------------------|
+| Résumés & keywords | Verified skill demonstrations |
+| Interview anxiety | Async proof submissions |
+| Bias-prone screening | Objective work samples |
+| Time-consuming processes | Streamlined evaluation |
 
 ---
 
-## 🎨 Theming & Roles
+## Features
 
-| Role      | Primary Color                | Accent         |
-| --------- | ---------------------------- | -------------- |
-| Candidate | `--color-candidate: #6C5CE7` | Purple         |
-| Employer  | `--color-employer: #4A90E2`  | Blue           |
-| Admin     | Neutral Gray                 | System default |
+### For Candidates 💜
+- **Dashboard** — Track completed proofs, ratings, and credits
+- **Proof Workspace** — Submit work samples with reflections
+- **Public Profile** — SEO-friendly portfolio at `bevisly.com/@username`
+- **LinkedIn Sharing** — Share verified achievements with your network
+- **Leaderboard** — Compete and showcase your proof credits
 
-All Tailwind tokens are defined in `index.css` under the `@theme` section.  
-Components use semantic color variables for consistent theming.
+### For Employers 💙
+- **Talent Board** — Kanban-style candidate pipeline management
+- **Proof Tasks** — Define real-world skill assessments
+- **Scorecard Reviews** — Structured feedback with category ratings
+- **Talent Pool** — Browse verified candidates with proven skills
+- **Side-by-Side Review** — Compare requirements vs submissions
 
----
-
-## 🧩 Current MVP Scope (✅ Completed)
-
-| Code                        | Feature                                                                                         | Description                                                |
-| --------------------------- | ----------------------------------------------------------------------------------------------- | ---------------------------------------------------------- |
-| **C1**                      | Dashboard                                                                                       | Candidate overview (proofs completed, average score, etc.) |
-| **C2**                      | Job Listings                                                                                    | Browse available proof tasks/jobs                          |
-| **C3**                      | Job Detail                                                                                      | See job and associated proof task details                  |
-| **C4**                      | Proof Workspace                                                                                 | Submit proof via GitHub link + reflection                  |
-| **C5**                      | Feedback View                                                                                   | See employer feedback, ratings, and comments               |
-| **C6**                      | Profile                                                                                         | Candidate’s personal info + account overview               |
-| **E1**                      | Employer Flow + Dashboard                                                                       | Employer overview (dashboard + home)                       |
-| **E2**                      | Job Post + Management                                                                           | Post Proof-based job roles and manage open positions.      |
-| **E3**                      | Review Submissions                                                                              | Evaluate candidate proofs, give structured feedback.       |
-| **E4**                      | Talent Pool + Manager                                                                           | Browse verified candidates, manage hiring pipeline.        |
-| **E5**                      | Employer Feedback Flow                                                                          | Submit hiring feedback, final confirmation success page.   |
-| **Admin Dashboard**         | System overview (stats, quick access, and admin actions)                                        |
-| **Admin Users**             | View, promote, and manage user roles                                                            |
-| **Admin Jobs**              | Browse all jobs with employer context                                                           |
-| **Admin Feedback Log**      | View all candidate–employer proof feedback and ratings                                          |
-| **Admin Feedback Messages** | View user-submitted platform feedback (via floating feedback button) with filters and summaries |
-| **Admin Data Viewer**       | Inspect Supabase data (for dev/admin insight)                                                   |
-| **Explore Menu**            | New dropdown in navbar with Learn More and About pages                                          |
-| **Learn More Page**         | Interactive guide for candidates and employers explaining how Bevisly works                     |
-| **About Page**              | Mission, vision, and platform purpose (non-blockchain MVP version)                              |
-| **Feedback Button**         | Universal floating feedback button for all users (bug reports, suggestions, etc.)               |
-| **Feedback Table (DB)**     | New feedback_messages table with RLS + linked to profiles                                       |
-| **Public Layout**           | Unified layout for /jobs, /leaderboard, /learn-more, /about, etc.                               |
-| **Landing Page**            | Modular marketing layout with hero video, CTA, and proof concept                                |
-| **Auth System**             | Full Supabase login + signup flow, role-based redirect                                          |
-| **Navbar & Sidebar**        | Responsive navigation; role-aware menus for candidate/employer/admin                            |
-| **Toast**                   | Unified `BevislyToaster` + `notify` helper                                                      |
-| **Theme + Dark Mode**       | Consistent color tokens, Tailwind v4 design system                                              |
-| **Type Safety**.            | Updated Supabase types, admin/candidate/employer shared TypeScript interfaces                   |
+### For Admins 🔧
+- **User Management** — Role assignments and oversight
+- **Platform Analytics** — System-wide metrics and insights
+- **Data Viewer** — Direct database inspection tools
 
 ---
 
-## Supabase Schema Highlights
+## Tech Stack
 
-### 🗃️ Core Tables
-
-- `users` → stores role (`candidate`, `employer`, `admin`)
-- `jobs` → employer job listings
-- `proof_tasks` → individual proof requirements
-- `submissions` → candidate submissions + reflections
-- `feedback` → employer feedback, stars, comments
-
-### 🔒 Row Level Security
-
-- Candidates: can only view and submit their own proofs
-- Employers: can only view submissions for their own jobs
-- Admins: unrestricted
-
-### RPC Functions
-
-| Function                   | Purpose                                  |
-| -------------------------- | ---------------------------------------- |
-| `is_admin(uid)`            | Checks if user is admin                  |
-| `promote_to_admin()`       | Promotes logged-in user                  |
-| `set_user_role(uid, role)` | Changes user role (future admin feature) |
-| `handle_new_user()`        | Trigger to auto-create user record       |
+| Layer | Technology |
+|-------|------------|
+| **Frontend** | React 18 + TypeScript + Vite |
+| **Styling** | CSS Variables + Glassmorphism Design |
+| **State** | React Context + React Router v6 |
+| **Backend** | Supabase (PostgreSQL + Auth + RLS) |
+| **UI/UX** | Framer Motion + Lucide Icons |
+| **Drag & Drop** | @dnd-kit/core + @dnd-kit/sortable |
 
 ---
 
-## 🔐 Authentication Flow
+## Getting Started
 
-- **Login / Sign-Up** handled via `AuthPage.tsx`
-- Roles stored in Supabase `user_metadata`
-- Role-based redirect:
-  - Candidate → `/`
-  - Employer → `/employer`
-  - Admin → `/admin`
-- Session caching via localStorage (`bevisly_user`)
+### Prerequisites
 
----
+- Node.js 18+
+- npm or yarn
+- Supabase account
 
-## Role Override System (Admin-only)
+### Installation
 
-Admins can “View as Candidate” or “View as Employer” for testing.  
-This uses a simple override in `AuthProvider`:
+```bash
+# Clone the repository
+git clone https://github.com/Taninwat-55/bevis-mvp.git
+cd bevis-mvp/frontend
 
-```ts
-const overrideRole = localStorage.getItem("overrideRole");
-const effectiveUser = user
-  ? { ...user, role: overrideRole || user.role }
-  : null;
-```
-
-This allows instant role switching without re-login or DB changes.
-
----
-
-## Branching Strategy
-
-| Branch       | Purpose                                        |
-| ------------ | ---------------------------------------------- |
-| **main**     | Protected — stable MVP build.                  |
-| **dev**      | Active development branch.                     |
-| **feature/** | New feature branches (merged into dev via PR). |
-| **fix/**     | Bugfix or maintenance branches.                |
-
-### Protected rules:
-
-- PR required before merging into main
-- No direct pushes to main
-- Linear history + code review required
-
----
-
-## Local Setup
-
-1. Clone & Install
-
-```
-git clone https://github.com/Taninwat-55/bevisly-mvp.git
-cd bevisly-mvp/frontend
+# Install dependencies
 npm install
+
+# Configure environment
+cp .env.example .env.local
 ```
 
-2. Configure Environment
+### Environment Variables
 
-**Create .env.local in /frontend**
-
-```
-VITE_SUPABASE_URL=https://YOUR_PROJECT.supabase.co
-VITE_SUPABASE_ANON_KEY=YOUR_SUPABASE_ANON_KEY
+```env
+VITE_SUPABASE_URL=https://your-project.supabase.co
+VITE_SUPABASE_ANON_KEY=your-anon-key
 ```
 
-3. Start Dev Server
+### Development
 
-```
+```bash
 npm run dev
 ```
 
+Visit `http://localhost:5173`
+
 ---
 
-**© 2025 Bevisly — Proof-Based Hiring Platform (MVP)**
+## Architecture
 
-_Built with 💜 by Taninwat “Ice” Kaewpankan_
+```
+frontend/src/
+├── components/
+│   ├── common/          # Shared UI components
+│   ├── employer/        # Employer-specific components
+│   ├── landing/         # Marketing page sections
+│   ├── proofs/          # Proof card & modal components
+│   ├── sharing/         # Social sharing components
+│   └── talent/          # Talent board & Kanban
+├── pages/
+│   ├── admin/           # Admin dashboard pages
+│   ├── auth/            # Authentication pages
+│   ├── candidate/       # Candidate portal pages
+│   ├── employer/        # Employer portal pages
+│   ├── jobs/            # Job listing & detail
+│   ├── public/          # Public profile & leaderboard
+│   └── shared/          # Cross-role pages
+├── lib/
+│   └── api/             # Supabase API functions
+├── hooks/               # Custom React hooks
+├── context/             # Auth context provider
+├── layout/              # Layout wrappers
+├── routes/              # React Router config
+└── types/               # TypeScript definitions
+```
+
+---
+
+## Database Schema
+
+### Core Tables
+
+| Table | Purpose |
+|-------|---------|
+| `profiles` | User data, roles, credits, username |
+| `jobs` | Employer job listings |
+| `proof_tasks` | Skill assessment definitions |
+| `submissions` | Candidate work samples |
+| `feedback` | Employer reviews & ratings |
+| `proof_cards` | Verified achievement records |
+
+### Row Level Security
+
+- **Candidates**: Access own submissions and public data
+- **Employers**: Access own jobs and related submissions
+- **Admins**: Full platform access
+
+---
+
+## Design System
+
+### Color Tokens
+
+| Role | Primary Color | Usage |
+|------|---------------|-------|
+| Candidate | `#6C5CE7` | Purple accents |
+| Employer | `#4A90E2` | Blue accents |
+| Neutral | System defaults | Shared UI |
+
+### UI Features
+
+- **Glassmorphism** — Modern frosted glass aesthetic
+- **Dark Mode** — Full theme support
+- **Responsive** — Mobile-first design
+- **Animations** — Smooth transitions via Framer Motion
+
+---
+
+## Scripts
+
+| Command | Description |
+|---------|-------------|
+| `npm run dev` | Start development server |
+| `npm run build` | Build for production |
+| `npm run preview` | Preview production build |
+| `npm run lint` | Run ESLint |
+| `npm run typecheck` | Run TypeScript checks |
+
+---
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit changes (`git commit -m 'Add amazing feature'`)
+4. Push to branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+### Branch Strategy
+
+| Branch | Purpose |
+|--------|---------|
+| `main` | Production-ready code |
+| `dev` | Active development |
+| `feature/*` | New features |
+| `fix/*` | Bug fixes |
+
+---
+
+## License
+
+© 2025 Bevisly — All rights reserved.
+
+---
+
+<p align="center">
+  Built with 💜 by <a href="https://github.com/Taninwat-55">Taninwat "Ice" Kaewpankan</a>
+</p>

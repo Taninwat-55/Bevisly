@@ -3,7 +3,7 @@ import { useNavigate, Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useTheme } from "@/hooks/useTheme";
 import { Sun, Moon, Menu, X, Home } from "lucide-react";
-import UserMenu from "@/components/ui/UserMenu";
+import UserMenu from "@/components/common/UserMenu";
 
 export default function Navbar() {
   const navigate = useNavigate();

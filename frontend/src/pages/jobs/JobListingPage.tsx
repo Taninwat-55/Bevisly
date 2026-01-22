@@ -27,9 +27,9 @@ import type { SessionUser } from "@/context/AuthContext";
 import type { Job } from "@/types/job";
 import type { ProofTask } from "@/types";
 
-import BackButton from "@/components/ui/BackButton";
-import MultiSelectFilter from "@/components/ui/MultiSelectFilter";
-import FilterChips from "@/components/ui/FilterChips";
+import BackButton from "@/components/common/BackButton";
+import MultiSelectFilter from "@/components/common/MultiSelectFilter";
+import FilterChips from "@/components/common/FilterChips";
 
 /* ─── Helpers ─────────────────────────────── */
 type JobListItem = Job & { proof_tasks?: ProofTask[] };

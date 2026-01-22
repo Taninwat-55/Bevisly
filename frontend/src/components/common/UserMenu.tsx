@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useTheme } from "@/hooks/useTheme";
 import toast from "react-hot-toast";
-import { notify } from "@/components/ui/Notify";
+import { notify } from "@/components/common/Notify";
 import {
   Bell,
   LogOut,

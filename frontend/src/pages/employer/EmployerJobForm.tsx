@@ -4,10 +4,10 @@ import toast from "react-hot-toast";
 import { createJobWithTasks } from "@/lib/api/jobs";
 import type { EmployerJob, ProofTask } from "@/types";
 
-import JobInfoSection from "@/components/employer_jobs/JobInfoSection";
-import JobDetailsSection from "@/components/employer_jobs/JobDetailsSection";
-import ProofTasksSection from "@/components/employer_jobs/ProofTasksSection";
-import SubmitSection from "@/components/employer_jobs/SubmitSection";
+import JobInfoSection from "@/components/employer/JobInfoSection";
+import JobDetailsSection from "@/components/employer/JobDetailsSection";
+import ProofTasksSection from "@/components/employer/ProofTasksSection";
+import SubmitSection from "@/components/employer/SubmitSection";
 import type { EmployerJobFormValues } from "@/types/employer";
 import { FileText, ChevronDown } from "lucide-react";
 import { JOB_TEMPLATES } from "@/data/jobTemplates";

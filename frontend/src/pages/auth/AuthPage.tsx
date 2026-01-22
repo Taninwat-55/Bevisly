@@ -2,9 +2,9 @@ import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../../lib/supabaseClient";
 import { useAuth } from "../../hooks/useAuth";
-import { notify } from "@/components/ui/Notify";
+import { notify } from "@/components/common/Notify";
 import { Eye, EyeOff } from "lucide-react";
-import BackButton from "@/components/ui/BackButton";
+import BackButton from "@/components/common/BackButton";
 import { motion } from "framer-motion";
 
 export default function AuthPage() {

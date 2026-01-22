@@ -2,7 +2,7 @@ import { useState } from "react";
 import { MessageCircle, X } from "lucide-react";
 import { supabase } from "@/lib/supabaseClient";
 import { useAuth } from "@/hooks/useAuth";
-import { notify } from "@/components/ui/Notify";
+import { notify } from "@/components/common/Notify";
 
 export default function FeedbackButton() {
   const { user } = useAuth();
