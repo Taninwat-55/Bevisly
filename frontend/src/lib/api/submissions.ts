@@ -31,7 +31,11 @@ export async function getCandidateSubmissions(
     .order("created_at", { ascending: false });
 
   if (error) throw error;
-  return data;
+  return data.map((s: any): CandidateSubmission => ({
+    ...s,
+    jobs: Array.isArray(s.jobs) ? s.jobs[0] : s.jobs,
+    proof_tasks: Array.isArray(s.proof_tasks) ? s.proof_tasks[0] : s.proof_tasks,
+  }));
 }
 
 /**
@@ -68,7 +72,10 @@ export async function getEmployerSubmissions(
     .order("created_at", { ascending: false });
 
   if (error) throw error;
-  return data;
+  return data.map((s: any): EmployerSubmission => ({
+    ...s,
+    proof_tasks: Array.isArray(s.proof_tasks) ? s.proof_tasks[0] : s.proof_tasks,
+  }));
 }
 
 export async function getEmployerSubmissionsWithFeedback(
@@ -108,7 +115,13 @@ export async function getEmployerSubmissionsWithFeedback(
     .order("created_at", { ascending: false });
 
   if (error) throw error;
-  return data as EmployerSubmission[];
+  if (error) throw error;
+  return data.map((s: any) => ({
+    ...s,
+    proof_tasks: Array.isArray(s.proof_tasks) ? s.proof_tasks[0] : s.proof_tasks,
+    jobs: Array.isArray(s.jobs) ? s.jobs[0] : s.jobs,
+    profiles: Array.isArray(s.profiles) ? s.profiles[0] : s.profiles,
+  })) as EmployerSubmission[];
 }
 
 /**
@@ -171,7 +184,12 @@ export async function getCandidateFeedback(user_id: string) {
     .order("created_at", { ascending: false });
 
   if (error) throw error;
-  return data as CandidateFeedbackEntry[];
+  if (error) throw error;
+  return data.map((s: any) => ({
+    ...s,
+    jobs: Array.isArray(s.jobs) ? s.jobs[0] : s.jobs,
+    proof_tasks: Array.isArray(s.proof_tasks) ? s.proof_tasks[0] : s.proof_tasks,
+  })) as CandidateFeedbackEntry[];
 }
 
 // 1. Update getSubmissionById to select new columns
@@ -199,7 +217,17 @@ export async function getSubmissionById(submission_id: string) {
     .single();
 
   if (error) throw error;
-  return data;
+  if (error) throw error;
+  
+  // Unwrap nested arrays
+  const formatted = {
+    ...data,
+    proof_tasks: Array.isArray(data.proof_tasks) ? data.proof_tasks[0] : data.proof_tasks,
+    jobs: Array.isArray(data.jobs) ? data.jobs[0] : data.jobs,
+    profiles: Array.isArray(data.profiles) ? data.profiles[0] : data.profiles,
+  };
+
+  return formatted as unknown as EmployerSubmission;
 }
 
 // 2. Update submitProof to save all fields
@@ -285,7 +313,12 @@ export async function getSubmissionsByJob(job_id: string): Promise<EmployerSubmi
     .order("created_at", { ascending: true });
 
   if (error) throw error;
-  return data as EmployerSubmission[];
+  if (error) throw error;
+  return data.map((s: any): EmployerSubmission => ({
+    ...s,
+    proof_tasks: Array.isArray(s.proof_tasks) ? s.proof_tasks[0] : s.proof_tasks,
+    jobs: Array.isArray(s.jobs) ? s.jobs[0] : s.jobs,
+  }));
 }
 
 export async function startProof(job_id: string, proof_task_id?: string) {

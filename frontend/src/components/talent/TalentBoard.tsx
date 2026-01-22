@@ -3,6 +3,7 @@ import {
   DndContext,
   type DragEndEvent,
   PointerSensor,
+  TouchSensor,
   useSensor,
   useSensors,
   DragOverlay,
@@ -15,14 +16,15 @@ import type { EmployerSubmission, HiringStage } from "@/types";
 import StageColumn from "./StageColumn";
 import CandidateCard from "./CandidateCard";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 
-const STAGES: { key: HiringStage; label: string; emoji: string }[] = [
-  { key: "new", label: "New", emoji: "🆕" },
-  { key: "shortlisted", label: "Shortlisted", emoji: "⭐" },
-  { key: "interview", label: "Interview", emoji: "💬" },
-  { key: "hold", label: "On Hold", emoji: "⏸" },
-  { key: "hired", label: "Hired", emoji: "🎉" },
-  { key: "rejected", label: "Rejected", emoji: "❌" },
+const STAGES: { key: HiringStage; label: string }[] = [
+  { key: "new", label: "New" },
+  { key: "shortlisted", label: "Shortlisted" },
+  { key: "interview", label: "Interview" },
+  { key: "hold", label: "On Hold" },
+  { key: "hired", label: "Hired" },
+  { key: "rejected", label: "Rejected" },
 ];
 
 // Custom collision: prioritize columns
@@ -44,9 +46,16 @@ export default function TalentBoard({
   submissions: EmployerSubmission[];
   setSubmissions: React.Dispatch<React.SetStateAction<EmployerSubmission[]>>;
 }) {
+  // Enhanced sensors with touch support for mobile
   const sensors = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { distance: 6 } })
+    useSensor(PointerSensor, {
+      activationConstraint: { distance: 8 }
+    }),
+    useSensor(TouchSensor, {
+      activationConstraint: { delay: 200, tolerance: 5 }
+    })
   );
+
   const [activeId, setActiveId] = useState<string | null>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
@@ -78,25 +87,25 @@ export default function TalentBoard({
     setActiveId(null);
     if (!over) return;
 
-    const activeId = String(active.id);
+    const draggedId = String(active.id);
     const destinationStage = over.data.current?.stage as
       | HiringStage
       | undefined;
     if (!destinationStage) return;
 
-    const dragged = submissions.find((s) => s.id === activeId);
+    const dragged = submissions.find((s) => s.id === draggedId);
     if (!dragged || dragged.hiring_stage === destinationStage) return;
 
     // Optimistic update
     setSubmissions((prev) =>
       prev.map((s) =>
-        s.id === activeId ? { ...s, hiring_stage: destinationStage } : s
+        s.id === draggedId ? { ...s, hiring_stage: destinationStage } : s
       )
     );
 
     try {
       await updateHiringStage(
-        activeId,
+        draggedId,
         destinationStage,
         dragged.employer_notes ?? ""
       );
@@ -105,19 +114,19 @@ export default function TalentBoard({
       toast.error("Failed to update stage");
       setSubmissions((prev) =>
         prev.map((s) =>
-          s.id === activeId ? { ...s, hiring_stage: dragged.hiring_stage } : s
+          s.id === draggedId ? { ...s, hiring_stage: dragged.hiring_stage } : s
         )
       );
     }
   }
 
-  // 🧭 Scroll awareness for arrows/fade
+  // Scroll awareness for arrows
   useEffect(() => {
     const el = scrollRef.current;
     if (!el) return;
     const update = () => {
       setCanScrollLeft(el.scrollLeft > 0);
-      setCanScrollRight(el.scrollLeft + el.clientWidth < el.scrollWidth);
+      setCanScrollRight(el.scrollLeft + el.clientWidth < el.scrollWidth - 10);
     };
     update();
     el.addEventListener("scroll", update);
@@ -130,29 +139,66 @@ export default function TalentBoard({
 
   return (
     <div className="relative">
-      {/* Scroll buttons */}
-      {canScrollLeft && (
-        <button
-          onClick={() =>
-            scrollRef.current?.scrollBy({ left: -300, behavior: "smooth" })
-          }
-          className="absolute text-[var(--color-text)] left-2 top-1/2 -translate-y-1/2 bg-[var(--color-surface)]/80 backdrop-blur-sm shadow-md p-2 rounded-full border border-[var(--color-border)] hover:bg-[var(--color-border)] transition z-10"
-        >
-          <ChevronLeft size={18} />
-        </button>
-      )}
-      {canScrollRight && (
-        <button
-          onClick={() =>
-            scrollRef.current?.scrollBy({ left: 300, behavior: "smooth" })
-          }
-          className="absolute text-[var(--color-text)] right-2 top-1/2 -translate-y-1/2 bg-[var(--color-surface)]/80 backdrop-blur-sm shadow-md p-2 rounded-full border border-[var(--color-border)] hover:bg-[var(--color-border)] transition z-10"
-        >
-          <ChevronRight size={18} />
-        </button>
-      )}
+      {/* Scroll Navigation Buttons */}
+      <AnimatePresence>
+        {canScrollLeft && (
+          <motion.button
+            initial={{ opacity: 0, x: -10 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -10 }}
+            onClick={() =>
+              scrollRef.current?.scrollBy({ left: -340, behavior: "smooth" })
+            }
+            className="absolute left-2 top-1/2 -translate-y-1/2 z-20
+              w-10 h-10 rounded-full flex items-center justify-center
+              bg-[var(--color-surface)]/90 backdrop-blur-md
+              border border-[var(--color-border)] 
+              text-[var(--color-text)] 
+              shadow-lg hover:shadow-xl
+              hover:bg-[var(--color-surface)] hover:scale-105
+              transition-all duration-200"
+            aria-label="Scroll left"
+          >
+            <ChevronLeft size={20} />
+          </motion.button>
+        )}
+      </AnimatePresence>
 
-      {/* Kanban */}
+      <AnimatePresence>
+        {canScrollRight && (
+          <motion.button
+            initial={{ opacity: 0, x: 10 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: 10 }}
+            onClick={() =>
+              scrollRef.current?.scrollBy({ left: 340, behavior: "smooth" })
+            }
+            className="absolute right-2 top-1/2 -translate-y-1/2 z-20
+              w-10 h-10 rounded-full flex items-center justify-center
+              bg-[var(--color-surface)]/90 backdrop-blur-md
+              border border-[var(--color-border)] 
+              text-[var(--color-text)] 
+              shadow-lg hover:shadow-xl
+              hover:bg-[var(--color-surface)] hover:scale-105
+              transition-all duration-200"
+            aria-label="Scroll right"
+          >
+            <ChevronRight size={20} />
+          </motion.button>
+        )}
+      </AnimatePresence>
+
+      {/* Edge Fade Gradients */}
+      <div
+        className={`absolute left-0 top-0 bottom-0 w-8 z-10 pointer-events-none transition-opacity duration-300 ${canScrollLeft ? 'opacity-100' : 'opacity-0'}`}
+        style={{ background: 'linear-gradient(to right, var(--color-bg), transparent)' }}
+      />
+      <div
+        className={`absolute right-0 top-0 bottom-0 w-8 z-10 pointer-events-none transition-opacity duration-300 ${canScrollRight ? 'opacity-100' : 'opacity-0'}`}
+        style={{ background: 'linear-gradient(to left, var(--color-bg), transparent)' }}
+      />
+
+      {/* Kanban Board */}
       <DndContext
         sensors={sensors}
         collisionDetection={collisionDetectionStrategy}
@@ -162,23 +208,38 @@ export default function TalentBoard({
       >
         <div
           ref={scrollRef}
-          className="flex overflow-x-auto gap-x-4 px-6 py-2 snap-x snap-mandatory relative scroll-smooth"
+          className="flex overflow-x-auto gap-4 px-8 py-4 snap-x snap-mandatory scroll-smooth"
+          style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
         >
-          {STAGES.map(({ key, label, emoji }) => (
+          {STAGES.map(({ key, label }) => (
             <StageColumn
               key={key}
               stage={key}
-              label={`${emoji} ${label}`}
+              label={label}
               submissions={grouped[key]}
             />
           ))}
         </div>
 
-        <DragOverlay>
+        {/* Premium Drag Overlay */}
+        <DragOverlay
+          dropAnimation={{
+            duration: 300,
+            easing: 'cubic-bezier(0.22, 1, 0.36, 1)',
+          }}
+        >
           {activeItem ? (
-            <div className="cursor-grabbing scale-[1.02] opacity-90">
+            <motion.div
+              initial={{ scale: 1, rotate: 0 }}
+              animate={{ scale: 1.05, rotate: 1 }}
+              className="cursor-grabbing"
+              style={{
+                boxShadow: '0 20px 40px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(0, 119, 204, 0.3)',
+                borderRadius: '12px',
+              }}
+            >
               <CandidateCard submission={activeItem} />
-            </div>
+            </motion.div>
           ) : null}
         </DragOverlay>
       </DndContext>

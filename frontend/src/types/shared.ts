@@ -42,6 +42,8 @@ export type ProfileLite = {
   id: string;
   full_name: string | null;
   credits: number | null;
+  username?: string | null;
+  is_public?: boolean;
 };
 
 // Minimal proof card info used in public + candidate profile grids

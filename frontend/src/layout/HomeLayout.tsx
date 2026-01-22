@@ -1,4 +1,4 @@
-import FeedbackButton from "@/components/ui/FeedbackButton";
+import FeedbackButton from "@/components/common/FeedbackButton";
 import { type ReactNode } from "react";
 
 interface HomeLayoutProps {
@@ -35,7 +35,7 @@ export default function HomeLayout({
       <section className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {children}
       </section>
-       <FeedbackButton />
+      <FeedbackButton />
     </div>
   );
 }

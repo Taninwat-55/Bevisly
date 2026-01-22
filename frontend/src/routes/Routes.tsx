@@ -39,10 +39,10 @@ import AdminFeedbackMessages from "@/pages/admin/AdminFeedbackMessages";
 import AdminLayout from "@/layout/AdminLayout";
 
 // --- Public pages
-import PublicCandidateProfilePage from "@/pages/PublicCandidateProfilePage";
-import PublicLeaderboard from "@/pages/PublicLeaderboard";
+import ProfilePage from "@/pages/public/ProfilePage";
+import LeaderboardPage from "@/pages/public/LeaderboardPage";
 import PublicLayout from "@/layout/PublicLayout";
-import LearnMorePage from "@/pages/LearnMore/LearnMorePage";
+import LearnMorePage from "@/pages/public/learn-more/LearnMorePage";
 import AboutPage from "@/pages/shared/AboutPage";
 import JobDetailPage from "@/pages/jobs/JobDetailPage";
 import JobListingPage from "@/pages/jobs/JobListingPage";
@@ -56,8 +56,9 @@ export const router = createBrowserRouter([
       { index: true, element: <LandingPage /> },
       { path: "/jobs", element: <JobListingPage /> },
       { path: "/jobs/:id", element: <JobDetailPage /> },
-      { path: "/leaderboard", element: <PublicLeaderboard /> },
-      { path: "/candidate/:id", element: <PublicCandidateProfilePage /> },
+      { path: "/leaderboard", element: <LeaderboardPage /> },
+      { path: "/candidate/:id", element: <ProfilePage /> }, // Legacy UUID support
+      { path: "/@:username", element: <ProfilePage /> }, // SEO-friendly username URLs
       { path: "/learn-more", element: <LearnMorePage /> },
       { path: "/privacy", element: <PrivacyPolicy /> },
       { path: "/about", element: <AboutPage /> },
@@ -106,19 +107,19 @@ export const router = createBrowserRouter([
       {
         element: <EmployerLayout />,
         children: [
-      { index: true, element: <EmployerHome /> },
-      { path: "dashboard", element: <EmployerDashboard /> },
-      { path: "review/:id", element: <EmployerReview /> },
-      { path: "review/success", element: <EmployerFeedbackSuccess /> },
-      { path: "jobs", element: <JobListingPage /> },
-      { path: "jobs/new", element: <EmployerPostJob /> },
-      { path: "job/:id", element: <JobDetailPage /> },
-      { path: "jobs/:id/edit", element: <EmployerEditJob /> },
-      { path: "submissions", element: <EmployerSubmissions /> },
-      { path: "talent", element: <EmployerTalentPool /> },
-      { path: "talent/manage", element: <EmployerTalentManager /> },
-      { path: "settings", element: <UserSettings /> },
-    ],
+          { index: true, element: <EmployerHome /> },
+          { path: "dashboard", element: <EmployerDashboard /> },
+          { path: "review/:id", element: <EmployerReview /> },
+          { path: "review/success", element: <EmployerFeedbackSuccess /> },
+          { path: "jobs", element: <JobListingPage /> },
+          { path: "jobs/new", element: <EmployerPostJob /> },
+          { path: "job/:id", element: <JobDetailPage /> },
+          { path: "jobs/:id/edit", element: <EmployerEditJob /> },
+          { path: "submissions", element: <EmployerSubmissions /> },
+          { path: "talent", element: <EmployerTalentPool /> },
+          { path: "talent/manage", element: <EmployerTalentManager /> },
+          { path: "settings", element: <UserSettings /> },
+        ],
       },
     ],
   },

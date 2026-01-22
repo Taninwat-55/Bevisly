@@ -58,8 +58,12 @@ export type EmployerSubmission = {
   reflection: string | null;
   proof_tasks: { id: string; title: string | null } | null;
 
-  jobs?: { title: string | null } | null;
-  feedback?: { stars: number | null }[] | null;
+  jobs?: { title: string | null; company: string | null } | null;
+  feedback?: {
+    stars: number | null;
+    strengths: string | null;
+    improvements: string | null;
+  }[] | null;
 
   // Talent Manager fields
   hiring_stage?: HiringStage | null;

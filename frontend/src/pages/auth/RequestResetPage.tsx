@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../../lib/supabaseClient";
-import { notify } from "@/components/ui/Notify";
-import BackButton from "@/components/ui/BackButton";
+import { notify } from "@/components/common/Notify";
+import BackButton from "@/components/common/BackButton";
 
 export default function RequestResetPage() {
   const [email, setEmail] = useState("");

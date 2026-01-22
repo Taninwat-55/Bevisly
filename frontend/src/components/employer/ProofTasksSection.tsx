@@ -3,7 +3,7 @@ import { Trash2, UploadCloud, Paperclip, Clock, Github, Code2 } from "lucide-rea
 import { supabase } from "@/lib/supabaseClient";
 import toast from "react-hot-toast";
 import type { ProofTask } from "@/types";
-import MarkdownEditor from "@/components/ui/MarkdownEditor";
+import MarkdownEditor from "@/components/common/MarkdownEditor";
 
 interface ProofTasksSectionProps {
   proofTasks: ProofTask[];

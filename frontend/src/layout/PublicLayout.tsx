@@ -1,10 +1,10 @@
 import Navbar from "@/components/Navbar";
 import LandingFooter from "@/components/landing/LandingFooter";
-import ScrollToTop from "@/components/ui/ScrollToTop";
-import FeedbackButton from "@/components/ui/FeedbackButton";
+import ScrollToTop from "@/components/common/ScrollToTop";
+import FeedbackButton from "@/components/common/FeedbackButton";
 import { Outlet, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import CookieConsent from "@/components/ui/CookieConsent";
+import CookieConsent from "@/components/common/CookieConsent";
 
 export default function PublicLayout() {
   const location = useLocation();

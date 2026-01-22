@@ -5,7 +5,7 @@ import WhyProofSection from "@/components/landing/WhyProofSection";
 import ProblemSection from "@/components/landing/ProblemSection";
 import FinalCTASection from "@/components/landing/FinalCTASection";
 import FeaturedEmployersSection from "@/components/landing/FeaturedEmployerSection";
-import FeedbackButton from "@/components/ui/FeedbackButton";
+import FeedbackButton from "@/components/common/FeedbackButton";
 
 export default function LandingPage() {
   return (

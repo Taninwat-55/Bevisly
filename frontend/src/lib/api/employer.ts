@@ -47,7 +47,7 @@ export async function getEmployerStats(
       user_id,
       job_id,
       created_at,
-      proof_tasks ( title ),
+      proof_tasks ( id, title ),
       feedback ( stars )
     `)
     .in("job_id", jobIds)
@@ -55,12 +55,15 @@ export async function getEmployerStats(
     .limit(3);
 
   if (recentErr) throw recentErr;
-  const submissions = (subs || []) as EmployerRecentSubmission[];
+  const submissions = (subs || []).map((s: any) => ({
+    ...s,
+    proof_tasks: Array.isArray(s.proof_tasks) ? s.proof_tasks[0] : s.proof_tasks,
+  })) as EmployerRecentSubmission[];
 
   // Calculate average score
   const stars =
     subs
-      ?.flatMap((s) => s.feedback?.map((f) => f.stars))
+      ?.flatMap((s) => s.feedback?.map((f: { stars: number | null }) => f.stars))
       .filter((v): v is number => typeof v === "number") || [];
   const avgScore =
     stars.length > 0
