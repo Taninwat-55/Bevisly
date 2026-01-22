@@ -78,6 +78,44 @@ export async function getEmployerSubmissions(
   }));
 }
 
+/**
+ * Get all submissions for a company's jobs (multi-tenant)
+ */
+export async function getCompanySubmissions(
+  company_id: string
+): Promise<EmployerSubmission[]> {
+  const { data: jobIds, error: jobErr } = await supabase
+    .from("jobs")
+    .select("id")
+    .eq("company_id", company_id);
+
+  if (jobErr) throw jobErr;
+  if (!jobIds?.length) return [];
+
+  const ids = jobIds.map((j) => j.id);
+
+  const { data, error } = await supabase
+    .from("submissions")
+    .select(`
+      id,
+      job_id,
+      user_id,
+      created_at,
+      status,
+      submission_link,
+      reflection,
+      proof_tasks ( id, title )
+    `)
+    .in("job_id", ids)
+    .order("created_at", { ascending: false });
+
+  if (error) throw error;
+  return data.map((s: any): EmployerSubmission => ({
+    ...s,
+    proof_tasks: Array.isArray(s.proof_tasks) ? s.proof_tasks[0] : s.proof_tasks,
+  }));
+}
+
 export async function getEmployerSubmissionsWithFeedback(
   employer_id: string
 ): Promise<EmployerSubmission[]> {
