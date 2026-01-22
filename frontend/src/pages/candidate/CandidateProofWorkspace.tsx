@@ -12,7 +12,7 @@ import {
   Loader2, Clock, Brain, CheckCircle2,
   Upload, Download, Link as LinkIcon,
   FileText, AlignLeft, Github, GitFork, Video,
-  ChevronDown, ChevronUp, Save
+  ChevronDown, Save
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import type { ProofTask } from "@/types/shared";
@@ -228,8 +228,8 @@ export default function CandidateProofWorkspace() {
         </h1>
         <div className="flex items-center justify-center gap-2 flex-wrap">
           <span className={`text-xs font-medium px-3 py-1.5 rounded-full border transition-all ${isLocked
-              ? "bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800"
-              : "bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-800"
+            ? "bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800"
+            : "bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-800"
             }`}>
             {isLocked ? "✅ Submitted" : "🚧 In Progress"}
           </span>
@@ -307,8 +307,8 @@ export default function CandidateProofWorkspace() {
                       <span className="text-xs text-[var(--color-text)]">{task.expected_time || "Flexible"}</span>
                     </div>
                     <div className={`flex items-center gap-2 px-3 py-2 rounded-xl border ${task.ai_tools_allowed
-                        ? "bg-emerald-50 dark:bg-emerald-900/20 border-emerald-200 dark:border-emerald-800"
-                        : "bg-rose-50 dark:bg-rose-900/20 border-rose-200 dark:border-rose-800"
+                      ? "bg-emerald-50 dark:bg-emerald-900/20 border-emerald-200 dark:border-emerald-800"
+                      : "bg-rose-50 dark:bg-rose-900/20 border-rose-200 dark:border-rose-800"
                       }`}>
                       <Brain size={14} className={task.ai_tools_allowed ? "text-emerald-600" : "text-rose-600"} />
                       <span className={`text-xs ${task.ai_tools_allowed ? "text-emerald-700 dark:text-emerald-400" : "text-rose-700 dark:text-rose-400"}`}>
@@ -341,8 +341,8 @@ export default function CandidateProofWorkspace() {
                   onClick={() => !isLocked && setInputMode(tab.id as typeof inputMode)}
                   disabled={isLocked && inputMode !== tab.id}
                   className={`flex-1 py-2.5 px-3 text-sm font-medium rounded-lg transition-all flex items-center justify-center gap-2 ${inputMode === tab.id
-                      ? "bg-[var(--color-candidate)] text-white shadow-sm"
-                      : "text-[var(--color-text-muted)] hover:text-[var(--color-text)] disabled:opacity-30"
+                    ? "bg-[var(--color-candidate)] text-white shadow-sm"
+                    : "text-[var(--color-text-muted)] hover:text-[var(--color-text)] disabled:opacity-30"
                     }`}
                 >
                   <tab.icon size={14} />
@@ -507,8 +507,8 @@ export default function CandidateProofWorkspace() {
               disabled={submitting || savingDraft}
               whileTap={{ scale: 0.95 }}
               className={`flex-1 py-3 rounded-xl border font-medium transition-all flex items-center justify-center gap-2 text-sm ${draftStatus === "saved"
-                  ? "border-emerald-300 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400"
-                  : "border-[var(--color-border)] text-[var(--color-text-muted)] hover:bg-[var(--color-surface)]"
+                ? "border-emerald-300 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400"
+                : "border-[var(--color-border)] text-[var(--color-text-muted)] hover:bg-[var(--color-surface)]"
                 }`}
             >
               {savingDraft ? (

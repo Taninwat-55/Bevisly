@@ -39,7 +39,7 @@ export default function PublicProfilePage() {
                 const { data: prof, error: profErr } = await supabase
                     .from("profiles")
                     .select("id, full_name, credits, email")
-                    .eq("username" as any, username.toLowerCase())
+                    .eq("username", username.toLowerCase())
                     .single();
 
                 if (profErr || !prof) {

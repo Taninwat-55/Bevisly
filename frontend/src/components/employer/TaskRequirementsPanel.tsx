@@ -1,5 +1,4 @@
 import { Clock, Brain, FileText, Link as LinkIcon, Code2 } from "lucide-react";
-import type { ProofTask } from "@/types/shared";
 
 interface TaskRequirementsPanelProps {
     task: {
@@ -89,8 +88,8 @@ export default function TaskRequirementsPanel({ task }: TaskRequirementsPanelPro
                 {/* AI Tools */}
                 <div className="flex items-center gap-3 p-3 rounded-xl bg-[var(--color-bg)] border border-[var(--color-border)]">
                     <div className={`p-2 rounded-lg ${task.ai_tools_allowed
-                            ? "bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400"
-                            : "bg-rose-100 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400"
+                        ? "bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400"
+                        : "bg-rose-100 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400"
                         }`}>
                         <Brain size={16} />
                     </div>

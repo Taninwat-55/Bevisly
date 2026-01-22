@@ -205,7 +205,7 @@ export default function EmployerJobForm({
 
             {showTemplates && (
               <div className="absolute right-0 top-full mt-2 w-64 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-card)] shadow-xl z-20 overflow-hidden">
-                {JOB_TEMPLATES.map((t) => (
+                {JOB_TEMPLATES.map((t: any) => (
                   <button
                     key={t.id}
                     type="button"

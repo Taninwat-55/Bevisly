@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import toast from "react-hot-toast";
 import ReactMarkdown from "react-markdown";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { createFeedback } from "@/lib/api/feedback";
 import { updateSubmissionStatus } from "@/lib/api/mutations";
 import { getSubmissionById, getSubmissionsByJob } from "@/lib/api/submissions";
