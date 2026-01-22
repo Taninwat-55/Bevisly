@@ -158,6 +158,3 @@ export default function ShareToLinkedIn({
         </motion.button>
     );
 }
-
-// Export utility for external use
-export { generateLinkedInShareUrl };

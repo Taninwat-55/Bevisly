@@ -3,7 +3,7 @@
 
 // type ProofPool = Database["public"]["Tables"]["proof_pools"]["Row"];
 
-export async function getProofPools(): Promise<any[]> {
+export async function getProofPools(): Promise<unknown[]> {
   // const { data, error } = await supabase
   //   .from("proof_pools")
   //   .select("*")

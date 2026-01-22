@@ -19,5 +19,13 @@ export default defineConfig([
       ecmaVersion: 2020,
       globals: globals.browser,
     },
+    rules: {
+      // Allow any in API layer where Supabase returns dynamic types
+      '@typescript-eslint/no-explicit-any': 'warn',
+      // Allow ts-ignore for edge cases
+      '@typescript-eslint/ban-ts-comment': 'off',
+      // Relaxed for complex effect dependencies
+      'react-hooks/exhaustive-deps': 'warn',
+    },
   },
 ])

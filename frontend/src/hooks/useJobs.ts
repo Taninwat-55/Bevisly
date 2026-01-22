@@ -13,8 +13,8 @@ export function useJobs() {
         // Use the centralized API function that fetches apply_url
         const data = await getAllJobs();
         setJobs(data || []);
-      } catch (err: any) {
-        setError(err.message || "Failed to fetch jobs");
+      } catch (err: unknown) {
+        setError(err instanceof Error ? err.message : "Failed to fetch jobs");
       } finally {
         setLoading(false);
       }
