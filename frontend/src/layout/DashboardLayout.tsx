@@ -48,7 +48,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
     ];
 
     return (
-        <div className="min-h-screen bg-[var(--color-bg)] flex transition-colors duration-300">
+        <div className="min-h-screen bg-[var(--color-bg)] transition-colors duration-300">
 
             {/* ── SIDEBAR (Glass Panel) ────────────────────────────── */}
             <motion.aside
