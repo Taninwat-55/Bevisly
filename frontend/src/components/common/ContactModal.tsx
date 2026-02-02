@@ -1,11 +1,11 @@
-import { useState } from "react";
+import { useState, Fragment } from "react";
 import { Dialog, Transition } from "@headlessui/react";
-import { Fragment } from "react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { supabase } from "@/lib/supabaseClient";
 import { notify } from "@/components/common/Notify";
 import { X, Mail, User, Send, MessageSquare } from "lucide-react";
+import { getContactMessageTemplate } from "@/lib/emailTemplates";
 
 interface ContactModalProps {
   isOpen: boolean;
@@ -23,20 +23,12 @@ export default function ContactModal({ isOpen, onClose }: ContactModalProps) {
     setLoading(true);
 
     try {
-      // Send email to Admin
       const { error: mailError } = await supabase.functions.invoke("send-email", {
         body: {
           to: ["bevislyapp@gmail.com"],
           reply_to: email, // Allow direct reply
           subject: `📬 New Contact Inquiry from ${name}`,
-          html: `
-            <h1>New Contact Inquiry</h1>
-            <p><strong>Name:</strong> ${name}</p>
-            <p><strong>Email:</strong> ${email}</p>
-            <hr />
-            <h3>Message:</h3>
-            <p style="white-space: pre-wrap;">${message}</p>
-          `,
+          html: getContactMessageTemplate(name, email, message),
         },
       });
 
