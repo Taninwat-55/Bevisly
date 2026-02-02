@@ -130,7 +130,7 @@ export default function TalentBoard({
   }, []);
 
   return (
-    <div className="relative">
+    <div className="relative w-full max-w-full isolate">
       {/* Scroll buttons */}
       {canScrollLeft && (
         <button
