@@ -1,19 +1,6 @@
-export type CandidateJob = {
-  id: string;
-  title: string;
-  description: string | null;
-  company: string | null;
-  location: string | null;
-  paid: boolean | null;
-  created_at: string | null;
-  expires_at?: string | null;
-  apply_url?: string | null;
-  proof_tasks?: {
-    id: string;
-    title: string;
-    expected_time?: string | null;
-  }[];
-};
+import type { Job } from "./job";
+
+export type CandidateJob = Job;
 
 export type CandidateSubmission = {
   id: string;

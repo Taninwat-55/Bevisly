@@ -16,6 +16,7 @@ import {
   ChevronLeft,
   ChevronRight,
   MessageCircle,
+  Coins
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -40,45 +41,45 @@ export default function Sidebar({ role }: SidebarProps) {
   const links =
     resolvedRole === "employer"
       ? [
-          { to: "/employer", label: "Overview", icon: <House size={17} /> },
-          {
-            to: "/employer/dashboard",
-            label: "Dashboard",
-            icon: <LayoutDashboard size={17} />,
-          },
-          {
-            to: "/employer/jobs",
-            label: "My Jobs",
-            icon: <Briefcase size={17} />,
-          },
-          {
-            to: "/employer/jobs/new",
-            label: "Post a Job",
-            icon: <PlusCircle size={17} />,
-          },
-          {
-            to: "/employer/submissions",
-            label: "Submissions",
-            icon: <FolderKanban size={17} />,
-          },
-          {
-            to: "/employer/talent",
-            label: "Talent Pool",
-            icon: <Users size={17} />,
-          },
-          {
-            to: "/employer/talent/manage",
-            label: "Talent Manager",
-            icon: <UserSquare2 size={17} />,
-          },
-          {
-            to: "/employer/settings",
-            label: "Settings",
-            icon: <Settings size={17} />,
-          },
-        ]
+        { to: "/employer", label: "Overview", icon: <House size={17} /> },
+        {
+          to: "/employer/dashboard",
+          label: "Dashboard",
+          icon: <LayoutDashboard size={17} />,
+        },
+        {
+          to: "/employer/jobs",
+          label: "My Jobs",
+          icon: <Briefcase size={17} />,
+        },
+        {
+          to: "/employer/jobs/new",
+          label: "Post a Job",
+          icon: <PlusCircle size={17} />,
+        },
+        {
+          to: "/employer/submissions",
+          label: "Submissions",
+          icon: <FolderKanban size={17} />,
+        },
+        {
+          to: "/employer/talent",
+          label: "Talent Pool",
+          icon: <Users size={17} />,
+        },
+        {
+          to: "/employer/talent/manage",
+          label: "Talent Manager",
+          icon: <UserSquare2 size={17} />,
+        },
+        {
+          to: "/employer/settings",
+          label: "Settings",
+          icon: <Settings size={17} />,
+        },
+      ]
       : resolvedRole === "admin"
-      ? [
+        ? [
           { to: "/admin", label: "Dashboard", icon: <Shield size={17} /> },
           { to: "/admin/users", label: "Users", icon: <Users size={17} /> },
           {
@@ -107,7 +108,7 @@ export default function Sidebar({ role }: SidebarProps) {
             icon: <Settings size={17} />,
           },
         ]
-      : [
+        : [
           { to: "/candidate", label: "Overview", icon: <House size={17} /> },
           {
             to: "/candidate/dashboard",
@@ -130,6 +131,11 @@ export default function Sidebar({ role }: SidebarProps) {
             icon: <UserSquare2 size={17} />,
           },
           {
+            to: "/candidate/credits",
+            label: "Credits",
+            icon: <Coins size={17} />,
+          },
+          {
             to: "/candidate/settings",
             label: "Settings",
             icon: <Settings size={17} />,
@@ -149,8 +155,8 @@ export default function Sidebar({ role }: SidebarProps) {
             {resolvedRole === "candidate"
               ? "🎓 Candidate"
               : resolvedRole === "employer"
-              ? "🏢 Employer"
-              : "🧩 Admin"}
+                ? "🏢 Employer"
+                : "🧩 Admin"}
           </span>
         )}
         <button
@@ -172,11 +178,10 @@ export default function Sidebar({ role }: SidebarProps) {
             title={label} // tooltip for collapsed mode
             className={({ isActive }) =>
               `flex items-center gap-3 px-3 py-2 rounded-[var(--radius-button)] text-sm font-medium transition-all
-     ${
-       isActive
-         ? "bg-[color-mix(in srgb,var(--color-bg) 85%,transparent)] text-[var(--color-text)] font-semibold"
-         : "text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[color-mix(in srgb,var(--color-bg) 90%,transparent)]"
-     }`
+     ${isActive
+                ? "bg-[color-mix(in srgb,var(--color-bg) 85%,transparent)] text-[var(--color-text)] font-semibold"
+                : "text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[color-mix(in srgb,var(--color-bg) 90%,transparent)]"
+              }`
             }
             style={({ isActive }) =>
               isActive

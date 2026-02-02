@@ -1,156 +1,88 @@
-import { useState, useEffect, useRef, useMemo } from "react";
+import { useState, useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { MoreHorizontal, FileText, Clock, CheckCircle2, Circle, AlertCircle } from "lucide-react";
+import { MoreHorizontal, Star, FileText, ExternalLink, GripVertical, Clock, Briefcase, Mail } from "lucide-react";
 import toast from "react-hot-toast";
 import { updateHiringStage } from "@/lib/api/mutations";
 import type { EmployerSubmission, HiringStage } from "@/types";
 import NotesModal from "./NotesModal";
+import { useNavigate } from "react-router-dom";
 
-const STAGES: HiringStage[] = [
-  "new",
-  "shortlisted",
-  "interview",
-  "hold",
-  "hired",
-  "rejected",
+const STAGES: { key: HiringStage; label: string; emoji: string }[] = [
+  { key: "new", label: "New", emoji: "🆕" },
+  { key: "shortlisted", label: "Shortlisted", emoji: "⭐" },
+  { key: "interview", label: "Interview", emoji: "💬" },
+  { key: "hold", label: "On Hold", emoji: "⏸" },
+  { key: "hired", label: "Hired", emoji: "🎉" },
+  { key: "rejected", label: "Rejected", emoji: "❌" },
 ];
 
-// Skill colors for badges (cycling palette)
-const SKILL_COLORS = [
-  { bg: "bg-blue-100 dark:bg-blue-900/40", text: "text-blue-700 dark:text-blue-300" },
-  { bg: "bg-emerald-100 dark:bg-emerald-900/40", text: "text-emerald-700 dark:text-emerald-300" },
-  { bg: "bg-violet-100 dark:bg-violet-900/40", text: "text-violet-700 dark:text-violet-300" },
-  { bg: "bg-amber-100 dark:bg-amber-900/40", text: "text-amber-700 dark:text-amber-300" },
-  { bg: "bg-rose-100 dark:bg-rose-900/40", text: "text-rose-700 dark:text-rose-300" },
-];
-
-// Extract skill keywords from task title
-function extractSkills(title: string | null | undefined): string[] {
-  if (!title) return [];
-
-  // Common tech/skill keywords to extract
-  const knownSkills = [
-    "React", "Vue", "Angular", "TypeScript", "JavaScript", "Python", "Java", "Go",
-    "API", "REST", "GraphQL", "SQL", "NoSQL", "MongoDB", "PostgreSQL", "AWS", "GCP",
-    "Docker", "Kubernetes", "CI/CD", "Testing", "Design", "Figma", "UI", "UX",
-    "Frontend", "Backend", "Fullstack", "Mobile", "iOS", "Android", "Node", "Next.js"
-  ];
-
-  // Match known skills (case-insensitive)
-  const found = knownSkills.filter(skill =>
-    title.toLowerCase().includes(skill.toLowerCase())
-  );
-
-  // If no known skills, extract capitalized words as potential skills
-  if (found.length === 0) {
-    const words = title.split(/[\s\-_:]+/);
-    return words
-      .filter(w => w.length > 2 && /^[A-Z]/.test(w))
-      .slice(0, 3);
-  }
-
-  return found.slice(0, 3);
-}
-
-// Format relative time
-function formatTimeAgo(dateString: string | null | undefined): string {
-  if (!dateString) return "—";
-
+function getRelativeTime(dateString?: string | null) {
+  if (!dateString) return "";
   const date = new Date(dateString);
   const now = new Date();
-  const diffMs = now.getTime() - date.getTime();
-  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-  const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+  const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
 
-  if (diffHours < 1) return "Just now";
-  if (diffHours < 24) return `${diffHours}h ago`;
-  if (diffDays === 1) return "1 day ago";
-  if (diffDays < 7) return `${diffDays} days ago`;
-  if (diffDays < 30) return `${Math.floor(diffDays / 7)}w ago`;
-  return `${Math.floor(diffDays / 30)}mo ago`;
+  if (diffInSeconds < 60) return "just now";
+  if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}m ago`;
+  if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}h ago`;
+  if (diffInSeconds < 604800) return `${Math.floor(diffInSeconds / 86400)}d ago`;
+  return date.toLocaleDateString();
 }
 
-// Status indicator component
-function StatusIndicator({ status, stars }: { status: string | null; stars?: number | null }) {
-  if (status === "reviewed" || stars) {
-    return (
-      <div className="flex items-center gap-1 text-emerald-600 dark:text-emerald-400" title="Reviewed">
-        <CheckCircle2 size={12} />
-      </div>
-    );
-  }
-  if (status === "submitted") {
-    return (
-      <div className="flex items-center gap-1 text-amber-500" title="Pending Review">
-        <AlertCircle size={12} />
-      </div>
-    );
-  }
-  return (
-    <div className="flex items-center gap-1 text-[var(--color-text-muted)]" title="Draft">
-      <Circle size={12} />
-    </div>
-  );
-}
-
-export default function CandidateCard({
+// Inner presentation component
+function InnerCard({
   submission,
+  isOverlay = false,
+  setNodeRef,
+  style,
+  attributes,
+  listeners,
+  isDragging = false,
 }: {
   submission: EmployerSubmission;
+  isOverlay?: boolean;
+  setNodeRef?: (node: HTMLElement | null) => void;
+  style?: React.CSSProperties;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  attributes?: Record<string, any>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  listeners?: Record<string, any>;
+  isDragging?: boolean;
 }) {
-  const {
-    id,
-    proof_tasks,
-    feedback,
-    employer_notes,
-    hiring_stage,
-    profiles,
-    created_at,
-    status
-  } = submission;
-
-  // Local state for notes (instant update fix)
-  const [currentNotes, setCurrentNotes] = useState(employer_notes);
+  const navigate = useNavigate();
+  const { id, profiles, proof_tasks, feedback, employer_notes, hiring_stage, jobs, created_at } =
+    submission;
   const [open, setOpen] = useState(false);
   const [showNotes, setShowNotes] = useState(false);
-  const dropdownRef = useRef<HTMLDivElement>(null);
+  const dropdownRef = useRef<HTMLButtonElement>(null);
 
-  const { attributes, listeners, setNodeRef, transform, isDragging } =
-    useSortable({ id });
-
-  // Memoize extracted skills
-  const skills = useMemo(() => extractSkills(proof_tasks?.title), [proof_tasks?.title]);
-  const timeAgo = useMemo(() => formatTimeAgo(created_at), [created_at]);
-
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition: "transform 0.25s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.2s, box-shadow 0.2s",
-    opacity: isDragging ? 0.6 : 1,
-  };
-
-  // Sync local state if prop updates
-  useEffect(() => {
-    setCurrentNotes(employer_notes);
-  }, [employer_notes]);
+  const rating = feedback?.[0]?.stars;
+  const candidateName = profiles?.full_name || profiles?.email?.split("@")[0] || "Unknown";
+  const initials = candidateName.charAt(0).toUpperCase();
+  const jobTitle = jobs?.title || "Unknown Role";
 
   // Close dropdown on outside click
   useEffect(() => {
     const handler = (e: MouseEvent) => {
-      if (
-        dropdownRef.current &&
-        !dropdownRef.current.contains(e.target as Node)
-      ) {
-        setOpen(false);
+      // If clicking inside the trigger button (dropdownRef), don't close here (toggle logic handles it)
+      if (dropdownRef.current && dropdownRef.current.contains(e.target as Node)) {
+        return;
       }
+      setOpen(false);
     };
-    document.addEventListener("mousedown", handler);
+
+    // Only add listener if open
+    if (open) {
+      document.addEventListener("mousedown", handler);
+    }
     return () => document.removeEventListener("mousedown", handler);
-  }, []);
+  }, [open]);
 
   async function handleMove(stage: HiringStage) {
     try {
-      await updateHiringStage(id, stage, currentNotes ?? "");
+      await updateHiringStage(id, stage, employer_notes ?? "");
       toast.success(`Moved to ${stage}`);
       setOpen(false);
     } catch {
@@ -158,9 +90,10 @@ export default function CandidateCard({
     }
   }
 
-  // Helper to get the best display name
-  const displayName = profiles?.full_name || profiles?.email?.split("@")[0] || "Unknown Candidate";
-  const stars = feedback?.[0]?.stars;
+  function handleViewProof(e: React.MouseEvent) {
+    e.stopPropagation();
+    navigate(`/employer/review/${id}`);
+  }
 
   return (
     <div
@@ -168,152 +101,197 @@ export default function CandidateCard({
       style={style}
       {...attributes}
       {...listeners}
-      className={`
-        group relative glass-card rounded-xl p-4 cursor-grab
-        hover:shadow-[var(--shadow-card)] 
-        ${isDragging ? "shadow-[var(--shadow-card)] scale-[1.02] z-50" : ""}
-        transition-all duration-200
-      `}
+      className={`group relative flex flex-col gap-3 bg-[var(--color-surface)] border border-[var(--color-border)] 
+      rounded-xl p-4 shadow-sm hover:shadow-md hover:border-[var(--color-brand-primary)]/40 
+      transition-all duration-200Selectable-none touch-none ${isDragging ? "shadow-none ring-0 opacity-30" : "cursor-grab active:cursor-grabbing"} 
+      ${isOverlay ? "cursor-grabbing rotate-2 shadow-xl ring-2 ring-[var(--color-brand-primary)]/20 bg-[var(--color-surface)]" : ""}`}
     >
-      {/* Top Row: Name + Status + Actions */}
-      <div className="flex justify-between items-start gap-2 mb-3">
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2">
-            <h4 className="font-semibold text-sm text-[var(--color-text)] truncate" title={displayName}>
-              {displayName}
-            </h4>
-            <StatusIndicator status={status} stars={stars} />
+      {/* Header: Avatar + Name + Time */}
+      <div className="flex items-start justify-between gap-3">
+        <div className="flex items-center gap-3 min-w-0">
+          {/* Avatar */}
+          <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0 shadow-sm
+            ${rating && rating >= 4
+              ? "bg-gradient-to-br from-amber-500/20 to-orange-500/20 text-amber-600 border border-amber-500/30"
+              : "bg-gradient-to-br from-blue-500/10 to-indigo-500/10 text-blue-600 border border-blue-500/20"
+            }`}>
+            {initials}
           </div>
 
-          {/* Time indicator */}
-          <div className="flex items-center gap-1 mt-0.5 text-[var(--color-text-muted)]">
-            <Clock size={10} className="opacity-60" />
-            <span className="text-[10px]">{timeAgo}</span>
+          <div className="min-w-0">
+            <h4 className="font-semibold text-[var(--color-text)] truncate text-[14px] leading-tight">
+              {candidateName}
+            </h4>
+            <div className="flex items-center gap-1.5 mt-0.5 text-[11px] text-[var(--color-text-muted)]">
+              <Clock size={10} className="shrink-0" />
+              <span>{getRelativeTime(created_at)}</span>
+            </div>
           </div>
         </div>
 
-        {/* Actions */}
-        <div className="flex items-center gap-1">
-          {status === "reviewed" && submission.resume_url && (
-            <a
-              href={submission.resume_url}
-              target="_blank"
-              rel="noopener noreferrer"
-              onPointerDown={(e) => e.stopPropagation()}
-              title="View CV"
-              className="p-1.5 rounded-lg hover:bg-[var(--color-employer-light)] text-[var(--color-employer-dark)] hover:text-[var(--color-employer)] transition-all"
-            >
-              <FileText size={14} strokeWidth={1.8} />
-            </a>
-          )}
+        {/* Drag Handle (Visual Only) */}
+        <div
+          className="text-[var(--color-text-muted)] opacity-0 group-hover:opacity-50 transition-opacity p-1"
+        >
+          <GripVertical size={14} />
+        </div>
+      </div>
 
-          <div ref={dropdownRef} className="relative">
+      {/* Main Content: Job + Task */}
+      <div
+        className="pb-2 border-b border-[var(--color-border)] cursor-pointer hover:opacity-80 transition-opacity"
+        onClick={handleViewProof}
+        onPointerDown={(e) => e.stopPropagation()} // Stop drag start
+        role="button"
+      >
+        <div className="flex items-center gap-1.5 mb-1">
+          <Briefcase size={12} className="text-[var(--color-brand-primary)] shrink-0" />
+          <p className="text-xs font-medium text-[var(--color-brand-primary)] truncate">
+            {jobTitle}
+          </p>
+        </div>
+        <p className="text-xs text-[var(--color-text-muted)] line-clamp-2 leading-relaxed">
+          {proof_tasks?.title || "Submitted Proof Task"}
+        </p>
+      </div>
+
+      {/* Footer: Rating + Actions */}
+      <div className="flex items-center justify-between pt-0.5">
+        {/* Rating */}
+        <div className="flex items-center gap-2">
+          {rating ? (
+            <div className="flex items-center gap-1.5">
+              <div className="flex items-center gap-1 bg-amber-50 dark:bg-amber-900/20 px-1.5 py-0.5 rounded text-[11px] font-bold text-amber-600 border border-amber-100 dark:border-amber-800">
+                <Star size={10} fill="currentColor" />
+                {rating.toFixed(1)}
+              </div>
+              {rating >= 4 && (
+                <span className="text-[10px] font-medium text-amber-600 uppercase tracking-wide">Match</span>
+              )}
+            </div>
+          ) : (
+            <span className="text-[11px] text-[var(--color-text-muted)] italic px-1">Unrated</span>
+          )}
+        </div>
+
+        {/* Quick Actions */}
+        <div className="flex items-center gap-1">
+          <button
+            onPointerDown={(e) => e.stopPropagation()}
+            onClick={(e) => { e.stopPropagation(); setShowNotes(true); }}
+            className={`p-1.5 rounded-md transition-colors ${employer_notes
+              ? "text-blue-600 bg-blue-50 dark:bg-blue-900/20 hover:bg-blue-100"
+              : "text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[var(--color-bg)]"}`}
+            title={employer_notes ? "Edit Note" : "Add Note"}
+          >
+            <FileText size={14} />
+          </button>
+          <div className="h-3 w-[1px] bg-[var(--color-border)] mx-0.5" />
+          <div className="relative">
             <button
+              ref={dropdownRef}
               onPointerDown={(e) => e.stopPropagation()}
-              onClick={() => setOpen((p) => !p)}
-              className="p-1.5 rounded-lg hover:bg-[var(--color-bg)] text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-all"
+              onClick={(e) => { e.stopPropagation(); setOpen(!open); }}
+              className="p-1.5 rounded-md text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[var(--color-bg)] transition-colors"
             >
               <MoreHorizontal size={14} />
             </button>
 
-            {open && (
-              <div className="absolute text-[var(--color-text)] right-0 top-8 z-[999] bg-[var(--color-surface)] border border-[var(--color-border)] rounded-xl shadow-lg text-sm min-w-[140px] overflow-hidden animate-slide-in">
-                {STAGES.map((stage) => (
+            {open && typeof document !== "undefined" && createPortal(
+              <div
+                className="fixed z-[9999] bg-[var(--color-surface)] border border-[var(--color-border)] rounded-lg shadow-xl text-sm min-w-[160px] py-1.5 overflow-hidden animate-in fade-in zoom-in-95 duration-100"
+                style={{
+                  top: (dropdownRef.current?.getBoundingClientRect().bottom ?? 0) + 4,
+                  left: (dropdownRef.current?.getBoundingClientRect().right ?? 0),
+                  transform: "translateX(-100%)" // Anchor top-right
+                }}
+                onPointerDown={(e) => e.stopPropagation()}
+                onClick={(e) => e.stopPropagation()}
+              >
+                <button
+                  onClick={handleViewProof}
+                  className="flex items-center gap-2 w-full text-left px-3 py-2 hover:bg-[var(--color-bg)] text-[var(--color-text)] text-xs font-medium transition-colors"
+                >
+                  <ExternalLink size={14} className="text-[var(--color-text-muted)]" /> View Proof
+                </button>
+                <a
+                  href={`mailto:${profiles?.email}`}
+                  onClick={(e) => e.stopPropagation()}
+                  className="flex items-center gap-2 w-full text-left px-3 py-2 hover:bg-[var(--color-bg)] text-[var(--color-text)] text-xs font-medium transition-colors"
+                >
+                  <Mail size={14} className="text-[var(--color-text-muted)]" /> Email Candidate
+                </a>
+
+                <div className="h-[1px] bg-[var(--color-border)] my-1" />
+                <div className="px-3 py-1 text-[10px] uppercase font-bold text-[var(--color-text-muted)] tracking-wider">
+                  Move to
+                </div>
+                {STAGES.map(({ key, label, emoji }) => (
                   <button
-                    key={stage}
+                    key={key}
                     onClick={(e) => {
                       e.stopPropagation();
-                      handleMove(stage);
+                      handleMove(key);
                     }}
-                    disabled={stage === hiring_stage}
-                    className={`block w-full text-left px-3 py-2 hover:bg-[var(--color-bg)] transition-colors capitalize ${stage === hiring_stage
-                        ? "text-[var(--color-text-muted)] bg-[var(--color-bg)] cursor-default"
-                        : ""
+                    disabled={key === hiring_stage}
+                    className={`flex items-center gap-2 w-full text-left px-3 py-1.5 hover:bg-[var(--color-bg)] transition-colors ${key === hiring_stage
+                      ? "text-[var(--color-text-muted)] opacity-50 cursor-not-allowed"
+                      : "text-[var(--color-text)]"
                       }`}
                   >
-                    {stage === hiring_stage ? "✓ " : ""}{stage.replace("_", " ")}
+                    <span>{emoji}</span> <span className="text-xs">{label}</span>
                   </button>
                 ))}
-              </div>
+              </div>,
+              document.body
             )}
           </div>
         </div>
       </div>
 
-      {/* Skill Badges */}
-      {skills.length > 0 && (
-        <div className="flex flex-wrap gap-1.5 mb-3">
-          {skills.map((skill, idx) => {
-            const color = SKILL_COLORS[idx % SKILL_COLORS.length];
-            return (
-              <span
-                key={skill}
-                className={`px-2 py-0.5 rounded-full text-[10px] font-medium ${color.bg} ${color.text}`}
-              >
-                {skill}
-              </span>
-            );
-          })}
-        </div>
-      )}
-
-      {/* Task Title */}
-      <p className="text-xs text-[var(--color-text-muted)] truncate mb-2" title={proof_tasks?.title || "Untitled task"}>
-        {proof_tasks?.title || "Untitled task"}
-      </p>
-
-      {/* Bottom Row: Rating + Notes */}
-      <div className="flex items-center justify-between pt-2 border-t border-[var(--color-border)]/50">
-        {/* Rating */}
-        {stars ? (
-          <div className="flex items-center gap-1">
-            {[1, 2, 3, 4, 5].map((i) => (
-              <span
-                key={i}
-                className={`text-[10px] ${i <= stars ? "text-amber-400" : "text-[var(--color-border)]"}`}
-              >
-                ★
-              </span>
-            ))}
-            <span className="text-[10px] font-medium text-[var(--color-text-muted)] ml-1">
-              {stars}/5
-            </span>
-          </div>
-        ) : (
-          <span className="text-[10px] text-[var(--color-text-muted)]">Not rated</span>
-        )}
-
-        {/* Notes Button */}
-        <button
-          onPointerDown={(e) => e.stopPropagation()}
-          onClick={() => setShowNotes(true)}
-          className={`text-[10px] px-2 py-1 rounded-md transition-all ${currentNotes
-              ? "bg-[var(--color-employer-light)] text-[var(--color-employer-dark)] hover:bg-[var(--color-employer)]/20"
-              : "text-[var(--color-text-muted)] hover:text-[var(--color-employer-dark)] hover:bg-[var(--color-employer-light)]"
-            }`}
-        >
-          {currentNotes ? "📝 Notes" : "+ Note"}
-        </button>
-      </div>
-
-      {/* Notes Preview */}
-      {currentNotes && (
-        <p className="text-[10px] text-[var(--color-text-muted)] italic mt-2 truncate opacity-70">
-          {currentNotes}
-        </p>
-      )}
-
       {showNotes && (
         <NotesModal
-          submission={{ ...submission, employer_notes: currentNotes }}
+          submission={submission}
           onClose={() => setShowNotes(false)}
-          onSave={(updated) => {
-            if (updated.employer_notes !== undefined) {
-              setCurrentNotes(updated.employer_notes);
-            }
-          }}
+          onSave={(updated) => console.log("Updated:", updated)} // Add logic to update local state if needed
         />
       )}
     </div>
   );
+}
+
+// 🟢 Standard Sortable Card
+export default function CandidateCard({
+  submission,
+}: {
+  submission: EmployerSubmission;
+}) {
+  const { attributes, listeners, setNodeRef, transform, isDragging } =
+    useSortable({ id: submission.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition: "transform 0.15s ease, opacity 0.15s, box-shadow 0.15s",
+    opacity: isDragging ? 0.3 : 1, // Make original item very faint while dragging
+  };
+
+  return (
+    <InnerCard
+      submission={submission}
+      setNodeRef={setNodeRef}
+      style={style}
+      attributes={attributes}
+      listeners={listeners}
+      isDragging={isDragging}
+    />
+  );
+}
+
+// 🔵 Overlay Card (Pure Visual, no sortable logic)
+export function CandidateCardOverlay({
+  submission,
+}: {
+  submission: EmployerSubmission;
+}) {
+  return <InnerCard submission={submission} isOverlay={true} />;
 }

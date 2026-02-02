@@ -8,17 +8,20 @@ export interface Job {
   paid?: boolean | null;
   apply_url?: string | null;
 
-  // Salary-related fields  
+  // Salary-related fields
   show_salary_range?: boolean | null;
   salary_min?: number | null;
   salary_max?: number | null;
   pay_period?: "hourly" | "monthly" | "yearly" | null;
   payment_currency?: string | null;
+  payment_amount?: number | null;
 
   // Employer-related (optional for candidates)
   job_type?: string | null;
   department?: string | null;
   work_mode?: string | null;
+  employer_id?: string;
+  company_logo?: string | null;
 
   // Timestamps
   created_at?: string | null;

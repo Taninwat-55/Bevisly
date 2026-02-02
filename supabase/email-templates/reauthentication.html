@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Confirm Your Identity</title>
+    <style>
+        body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: #f8fafc; margin: 0; padding: 0; }
+        .container { max-width: 600px; margin: 40px auto; background: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
+        .header { background: #0f172a; padding: 32px; text-align: center; }
+        .logo { font-size: 24px; font-weight: bold; color: #ffffff; text-decoration: none; letter-spacing: -0.5px; }
+        .content { padding: 40px 32px; color: #334155; line-height: 1.6; }
+        .h1 { font-size: 24px; font-weight: 700; color: #0f172a; margin: 0 0 16px; }
+        .button { display: inline-block; background-color: #2563eb; color: #ffffff; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: 600; margin: 24px 0; text-align: center; }
+        .footer { padding: 24px; background: #f1f5f9; text-align: center; font-size: 12px; color: #64748b; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">Bevisly</div>
+        </div>
+        <div class="content">
+            <h1 class="h1">Confirm it's you</h1>
+            <p>Hello,</p>
+            <p>We need to verify your identity to proceed with your request. Enter the code below:</p>
+            
+            <center>
+                <h2 style="font-size: 32px; letter-spacing: 5px; color: #2563eb; margin: 24px 0;">{{ .Token }}</h2>
+            </center>
+            
+            <p style="text-align: center; font-size: 14px; color: #64748b;">This code will expire in 5 minutes.</p>
+        </div>
+        <div class="footer">
+            <p>&copy; 2026 Bevisly Inc. All rights reserved.</p>
+        </div>
+    </div>
+</body>
+</html>

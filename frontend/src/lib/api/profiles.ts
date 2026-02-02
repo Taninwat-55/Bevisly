@@ -51,17 +51,78 @@ export async function updateProfileName(full_name: string) {
 
   const { error } = await supabase
     .from("profiles")
-    .update({ full_name })
-    .eq("id", user.id);
+    .upsert({ id: user.id, full_name })
+    .select();
 
   if (error) throw error;
 }
 
-export async function updateProfileData(userId: string, data: { full_name?: string; company_name?: string }) {
+export async function updateProfileData(
+  userId: string,
+  data: {
+    full_name?: string;
+    company_name?: string;
+    avatar_url?: string | null;
+    skills?: string[];
+    work_status?: string;
+    bio?: string;
+    linkedin_url?: string;
+    github_url?: string;
+    website_url?: string;
+    is_public?: boolean;
+  },
+) {
   const { error } = await supabase
     .from("profiles")
-    .update(data)
-    .eq("id", userId);
+    .upsert({ id: userId, ...data })
+    .select();
 
   if (error) throw error;
+}
+
+export async function downloadUserData(
+  userId: string,
+  role: "candidate" | "employer" | "admin",
+) {
+  // 1. Fetch Profile
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("*")
+    .eq("id", userId)
+    .single();
+
+  // 2. Fetch Common Data (Saved Jobs)
+  const { data: savedJobs } = await supabase
+    .from("saved_jobs")
+    .select("job_id, created_at")
+    .eq("user_id", userId);
+
+  let specificData = {};
+
+  // 3. Fetch Role-Specific Data
+  if (role === "employer") {
+    const { data: jobs } = await supabase
+      .from("jobs")
+      .select("*")
+      .eq("employer_id", userId);
+    specificData = { posted_jobs: jobs };
+  } else if (role === "candidate") {
+    const { data: submissions } = await supabase
+      .from("submissions")
+      .select("*")
+      .eq("user_id", userId);
+    specificData = { submissions };
+  }
+
+  // 4. Construct JSON Blob
+  const exportData = {
+    user: profile,
+    saved_jobs: savedJobs,
+    ...specificData,
+    exported_at: new Date().toISOString(),
+  };
+
+  return new Blob([JSON.stringify(exportData, null, 2)], {
+    type: "application/json",
+  });
 }

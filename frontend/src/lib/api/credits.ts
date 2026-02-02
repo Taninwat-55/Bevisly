@@ -80,6 +80,14 @@ export async function getCreditBalance(userId: string): Promise<number> {
   return (data as number) ?? 0;
 }
 
+/**
+ * Get Candidate Credits (Alias for getCreditBalance)
+ * Used by the frontend CandidateCredits page.
+ */
+export async function getCandidateCredits(userId: string): Promise<number> {
+  return getCreditBalance(userId);
+}
+
 // ============================================================
 // READ FUNCTIONS
 // ============================================================

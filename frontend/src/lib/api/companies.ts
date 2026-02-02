@@ -2,164 +2,100 @@ import { supabase } from "../supabaseClient";
 import type { Company, CompanyMember } from "@/types";
 
 /**
- * Get the current user's company (first company they belong to)
+ * Get the current user's company (Maps to Profile for MVP)
  */
 export async function getCurrentCompany(): Promise<Company | null> {
   const user = (await supabase.auth.getUser()).data.user;
   if (!user) return null;
 
   const { data, error } = await supabase
-    .from("company_members")
-    .select(`
-      company_id,
-      role,
-      companies:company_id (
-        id,
-        name,
-        slug,
-        logo_url,
-        owner_id,
-        created_at
-      )
-    `)
-    .eq("user_id", user.id)
-    .limit(1)
-    .maybeSingle();
+    .from("profiles")
+    .select("*")
+    .eq("id", user.id)
+    .single();
 
   if (error || !data) return null;
   
-  // Unwrap the nested company object
-  const company = Array.isArray(data.companies) 
-    ? data.companies[0] 
-    : data.companies;
-  
-  return company as Company | null;
+  // Map Profile to Company type
+  return {
+    id: data.id,
+    name: data.company_name || data.full_name || "My Company",
+    slug: data.username,
+    logo_url: null, // Profile doesn't have logo_url yet, could fetch if needed
+    owner_id: data.id,
+    created_at: data.created_at,
+    subscription_tier: data.subscription_tier,
+    active_jobs_count: data.active_jobs_count,
+    monthly_job_posts_count: data.monthly_job_posts_count,
+    credits: data.credits,
+  };
 }
 
 /**
- * Get all companies the user belongs to
+ * Get all companies the user belongs to (Single Tenant MVP)
  */
 export async function getUserCompanies(): Promise<Company[]> {
-  const user = (await supabase.auth.getUser()).data.user;
-  if (!user) return [];
-
-  const { data, error } = await supabase
-    .from("company_members")
-    .select(`
-      company_id,
-      role,
-      companies:company_id (
-        id,
-        name,
-        slug,
-        logo_url,
-        owner_id,
-        created_at
-      )
-    `)
-    .eq("user_id", user.id);
-
-  if (error || !data) return [];
-
-  return data
-    .map((m) => (Array.isArray(m.companies) ? m.companies[0] : m.companies))
-    .filter(Boolean) as Company[];
+  const company = await getCurrentCompany();
+  return company ? [company] : [];
 }
 
 /**
- * Get members of a company
+ * Deduct credits from the company (user profile)
  */
-export async function getCompanyMembers(companyId: string): Promise<CompanyMember[]> {
-  const { data, error } = await supabase
-    .from("company_members")
-    .select(`
-      id,
-      company_id,
-      user_id,
-      role,
-      invited_by,
-      created_at,
-      profiles:user_id (
-        full_name,
-        email
-      )
-    `)
-    .eq("company_id", companyId);
-
-  if (error) throw error;
-
-  return data.map((m: any): CompanyMember => ({
-    ...m,
-    profiles: Array.isArray(m.profiles) ? m.profiles[0] : m.profiles,
-  }));
-}
-
-/**
- * Create a new company and add creator as owner
- */
-export async function createCompany(name: string, slug?: string): Promise<Company> {
+export async function deductCompanyCredits(amount: number): Promise<boolean> {
   const user = (await supabase.auth.getUser()).data.user;
   if (!user) throw new Error("Not authenticated");
 
-  // Create company
-  const { data: company, error: companyErr } = await supabase
-    .from("companies")
-    .insert({ name, slug, owner_id: user.id })
+  // Call the RPC function created in migration
+  const { data, error } = await supabase.rpc("deduct_credits", {
+    user_id_input: user.id,
+    amount: amount
+  });
+
+  if (error) {
+    console.error("Credit deduction failed:", error);
+    return false;
+  }
+
+  return !!data;
+}
+
+// ------------------------------------------------------------------
+// Stubbed functions for compatibility with components expecting them
+// ------------------------------------------------------------------
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export async function getCompanyMembers(_companyId: string): Promise<CompanyMember[]> {
+  return []; // No multi-user support in MVP yet
+}
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export async function createCompany(name: string, _slug?: string): Promise<Company> {
+  // In MVP, creating a company is just updating the profile
+  const user = (await supabase.auth.getUser()).data.user;
+  if (!user) throw new Error("Not authenticated");
+
+  const { data, error } = await supabase
+    .from("profiles")
+    .update({ company_name: name })
+    .eq("id", user.id)
     .select()
     .single();
 
-  if (companyErr) throw companyErr;
-
-  // Add owner to members
-  const { error: memberErr } = await supabase
-    .from("company_members")
-    .insert({
-      company_id: company.id,
-      user_id: user.id,
-      role: "owner",
-    });
-
-  if (memberErr) throw memberErr;
-
-  return company;
+  if (error) throw error;
+  
+  return {
+    id: data.id,
+    name: data.company_name,
+    slug: null,
+    logo_url: null,
+    owner_id: data.id,
+    created_at: data.created_at
+  };
 }
 
-/**
- * Invite a user to a company by email
- */
-export async function inviteToCompany(
-  companyId: string,
-  email: string,
-  role: "admin" | "member" = "member"
-): Promise<void> {
-  const user = (await supabase.auth.getUser()).data.user;
-  if (!user) throw new Error("Not authenticated");
-
-  // Find the user by email
-  const { data: invitee, error: findErr } = await supabase
-    .from("profiles")
-    .select("id")
-    .eq("email", email)
-    .maybeSingle();
-
-  if (findErr || !invitee) {
-    throw new Error("User not found with that email");
-  }
-
-  // Add them to company_members
-  const { error } = await supabase
-    .from("company_members")
-    .insert({
-      company_id: companyId,
-      user_id: invitee.id,
-      role,
-      invited_by: user.id,
-    });
-
-  if (error) {
-    if (error.code === "23505") {
-      throw new Error("User is already a member of this company");
-    }
-    throw error;
-  }
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export async function inviteToCompany(_companyId: string, _email: string) {
+  throw new Error("Team features main available in Pro SaaS plan.");
 }
+

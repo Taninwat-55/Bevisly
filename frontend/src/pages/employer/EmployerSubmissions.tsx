@@ -56,6 +56,7 @@ export default function EmployerSubmissions() {
       }
     }
     load();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.id]);
 
   /* ─── Close dropdown on outside click ─────────────────────────────── */
@@ -148,8 +149,8 @@ export default function EmployerSubmissions() {
             {filter === "all"
               ? "All Submissions"
               : filter === "reviewed"
-              ? "Reviewed"
-              : "Pending"}
+                ? "Reviewed"
+                : "Pending"}
           </button>
 
           {dropdownOpen && (
@@ -171,11 +172,10 @@ export default function EmployerSubmissions() {
                     setFilter(value as "all" | "pending" | "reviewed");
                     setDropdownOpen(false);
                   }}
-                  className={`px-3 py-2 text-sm cursor-pointer flex items-center gap-2 hover:bg-[var(--color-border)] transition ${
-                    filter === value
+                  className={`px-3 py-2 text-sm cursor-pointer flex items-center gap-2 hover:bg-[var(--color-border)] transition ${filter === value
                       ? "bg-[var(--color-border)] text-[var(--color-employer-dark)] font-medium"
                       : "text-[var(--color-text-muted)]"
-                  }`}
+                    }`}
                 >
                   {value === "reviewed" ? (
                     <CheckCircle2 size={14} />
@@ -215,11 +215,10 @@ export default function EmployerSubmissions() {
                   {s.proof_tasks?.title || "Untitled Task"}
                 </h3>
                 <span
-                  className={`text-xs font-medium ${
-                    s.status === "reviewed"
+                  className={`text-xs font-medium ${s.status === "reviewed"
                       ? "text-[var(--color-success)]"
                       : "text-[var(--color-warning)]"
-                  }`}
+                    }`}
                 >
                   {s.status}
                 </span>
@@ -251,11 +250,10 @@ export default function EmployerSubmissions() {
                 <button
                   disabled={!s.feedback?.length}
                   onClick={() => setSelectedFeedback(s.feedback?.[0] || null)}
-                  className={`flex-1 border border-[var(--color-border)] py-2 rounded-[var(--radius-button)] flex items-center justify-center gap-1 text-sm transition ${
-                    s.feedback?.length
+                  className={`flex-1 border border-[var(--color-border)] py-2 rounded-[var(--radius-button)] flex items-center justify-center gap-1 text-sm transition ${s.feedback?.length
                       ? "text-[var(--color-accent)] hover:bg-[var(--color-border)] hover:text-white"
                       : "text-[var(--color-text-muted)] opacity-50 cursor-not-allowed"
-                  }`}
+                    }`}
                 >
                   <Eye size={14} /> View
                 </button>

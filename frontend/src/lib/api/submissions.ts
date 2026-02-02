@@ -31,6 +31,7 @@ export async function getCandidateSubmissions(
     .order("created_at", { ascending: false });
 
   if (error) throw error;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return data.map((s: any): CandidateSubmission => ({
     ...s,
     jobs: Array.isArray(s.jobs) ? s.jobs[0] : s.jobs,
@@ -72,6 +73,7 @@ export async function getEmployerSubmissions(
     .order("created_at", { ascending: false });
 
   if (error) throw error;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return data.map((s: any): EmployerSubmission => ({
     ...s,
     proof_tasks: Array.isArray(s.proof_tasks) ? s.proof_tasks[0] : s.proof_tasks,
@@ -110,6 +112,7 @@ export async function getCompanySubmissions(
     .order("created_at", { ascending: false });
 
   if (error) throw error;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return data.map((s: any): EmployerSubmission => ({
     ...s,
     proof_tasks: Array.isArray(s.proof_tasks) ? s.proof_tasks[0] : s.proof_tasks,
@@ -154,6 +157,7 @@ export async function getEmployerSubmissionsWithFeedback(
 
   if (error) throw error;
   if (error) throw error;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return data.map((s: any) => ({
     ...s,
     proof_tasks: Array.isArray(s.proof_tasks) ? s.proof_tasks[0] : s.proof_tasks,
@@ -171,14 +175,25 @@ export async function getProofTaskDetails(
   const { data, error } = await supabase
     .from("proof_tasks")
     .select(
-      "id, job_id, title, description, expected_time, submission_format, ai_tools_allowed, attachments, recommended_platform, submission_type"
+      "id, job_id, title, description, expected_time, submission_format, ai_tools_allowed, attachments, recommended_platform, submission_type, jobs ( company )"
     )
     .eq("id", proof_task_id)
     .maybeSingle();
 
   if (error) throw error;
-  // Cast the result to ProofTask | null to satisfy the union type
-  return (data as ProofTask | null) ?? null;
+  
+  if (!data) return null;
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const raw = data as any;
+
+  const result: ProofTask = {
+    ...raw,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    company_name: Array.isArray(raw.jobs) ? raw.jobs[0]?.company : raw.jobs?.company,
+  };
+
+  return result;
 }
 
 export async function checkSubmissionStatus(job_id: string) {
@@ -223,6 +238,7 @@ export async function getCandidateFeedback(user_id: string) {
 
   if (error) throw error;
   if (error) throw error;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return data.map((s: any) => ({
     ...s,
     jobs: Array.isArray(s.jobs) ? s.jobs[0] : s.jobs,
@@ -328,6 +344,7 @@ export async function submitProof({
 }
 
 // 3. Update completeProof signature to match
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function completeProof(params: any) {
   return submitProof(params);
 }
@@ -352,6 +369,7 @@ export async function getSubmissionsByJob(job_id: string): Promise<EmployerSubmi
 
   if (error) throw error;
   if (error) throw error;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return data.map((s: any): EmployerSubmission => ({
     ...s,
     proof_tasks: Array.isArray(s.proof_tasks) ? s.proof_tasks[0] : s.proof_tasks,

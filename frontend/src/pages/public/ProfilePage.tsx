@@ -15,6 +15,7 @@ import { motion } from "framer-motion";
 interface PublicProfile extends ProfileLite {
     username?: string | null;
     is_public?: boolean;
+    email?: string | null;
 }
 
 export default function PublicProfilePage() {
@@ -232,7 +233,7 @@ export default function PublicProfilePage() {
                             {/* CTA Buttons */}
                             <div className="flex flex-wrap justify-center gap-3 mt-6">
                                 <a
-                                    href={`mailto:${(profile as any).email}?subject=Interview Request via Bevisly`}
+                                    href={`mailto:${profile.email}?subject=Interview Request via Bevisly`}
                                     className="flex items-center gap-2 px-5 py-2.5 bg-[var(--color-text)] text-[var(--color-bg)] rounded-xl font-semibold hover:opacity-90 transition shadow-md"
                                 >
                                     <Briefcase size={16} />

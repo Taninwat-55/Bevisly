@@ -120,3 +120,15 @@ export interface EmployerJobFormValues {
   work_mode?: string;
   proof_tasks: ProofTask[];
 }
+
+export type EmployerProfile = {
+  id: string;
+  full_name: string | null;
+  company_name: string | null;
+  email: string | null;
+  credits: number;
+  subscription_tier: "free" | "pro_saas";
+  active_jobs_count: number;
+  monthly_job_posts_count: number;
+  billing_period_end?: string | null;
+};

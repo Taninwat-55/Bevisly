@@ -11,7 +11,7 @@ export default function PublicLayout() {
 
   return (
     <div className="min-h-screen flex flex-col bg-[var(--color-bg)] text-[var(--color-text)] transition-colors">
-      <Navbar />
+      {location.pathname !== "/" && <Navbar />}
       <ScrollToTop />
 
       {/* Animated route outlet */}

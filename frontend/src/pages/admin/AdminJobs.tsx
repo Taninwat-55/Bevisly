@@ -2,7 +2,7 @@ import { useEffect, useState, useMemo } from "react";
 import { getAllJobs, toggleFeaturedJob } from "@/lib/api/admin";
 import type { AdminJob } from "@/types/admin";
 import toast from "react-hot-toast";
-import { ArrowDownUp, Search, Star } from "lucide-react";
+import { ArrowDownUp, Search, Star, Building, MapPin, Clock } from "lucide-react";
 import { motion } from "framer-motion";
 
 export default function AdminJobs() {
@@ -11,15 +11,13 @@ export default function AdminJobs() {
 
   // Filters
   const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter, setStatusFilter] = useState<"all" | "open" | "closed">(
-    "all"
-  );
+  const [statusFilter, setStatusFilter] = useState<"all" | "open" | "closed">("all");
   const [employerFilter, setEmployerFilter] = useState("all");
   const [sortOrder, setSortOrder] = useState<"newest" | "oldest">("newest");
 
   // Pagination
   const [page, setPage] = useState(1);
-  const [perPage, setPerPage] = useState(10);
+  const [perPage] = useState(10);
 
   useEffect(() => {
     loadJobs();
@@ -75,15 +73,6 @@ export default function AdminJobs() {
   const totalPages = Math.ceil(filteredJobs.length / perPage);
   const paginated = filteredJobs.slice((page - 1) * perPage, page * perPage);
 
-  const stats = useMemo(
-    () => ({
-      open: jobs.filter((j) => j.status === "open").length,
-      closed: jobs.filter((j) => j.status === "closed").length,
-      total: jobs.length,
-    }),
-    [jobs]
-  );
-
   useEffect(
     () => setPage(1),
     [searchTerm, statusFilter, employerFilter, perPage]
@@ -92,237 +81,185 @@ export default function AdminJobs() {
   /* ─────────────────────── Render ─────────────────────── */
   if (loading)
     return (
-      <div className="min-h-screen flex items-center justify-center text-[var(--color-text-muted)]">
-        Loading jobs…
+      <div className="min-h-screen flex flex-col items-center justify-center text-[var(--color-text-muted)] gap-4">
+        <div className="w-8 h-8 rounded-full border-2 border-[var(--color-brand-primary)] border-t-transparent animate-spin" />
+        <p>Syncing job database...</p>
       </div>
     );
 
   return (
-    <div className="min-h-screen bg-[var(--color-bg)] text-[var(--color-text)] px-6 md:px-10 py-12 transition-colors">
+    <div className="min-h-screen bg-[var(--color-bg)] text-[var(--color-text)] px-6 md:px-10 py-12 transition-colors font-sans">
+
       {/* Header */}
-      <header className="mb-8 flex flex-col gap-2">
-        <h1 className="heading-lg flex items-center gap-2">💼 Job Overview</h1>
-        <p className="body-base text-[var(--color-text-muted)]">
-          Browse and manage all job postings across the platform.
-        </p>
+      <header className="mb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div>
+          <h1 className="text-3xl font-bold font-display text-[var(--color-text)] mb-2">Job Listings</h1>
+          <p className="text-[var(--color-text-muted)]">Monitor job posts, feature roles, and status.</p>
+        </div>
+        <div className="flex items-center gap-2 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-xl p-1 shadow-sm">
+          <div className="px-4 py-2 rounded-lg bg-[var(--color-bg)] text-xs font-medium text-[var(--color-text-muted)]">
+            Active: <span className="text-[var(--color-text)] font-bold ml-1">{jobs.filter(j => j.status === 'open').length}</span>
+          </div>
+        </div>
       </header>
 
-      {/* Job Counters */}
-      <motion.section
-        initial={{ opacity: 0, y: 6 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6"
-      >
-        <div className="p-4 text-center rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[color-mix(in srgb,var(--color-success)10%,var(--color-surface))]">
-          <p className="text-sm text-[var(--color-text-muted)]">Open Jobs</p>
-          <h3 className="text-xl font-semibold text-green-600 dark:text-green-400">
-            {stats.open}
-          </h3>
-        </div>
-        <div className="p-4 text-center rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[color-mix(in srgb,var(--color-text-muted)10%,var(--color-surface))]">
-          <p className="text-sm text-[var(--color-text-muted)]">Closed Jobs</p>
-          <h3 className="text-xl font-semibold text-gray-600 dark:text-gray-300">
-            {stats.closed}
-          </h3>
-        </div>
-        <div className="p-4 text-center rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[color-mix(in srgb,var(--color-employer)10%,var(--color-surface))]">
-          <p className="text-sm text-[var(--color-text-muted)]">Total Jobs</p>
-          <h3 className="text-xl font-semibold text-blue-600 dark:text-blue-400">
-            {stats.total}
-          </h3>
-        </div>
-      </motion.section>
 
-      {/* Filters */}
-      <div className="flex flex-wrap items-center gap-3 mb-6">
-        <div className="relative">
-          <Search
-            size={14}
-            className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)]"
-          />
+      {/* Controls Bar */}
+      <div className="glass-panel p-4 rounded-xl border border-[var(--color-border)] mb-6 flex flex-col xl:flex-row gap-4 items-center justify-between">
+
+        {/* Search */}
+        <div className="relative w-full xl:w-96">
+          <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)]" />
           <input
             type="text"
-            placeholder="Search title, company, or employer..."
+            placeholder="Search jobs, companies..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="border border-[var(--color-border)] rounded-[var(--radius-button)] pl-8 pr-3 py-2 text-sm bg-[var(--color-surface)] focus:ring-1 focus:ring-[var(--color-candidate)]"
+            className="w-full bg-[var(--color-bg)] border border-[var(--color-border)] rounded-lg pl-10 pr-4 py-2.5 text-sm focus:ring-2 focus:ring-[var(--color-brand-primary)]/20 focus:border-[var(--color-brand-primary)] outline-none transition-all"
           />
         </div>
 
-        <select
-          value={statusFilter}
-          onChange={(e) =>
-            setStatusFilter(e.target.value as "all" | "open" | "closed")
-          }
-          className="border border-[var(--color-border)] rounded-[var(--radius-button)] px-3 py-2 text-sm bg-[var(--color-surface)]"
-        >
-          <option value="all">All Statuses</option>
-          <option value="open">Open</option>
-          <option value="closed">Closed</option>
-        </select>
+        {/* Filters */}
+        <div className="flex flex-wrap items-center gap-3 w-full xl:w-auto">
+          <select
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value as typeof statusFilter)}
+            className="bg-[var(--color-bg)] border border-[var(--color-border)] rounded-lg px-4 py-2.5 text-sm outline-none focus:border-[var(--color-brand-primary)] cursor-pointer"
+          >
+            <option value="all">All Statuses</option>
+            <option value="open">Open</option>
+            <option value="closed">Closed</option>
+          </select>
 
-        <select
-          value={employerFilter}
-          onChange={(e) => setEmployerFilter(e.target.value)}
-          className="border border-[var(--color-border)] rounded-[var(--radius-button)] px-3 py-2 text-sm bg-[var(--color-surface)]"
-        >
-          <option value="all">All Employers</option>
-          {uniqueEmployers.map((email) => (
-            <option key={email} value={email}>
-              {email}
-            </option>
-          ))}
-        </select>
+          <select
+            value={employerFilter}
+            onChange={(e) => setEmployerFilter(e.target.value)}
+            className="bg-[var(--color-bg)] border border-[var(--color-border)] rounded-lg px-4 py-2.5 text-sm outline-none focus:border-[var(--color-brand-primary)] cursor-pointer max-w-[200px]"
+          >
+            <option value="all">All Employers</option>
+            {uniqueEmployers.map(e => <option key={e} value={e}>{e}</option>)}
+          </select>
 
-        <button
-          onClick={() =>
-            setSortOrder((prev) => (prev === "newest" ? "oldest" : "newest"))
-          }
-          className="flex items-center gap-1.5 border border-[var(--color-border)] rounded-[var(--radius-button)] px-3 py-2 text-sm bg-[var(--color-surface)] hover:bg-[var(--color-bg-hover)] transition"
-        >
-          <ArrowDownUp size={14} />
-          {sortOrder === "newest" ? "Newest First" : "Oldest First"}
-        </button>
+          <button
+            onClick={() => setSortOrder(prev => prev === 'newest' ? 'oldest' : 'newest')}
+            className="flex items-center gap-2 px-4 py-2.5 bg-[var(--color-bg)] border border-[var(--color-border)] rounded-lg text-sm hover:bg-[var(--color-surface-hover)] transition"
+          >
+            <ArrowDownUp size={16} className="text-[var(--color-text-muted)]" />
+            {sortOrder === 'newest' ? 'Newest' : 'Oldest'}
+          </button>
+        </div>
       </div>
 
       {/* Table */}
       <motion.div
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
-        className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-card)] shadow-[var(--shadow-soft)] overflow-auto"
+        className="glass-panel border border-[var(--color-border)] rounded-2xl overflow-hidden shadow-sm"
       >
         <table className="w-full text-sm text-left">
-          <thead className="bg-[color-mix(in srgb,var(--color-candidate)10%,var(--color-surface))] border-b border-[var(--color-border)] sticky top-0 z-10">
-            <tr>
-              <th className="py-3 px-4 font-medium">Title</th>
-              <th className="py-3 px-4 font-medium">Company</th>
-              <th className="py-3 px-4 font-medium">Employer</th>
-              <th className="py-3 px-4 font-medium">Status</th>
-              <th className="py-3 px-4 font-medium text-center">⭐ Featured</th>
-              <th className="py-3 px-4 font-medium">Created</th>
+          <thead>
+            <tr className="bg-[var(--color-bg)] border-b border-[var(--color-border)]">
+              <th className="py-4 px-6 font-semibold text-[var(--color-text-muted)] uppercase text-xs tracking-wider">Job Details</th>
+              <th className="py-4 px-6 font-semibold text-[var(--color-text-muted)] uppercase text-xs tracking-wider">Status</th>
+              <th className="py-4 px-6 font-semibold text-[var(--color-text-muted)] uppercase text-xs tracking-wider text-center">Featured</th>
+              <th className="py-4 px-6 font-semibold text-[var(--color-text-muted)] uppercase text-xs tracking-wider text-right">Date</th>
             </tr>
           </thead>
-          <tbody>
+          <tbody className="divide-y divide-[var(--color-border)]/50">
             {paginated.length ? (
-              paginated.map((j, i) => (
-                <tr
-                  key={j.id}
-                  className={`border-b border-[var(--color-border)] ${
-                    i % 2 === 0
-                      ? "bg-[color-mix(in srgb,var(--color-bg)96%,transparent)]"
-                      : ""
-                  } hover:bg-[var(--color-bg-hover)] transition`}
-                >
-                  <td className="py-3 px-4 font-medium">{j.title}</td>
-                  <td className="py-3 px-4">{j.company ?? "—"}</td>
-                  <td className="py-3 px-4 text-[var(--color-text-muted)]">
-                    {j.employer_email}
+              paginated.map((j) => (
+                <tr key={j.id} className="group hover:bg-[var(--color-bg)]/50 transition-colors">
+                  <td className="py-4 px-6">
+                    <div className="flex flex-col gap-1">
+                      <span className="font-bold text-[var(--color-text)] text-base">{j.title}</span>
+                      <div className="flex items-center gap-3 text-xs text-[var(--color-text-muted)]">
+                        <span className="flex items-center gap-1"><Building size={12} /> {j.company || 'Unknown Company'}</span>
+                        <span className="flex items-center gap-1"><MapPin size={12} /> {j.location || 'Remote'}</span>
+                      </div>
+                      <div className="mt-1 text-xs text-[var(--color-brand-primary)] opacity-80">{j.employer_email}</div>
+                    </div>
                   </td>
-                  <td className="py-3 px-4">
+
+                  <td className="py-4 px-6">
                     <span
-                      className={`px-2 py-1 rounded text-xs font-medium ${
-                        j.status === "open"
-                          ? "bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300"
-                          : "bg-gray-200 text-gray-700 dark:bg-gray-900 dark:text-gray-400"
-                      }`}
+                      className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-semibold border ${j.status === "open"
+                        ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/20"
+                        : "bg-slate-200 text-slate-600 border-slate-300 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700"
+                        }`}
                     >
-                      {j.status}
+                      <div className={`w-1.5 h-1.5 rounded-full ${j.status === 'open' ? 'bg-emerald-500 animate-pulse' : 'bg-slate-400'}`} />
+                      {j.status.toUpperCase()}
                     </span>
                   </td>
-                  <td className="py-3 px-4 text-center">
+
+                  <td className="py-4 px-6 text-center">
                     <button
                       onClick={async () => {
                         try {
                           await toggleFeaturedJob(j.id, !j.featured);
-                          toast.success(
-                            j.featured
-                              ? "Job unfeatured successfully"
-                              : "Job featured successfully ⭐"
-                          );
-                          setJobs((prev) =>
-                            prev.map((job) =>
-                              job.id === j.id
-                                ? { ...job, featured: !j.featured }
-                                : job
-                            )
-                          );
+                          toast.success(j.featured ? "Removed from featured" : "Added to featured ⭐");
+                          setJobs((prev) => prev.map((job) => job.id === j.id ? { ...job, featured: !j.featured } : job));
                         } catch (err) {
                           console.error(err);
-                          toast.error("Failed to update featured state");
+                          toast.error("Failed to update status");
                         }
                       }}
-                      className={`flex items-center justify-center gap-1 px-2 py-1 rounded text-xs font-medium transition ${
-                        j.featured
-                          ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-300 hover:brightness-110"
-                          : "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400 hover:brightness-125"
-                      }`}
+                      className={`
+                          w-8 h-8 rounded-lg inline-flex items-center justify-center transition-all
+                          ${j.featured ? 'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/40 dark:text-yellow-400' : 'bg-[var(--color-bg)]/50 text-[var(--color-text-muted)] hover:bg-[var(--color-bg-hover)]'}
+                       `}
+                      title="Toggle Featured"
                     >
-                      <Star
-                        size={14}
-                        fill={j.featured ? "currentColor" : "none"}
-                      />
-                      {j.featured ? "Featured" : "Mark"}
+                      <Star size={16} fill={j.featured ? "currentColor" : "none"} />
                     </button>
                   </td>
-                  <td className="py-3 px-4 text-[var(--color-text-muted)]">
-                    {new Date(j.created_at).toLocaleDateString()}
+
+                  <td className="py-4 px-6 text-right">
+                    <div className="flex flex-col items-end gap-1 text-xs text-[var(--color-text-muted)]">
+                      <span className="flex items-center gap-1">
+                        <Clock size={12} />
+                        {new Date(j.created_at).toLocaleDateString()}
+                      </span>
+                    </div>
                   </td>
                 </tr>
               ))
             ) : (
               <tr>
-                <td
-                  colSpan={6}
-                  className="text-center py-6 text-[var(--color-text-muted)]"
-                >
+                <td colSpan={4} className="py-12 text-center text-[var(--color-text-muted)]">
                   No jobs found.
                 </td>
               </tr>
             )}
           </tbody>
         </table>
+
+        {/* Pagination */}
+        {filteredJobs.length > 0 && (
+          <div className="border-t border-[var(--color-border)] p-4 flex flex-col md:flex-row items-center justify-between gap-4 bg-[var(--color-bg)]/30">
+            <div className="text-xs text-[var(--color-text-muted)]">
+              Showing <span className="font-medium text-[var(--color-text)]">{(page - 1) * perPage + 1}</span> to <span className="font-medium text-[var(--color-text)]">{Math.min(page * perPage, filteredJobs.length)}</span> of {filteredJobs.length} jobs
+            </div>
+
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setPage(p => Math.max(1, p - 1))}
+                disabled={page === 1}
+                className="px-3 py-1.5 rounded-md border border-[var(--color-border)] text-xs font-medium hover:bg-[var(--color-surface)] disabled:opacity-50 disabled:hover:bg-transparent transition"
+              >
+                Previous
+              </button>
+              <button
+                onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                disabled={page >= totalPages}
+                className="px-3 py-1.5 rounded-md border border-[var(--color-border)] text-xs font-medium hover:bg-[var(--color-surface)] disabled:opacity-50 disabled:hover:bg-transparent transition"
+              >
+                Next
+              </button>
+            </div>
+          </div>
+        )}
       </motion.div>
-
-      {/* Pagination */}
-      {filteredJobs.length > 0 && (
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 mt-6 text-sm">
-          <div className="text-[var(--color-text-muted)]">
-            Showing {(page - 1) * perPage + 1}–
-            {Math.min(page * perPage, filteredJobs.length)} of{" "}
-            {filteredJobs.length} jobs
-          </div>
-
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => setPage((p) => Math.max(1, p - 1))}
-              disabled={page === 1}
-              className="px-3 py-1 border border-[var(--color-border)] rounded disabled:opacity-40 hover:bg-[var(--color-bg-hover)]"
-            >
-              Prev
-            </button>
-            <span>
-              Page {page} / {totalPages || 1}
-            </span>
-            <button
-              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-              disabled={page >= totalPages}
-              className="px-3 py-1 border border-[var(--color-border)] rounded disabled:opacity-40 hover:bg-[var(--color-bg-hover)]"
-            >
-              Next
-            </button>
-
-            <select
-              value={perPage}
-              onChange={(e) => setPerPage(Number(e.target.value))}
-              className="border border-[var(--color-border)] rounded px-2 py-1 bg-[var(--color-surface)]"
-            >
-              <option value={10}>10 / page</option>
-              <option value={25}>25 / page</option>
-              <option value={50}>50 / page</option>
-            </select>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

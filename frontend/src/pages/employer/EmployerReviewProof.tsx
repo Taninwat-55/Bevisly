@@ -14,7 +14,138 @@ import {
     CheckCircle2
 } from "lucide-react";
 import { distributeCredits } from "@/lib/api/credits";
-import { TaskRequirementsPanel, Scorecard } from "@/components/employer";
+import { Star } from "lucide-react";
+
+// Inline TaskRequirementsPanel (original was deleted)
+interface TaskInfo {
+    title: string | null;
+    description: string | null;
+    expected_time: string | null;
+    submission_type: "link" | "file" | "text";
+    ai_tools_allowed: boolean;
+}
+
+function TaskRequirementsPanel({ task }: { task: TaskInfo | null }) {
+    if (!task) {
+        return (
+            <div className="glass-panel rounded-2xl p-6">
+                <h3 className="text-xs font-bold uppercase tracking-wider text-[var(--color-text-muted)] mb-4">
+                    Task Requirements
+                </h3>
+                <p className="text-sm text-[var(--color-text-muted)]">No task information available.</p>
+            </div>
+        );
+    }
+
+    return (
+        <div className="glass-panel rounded-2xl p-6 space-y-4">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-[var(--color-employer)] mb-2">
+                Task Requirements
+            </h3>
+            <div>
+                <p className="font-semibold text-[var(--color-text)]">{task.title}</p>
+                {task.description && (
+                    <p className="text-sm text-[var(--color-text-muted)] mt-2">{task.description}</p>
+                )}
+            </div>
+            <div className="flex flex-wrap gap-2 text-xs">
+                {task.expected_time && (
+                    <span className="px-2 py-1 rounded-full bg-[var(--color-bg)] border border-[var(--color-border)]">
+                        ⏱ {task.expected_time}
+                    </span>
+                )}
+                <span className="px-2 py-1 rounded-full bg-[var(--color-bg)] border border-[var(--color-border)]">
+                    📎 {task.submission_type}
+                </span>
+                <span className="px-2 py-1 rounded-full bg-[var(--color-bg)] border border-[var(--color-border)]">
+                    {task.ai_tools_allowed ? "🤖 AI Allowed" : "🚫 No AI"}
+                </span>
+            </div>
+        </div>
+    );
+}
+
+// Inline Scorecard (original was deleted)
+interface ScorecardProps {
+    stars: number;
+    setStars: (v: number) => void;
+    strengths: string;
+    setStrengths: (v: string) => void;
+    improvements: string;
+    setImprovements: (v: string) => void;
+    isLocked: boolean;
+}
+
+function Scorecard({
+    stars,
+    setStars,
+    strengths,
+    setStrengths,
+    improvements,
+    setImprovements,
+    isLocked,
+}: ScorecardProps) {
+    return (
+        <div className="glass-panel rounded-2xl p-6 space-y-6">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-[var(--color-employer)]">
+                Your Review
+            </h3>
+
+            {/* Star Rating */}
+            <div>
+                <label className="block text-sm font-medium text-[var(--color-text)] mb-2">
+                    Rating
+                </label>
+                <div className="flex gap-1">
+                    {[1, 2, 3, 4, 5].map((n) => (
+                        <button
+                            key={n}
+                            type="button"
+                            disabled={isLocked}
+                            onClick={() => setStars(n)}
+                            className={`p-1 transition-colors ${isLocked ? "cursor-not-allowed" : "hover:scale-110"}`}
+                        >
+                            <Star
+                                size={24}
+                                className={n <= stars ? "fill-yellow-400 text-yellow-400" : "text-[var(--color-border)]"}
+                            />
+                        </button>
+                    ))}
+                </div>
+            </div>
+
+            {/* Strengths */}
+            <div>
+                <label className="block text-sm font-medium text-[var(--color-text)] mb-2">
+                    Strengths
+                </label>
+                <textarea
+                    value={strengths}
+                    onChange={(e) => setStrengths(e.target.value)}
+                    disabled={isLocked}
+                    placeholder="What did the candidate do well?"
+                    className="w-full p-3 rounded-xl border border-[var(--color-border)] bg-[var(--color-input-bg)] text-[var(--color-text)] placeholder:text-[var(--color-text-muted)] resize-none focus:outline-none focus:ring-2 focus:ring-[var(--color-employer)] disabled:opacity-60"
+                    rows={3}
+                />
+            </div>
+
+            {/* Improvements */}
+            <div>
+                <label className="block text-sm font-medium text-[var(--color-text)] mb-2">
+                    Areas for Improvement
+                </label>
+                <textarea
+                    value={improvements}
+                    onChange={(e) => setImprovements(e.target.value)}
+                    disabled={isLocked}
+                    placeholder="What could be improved?"
+                    className="w-full p-3 rounded-xl border border-[var(--color-border)] bg-[var(--color-input-bg)] text-[var(--color-text)] placeholder:text-[var(--color-text-muted)] resize-none focus:outline-none focus:ring-2 focus:ring-[var(--color-employer)] disabled:opacity-60"
+                    rows={3}
+                />
+            </div>
+        </div>
+    );
+}
 
 // Helper function to detect video links
 const getVideoEmbed = (url: string | null) => {

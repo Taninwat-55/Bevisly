@@ -1,113 +1,132 @@
 import { useEffect, useState } from "react";
-import HomeLayout from "@/layout/HomeLayout";
 import { useAuth } from "@/hooks/useAuth";
 import { useCandidateStats } from "@/hooks/useCandidateStats";
+import { getAllJobs } from "@/lib/api/jobs";
+import type { CandidateJob } from "@/types";
+import JobCard from "@/components/jobs/JobCard";
 import { Link } from "react-router-dom";
-import { Loader2 } from "lucide-react";
-import { supabase } from "@/lib/supabaseClient"; 
+import {
+  Trophy,
+  Target,
+  Briefcase,
+  TrendingUp,
+  ArrowRight
+} from "lucide-react";
+import { Button } from "@/components/ui/Button";
 
-export default function CandidateHome() {
+export default function CandidateDashboard() {
   const { user } = useAuth();
-  const { proofsCompleted, avgScore, jobsApplied, credits, loading } = useCandidateStats();
-  const [displayName, setDisplayName] = useState<string>(""); 
+  const { proofsCompleted, avgScore, jobsApplied, credits } = useCandidateStats();
+  const [jobs, setJobs] = useState<CandidateJob[]>([]);
+  const [loadingJobs, setLoadingJobs] = useState(true);
 
-  // Fetch profile name
   useEffect(() => {
-    if (!user?.id) return;
-    
-    const fetchProfileName = async () => {
-      const { data } = await supabase
-        .from("profiles")
-        .select("full_name")
-        .eq("id", user.id)
-        .single();
-      
-      if (data?.full_name) {
-        setDisplayName(data.full_name);
+    const fetchJobs = async () => {
+      try {
+        const data = await getAllJobs();
+        setJobs(data.slice(0, 3)); // Top 3 recommended
+      } catch (error) {
+        console.error("Failed to fetch jobs", error);
+      } finally {
+        setLoadingJobs(false);
       }
     };
+    fetchJobs();
+  }, []);
 
-    fetchProfileName();
-  }, [user?.id]);
-
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center min-h-screen text-[var(--color-text-muted)]">
-        <Loader2 className="animate-spin mr-2" size={18} />
-        Loading your dashboard…
-      </div>
-    );
-  }
+  const displayName = user?.email?.split("@")[0] || "Candidate";
 
   return (
-    <HomeLayout
-      accentColor="var(--color-candidate-dark)"
-      // Use Display Name if available
-      title={`👋 Welcome back, ${displayName || user?.email?.split("@")[0] || "Candidate"}!`}
-      subtitle="Track your progress, explore new proof tasks, and grow your verified record."
-    >
-      {/* Quick Stats */}
-      <div className="sm:col-span-2 lg:col-span-3 grid sm:grid-cols-3 gap-4 mb-2">
-        <StatCard label="Proofs Completed" value={proofsCompleted} />
-        <StatCard label="Average Score" value={avgScore ? `${avgScore}★` : "—"} />
-        <StatCard label="Jobs Applied" value={jobsApplied} />
-      </div>
+    <div className="space-y-8 pb-10">
 
-      {/* Credits */}
-      <div className="sm:col-span-2 lg:col-span-3">
-        <div className="bg-[var(--color-candidate)]/10 border border-[var(--color-border)] rounded-[var(--radius-card)] shadow-[var(--shadow-soft)] p-5 text-center">
-          <p className="text-sm text-[var(--color-text-muted)]">
-            You currently have{" "}
-            <strong className="text-[var(--color-candidate-dark)]">{credits}</strong> Bevisly
-            Credits — earn more through top-rated proofs.
-          </p>
+      {/* ── Hero Section ────────────────────────────── */}
+      <div className="relative group overflow-hidden rounded-3xl p-8 lg:p-10 border border-[var(--color-border)] bg-[var(--color-surface)] shadow-2xl">
+        {/* Background Gradient/Mesh */}
+        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-gradient-to-br from-[var(--color-brand-primary)]/10 to-[var(--color-brand-secondary)]/10 rounded-full blur-[100px] -z-10 translate-x-1/3 -translate-y-1/3" />
+
+        <div className="relative z-10">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+            <div>
+              <h1 className="text-3xl md:text-4xl font-bold font-display text-[var(--color-text)] mb-2">
+                Welcome back, <span className="text-transparent bg-clip-text bg-gradient-to-r from-[var(--color-brand-primary)] to-[var(--color-brand-secondary)] capitalize">{displayName}</span>
+              </h1>
+              <p className="text-[var(--color-text-muted)] text-lg max-w-xl">
+                You have <strong className="text-[var(--color-text)]">{credits} Credits</strong> available.
+                Complete more proof tasks to earn badges and unlock exclusive roles.
+              </p>
+            </div>
+            <div className="flex items-center gap-3">
+              <Button onClick={() => window.location.href = '/candidate/jobs'} size="lg" className="shadow-glow-primary">
+                Find Work
+              </Button>
+            </div>
+          </div>
+
+          {/* Stats Row within Hero */}
+          <div className="grid grid-cols-3 gap-4 mt-8 md:mt-12 max-w-2xl">
+            <div className="glass-panel bg-white/50 dark:bg-black/20 p-4 rounded-2xl border border-[var(--color-border)]/50 backdrop-blur-md">
+              <div className="flex items-center gap-3 mb-1">
+                <div className="p-2 rounded-lg bg-emerald-500/10 text-emerald-500">
+                  <Trophy size={18} />
+                </div>
+                <span className="text-sm text-[var(--color-text-muted)] font-medium">Proofs</span>
+              </div>
+              <div className="text-2xl font-bold text-[var(--color-text)]">{proofsCompleted}</div>
+            </div>
+
+            <div className="glass-panel bg-white/50 dark:bg-black/20 p-4 rounded-2xl border border-[var(--color-border)]/50 backdrop-blur-md">
+              <div className="flex items-center gap-3 mb-1">
+                <div className="p-2 rounded-lg bg-amber-500/10 text-amber-500">
+                  <Target size={18} />
+                </div>
+                <span className="text-sm text-[var(--color-text-muted)] font-medium">Avg Score</span>
+              </div>
+              <div className="text-2xl font-bold text-[var(--color-text)]">{avgScore ? avgScore : "-"}</div>
+            </div>
+
+            <div className="glass-panel bg-white/50 dark:bg-black/20 p-4 rounded-2xl border border-[var(--color-border)]/50 backdrop-blur-md">
+              <div className="flex items-center gap-3 mb-1">
+                <div className="p-2 rounded-lg bg-blue-500/10 text-blue-500">
+                  <TrendingUp size={18} />
+                </div>
+                <span className="text-sm text-[var(--color-text-muted)] font-medium">Applied</span>
+              </div>
+              <div className="text-2xl font-bold text-[var(--color-text)]">{jobsApplied}</div>
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* Action Cards */}
-      <ActionCard
-        title="Explore Proof Tasks"
-        desc="Browse available roles and challenges that match your skills."
-        href="/jobs"
-      />
-      <ActionCard
-        title="🧾 View Feedback"
-        desc="Check employer ratings and feedback to improve your next submission."
-        href="/candidate/proofs"
-      />
-      <ActionCard
-        title="📄 Update Profile"
-        desc="Keep your information up-to-date and strengthen your credibility."
-        href="/candidate/profile"
-      />
-    </HomeLayout>
-  );
-}
+      {/* ── Recommended Jobs ────────────────────────────── */}
+      <div>
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-2xl font-bold font-display text-[var(--color-text)] flex items-center gap-2">
+            <Briefcase className="text-[var(--color-brand-primary)]" size={24} />
+            Recommended Roles
+          </h2>
+          <Link to="/candidate/jobs" className="text-sm font-medium text-[var(--color-text-muted)] hover:text-[var(--color-brand-primary)] flex items-center gap-1 transition-colors">
+            View All <ArrowRight size={16} />
+          </Link>
+        </div>
 
-/* ─────────────────────────────── Subcomponents ─────────────────────────────── */
-
-function StatCard({ label, value }: { label: string; value: string | number }) {
-  return (
-    <div className="bg-[var(--color-surface)] p-4 rounded-[var(--radius-card)] border border-[var(--color-border)] shadow-[var(--shadow-soft)] text-center">
-      <div className="text-2xl font-semibold text-[var(--color-candidate-dark)] mb-1">
-        {value}
+        {loadingJobs ? (
+          <div className="grid md:grid-cols-3 gap-6">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="h-64 rounded-2xl bg-[var(--color-surface)] border border-[var(--color-border)] animate-pulse" />
+            ))}
+          </div>
+        ) : (
+          <div className="grid md:grid-cols-3 gap-6">
+            {jobs.map((job) => (
+              <JobCard key={job.id} job={job} />
+            ))}
+          </div>
+        )}
       </div>
-      <p className="text-sm text-[var(--color-text-muted)]">{label}</p>
-    </div>
-  );
-}
 
-function ActionCard({ title, desc, href }: { title: string; desc: string; href: string }) {
-  return (
-    <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-card)] shadow-[var(--shadow-soft)] p-6 hover:shadow-[var(--shadow-hover)] transition-all">
-      <h2 className="font-semibold mb-2 text-[var(--color-text)]">{title}</h2>
-      <p className="text-sm text-[var(--color-text-muted)] mb-4">{desc}</p>
-      <Link
-        to={href}
-        className="text-[var(--color-candidate-dark)] font-medium hover:underline transition"
-      >
-        Go →
-      </Link>
+      {/* ── Recent Applications (Placeholder) ────────────────────────────── */}
+      {/* We can expand this later if we have an API for applications */}
+
     </div>
   );
 }

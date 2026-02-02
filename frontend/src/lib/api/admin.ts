@@ -10,7 +10,7 @@ import type {
 export async function getAllUsers(): Promise<BevislyUser[]> {
   const { data, error } = await supabase
     .from("profiles") 
-    .select("id, email, role, created_at")
+    .select("id, email, role, created_at, credits")
     .order("created_at", { ascending: false });
 
   if (error) throw error;
@@ -21,6 +21,7 @@ export async function getAllUsers(): Promise<BevislyUser[]> {
       email: u.email ?? "",
       role: (u.role as BevislyUser["role"]) || "candidate",
       created_at: u.created_at ?? new Date().toISOString(),
+      credits: u.credits ?? 0,
     })) ?? []
   );
 }
@@ -45,6 +46,7 @@ export async function getAllJobs(): Promise<AdminJob[]> {
 
   if (error) throw error;
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   type RawJob = any; 
 
   return (
@@ -83,6 +85,7 @@ export async function getAllFeedbackLogs(): Promise<AdminFeedback[]> {
 
   if (error) throw error;
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   type RawFeedback = any;
 
   return (
@@ -115,6 +118,29 @@ export async function toggleFeaturedJob(jobId: string, newState: boolean) {
     .eq("id", jobId);
   if (error) throw error;
   return true;
+}
+
+// Add credits to a user (Admin only)
+export async function addCredits(userId: string, amount: number) {
+  // First get current credits
+  const { data: profile, error: fetchError } = await supabase
+    .from("profiles")
+    .select("credits")
+    .eq("id", userId)
+    .single();
+
+  if (fetchError) throw fetchError;
+
+  const current = profile?.credits || 0;
+  const newBalance = current + amount;
+
+  const { error } = await supabase
+    .from("profiles")
+    .update({ credits: newBalance })
+    .eq("id", userId);
+
+  if (error) throw error;
+  return newBalance;
 }
 
 export async function getAdminStats(): Promise<AdminStats> {
@@ -170,6 +196,7 @@ export async function getTableData(table: string, limit = 25, offset = 0) {
     throw new Error(`Access denied: Table '${table}' is not in the allowed list`);
   }
   
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const sb = supabase as any; 
   const { data, error } = await sb
     .from(table)
@@ -187,6 +214,7 @@ export async function getTableSchema(table: string) {
     throw new Error(`Access denied: Table '${table}' is not in the allowed list`);
   }
   
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const sb = supabase as any;
   
   const { data, error } = await sb
@@ -199,5 +227,6 @@ export async function getTableSchema(table: string) {
     return [];
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return data?.filter((c: any) => typeof c.column_name === 'string') ?? [];
 }
