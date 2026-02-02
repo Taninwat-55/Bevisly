@@ -9,12 +9,10 @@ import {
   Clock,
   Package,
   Brain,
-  LogIn,
+  Shield,
+  DollarSign,
   CheckCircle,
   X,
-  Edit3,
-  FolderOpen,
-  Shield,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import type { Job } from "@/types/job";
@@ -61,6 +59,7 @@ export default function JobDetailPage() {
       setLoading(false);
     };
     fetchJob();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
   /* ─── Loading & Empty States ─────────────────────────────── */
@@ -126,7 +125,7 @@ export default function JobDetailPage() {
     "hiringOrganization": {
       "@type": "Organization",
       "name": job.company,
-      "sameAs": "https://bevisly.com" 
+      "sameAs": "https://bevisly.com"
     },
     "jobLocation": {
       "@type": "Place",
@@ -149,284 +148,265 @@ export default function JobDetailPage() {
 
   /* ─── Render ─────────────────────────────────────────────── */
   return (
-    <div className="min-h-screen bg-[var(--color-bg)] px-8 py-10 relative">
+    <div className="min-h-screen bg-[var(--color-bg)] text-[var(--color-text)] relative overflow-hidden">
+      {/* Background Blobs */}
+      <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-blue-500/5 rounded-full blur-[120px] pointer-events-none -z-10" />
+      <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-purple-500/5 rounded-full blur-[120px] pointer-events-none -z-10" />
+
       {job && (
         <Helmet>
-          {/* Standard Meta Tags */}
           <title>{`${job.title} at ${job.company} | Bevisly`}</title>
           <meta name="description" content={`Apply for the ${job.title} role at ${job.company}. Verified proof-based hiring.`} />
-
-          {/* Open Graph (Facebook/LinkedIn Cards) */}
           <meta property="og:title" content={`${job.title} at ${job.company}`} />
           <meta property="og:description" content={job.description?.slice(0, 150) + "..."} />
           <meta property="og:type" content="website" />
-
-          {/* Google Jobs Schema Script */}
           <script type="application/ld+json">{jobSchema}</script>
         </Helmet>
       )}
 
-      {/* Back Button */}
-      <button
-        onClick={() => navigate(-1)}
-        className="mb-6 text-sm text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition"
-      >
-        ← Back
-      </button>
+      <div className="max-w-4xl mx-auto px-6 py-8">
+        {/* Back Button */}
+        <button
+          onClick={() => navigate(-1)}
+          className="mb-8 flex items-center gap-2 text-sm text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors group"
+        >
+          <span className="p-1.5 rounded-full bg-[var(--color-surface)] border border-[var(--color-border)] group-hover:border-[var(--color-text-muted)] transition-colors">
+            ←
+          </span>
+          Back
+        </button>
 
-      {/* Job Header */}
-      <header className="mb-8">
-        <h1 className="heading-lg mb-1 text-[var(--color-text)]">
-          {job.title}
-        </h1>
-        <p className="text-[var(--color-text-muted)]">
-          {job.company || "—"} {job.location && `• ${job.location}`}
-        </p>
-      </header>
+        {/* Job Header Card */}
+        <div className="relative glass-panel rounded-3xl p-8 border border-[var(--color-border)] overflow-hidden mb-8 shadow-xl">
+          <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-[var(--color-brand-primary)]/10 to-transparent blur-3xl -z-10" />
 
-      {/* Job Description */}
-      <section className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-card)] shadow-[var(--shadow-soft)] p-6 mb-8">
-        <h2 className="heading-md mb-2">About the Role</h2>
-        <p className="body-base leading-relaxed text-[var(--color-text-muted)] whitespace-pre-line">
-          {job.description || "No description provided."}
-        </p>
-
-        {/* Requirements Section */}
-        {job.requirements && (
-          <div className="mt-8 pt-6 border-t border-[var(--color-border)]">
-            <h3 className="text-lg font-semibold text-[var(--color-text)] mb-3">
-              Requirements & Skills
-            </h3>
-            <div className="body-base leading-relaxed text-[var(--color-text-muted)] whitespace-pre-line">
-              {job.requirements}
-            </div>
-          </div>
-        )}
-
-        <div className="flex flex-wrap items-center gap-3 mt-4 text-sm text-[var(--color-text-muted)]">
-          <span>📍 {job.location || "Remote"}</span>
-
-          {/* Deadline Info */}
-          {job.expires_at && (
-            <span className="flex items-center gap-1 text-[var(--color-warning)]">
-              <Clock size={14} />
-              Deadline: {new Date(job.expires_at).toLocaleDateString()}
-            </span>
-          )}
-
-          {job.paid && (
-            <span className="bg-[var(--color-candidate-light)] text-[var(--color-candidate-dark)] px-2 py-1 rounded-[var(--radius-button)] text-xs font-medium">
-              Paid Opportunity
-            </span>
-          )}
-
-          {job.show_salary_range && job.salary_min && job.salary_max && (
-            <span className="bg-[var(--color-surface-hover)] text-[var(--color-text)] px-2 py-1 rounded-[var(--radius-button)] text-xs font-medium">
-              💰 {job.salary_min.toLocaleString()} –{" "}
-              {job.salary_max.toLocaleString()} {job.payment_currency ?? "EUR"}{" "}
-              /{job.pay_period ?? "month"}
-            </span>
-          )}
-        </div>
-      </section>
-
-      {/* EXTERNAL JOB APPLY BUTTON (No Proof Task needed) */}
-      {job.apply_url && (
-        <section className="mb-10">
-          <a
-            href={job.apply_url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="block w-full text-center py-4 rounded-[var(--radius-button)] font-semibold text-lg bg-[var(--color-employer)] text-white hover:bg-[var(--color-employer-dark)] transition shadow-md hover:shadow-lg"
-          >
-            Apply on Company Site ↗
-          </a>
-        </section>
-      )}
-
-      {/* Proof Task Section */}
-      {proof && (
-        <section className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-card)] shadow-[var(--shadow-soft)] p-6 mb-10">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="heading-md">Proof Task</h2>
-            <span className="text-xs text-[var(--color-text-muted)]">
-              Task ID: {proof.id.slice(0, 8)}…
-            </span>
-          </div>
-
-          <h3 className="font-semibold text-[var(--color-text)] mb-1">
-            {proof.title}
-          </h3>
-          <p className="text-sm text-[var(--color-text-muted)] mb-4 leading-relaxed">
-            {proof.description || "No task description provided."}
-          </p>
-
-          <ul className="text-sm text-[var(--color-text-muted)] space-y-2 mb-6">
-            <li className="flex items-center gap-2">
-              <Clock size={15} className="opacity-80" />
-              <span>
-                <strong>Expected Time:</strong> {proof.expected_time || "—"}
-              </span>
-            </li>
-            <li className="flex items-center gap-2">
-              <Package size={15} className="opacity-80" />
-              <span>
-                <strong>Submission Format:</strong>{" "}
-                {proof.submission_format || "Not specified"}
-              </span>
-            </li>
-            <li className="flex items-center gap-2">
-              <Brain size={15} className="opacity-80" />
-              <span>
-                <strong>AI Tools Allowed:</strong>{" "}
-                {proof.ai_tools_allowed ? (
-                  <span className="text-[var(--color-success)] font-medium">
-                    Yes
-                  </span>
-                ) : (
-                  <span className="text-[var(--color-error)] font-medium">
-                    No
-                  </span>
-                )}
-              </span>
-            </li>
-          </ul>
-
-          {/* Role-specific actions */}
-          {/* 1. EXTERNAL JOB (Backfilled) - Show to Guests & Candidates */}
-          {job.apply_url && (!user || role === "candidate") && (
-            <a
-              href={job.apply_url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="block w-full text-center py-3 rounded-[var(--radius-button)] font-medium bg-[var(--color-employer)] text-white hover:bg-[var(--color-employer-dark)] transition shadow-sm mb-4"
-            >
-              Apply on Company Site ↗
-            </a>
-          )}
-
-          {/* 2. INTERNAL JOB (Bevisly Task) - Show to Guests & Candidates */}
-          {!job.apply_url && (!user || role === "candidate") && (
-            <button
-              onClick={handleCTA}
-              disabled={hasApplied}
-              className={`w-full py-3 rounded-[var(--radius-button)] font-medium transition ${hasApplied
-                ? "bg-green-100 text-green-700 cursor-default"
-                : !user
-                  ? "bg-[var(--color-bg-hover)] border border-[var(--color-border)] text-[var(--color-text-muted)] hover:text-[var(--color-candidate-dark)]"
-                  : "bg-[var(--color-candidate)] text-white hover:bg-[var(--color-candidate-dark)] shadow-sm"
-                }`}
-            >
-              {hasApplied ? (
-                "✅ Application Submitted"
-              ) : !user ? (
-                <span className="inline-flex items-center gap-1 justify-center">
-                  <LogIn size={18} /> Sign in to Start Proof
-                </span>
-              ) : (
-                "Start Proof Task"
-              )}
-            </button>
-          )}
-
-          {/* 3. EMPLOYER ACTIONS - Only show to Employers */}
-          {role === "employer" && (
-            <div className="flex gap-3 mt-4">
-              <button
-                onClick={() => navigate(`/employer/jobs/${id}/edit`)}
-                className="bg-[var(--color-employer)] text-white px-4 py-2 rounded-[var(--radius-button)] hover:bg-[var(--color-employer-dark)] transition flex items-center gap-2"
-              >
-                <Edit3 size={16} /> Edit Job
-              </button>
-              <button
-                onClick={() => navigate(`/employer/submissions`)}
-                className="border border-[var(--color-border)] text-[var(--color-text-muted)] px-4 py-2 rounded-[var(--radius-button)] hover:bg-[var(--color-border)] transition flex items-center gap-2"
-              >
-                <FolderOpen size={16} /> View Submissions
-              </button>
-            </div>
-          )}
-
-          {/* 4. ADMIN ACTIONS - Only show to Admins */}
-          {role === "admin" && (
-            <div className="flex gap-3 mt-4">
-              <button
-                onClick={() => toast("Admin management coming soon!")}
-                className="bg-[var(--color-admin)] text-white px-4 py-2 rounded-[var(--radius-button)] hover:bg-[var(--color-admin-dark)] transition flex items-center gap-2"
-              >
-                <Shield size={16} /> Manage Job
-              </button>
-            </div>
-          )}
-
-        </section>
-      )}
-
-      {/* Confirmation Modal */}
-      <AnimatePresence>
-        {showConfirm && proof && (
-          <motion.div
-            className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-          >
-            <motion.div
-              className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-card)] shadow-xl p-6 max-w-sm w-[90%] text-center relative"
-              initial={{ scale: 0.95, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.95, opacity: 0 }}
-            >
-              <CheckCircle
-                className="mx-auto text-[var(--color-success)] mb-3"
-                size={32}
-              />
-              <h2 className="heading-md mb-1">Proof Started!</h2>
-              <p className="text-sm text-[var(--color-text-muted)] mb-6">
-                You’re about to begin your submission for{" "}
-                <strong>{job.title}</strong>.
-              </p>
-
-              <label className="flex items-center justify-center gap-2 text-xs text-[var(--color-text-muted)] mb-6 cursor-pointer select-none">
-                <input
-                  type="checkbox"
-                  checked={skipModal}
-                  onChange={(e) => {
-                    const checked = e.target.checked;
-                    setSkipModal(checked);
-                    localStorage.setItem("skipProofConfirm", String(checked));
-                  }}
-                  className="accent-[var(--color-candidate)]"
-                />
-                Don’t show this confirmation again
-              </label>
-
-              <div className="flex gap-3 justify-center">
-                <button
-                  onClick={confirmStartProof}
-                  disabled={starting}
-                  className="bg-[var(--color-candidate)] text-white px-4 py-2 rounded-[var(--radius-button)] hover:bg-[var(--color-candidate-dark)] transition disabled:opacity-60"
-                >
-                  {starting ? "Opening..." : "Go to Workspace"}
-                </button>
-                <button
-                  onClick={() => setShowConfirm(false)}
-                  className="border border-[var(--color-border)] px-4 py-2 rounded-[var(--radius-button)] text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
-                >
-                  Cancel
-                </button>
+          <div className="flex flex-col md:flex-row md:items-start justify-between gap-6">
+            <div>
+              <h1 className="text-3xl md:text-4xl font-bold font-display tracking-tight text-[var(--color-text)] mb-3 bg-clip-text text-transparent bg-gradient-to-r from-[var(--color-text)] to-[var(--color-text-muted)]">
+                {job.title}
+              </h1>
+              <div className="flex items-center gap-2 text-[var(--color-text-muted)]">
+                <span className="font-semibold text-[var(--color-brand-primary)]">{job.company || "Company"}</span>
+                <span>•</span>
+                <span>{job.location || "Remote"}</span>
               </div>
 
-              <button
-                onClick={() => setShowConfirm(false)}
-                className="absolute top-3 right-3 text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
+              <div className="flex flex-wrap gap-2 mt-6">
+                {job.paid && (
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 text-xs font-medium">
+                    <DollarSign size={13} /> Paid Role
+                  </span>
+                )}
+                {job.show_salary_range && job.salary_min && job.salary_max && (
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[var(--color-surface)] border border-[var(--color-border)] text-[var(--color-text-muted)] text-xs font-medium">
+                    💰 {job.salary_min.toLocaleString()} – {job.salary_max.toLocaleString()} {job.payment_currency}
+                  </span>
+                )}
+                {job.expires_at && (
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-600 text-xs font-medium">
+                    <Clock size={13} /> Expires {new Date(job.expires_at).toLocaleDateString()}
+                  </span>
+                )}
+              </div>
+            </div>
+
+            {/* Proof Badge/Icon */}
+            {proof && (
+              <div className="hidden md:flex flex-col items-end">
+                <div className="w-16 h-16 rounded-2xl bg-[var(--color-surface)] border border-[var(--color-border)] flex items-center justify-center shadow-inner">
+                  <Brain size={32} className="text-[var(--color-brand-primary)]" />
+                </div>
+                <span className="text-xs text-[var(--color-text-muted)] mt-2 font-medium">Proof-Based</span>
+              </div>
+            )}
+          </div>
+        </div>
+
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Left Column: Content */}
+          <div className="lg:col-span-2 space-y-8">
+
+            {/* Description */}
+            <section>
+              <h3 className="text-lg font-semibold text-[var(--color-text)] mb-4 flex items-center gap-2">
+                <Package size={18} className="text-[var(--color-brand-primary)]" /> About the Role
+              </h3>
+              <div className="prose prose-invert max-w-none text-[var(--color-text-muted)] leading-relaxed whitespace-pre-line text-sm md:text-base">
+                {job.description || "No description provided."}
+              </div>
+            </section>
+
+            {/* Requirements */}
+            {job.requirements && (
+              <section>
+                <h3 className="text-lg font-semibold text-[var(--color-text)] mb-4 flex items-center gap-2">
+                  <CheckCircle size={18} className="text-[var(--color-brand-primary)]" />  Requirements
+                </h3>
+                <div className="prose prose-invert max-w-none text-[var(--color-text-muted)] leading-relaxed whitespace-pre-line text-sm md:text-base bg-[var(--color-surface)]/50 p-6 rounded-2xl border border-[var(--color-border)] border-dashed">
+                  {job.requirements}
+                </div>
+              </section>
+            )}
+          </div>
+
+          {/* Right Column: Sidebar Actions */}
+          <div className="space-y-6">
+
+            {/* Proof Task Card (The Main CTA) */}
+            {proof ? (
+              <div className="sticky top-24 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-2xl shadow-lg p-6 relative overflow-hidden group">
+                {/* Shine effect */}
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full group-hover:animate-shimmer pointer-events-none" />
+
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="p-2 rounded-lg bg-[var(--color-brand-primary)]/10 text-[var(--color-brand-primary)]">
+                    <Shield size={20} />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-[var(--color-text)]">Proof Task</h3>
+                    <p className="text-xs text-[var(--color-text-muted)]">Show, don't just tell.</p>
+                  </div>
+                </div>
+
+                <div className="space-y-4 mb-6">
+                  <h4 className="font-medium text-[var(--color-text)] text-sm">{proof.title}</h4>
+                  <p className="text-xs text-[var(--color-text-muted)] line-clamp-3">
+                    {proof.description || "Complete this task to prove your skills."}
+                  </p>
+
+                  <div className="space-y-2 pt-2 border-t border-[var(--color-border)]">
+                    <div className="flex justify-between text-xs">
+                      <span className="text-[var(--color-text-muted)]">Est. Time</span>
+                      <span className="font-medium text-[var(--color-text)]">{proof.expected_time || "N/A"}</span>
+                    </div>
+                    <div className="flex justify-between text-xs">
+                      <span className="text-[var(--color-text-muted)]">Format</span>
+                      <span className="font-medium text-[var(--color-text)] capitalize">{proof.submission_format?.replace("_", " ") || "Repo"}</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Action Buttons */}
+                {role === "employer" ? (
+                  <div className="grid grid-cols-2 gap-3">
+                    <button
+                      onClick={() => navigate(`/employer/jobs/${id}/edit`)}
+                      className="px-4 py-2.5 bg-[var(--color-surface-hover)] hover:bg-[var(--color-border)] text-[var(--color-text)] text-sm font-medium rounded-xl transition-colors text-center"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => navigate(`/employer/submissions`)}
+                      className="px-4 py-2.5 bg-[var(--color-brand-primary)] hover:bg-[var(--color-brand-primary-dark)] text-white text-sm font-medium rounded-xl transition-colors text-center"
+                    >
+                      Submissions
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    onClick={handleCTA}
+                    disabled={hasApplied}
+                    className={`w-full py-3 rounded-xl font-bold text-sm transition-all transform active:scale-[0.98]
+                                    ${hasApplied
+                        ? "bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 cursor-default"
+                        : "bg-[var(--color-brand-primary)] hover:bg-[var(--color-brand-primary-dark)] text-white shadow-lg hover:shadow-brand-primary/25"
+                      }`}
+                  >
+                    {hasApplied ? "✅ Submitted" : "Start Proof Task"}
+                  </button>
+                )}
+              </div>
+            ) : (
+              // External Application Fallback
+              job.apply_url && (
+                <div className="sticky top-24 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-2xl p-6">
+                  <h3 className="font-bold text-[var(--color-text)] mb-2">Apply Externally</h3>
+                  <p className="text-sm text-[var(--color-text-muted)] mb-4">
+                    This role requires an external application on the company's site.
+                  </p>
+                  <a
+                    href={job.apply_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block w-full text-center py-3 bg-[var(--color-text)] hover:bg-[var(--color-text-muted)] text-[var(--color-bg)] rounded-xl font-bold text-sm transition-colors"
+                  >
+                    Apply Now ↗
+                  </a>
+                </div>
+              )
+            )}
+
+          </div>
+        </div>
+
+        {/* Confirmation Modal */}
+        <AnimatePresence>
+          {showConfirm && proof && (
+            <motion.div
+              className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[100]"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+            >
+              <motion.div
+                className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-2xl shadow-2xl p-8 max-w-sm w-[90%] text-center relative overflow-hidden"
+                initial={{ scale: 0.95, opacity: 0, y: 10 }}
+                animate={{ scale: 1, opacity: 1, y: 0 }}
+                exit={{ scale: 0.95, opacity: 0, y: 10 }}
               >
-                <X size={16} />
-              </button>
+                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-[var(--color-brand-primary)] to-transparent opacity-50" />
+
+                <div className="w-16 h-16 rounded-full bg-[var(--color-brand-primary)]/10 flex items-center justify-center mx-auto mb-4 text-[var(--color-brand-primary)]">
+                  <Brain size={32} />
+                </div>
+
+                <h2 className="text-xl font-bold text-[var(--color-text)] mb-2">Ready to Prove It?</h2>
+                <p className="text-sm text-[var(--color-text-muted)] mb-8 leading-relaxed">
+                  You're starting the proof task for <strong>{job.title}</strong>. This is your chance to shine!
+                </p>
+
+                <label className="flex items-center justify-center gap-2 text-xs text-[var(--color-text-muted)] mb-6 cursor-pointer select-none hover:text-[var(--color-text)] transition-colors">
+                  <input
+                    type="checkbox"
+                    checked={skipModal}
+                    onChange={(e) => {
+                      const checked = e.target.checked;
+                      setSkipModal(checked);
+                      localStorage.setItem("skipProofConfirm", String(checked));
+                    }}
+                    className="rounded border-[var(--color-border)] bg-[var(--color-bg)] text-[var(--color-brand-primary)] focus:ring-[var(--color-brand-primary)]/20"
+                  />
+                  Don’t show this again
+                </label>
+
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => setShowConfirm(false)}
+                    className="flex-1 px-4 py-2.5 rounded-xl border border-[var(--color-border)] text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[var(--color-surface-hover)] font-medium text-sm transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={confirmStartProof}
+                    disabled={starting}
+                    className="flex-1 px-4 py-2.5 rounded-xl bg-[var(--color-brand-primary)] hover:bg-[var(--color-brand-primary-dark)] text-white font-bold text-sm transition-colors shadow-lg hover:shadow-[var(--color-brand-primary)]/25 disabled:opacity-70 disabled:cursor-not-allowed"
+                  >
+                    {starting ? "Starting..." : "Let's Go!"}
+                  </button>
+                </div>
+
+                <button
+                  onClick={() => setShowConfirm(false)}
+                  className="absolute top-4 right-4 text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors"
+                >
+                  <X size={20} />
+                </button>
+              </motion.div>
             </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+          )}
+        </AnimatePresence>
+      </div>
     </div>
   );
 }

@@ -7,19 +7,16 @@ import { useState, useMemo, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useJobs } from "@/hooks/useJobs";
-import { getEmployerJobs, deleteJob, getSavedJobIds, toggleSavedJob } from "@/lib/api/jobs";
+import { getEmployerJobs, getSavedJobIds, toggleSavedJob } from "@/lib/api/jobs";
 import { supabase } from "@/lib/supabaseClient";
 import {
   Loader2,
-  Briefcase,
   Search,
-  Edit3,
-  FolderOpen,
   Plus,
   XCircle,
-  Trash2,
-  Clock,
-  Heart
+  Briefcase,
+  ChevronLeft,
+  ChevronRight
 } from "lucide-react";
 import toast from "react-hot-toast";
 
@@ -27,9 +24,12 @@ import type { SessionUser } from "@/context/AuthContext";
 import type { Job } from "@/types/job";
 import type { ProofTask } from "@/types";
 
+// UI Components
 import BackButton from "@/components/common/BackButton";
 import MultiSelectFilter from "@/components/common/MultiSelectFilter";
 import FilterChips from "@/components/common/FilterChips";
+import JobCard from "@/components/jobs/JobCard";
+import { Button } from "@/components/ui/Button";
 
 /* ─── Helpers ─────────────────────────────── */
 type JobListItem = Job & { proof_tasks?: ProofTask[] };
@@ -68,6 +68,15 @@ export default function JobListingPage() {
   const [companies, setCompanies] = useState<string[]>([]);
   const [locations, setLocations] = useState<string[]>([]);
   const [categories, setCategories] = useState<string[]>([]);
+
+  /* ─── Pagination State ─────────────────────────────── */
+  const ITEMS_PER_PAGE = 12;
+  const [currentPage, setCurrentPage] = useState(1);
+
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [query, filters, companies, locations, categories, role]);
 
   /* ─── Fetch employer jobs ─────────────────────────────── */
   useEffect(() => {
@@ -131,22 +140,6 @@ export default function JobListingPage() {
 
     // Database Update
     await toggleSavedJob(user.id, jobId);
-  };
-
-  /* ─── Handle Delete ─────────────────────────────── */
-  const handleDelete = async (e: React.MouseEvent, jobId: string) => {
-    e.stopPropagation();
-
-    if (!confirm("Are you sure you want to delete this job?")) return;
-
-    try {
-      await deleteJob(jobId);
-      setEmployerJobs((prev) => prev.filter((job) => job.id !== jobId));
-      toast.success("Job removed successfully");
-    } catch (err) {
-      console.error(err);
-      toast.error("Failed to remove job");
-    }
   };
 
   /* ─── Debounced Search ─────────────────────────────── */
@@ -241,6 +234,18 @@ export default function JobListingPage() {
     });
   }, [jobs, debouncedQuery, filters, locations, companies, categories]);
 
+  /* ─── Pagination Logic (Computed) ─────────────────────────────── */
+  const totalPages = Math.ceil(filteredJobs.length / ITEMS_PER_PAGE);
+  const paginatedJobs = useMemo(() => {
+    const start = (currentPage - 1) * ITEMS_PER_PAGE;
+    return filteredJobs.slice(start, start + ITEMS_PER_PAGE);
+  }, [filteredJobs, currentPage]);
+
+  const handlePageChange = (newPage: number) => {
+    setCurrentPage(newPage);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   const handleRemoveChip = (type: string) => {
     switch (type) {
       case "query":
@@ -296,219 +301,134 @@ export default function JobListingPage() {
       </div>
     );
 
-  /* ─── Candidate empty state (After filtering applied jobs) ─── */
-  if (role !== "employer" && !filteredJobs.length) {
-    // Check if publicJobs has items but they were all filtered out by "applied" logic
-    if (publicJobs.length > 0 && appliedJobIds.size > 0 && jobs.length === 0) {
-      return (
-        <div className="min-h-screen bg-[var(--color-bg)] px-8 py-10 flex flex-col items-center justify-center text-center">
-          <div className="p-4 bg-[var(--color-success)]/10 rounded-full mb-4 text-[var(--color-success)]">
-            <Clock size={32} />
-          </div>
-          <h2 className="heading-md mb-2">All caught up!</h2>
-          <p className="text-[var(--color-text-muted)] max-w-md">
-            You've applied to all currently available jobs. Check your dashboard for updates on your submissions.
-          </p>
-          <button
-            onClick={() => navigate("/candidate/dashboard")}
-            className="mt-6 px-5 py-2 bg-[var(--color-candidate)] text-white rounded-[var(--radius-button)] hover:brightness-110 transition"
-          >
-            Go to Dashboard
-          </button>
-        </div>
-      );
-    }
-
-    return (
-      <div className="p-10 text-center text-[var(--color-text-muted)]">
-        No jobs match your search — try adjusting filters!
-      </div>
-    );
-  }
 
   /* ─── Main Layout ─────────────────────────────── */
   return (
-    <div className="min-h-screen bg-[var(--color-bg)] px-8 py-10">
-      <BackButton to="/" className="mb-6" />
+    <div className="min-h-screen bg-[var(--color-bg)] transition-colors">
 
-      {/* Header */}
-      <header className="mb-8 flex justify-between items-center">
-        <div>
-          <h1 className="heading-lg mb-1">
-            {role === "employer" ? "My Jobs" : "🔍 Browse Proof Opportunities"}
-          </h1>
-          <p className="text-[var(--color-text-muted)]">
-            {role === "employer"
-              ? "Manage and edit your proof-based roles."
-              : "Find open proof tasks and start building your verified record."}
-          </p>
+      {/* ── Fancy Banner / Header ── */}
+      <div className="relative py-12 px-8 bg-gradient-to-r from-[var(--color-brand-primary)] to-[var(--color-brand-secondary)] text-white shadow-xl overflow-hidden mt-2 rounded-b-[3rem] mx-4">
+        <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20" />
+        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3 pointer-events-none" />
+
+        <div className="relative z-10 max-w-7xl mx-auto flex flex-col md:flex-row md:items-end justify-between gap-6">
+          <div>
+            <BackButton to="/" className="mb-6" variant="glass" label="Back to Dashboard" />
+            <h1 className="text-4xl font-bold font-display leading-tight mb-2">
+              {role === "employer" ? "Manage Your Listings" : "Discover Your Next Challenge"}
+            </h1>
+            <p className="text-blue-100 max-w-xl text-lg">
+              {role === "employer"
+                ? "Track performance and manage proof-based roles."
+                : "Showcase your real skills through verified proof tasks. No resumed needed."}
+            </p>
+          </div>
+
+          {role === "employer" && (
+            <Button
+              onClick={() => navigate("/employer/jobs/new")}
+              className="bg-white text-[var(--color-brand-primary)] hover:bg-blue-50 border-transparent"
+              leftIcon={<Plus size={16} />}
+            >
+              Post New Job
+            </Button>
+          )}
+        </div>
+      </div>
+
+      <div className="px-8 py-10 max-w-[1400px] mx-auto">
+
+        {/* ── Filters ── */}
+        {role !== "employer" && (
+          <>
+            <div className="glass-panel border border-[var(--color-border)] rounded-2xl shadow-sm p-5 mb-8 space-y-5 -mt-20 relative z-20">
+              <div className="relative">
+                <Search size={18} className={`absolute left-4 top-1/2 -translate-y-1/2 transition-colors ${query ? "text-[var(--color-candidate)]" : "text-[var(--color-text-muted)]"}`} />
+                <input
+                  type="text"
+                  placeholder="Search roles, companies, or specific technologies..."
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  className="w-full pl-12 pr-4 py-3.5 text-base rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)] focus:outline-none focus:ring-2 focus:ring-[var(--color-candidate)]/20 transition-all font-medium"
+                />
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <MultiSelectFilter label="Companies" options={allCompanies} selected={companies} onChange={setCompanies} />
+                <MultiSelectFilter label="Locations" options={allLocations} selected={locations} onChange={setLocations} />
+                <MultiSelectFilter label="Role Type" options={allCategories} selected={categories} onChange={setCategories} />
+              </div>
+
+              <div className="flex flex-wrap justify-between items-center text-sm pt-2 border-t border-[var(--color-border)]/50">
+                <div className="flex flex-wrap gap-2 mt-2">
+                  <button onClick={() => setFilters((f) => ({ ...f, paid: !f.paid }))} className={`px-4 py-2 rounded-full border transition-all font-medium flex items-center gap-2 ${filters.paid ? "bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 border-emerald-200" : "border-[var(--color-border)] text-[var(--color-text-muted)] hover:bg-[var(--color-surface-hover)]"}`}>💰 Paid Opportunities</button>
+                  <button onClick={() => setFilters((f) => ({ ...f, short: !f.short }))} className={`px-4 py-2 rounded-full border transition-all font-medium flex items-center gap-2 ${filters.short ? "bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 border-blue-200" : "border-[var(--color-border)] text-[var(--color-text-muted)] hover:bg-[var(--color-surface-hover)]"}`}>⏱ Under 30 mins</button>
+                  <button onClick={() => setFilters((f) => ({ ...f, aiAllowed: !f.aiAllowed }))} className={`px-4 py-2 rounded-full border transition-all font-medium flex items-center gap-2 ${filters.aiAllowed ? "bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400 border-purple-200" : "border-[var(--color-border)] text-[var(--color-text-muted)] hover:bg-[var(--color-surface-hover)]"}`}>🤖 AI Tools Allowed</button>
+                </div>
+                {(!!query || Object.values(filters).some(Boolean) || companies.length > 0 || locations.length > 0 || categories.length > 0) && (
+                  <button onClick={handleClearAll} className="flex items-center gap-1 text-[var(--color-text-muted)] hover:text-[var(--color-error)] transition mt-2 font-medium px-2 py-1 hover:bg-red-50 dark:hover:bg-red-900/10 rounded-lg"><XCircle size={16} /> Clear Filters</button>
+                )}
+              </div>
+            </div>
+            <FilterChips query={query || undefined} paidOnly={filters.paid} remoteOnly={false} companies={companies} locations={locations} categories={categories} onRemove={handleRemoveChip} onClearAll={handleClearAll} />
+          </>
+        )}
+
+        {/* ── Empty State Candidate ── */}
+        {role !== "employer" && !filteredJobs.length && (
+          <div className="py-20 flex flex-col items-center justify-center text-center max-w-lg mx-auto">
+            <div className="w-24 h-24 bg-[var(--color-surface)] border-2 border-[var(--color-border)] rounded-full flex items-center justify-center mb-6">
+              <Briefcase size={40} className="text-[var(--color-text-muted)] opacity-50" />
+            </div>
+            <h3 className="text-xl font-bold text-[var(--color-text)] mb-2">No roles found</h3>
+            <p className="text-[var(--color-text-muted)] mb-6">
+              {publicJobs.length > 0 && jobs.length === 0
+                ? "You've caught up! checks your dashboard for updates on applied roles."
+                : "Try adjusting your filters or search query to see more results."}
+            </p>
+            <Button onClick={handleClearAll} variant="outline">Clear All Filters</Button>
+          </div>
+        )}
+
+        {/* ── Job Grid ── */}
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 mt-6 pb-20">
+          {paginatedJobs.map((job) => (
+            <JobCard
+              key={job.id}
+              job={job}
+              isSaved={savedJobIds.includes(job.id)}
+              onToggleSave={(e) => handleToggleSave(e, job.id)}
+            />
+          ))}
         </div>
 
-        {role === "employer" && (
-          <button
-            onClick={() => navigate("/employer/jobs/new")}
-            className="bg-[var(--color-employer)] text-white px-4 py-2 rounded-[var(--radius-button)] hover:bg-[var(--color-employer-dark)] transition inline-flex items-center gap-2"
-          >
-            <Plus size={16} /> Post New Job
-          </button>
-        )}
-      </header>
-
-      {/* Candidate/Public Filters */}
-      {role !== "employer" && (
-        <>
-          <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-card)] shadow-[var(--shadow-soft)] p-4 mb-4 space-y-4">
-            <div className="relative">
-              <Search size={16} className={`absolute left-3 top-1/2 -translate-y-1/2 transition-colors ${query ? "text-[var(--color-candidate)]" : "text-[var(--color-text-muted)]"}`} />
-              <input type="text" placeholder="Search by job, company, or proof task…" value={query} onChange={(e) => setQuery(e.target.value)} className="w-full pl-9 pr-3 py-2 text-sm rounded-[var(--radius-button)] border border-[var(--color-border)] bg-[var(--color-bg)] focus:outline-none focus:ring-1 focus:ring-[var(--color-candidate)]" />
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-              <MultiSelectFilter label="Companies" options={allCompanies} selected={companies} onChange={setCompanies} />
-              <MultiSelectFilter label="Locations" options={allLocations} selected={locations} onChange={setLocations} />
-              <MultiSelectFilter label="Categories" options={allCategories} selected={categories} onChange={setCategories} />
-            </div>
-            <div className="flex flex-wrap justify-between items-center text-sm">
-              <div className="flex flex-wrap gap-2">
-                <button onClick={() => setFilters((f) => ({ ...f, paid: !f.paid }))} className={`px-3 py-1.5 rounded-full border transition-all ${filters.paid ? "bg-[var(--color-candidate)] text-white border-[var(--color-candidate)]" : "border-[var(--color-border)] text-[var(--color-text-muted)] hover:border-[var(--color-candidate-light)] hover:text-[var(--color-candidate-dark)]"}`}>💰 Paid Only</button>
-                <button onClick={() => setFilters((f) => ({ ...f, short: !f.short }))} className={`px-3 py-1.5 rounded-full border transition-all ${filters.short ? "bg-[var(--color-candidate)] text-white border-[var(--color-candidate)]" : "border-[var(--color-border)] text-[var(--color-text-muted)] hover:border-[var(--color-candidate-light)] hover:text-[var(--color-candidate-dark)]"}`}>⏱ Under 30 min</button>
-                <button onClick={() => setFilters((f) => ({ ...f, aiAllowed: !f.aiAllowed }))} className={`px-3 py-1.5 rounded-full border transition-all ${filters.aiAllowed ? "bg-[var(--color-candidate)] text-white border-[var(--color-candidate)]" : "border-[var(--color-border)] text-[var(--color-text-muted)] hover:border-[var(--color-candidate-light)] hover:text-[var(--color-candidate-dark)]"}`}>🤖 AI Allowed</button>
-              </div>
-              {(!!query || Object.values(filters).some(Boolean) || companies.length > 0 || locations.length > 0 || categories.length > 0) && (
-                <button onClick={handleClearAll} className="flex items-center gap-1 text-[var(--color-text-muted)] hover:text-[var(--color-error)] transition"><XCircle size={14} /> Clear All</button>
-              )}
-            </div>
-          </div>
-          <FilterChips query={query || undefined} paidOnly={filters.paid} remoteOnly={false} companies={companies} locations={locations} categories={categories} onRemove={handleRemoveChip} onClearAll={handleClearAll} />
-        </>
-      )}
-
-      {/* Job Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6 mt-6">
-        {filteredJobs.map((job) => {
-          const proof = hasProofTasks(job) ? job.proof_tasks[0] : undefined;
-          const handleCTA = () => {
-            if (role === "employer") navigate(`/employer/jobs/${job.id}`);
-            else navigate(`/jobs/${job.id}`);
-          };
-
-          let daysLeft: number | null = null;
-          if (job.expires_at) {
-            const diff = new Date(job.expires_at).getTime() - new Date().getTime();
-            daysLeft = Math.ceil(diff / (1000 * 60 * 60 * 24));
-          }
-
-          return (
-            <div
-              key={job.id}
-              className="group bg-[var(--color-surface)] border border-[var(--color-border)]
-                         rounded-[var(--radius-card)] shadow-[var(--shadow-soft)]
-                         p-6 transition-all hover:shadow-[var(--shadow-hover)] hover:-translate-y-[2px]"
+        {/* ── Pagination Controls ── */}
+        {filteredJobs.length > ITEMS_PER_PAGE && (
+          <div className="flex justify-center items-center gap-4 mt-8 pb-12">
+            <Button
+              variant="outline"
+              onClick={() => handlePageChange(currentPage - 1)}
+              disabled={currentPage === 1}
+              leftIcon={<ChevronLeft size={16} />}
             >
-              {/* WISHLIST BUTTON */}
-              <button
-                onClick={(e) => handleToggleSave(e, job.id)}
-                className="absolute top-4 right-4 z-20 p-2.5 rounded-full bg-white border border-[var(--color-border)] shadow-sm text-[var(--color-text-muted)] hover:text-red-500 hover:border-red-200 transition-all"
-                title={savedJobIds.includes(job.id) ? "Unsave" : "Save for later"}
-              >
-                <Heart
-                  size={18}
-                  className={
-                    savedJobIds.includes(job.id)
-                      ? "fill-red-500 text-red-500"
-                      : "text-gray-400"
-                  }
-                />
-              </button>
+              Previous
+            </Button>
+            
+            <span className="text-[var(--color-text-muted)] font-medium">
+              Page {currentPage} of {totalPages}
+            </span>
 
-              {/* Header Container - Added padding-right to avoid Heart button */}
-              <div className="flex flex-col items-start gap-2 mb-3 pr-12">
-                <h3 className="text-lg font-semibold text-[var(--color-text)] leading-tight">
-                  {job.title}
-                </h3>
+            <Button
+              variant="outline"
+              onClick={() => handlePageChange(currentPage + 1)}
+              disabled={currentPage === totalPages}
+              rightIcon={<ChevronRight size={16} />}
+            >
+              Next
+            </Button>
+          </div>
+        )}
 
-                {/* XP Badge - Only Shows if Internal Job (!apply_url) */}
-                {!job.apply_url && (
-                  <span
-                    className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold border ${job.paid
-                        ? "bg-green-50 text-green-700 border-green-200"
-                        : "bg-amber-50 text-amber-700 border-amber-200"
-                      }`}
-                  >
-                    {job.paid ? "💰 Paid" : "⚡ 150 XP"}
-                  </span>
-                )}
-              </div>
-
-              <p className="text-sm text-[var(--color-text-muted)] mb-3">
-                <Briefcase size={14} className="inline mr-1 opacity-80" />
-                {job.company || "Unknown"} {job.location && `• ${job.location}`}
-
-                {daysLeft !== null && daysLeft > 0 && (
-                  <span className={`ml-2 inline-flex items-center gap-1 text-xs font-medium ${daysLeft <= 3 ? "text-[var(--color-error)]" : "text-[var(--color-warning)]"
-                    }`}>
-                    <Clock size={12} />
-                    {daysLeft}d left
-                  </span>
-                )}
-              </p>
-
-              {proof && (
-                <div className="mb-3 text-sm text-[var(--color-text-muted)]">
-                  <p className="font-medium text-[var(--color-text)] mb-1">
-                    {proof.title}
-                  </p>
-                  <p className="line-clamp-2">
-                    {proof.description || "A proof task is available."}
-                  </p>
-                </div>
-              )}
-
-              {job.show_salary_range && job.salary_min && job.salary_max && (
-                <p className="text-sm text-[var(--color-text)] font-medium mb-3">
-                  💰 {job.salary_min.toLocaleString()} –{" "}
-                  {job.salary_max.toLocaleString()}{" "}
-                  {job.payment_currency ?? "EUR"} /{job.pay_period ?? "month"}
-                </p>
-              )}
-
-              {role === "employer" ? (
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => navigate(`/employer/jobs/${job.id}/edit`)}
-                    className="flex-1 bg-[var(--color-employer)] text-white py-2 rounded-[var(--radius-button)] hover:bg-[var(--color-employer-dark)] transition flex items-center justify-center gap-1"
-                  >
-                    <Edit3 size={14} /> Edit
-                  </button>
-
-                  <button
-                    onClick={() => navigate(`/employer/submissions`)}
-                    className="flex-1 border border-[var(--color-border)] text-[var(--color-text-muted)] py-2 rounded-[var(--radius-button)] hover:bg-[var(--color-border)] transition flex items-center justify-center gap-1"
-                  >
-                    <FolderOpen size={14} /> Subs
-                  </button>
-
-                  <button
-                    onClick={(e) => handleDelete(e, job.id)}
-                    className="px-3 border border-[var(--color-border)] text-[var(--color-error)] py-2 rounded-[var(--radius-button)] hover:bg-[var(--color-error)] hover:text-white transition flex items-center justify-center"
-                    title="Delete Job"
-                  >
-                    <Trash2 size={14} />
-                  </button>
-                </div>
-              ) : (
-                <button
-                  onClick={handleCTA}
-                  className={`w-full py-2.5 rounded-[var(--radius-button)] font-medium transition flex items-center justify-center gap-2 ${!user
-                    ? "bg-[var(--color-surface)] border border-[var(--color-border)] text-[var(--color-text-muted)] hover:border-[var(--color-text-muted)] hover:text-[var(--color-text)]"
-                    : "bg-[var(--color-candidate)] text-white hover:bg-[var(--color-candidate-dark)]"
-                    }`}
-                >
-                  {!user ? "View Details →" : "View Details →"}
-                </button>
-              )}
-            </div>
-          );
-        })}
       </div>
     </div>
   );

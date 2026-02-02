@@ -1,8 +1,8 @@
 import { supabase } from "../supabaseClient";
 import type {
+  CandidateJob,
   EmployerJob,
   EmployerJobSummary,
-  CandidateJob,
   ProofTask,
 } from "@/types";
 
@@ -29,13 +29,20 @@ export async function getAllJobs(): Promise<CandidateJob[]> {
       created_at,
       expires_at,
       apply_url,
-      proof_tasks ( id, title, expected_time )
-    `) 
-    .eq("status", "active") 
+      employer_id,
+      proof_tasks ( id, title, expected_time ),
+      employer:employer_id ( avatar_url )
+    `)
+    .eq("status", "active")
     .order("created_at", { ascending: false });
 
   if (error) throw error;
-  return data;
+
+  // Map the nested employer avatar to the top-level company_logo field
+  return data.map((job: any) => ({
+    ...job,
+    company_logo: job.employer?.avatar_url || null,
+  }));
 }
 
 /* ──────────────────────────────────────────────
@@ -59,7 +66,7 @@ export async function getJobWithTasks(job_id: string) {
       pay_period,
       created_at,
       expires_at,
-      employer_id,  
+      employer_id,
       proof_tasks (
         id,
         title,
@@ -68,20 +75,26 @@ export async function getJobWithTasks(job_id: string) {
         submission_format,
         ai_tools_allowed,
         attachments
-      )
-    `) 
+      ),
+      employer:employer_id ( avatar_url )
+    `)
     .eq("id", job_id)
     .single();
 
   if (error) throw error;
-  return data;
+
+  // Map the nested employer avatar to the top-level company_logo field
+  return {
+    ...data,
+    company_logo: (data as any).employer?.avatar_url || null,
+  };
 }
 
 /* ──────────────────────────────────────────────
  * Fetch all jobs created by the logged-in employer
  * ────────────────────────────────────────────── */
 export async function getEmployerJobs(
-  employer_id: string
+  employer_id: string,
 ): Promise<(EmployerJob & { proof_tasks?: ProofTask[] })[]> {
   const { data, error } = await supabase
     .from("jobs")
@@ -114,7 +127,7 @@ export async function getEmployerJobs(
  * Employer job summary (dashboard view)
  * ────────────────────────────────────────────── */
 export async function getEmployerJobSummary(
-  employer_id: string
+  employer_id: string,
 ): Promise<EmployerJobSummary[]> {
   const { data, error } = await supabase
     .from("employer_job_summary")
@@ -130,7 +143,7 @@ export async function getEmployerJobSummary(
  * Fetch all jobs for a company (multi-tenant)
  * ────────────────────────────────────────────── */
 export async function getCompanyJobs(
-  company_id: string
+  company_id: string,
 ): Promise<(EmployerJob & { proof_tasks?: ProofTask[] })[]> {
   const { data, error } = await supabase
     .from("jobs")
@@ -167,7 +180,7 @@ export async function getFeaturedJobs() {
   const { data, error } = await supabase
     .from("jobs")
     .select(
-      "id, title, company, location, created_at, show_salary_range, salary_min, salary_max, pay_period"
+      "id, title, company, location, created_at, show_salary_range, salary_min, salary_max, pay_period",
     )
     .eq("featured", true)
     .eq("is_public", true)
@@ -181,7 +194,7 @@ export async function getFeaturedJobs() {
  * Create a job + associated proof tasks
  * ────────────────────────────────────────────── */
 export async function createJobWithTasks(
-  values: Partial<EmployerJob & { proof_tasks?: ProofTask[] }>
+  values: Partial<EmployerJob & { proof_tasks?: ProofTask[] }>,
 ) {
   const user = (await supabase.auth.getUser()).data.user;
   if (!user) throw new Error("User not authenticated.");
@@ -203,7 +216,6 @@ export async function createJobWithTasks(
         salary_max: values.salary_max ?? null,
         pay_period: values.pay_period ?? "monthly",
         employer_id: user.id,
-        company_id: values.company_id ?? null, // Multi-tenant
         expires_at: values.expires_at ?? null,
         is_public: true,
         job_type: values.job_type ?? null,
@@ -222,7 +234,7 @@ export async function createJobWithTasks(
       job_id: job.id,
       title: task.title,
       description: task.description,
-      duration_minutes: task.duration_minutes || 30, 
+      duration_minutes: task.duration_minutes || 30,
       expected_time: task.expected_time || "30 mins",
       submission_format: task.submission_format,
       submission_type: task.submission_type ?? "link",
@@ -245,7 +257,7 @@ export async function createJobWithTasks(
  * ────────────────────────────────────────────── */
 export async function updateJobWithTasks(
   job_id: string,
-  values: Partial<EmployerJob & { proof_tasks?: ProofTask[] }>
+  values: Partial<EmployerJob & { proof_tasks?: ProofTask[] }>,
 ) {
   const { error: jobError } = await supabase
     .from("jobs")
@@ -332,7 +344,9 @@ export async function deleteJob(job_id: string) {
 
   // 🚨 Validation: If count is 0, RLS probably blocked the delete
   if (count === 0) {
-    throw new Error("Job could not be deleted. You might be missing a DELETE policy in Supabase.");
+    throw new Error(
+      "Job could not be deleted. You might be missing a DELETE policy in Supabase.",
+    );
   }
 
   return true;
@@ -356,11 +370,17 @@ export async function toggleSavedJob(userId: string, jobId: string) {
 
   if (data) {
     // Unsave (Delete)
-    await supabase.from("saved_jobs").delete().eq("user_id", userId).eq("job_id", jobId);
+    await supabase.from("saved_jobs").delete().eq("user_id", userId).eq(
+      "job_id",
+      jobId,
+    );
     return false; // Result: Not Saved
   } else {
     // Save (Insert)
-    await supabase.from("saved_jobs").insert({ user_id: userId, job_id: jobId });
+    await supabase.from("saved_jobs").insert({
+      user_id: userId,
+      job_id: jobId,
+    });
     return true; // Result: Saved
   }
 }

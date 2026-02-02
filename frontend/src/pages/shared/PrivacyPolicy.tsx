@@ -1,6 +1,10 @@
 import BackButton from "@/components/common/BackButton";
+import { useState } from "react";
+import ContactModal from "@/components/common/ContactModal";
 
 export default function PrivacyPolicy() {
+  const [isContactOpen, setIsContactOpen] = useState(false);
+
   return (
     <div className="min-h-screen bg-[var(--color-bg)] text-[var(--color-text)] px-6 py-12 transition-colors">
       <div className="max-w-3xl mx-auto">
@@ -70,15 +74,19 @@ export default function PrivacyPolicy() {
               <h2 className="text-lg font-semibold text-[var(--color-text)] mb-2">6. Contact Us</h2>
               <p>
                 If you have any questions about this privacy policy or our privacy practices, please contact us at{" "}
-                <a href="mailto:support@bevisly.com" className="text-[var(--color-candidate)] underline hover:no-underline">
-                  support@bevisly.com
-                </a>{" "}
+                <button 
+                  onClick={() => setIsContactOpen(true)}
+                  className="text-[var(--color-candidate)] underline hover:no-underline"
+                >
+                  bevislyapp@gmail.com
+                </button>{" "}
                 or use the Feedback button on the site.
               </p>
             </div>
           </section>
         </article>
       </div>
+      <ContactModal isOpen={isContactOpen} onClose={() => setIsContactOpen(false)} />
     </div>
   );
 }

@@ -55,6 +55,7 @@ export async function getEmployerStats(
     .limit(3);
 
   if (recentErr) throw recentErr;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const submissions = (subs || []).map((s: any) => ({
     ...s,
     proof_tasks: Array.isArray(s.proof_tasks) ? s.proof_tasks[0] : s.proof_tasks,

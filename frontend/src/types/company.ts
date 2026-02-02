@@ -11,6 +11,11 @@ export type Company = {
   logo_url: string | null;
   owner_id: string | null;
   created_at: string | null;
+  // Pricing & Usage
+  subscription_tier?: "free" | "pro_saas";
+  active_jobs_count?: number;
+  monthly_job_posts_count?: number;
+  credits?: number;
 };
 
 export type CompanyMember = {

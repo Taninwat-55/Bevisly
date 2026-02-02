@@ -48,6 +48,7 @@ export default function JobDetailsSection({
     if (values.department !== "Other" && values.department !== customDept) {
       setCustomDept("");
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [values.department]);
 
   return (

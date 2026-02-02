@@ -19,7 +19,7 @@ export default function NotesModal({
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
 
-  // Auto-save after typing delay (500ms)
+  // 🧠 Auto-save after typing delay (500ms)
   useEffect(() => {
     if (!submission) return;
     if (!note.trim()) return;
@@ -43,6 +43,7 @@ export default function NotesModal({
       }
     }, 600);
     return () => clearTimeout(timeout);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [note]);
 
   if (!submission) return null;
@@ -79,10 +80,10 @@ export default function NotesModal({
             {saving
               ? "Saving..."
               : saved
-              ? "✓ Saved"
-              : note.trim()
-              ? "Auto-save enabled"
-              : "Type something..."}
+                ? "✓ Saved"
+                : note.trim()
+                  ? "Auto-save enabled"
+                  : "Type something..."}
           </span>
           <button
             onClick={onClose}

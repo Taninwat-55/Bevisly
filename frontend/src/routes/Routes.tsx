@@ -11,21 +11,21 @@ import RequestResetPage from "@/pages/auth/RequestResetPage";
 // --- Candidate pages
 import CandidateLayout from "@/layout/CandidateLayout";
 import CandidateHome from "@/pages/candidate/CandidateOverview";
-import CandidateDashboard from "@/pages/candidate/CandidateDashboard";
+
 import CandidateProofWorkspace from "@/pages/candidate/CandidateProofWorkspace";
 import CandidateFeedbackView from "@/pages/candidate/CandidateFeedbackView";
 import CandidateProfile from "@/pages/candidate/CandidateProfile";
+import CandidateCredits from "@/pages/candidate/CandidateCredits";
 
 // --- Employer pages
 import EmployerLayout from "@/layout/EmployerLayout";
-import EmployerHome from "@/pages/employer/EmployerOverview";
+
 import EmployerDashboard from "@/pages/employer/EmployerDashboard";
 import EmployerPostJob from "@/pages/employer/EmployerPostJob";
 import EmployerEditJob from "@/pages/employer/EmployerEditJob";
 import EmployerFeedbackSuccess from "@/pages/employer/EmployerFeedbackSuccess";
 import EmployerReview from "@/pages/employer/EmployerReviewProof";
 import EmployerTalentManager from "@/pages/employer/EmployerTalentManager";
-import EmployerSubmissions from "@/pages/employer/EmployerSubmissions";
 import EmployerTalentPool from "@/pages/employer/EmployerTalentPool";
 
 // --- Admin pages
@@ -83,12 +83,13 @@ export const router = createBrowserRouter([
         element: <CandidateLayout />,
         children: [
           { index: true, element: <CandidateHome /> },
-          { path: "dashboard", element: <CandidateDashboard /> },
+          { path: "dashboard", element: <CandidateHome /> },
           { path: "jobs", element: <JobListingPage /> },
           { path: "job/:id", element: <JobDetailPage /> },
           { path: "proof/:id", element: <CandidateProofWorkspace /> },
           { path: "proofs", element: <CandidateFeedbackView /> },
           { path: "profile", element: <CandidateProfile /> },
+          { path: "credits", element: <CandidateCredits /> },
           { path: "settings", element: <UserSettings /> },
         ],
       },
@@ -107,7 +108,7 @@ export const router = createBrowserRouter([
       {
         element: <EmployerLayout />,
         children: [
-          { index: true, element: <EmployerHome /> },
+          { index: true, element: <EmployerDashboard /> },
           { path: "dashboard", element: <EmployerDashboard /> },
           { path: "review/:id", element: <EmployerReview /> },
           { path: "review/success", element: <EmployerFeedbackSuccess /> },
@@ -115,7 +116,7 @@ export const router = createBrowserRouter([
           { path: "jobs/new", element: <EmployerPostJob /> },
           { path: "job/:id", element: <JobDetailPage /> },
           { path: "jobs/:id/edit", element: <EmployerEditJob /> },
-          { path: "submissions", element: <EmployerSubmissions /> },
+          { path: "submissions", element: <EmployerTalentPool /> },
           { path: "talent", element: <EmployerTalentPool /> },
           { path: "talent/manage", element: <EmployerTalentManager /> },
           { path: "settings", element: <UserSettings /> },

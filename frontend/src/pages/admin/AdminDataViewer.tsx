@@ -25,6 +25,7 @@ export default function AdminDataViewer() {
   useEffect(() => {
     loadData();
     loadSchema();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [table, page, perPage]);
 
   const loadData = async () => {
@@ -55,9 +56,9 @@ export default function AdminDataViewer() {
   const filteredRows = data.rows.filter((row) =>
     searchTerm
       ? Object.values(row)
-          .join(" ")
-          .toLowerCase()
-          .includes(searchTerm.toLowerCase())
+        .join(" ")
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase())
       : true
   );
   const sortedRows = [...filteredRows].sort((a, b) => {
@@ -151,11 +152,10 @@ export default function AdminDataViewer() {
               {paginatedRows.map((row, i) => (
                 <tr
                   key={i}
-                  className={`border-b border-[var(--color-border)] ${
-                    i % 2 === 0
+                  className={`border-b border-[var(--color-border)] ${i % 2 === 0
                       ? "bg-[color-mix(in srgb,var(--color-bg)90%,transparent)]"
                       : ""
-                  } hover:bg-[var(--color-bg-hover)] transition`}
+                    } hover:bg-[var(--color-bg-hover)] transition`}
                 >
                   {data.columns.map((col) => (
                     <td

@@ -1,21 +1,46 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { supabase } from "../lib/supabaseClient";
 import { AuthContext, type SessionUser } from "./AuthContext";
 import toast from "react-hot-toast";
 
-// Helper function to fetch role from the profiles table (database is source of truth)
-async function fetchRoleFromDB(userId: string): Promise<SessionUser["role"]> {
+// Helper function to fetch profile data from the profiles table
+async function fetchProfileFromDB(userId: string): Promise<{
+  role: SessionUser["role"];
+  full_name: string | null;
+  avatar_url: string | null;
+  company_name: string | null;
+  credits: number;
+  subscription_tier?: "free" | "pro_saas";
+  is_public?: boolean;
+}> {
   const { data, error } = await supabase
     .from("profiles")
-    .select("role")
+    .select("role, full_name, avatar_url, company_name, credits, subscription_tier, is_public")
     .eq("id", userId)
     .single();
 
   if (error) {
-    console.warn("Failed to fetch role from profiles:", error.message);
-    return "candidate"; // fallback
+    console.warn("Failed to fetch profile from profiles:", error.message);
+    // Return default values if fetch fails
+    return { 
+        role: "candidate", 
+        full_name: null, 
+        avatar_url: null, 
+        company_name: null,
+        credits: 0,
+        subscription_tier: "free",
+        is_public: false
+    };
   }
-  return (data?.role as SessionUser["role"]) ?? "candidate";
+  return {
+    role: (data?.role as SessionUser["role"]) ?? "candidate",
+    full_name: data?.full_name ?? null,
+    avatar_url: data?.avatar_url ?? null,
+    company_name: data?.company_name ?? null,
+    credits: data?.credits ?? 0,
+    subscription_tier: data?.subscription_tier as "free" | "pro_saas" | undefined,
+    is_public: data?.is_public ?? false,
+  };
 }
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
@@ -24,52 +49,71 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signOut = async () => {
     try {
-      // 1. Show feedback immediately so the user knows something is happening
       toast.success("👋 Logging out...");
-
-      // 2. AWAIT the Supabase cleanup. 
-      // This is critical. We must wait for it to delete the 'sb-xxxx-auth-token' 
-      // from the browser's local storage/cookies.
       await supabase.auth.signOut();
-
-      // 3. Clear our custom app keys
       localStorage.removeItem("bevisly_user");
       localStorage.removeItem("overrideRole");
-
-      // Note: We DO NOT call setUser(null) here. 
-      // If we did, the ProtectedRoute would trigger and send you to /auth 
-      // for a split second before the reload happens. 
-      // We want to stay on the current screen until the hard reload wipes everything.
-
-      // 4. Force Redirect/Reload to Landing Page
-      // Now that the token is definitely gone, this reload will result in a logged-out state.
       window.location.replace("/");
-
     } catch (err) {
       console.error("Logout error:", err);
-      // Fallback: ensure storage is cleared even if the API call fails
       localStorage.removeItem("bevisly_user");
       localStorage.removeItem("overrideRole");
       window.location.replace("/");
     }
   };
 
+  // Refresh profile data from database - call this after profile updates
+  const refreshProfile = useCallback(async () => {
+    const { data } = await supabase.auth.getSession();
+    const sessionUser = data.session?.user;
+    if (sessionUser) {
+      const profile = await fetchProfileFromDB(sessionUser.id);
+      const newUser: SessionUser = {
+        id: sessionUser.id,
+        email: sessionUser.email!,
+        role: profile.role,
+        full_name: profile.full_name,
+        avatar_url: profile.avatar_url,
+        company_name: profile.company_name,
+        credits: profile.credits,
+        subscription_tier: profile.subscription_tier,
+        is_public: profile.is_public,
+        app_metadata: {
+          provider: sessionUser.app_metadata?.provider,
+          providers: sessionUser.app_metadata?.providers,
+        },
+      };
+      setUser(newUser);
+      localStorage.setItem("bevisly_user", JSON.stringify(newUser));
+    }
+  }, []);
+
   useEffect(() => {
-    // Try cached user first
+    // Try cached user first for instant render
     const cachedUser = localStorage.getItem("bevisly_user");
     if (cachedUser) {
       setUser(JSON.parse(cachedUser));
     }
 
-    // Always confirm current Supabase session and fetch role from DB
+    // Always confirm current Supabase session and fetch profile from DB
     supabase.auth.getSession().then(async ({ data }) => {
       const sessionUser = data.session?.user;
       if (sessionUser) {
-        const role = await fetchRoleFromDB(sessionUser.id);
-        const newUser = {
+        const profile = await fetchProfileFromDB(sessionUser.id);
+        const newUser: SessionUser = {
           id: sessionUser.id,
           email: sessionUser.email!,
-          role,
+          role: profile.role,
+          full_name: profile.full_name,
+          avatar_url: profile.avatar_url,
+          company_name: profile.company_name,
+          credits: profile.credits,
+          subscription_tier: profile.subscription_tier,
+          is_public: profile.is_public,
+          app_metadata: {
+            provider: sessionUser.app_metadata?.provider,
+            providers: sessionUser.app_metadata?.providers,
+          },
         };
         setUser(newUser);
         localStorage.setItem("bevisly_user", JSON.stringify(newUser));
@@ -80,7 +124,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setLoading(false);
     });
 
-    // Auth change listener - fetch role from database
+    // Auth change listener - fetch profile from database
     const { data: listener } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         if (event === "PASSWORD_RECOVERY") {
@@ -90,11 +134,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
         const sessionUser = session?.user;
         if (sessionUser) {
-          const role = await fetchRoleFromDB(sessionUser.id);
-          const newUser = {
+          const profile = await fetchProfileFromDB(sessionUser.id);
+          const newUser: SessionUser = {
             id: sessionUser.id,
             email: sessionUser.email!,
-            role,
+            role: profile.role,
+            full_name: profile.full_name,
+            avatar_url: profile.avatar_url,
+            company_name: profile.company_name,
+            credits: profile.credits,
+            subscription_tier: profile.subscription_tier,
+            is_public: profile.is_public,
+            app_metadata: {
+              provider: sessionUser.app_metadata?.provider,
+              providers: sessionUser.app_metadata?.providers,
+            },
           };
           setUser(newUser);
           localStorage.setItem("bevisly_user", JSON.stringify(newUser));
@@ -148,12 +202,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const setOverride = (role: SessionUser["role"]) => {
     localStorage.setItem("overrideRole", role ?? "");
-    setUser((u) => (u ? { ...u, role } : null)); // immediately update context
+    setUser((u) => (u ? { ...u, role } : null));
   };
 
   return (
     <AuthContext.Provider
-      value={{ user: effectiveUser, loading, signOut, setOverride }}
+      value={{ user: effectiveUser, loading, signOut, setOverride, refreshProfile }}
     >
       {loading ? (
         <div className="flex items-center justify-center min-h-screen text-gray-500">
