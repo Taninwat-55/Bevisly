@@ -34,6 +34,8 @@ export default function RequestAccessModal({ isOpen, onClose }: RequestAccessMod
       if (adminMailError) throw adminMailError;
 
       // 2. Send confirmation to User (Optional but nice)
+      /* 
+      // Temporarily disabled until domain is fully verified/propagated
       await supabase.functions.invoke("send-email", {
         body: {
           to: [email],
@@ -41,8 +43,9 @@ export default function RequestAccessModal({ isOpen, onClose }: RequestAccessMod
           html: getUserConfirmationTemplate(name),
         },
       });
+      */
 
-      notify.success("Request sent! Check your email for confirmation.");
+      notify.success("Request sent! We've received your details.");
       onClose();
       setEmail("");
       setName("");
