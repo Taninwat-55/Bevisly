@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/Input";
 import { supabase } from "@/lib/supabaseClient";
 import { notify } from "@/components/common/Notify";
 import { X, Mail, User, Building, Send } from "lucide-react";
-import { getAdminNotificationTemplate, getUserConfirmationTemplate } from "@/lib/emailTemplates";
+import { getAdminNotificationTemplate } from "@/lib/emailTemplates";
 
 interface RequestAccessModalProps {
   isOpen: boolean;
