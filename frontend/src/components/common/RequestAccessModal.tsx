@@ -1,11 +1,11 @@
-import { useState } from "react";
+import { useState, Fragment } from "react";
 import { Dialog, Transition } from "@headlessui/react";
-import { Fragment } from "react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { supabase } from "@/lib/supabaseClient";
 import { notify } from "@/components/common/Notify";
 import { X, Mail, User, Building, Send } from "lucide-react";
+import { getAdminNotificationTemplate, getUserConfirmationTemplate } from "@/lib/emailTemplates";
 
 interface RequestAccessModalProps {
   isOpen: boolean;
@@ -23,19 +23,11 @@ export default function RequestAccessModal({ isOpen, onClose }: RequestAccessMod
     setLoading(true);
 
     try {
-      // 1. Send email to Admin (User)
       const { error: adminMailError } = await supabase.functions.invoke("send-email", {
         body: {
           to: ["bevislyapp@gmail.com"], // Send request to admin
           subject: `🚀 New Beta Request: ${name} (${company})`,
-          html: `
-            <h1>New Beta Access Request</h1>
-            <p><strong>Name:</strong> ${name}</p>
-            <p><strong>Email:</strong> ${email}</p>
-            <p><strong>Company:</strong> ${company || "N/A"}</p>
-            <hr />
-            <p>Reply to this email to send them an invite code.</p>
-          `,
+          html: getAdminNotificationTemplate(name, email, company, "Beta Access"),
         },
       });
 
@@ -46,16 +38,7 @@ export default function RequestAccessModal({ isOpen, onClose }: RequestAccessMod
         body: {
           to: [email],
           subject: "We've received your request - Bevisly Beta",
-          html: `
-            <div style="font-family: sans-serif; padding: 20px;">
-              <h2>Thanks for your interest, ${name}!</h2>
-              <p>We've received your request for early access to Bevisly.</p>
-              <p>We are currently onboarding teams in batches to ensure the best experience. We'll send you an invitation code as soon as a spot opens up.</p>
-              <br>
-              <p>Best,</p>
-              <p>The Bevisly Team</p>
-            </div>
-          `,
+          html: getUserConfirmationTemplate(name),
         },
       });
 
