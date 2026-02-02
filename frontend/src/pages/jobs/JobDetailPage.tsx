@@ -254,7 +254,7 @@ export default function JobDetailPage() {
           <div className="space-y-6">
 
             {/* Proof Task Card (The Main CTA) */}
-            {proof ? (
+            {proof && (
               <div className="sticky top-24 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-2xl shadow-lg p-6 relative overflow-hidden group">
                 {/* Shine effect */}
                 <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full group-hover:animate-shimmer pointer-events-none" />
@@ -317,24 +317,6 @@ export default function JobDetailPage() {
                   </button>
                 )}
               </div>
-            ) : (
-              // External Application Fallback
-              job.apply_url && (
-                <div className="sticky top-24 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-2xl p-6">
-                  <h3 className="font-bold text-[var(--color-text)] mb-2">Apply Externally</h3>
-                  <p className="text-sm text-[var(--color-text-muted)] mb-4">
-                    This role requires an external application on the company's site.
-                  </p>
-                  <a
-                    href={job.apply_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="block w-full text-center py-3 bg-[var(--color-text)] hover:bg-[var(--color-text-muted)] text-[var(--color-bg)] rounded-xl font-bold text-sm transition-colors"
-                  >
-                    Apply Now ↗
-                  </a>
-                </div>
-              )
             )}
 
           </div>
