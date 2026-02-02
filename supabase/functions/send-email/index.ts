@@ -34,7 +34,7 @@ serve(async (req) => {
                 subject,
                 html,
                 text,
-                reply_to,
+                reply_to: reply_to || "bevislyapp@gmail.com",
             }),
         });
 
