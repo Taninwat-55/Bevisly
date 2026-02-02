@@ -29,7 +29,7 @@ serve(async (req) => {
                 Authorization: `Bearer ${RESEND_API_KEY}`,
             },
             body: JSON.stringify({
-                from: `Bevisly <onboarding@resend.dev>`, // Default to testing domain until user adds custom domain
+                from: `Bevisly <hello@bevisly.com>`,
                 to,
                 subject,
                 html,
