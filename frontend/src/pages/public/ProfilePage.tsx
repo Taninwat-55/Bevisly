@@ -39,7 +39,7 @@ export default function PublicProfilePage() {
                 // Note: username/is_public columns require migration to be run first
                 const { data: prof, error: profErr } = await supabase
                     .from("profiles")
-                    .select("id, full_name, credits, email")
+                    .select("id, full_name, credits, email, avatar_url")
                     .eq("username", username.toLowerCase())
                     .single();
 
@@ -180,6 +180,7 @@ export default function PublicProfilePage() {
                 <meta property="og:description" content={`View ${profile.full_name}'s verified proof portfolio on Bevisly`} />
                 <meta property="og:type" content="profile" />
                 <meta property="og:url" content={profileUrl} />
+                <meta property="og:image" content={profile.avatar_url || "https://bevisly.com/og-card-default.png"} />
                 <link rel="canonical" href={profileUrl} />
                 <script type="application/ld+json">{JSON.stringify(jsonLd)}</script>
             </Helmet>
