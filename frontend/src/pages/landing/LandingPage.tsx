@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Helmet } from "react-helmet-async";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/Button";
 import { ArrowRight, CheckCircle, Play, Check, Mail } from "lucide-react";
@@ -15,6 +16,52 @@ export default function LandingPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isContactOpen, setIsContactOpen] = useState(false);
 
+  // 1. JSON-LD Structured Data for GEO
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Organization",
+        "name": "Bevisly",
+        "url": "https://bevisly.com",
+        "logo": "https://bevisly.com/logo.png",
+        "sameAs": [
+          "https://twitter.com/bevisly",
+          "https://linkedin.com/company/bevisly"
+        ]
+      },
+      {
+        "@type": "FAQPage",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "How is Bevisly different from a resume?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Bevisly verifies actual skills through code and design tasks, whereas resumes are just self-reported claims. We provide improved trust for employers and a fair chance for candidates."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Do I need an invitation to join?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Candidates can join freely and start verifying skills immediately. Employers currently need an invitation code to post jobs during our closed beta."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Is Bevisly free for candidates?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Yes, candidates can create a profile and display verified badges for free. We also offer a Pro tier for enhanced visibility."
+            }
+          }
+        ]
+      }
+    ]
+  };
+
   const handleCTA = () => {
     if (user) {
       if (user.role === "employer") return navigate("/employer/dashboard");
@@ -29,6 +76,10 @@ export default function LandingPage() {
 
   return (
     <div className="bg-[var(--color-bg)] min-h-screen font-sans selection:bg-[var(--color-brand-primary)] selection:text-white">
+      <Helmet>
+        <title>Bevisly - Hire Proven Talent</title>
+        <script type="application/ld+json">{JSON.stringify(structuredData)}</script>
+      </Helmet>
       {/* ── HEADER ────────────────────────────── */}
       <header className="fixed top-0 inset-x-0 z-50 transition-all duration-200 bg-[var(--color-bg)]/80 backdrop-blur-md border-b border-[var(--color-border)]">
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
@@ -485,6 +536,35 @@ export default function LandingPage() {
             </div>
           </div>
         </section >
+
+        {/* ── FAQ SECTION (New for GEO) ────────────────────────────── */}
+        <section className="py-24 bg-[var(--color-bg)] border-t border-[var(--color-border)]">
+          <div className="max-w-3xl mx-auto px-6">
+            <h2 className="text-3xl font-bold font-display text-[var(--color-text)] mb-12 text-center">
+              Frequently Asked Questions
+            </h2>
+            <div className="space-y-8">
+              <div>
+                <h3 className="text-xl font-semibold text-[var(--color-text)] mb-2">How is Bevisly different from a resume?</h3>
+                <p className="text-[var(--color-text-muted)] leading-relaxed">
+                  Bevisly verifies actual skills through code and design tasks, whereas resumes are just self-reported claims. We provide improved trust for employers and a fair chance for candidates.
+                </p>
+              </div>
+              <div>
+                <h3 className="text-xl font-semibold text-[var(--color-text)] mb-2">Do I need an invitation to join?</h3>
+                <p className="text-[var(--color-text-muted)] leading-relaxed">
+                  Candidates can join freely and start verifying skills immediately. Employers currently need an invitation code to post jobs during our closed beta.
+                </p>
+              </div>
+              <div>
+                <h3 className="text-xl font-semibold text-[var(--color-text)] mb-2">Is Bevisly free for candidates?</h3>
+                <p className="text-[var(--color-text-muted)] leading-relaxed">
+                   Yes, candidates can create a profile and display verified badges for free. We also offer a Pro tier for enhanced visibility.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
 
         <section className="py-32 relative overflow-hidden bg-[var(--color-surface)]">
           <div className="absolute inset-0 bg-gradient-to-br from-[var(--color-brand-primary)]/5 to-[var(--color-brand-secondary)]/5" />

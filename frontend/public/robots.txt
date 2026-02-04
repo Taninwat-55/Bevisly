@@ -4,4 +4,4 @@ Disallow: /candidate/dashboard
 Disallow: /employer/dashboard
 Disallow: /admin
 
-Sitemap: https://your-domain.com/sitemap.xml
+Sitemap: https://bevisly.com/sitemap.xml
