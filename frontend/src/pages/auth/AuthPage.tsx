@@ -65,26 +65,28 @@ export default function AuthPage() {
       setFormError("Passwords do not match.");
       return;
     }
-    if (!inviteCode.trim()) {
-      setFormError("Invitation code is required for beta access.");
-      return;
-    }
-
     try {
       setFormLoading(true);
 
-      // Verify invite code
-      const { data: isValid, error: checkError } = await supabase.rpc('check_invite_code', { invite_code: inviteCode });
-      
-      if (checkError) {
-        console.error("Invite check error:", checkError);
-        setFormError("Error verifying invitation code.");
-        return; 
-      }
+      if (role === "employer") {
+        if (!inviteCode.trim()) {
+          setFormError("Invitation code is required for employer access.");
+          return;
+        }
 
-      if (!isValid) {
-        setFormError("Invalid or expired invitation code.");
-        return;
+        // Verify invite code
+        const { data: isValid, error: checkError } = await supabase.rpc('check_invite_code', { invite_code: inviteCode });
+        
+        if (checkError) {
+          console.error("Invite check error:", checkError);
+          setFormError("Error verifying invitation code.");
+          return; 
+        }
+
+        if (!isValid) {
+          setFormError("Invalid or expired invitation code.");
+          return;
+        }
       }
 
       const { data, error } = await supabase.auth.signUp({
@@ -100,11 +102,13 @@ export default function AuthPage() {
 
       if (data.session) {
         notify.success("🎉 Account created! Logging you in...", role);
-        try {
-           // Attempt to claim code immediately if session exists
-           await supabase.rpc('claim_invite_code', { invite_code: inviteCode });
-        } catch (e) {
-             console.log("Could not claim code immediately", e);
+        if (role === "employer") {
+          try {
+             // Attempt to claim code immediately if session exists
+             await supabase.rpc('claim_invite_code', { invite_code: inviteCode });
+          } catch (e) {
+               console.log("Could not claim code immediately", e);
+          }
         }
       } else if (data.user) {
         notify.success("✅ Success! Please check your email to confirm.", role);
@@ -276,10 +280,14 @@ export default function AuthPage() {
 
           <div className="text-center lg:text-left">
             <h1 className="text-3xl font-bold font-display text-[var(--color-text)] tracking-tight mb-2">
-              {isLogin ? "Welcome back" : "Invitation Only"}
+              {isLogin ? "Welcome back" : (role === "employer" ? "Invitation Only" : "Create Account")}
             </h1>
             <p className="text-[var(--color-text-muted)]">
-              {isLogin ? "Enter your credentials to access your account." : "Enter your invitation code to access the beta."}
+              {isLogin 
+                ? "Enter your credentials to access your account." 
+                : (role === "employer" 
+                    ? "Enter your invitation code to access the beta." 
+                    : "Join to start proving your skills.")}
             </p>
           </div>
 
@@ -344,56 +352,62 @@ export default function AuthPage() {
                       </button>
                     </div>
 
-                    {/* Invitation Code (Signup only) */}
-                    <Input
-                      label="Invitation Code"
-                      type="text"
-                      value={inviteCode}
-                      onChange={(e) => setInviteCode(e.target.value)}
-                      placeholder="ENTER-CODE"
-                      required
-                      className="tracking-widest font-mono"
-                    />
+                    {/* Role Selection */}
+                    <div className="pt-2">
+                      <label className="block text-sm font-medium text-[var(--color-text)] mb-1.5">I am a...</label>
+                      <div className="grid grid-cols-2 gap-3">
+                        <button
+                          type="button"
+                          onClick={() => setRole("candidate")}
+                          className={`p-3 rounded-xl border text-sm font-medium transition-all ${role === "candidate"
+                            ? "border-[var(--color-brand-primary)] bg-[var(--color-brand-primary)]/5 text-[var(--color-brand-primary)] shadow-sm"
+                            : "border-[var(--color-border)] bg-[var(--color-bg)] text-[var(--color-text-muted)] hover:bg-[var(--color-slate-100)] dark:hover:bg-[var(--color-slate-800)]"
+                            }`}
+                        >
+                          Candidate
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setRole("employer")}
+                          className={`p-3 rounded-xl border text-sm font-medium transition-all ${role === "employer"
+                            ? "border-[var(--color-brand-primary)] bg-[var(--color-brand-primary)]/5 text-[var(--color-brand-primary)] shadow-sm"
+                            : "border-[var(--color-border)] bg-[var(--color-bg)] text-[var(--color-text-muted)] hover:bg-[var(--color-slate-100)] dark:hover:bg-[var(--color-slate-800)]"
+                            }`}
+                        >
+                          Employer
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Invitation Code (Employer only) */}
+                    <AnimatePresence>
+                      {role === "employer" && (
+                        <motion.div
+                          initial={{ opacity: 0, height: 0 }}
+                          animate={{ opacity: 1, height: "auto" }}
+                          exit={{ opacity: 0, height: 0 }}
+                          className="overflow-hidden"
+                        >
+                          <div className="pt-4">
+                            <Input
+                              label="Invitation Code"
+                              type="text"
+                              value={inviteCode}
+                              onChange={(e) => setInviteCode(e.target.value)}
+                              placeholder="ENTER-CODE"
+                              required
+                              className="tracking-widest font-mono"
+                            />
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
                   </div>
                 </motion.div>
               )}
             </AnimatePresence>
 
-            {/* Role Selection (Signup only) */}
-            <AnimatePresence>
-              {!isLogin && (
-                <motion.div
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: "auto" }}
-                  exit={{ opacity: 0, height: 0 }}
-                  className="overflow-hidden pt-1"
-                >
-                  <label className="block text-sm font-medium text-[var(--color-text)] mb-1.5">I am a...</label>
-                  <div className="grid grid-cols-2 gap-3">
-                    <button
-                      type="button"
-                      onClick={() => setRole("candidate")}
-                      className={`p-3 rounded-xl border text-sm font-medium transition-all ${role === "candidate"
-                        ? "border-[var(--color-brand-primary)] bg-[var(--color-brand-primary)]/5 text-[var(--color-brand-primary)] shadow-sm"
-                        : "border-[var(--color-border)] bg-[var(--color-bg)] text-[var(--color-text-muted)] hover:bg-[var(--color-slate-100)] dark:hover:bg-[var(--color-slate-800)]"
-                        }`}
-                    >
-                      Candidate
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setRole("employer")}
-                      className={`p-3 rounded-xl border text-sm font-medium transition-all ${role === "employer"
-                        ? "border-[var(--color-brand-primary)] bg-[var(--color-brand-primary)]/5 text-[var(--color-brand-primary)] shadow-sm"
-                        : "border-[var(--color-border)] bg-[var(--color-bg)] text-[var(--color-text-muted)] hover:bg-[var(--color-slate-100)] dark:hover:bg-[var(--color-slate-800)]"
-                        }`}
-                    >
-                      Employer
-                    </button>
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
+
 
             {/* Form Error */}
             <AnimatePresence>
@@ -415,7 +429,7 @@ export default function AuthPage() {
               isLoading={formLoading}
               rightIcon={!formLoading && <ArrowRight size={18} />}
             >
-              {isLogin ? "Sign In" : "Verify Invite & Join"}
+              {isLogin ? "Sign In" : (role === "employer" ? "Verify Invite & Join" : "Create Account")}
             </Button>
 
             {isLogin && (
@@ -428,7 +442,7 @@ export default function AuthPage() {
                  </div>
                </div>
             )}
-
+            
             {isLogin && (
                <div className="space-y-3">
                   <Button
@@ -490,7 +504,7 @@ export default function AuthPage() {
               className="w-full"
               onClick={() => setIsLogin(!isLogin)}
             >
-              {isLogin ? "Create account with Invite" : "Log in to existing account"}
+              {isLogin ? "Create an account" : "Log in to existing account"}
             </Button>
           </div>
         </div>
