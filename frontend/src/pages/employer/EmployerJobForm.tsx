@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import { createJobWithTasks } from "@/lib/api/jobs";
+import { supabase } from "@/lib/supabaseClient";
 import type { EmployerJob, ProofTask } from "@/types";
 import { Input } from "@/components/ui/Input";
 import { Textarea } from "@/components/ui/Textarea";
@@ -9,9 +10,9 @@ import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import type { EmployerJobFormValues } from "@/types/employer";
 import {
-  FileText, Briefcase, MapPin, DollarSign, BrainCircuit, ArrowRight
+  Briefcase, MapPin, DollarSign, BrainCircuit, ArrowRight, Sparkles
 } from "lucide-react";
-import { JOB_TEMPLATES } from "@/data/jobTemplates";
+import { POPULAR_JOB_TITLES } from "@/data/popularJobTitles";
 import { useCompany } from "@/hooks/useCompany";
 
 const FREE_TIER_JOB_LIMIT = 2;
@@ -65,7 +66,10 @@ export default function EmployerJobForm({
     ],
   });
 
+
+  
   const [loading, setLoading] = useState(false);
+  const [generatingAI, setGeneratingAI] = useState(false);
 
   // Handlers
   const handleChange = (field: string, value: unknown) => {
@@ -78,24 +82,62 @@ export default function EmployerJobForm({
     handleChange("proof_tasks", newTasks);
   };
 
-  const applyTemplate = (template: typeof JOB_TEMPLATES[0]) => {
-    setValues((prev) => ({
-      ...prev,
-      title: template.title,
-      department: template.department,
-      description: template.description || "",
-      requirements: template.requirements || "",
-      // Use existing task structure but update content
-      proof_tasks: template.proof_tasks.map(t => ({
-        id: crypto.randomUUID(),
-        title: t.title || "",
-        description: t.description || "",
-        expected_time: t.expected_time || "2-4 hours",
-        submission_format: t.submission_format || "github_repo",
-        ai_tools_allowed: t.ai_tools_allowed ?? true
-      }))
-    }));
-    toast.success("Template applied!");
+
+
+  const handleGenerateAITask = async (index: number) => {
+    if (!values.description || !values.title) {
+        toast.error("Please fill in Job Title and Description first so AI has context.");
+        return;
+    }
+    
+    setGeneratingAI(true);
+    const toastId = toast.loading("Sparking creativity with Gemini (this may take 5-10s)...");
+    
+    // Add timeout to prevent infinite hanging
+    const abortController = new AbortController();
+    const timeoutId = setTimeout(() => abortController.abort(), 15000); // 15s timeout
+
+    try {
+        const { data, error } = await supabase.functions.invoke('generate-proof-task', {
+            body: { job_title: values.title, job_description: values.description },
+            headers: { 'x-client-timeout': '15000' } // Custom header if supported, otherwise just for debug
+        });
+
+        clearTimeout(timeoutId);
+
+        if (error) {
+            console.error("Supabase Invoke Error:", error);
+            throw error;
+        }
+        
+        if (data.error) {
+             console.error("Edge Function Error:", data.error);
+             throw new Error(data.error);
+        }
+
+        if (!data.title) throw new Error("Received empty response from AI");
+
+        // Update the task at index
+        const newTasks = [...(values.proof_tasks || [])];
+        newTasks[index] = {
+            ...newTasks[index],
+            title: data.title,
+            description: (data.description + "\n\nAcceptance Criteria:\n" + data.acceptance_criteria),
+            expected_time: data.estimated_duration
+        };
+        handleChange("proof_tasks", newTasks);
+        toast.success("Task generated!", { id: toastId });
+    } catch (err: any) {
+        console.error("AI Generation Failed:", err);
+        let msg = "Failed to generate task.";
+        if (err.name === 'AbortError') msg = "Request timed out. Gemini is taking too long.";
+        else if (err.message) msg = `Error: ${err.message}`;
+        
+        toast.error(msg, { id: toastId, duration: 5000 });
+    } finally {
+        clearTimeout(timeoutId);
+        setGeneratingAI(false);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -136,10 +178,10 @@ export default function EmployerJobForm({
   };
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
-
-      {/* LEFT COLUMN: Form */}
-      <div className="lg:col-span-2 space-y-6">
+    <div className="max-w-4xl mx-auto">
+      
+      {/* Form */}
+      <div className="space-y-6">
         <form onSubmit={handleSubmit} className="space-y-8">
 
           {/* 1. Basic Info */}
@@ -162,7 +204,13 @@ export default function EmployerJobForm({
                   value={values.title ?? ""}
                   onChange={(e) => handleChange("title", e.target.value)}
                   required
+                  list="job-titles-list"
                 />
+                <datalist id="job-titles-list">
+                    {POPULAR_JOB_TITLES.map(t => (
+                        <option key={t} value={t} />
+                    ))}
+                </datalist>
               </div>
 
               <Input
@@ -302,6 +350,17 @@ export default function EmployerJobForm({
               <div key={task.id || index} className="p-5 bg-[var(--color-bg)] rounded-[var(--radius-card)] border border-[var(--color-border)] space-y-5 animate-fade-in-up">
                 <div className="flex justify-between items-start">
                   <h4 className="font-semibold text-[var(--color-text)] text-sm uppercase tracking-wider">Task Details</h4>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleGenerateAITask(index)}
+                    isLoading={generatingAI}
+                    leftIcon={<Sparkles size={14} className="text-purple-500" />}
+                    className="text-xs text-purple-600 hover:text-purple-700 hover:bg-purple-50 dark:hover:bg-purple-900/20"
+                  >
+                    Auto-Generate
+                  </Button>
                 </div>
 
                 <Input
@@ -384,44 +443,7 @@ export default function EmployerJobForm({
         </form>
       </div>
 
-      {/* RIGHT COLUMN: Templates/Tips */}
-      <div className="space-y-6">
-        <div className="sticky top-24 space-y-6">
-          <Card className="p-6 bg-gradient-to-br from-slate-900 to-slate-800 text-white border-slate-700">
-            <div className="mb-4">
-              <h3 className="font-bold text-lg flex items-center gap-2">
-                <FileText size={18} className="text-blue-400" />
-                Quick Templates
-              </h3>
-              <p className="text-slate-300 text-sm mt-1">Don't start from scratch. Pick a role to auto-fill details.</p>
-            </div>
 
-            <div className="space-y-2 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
-              {JOB_TEMPLATES.map((template) => (
-                <button
-                  key={template.id}
-                  type="button"
-                  onClick={() => applyTemplate(template)}
-                  className="w-full text-left p-3 rounded-lg bg-white/5 hover:bg-white/10 border border-white/5 hover:border-white/20 transition-all group"
-                >
-                  <p className="font-medium text-sm text-slate-200 group-hover:text-white">{template.label}</p>
-                  <p className="text-[10px] text-slate-400 uppercase tracking-wider mt-1">{template.category}</p>
-                </button>
-              ))}
-            </div>
-          </Card>
-
-          <div className="p-4 rounded-xl bg-blue-500/10 border border-blue-500/20 text-sm">
-            <h4 className="font-semibold text-blue-600 mb-2 flex items-center gap-2">
-              <BrainCircuit size={16} /> Why Proof Tasks?
-            </h4>
-            <p className="text-[var(--color-text-muted)] leading-relaxed">
-              Jobs with specific proof tasks get <strong>3x higher quality applicants</strong>.
-              Candidates prefer showing their skills over writing cover letters.
-            </p>
-          </div>
-        </div>
-      </div>
     </div>
   );
 }

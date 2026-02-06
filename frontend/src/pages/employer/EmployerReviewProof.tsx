@@ -14,7 +14,8 @@ import {
     CheckCircle2
 } from "lucide-react";
 import { distributeCredits } from "@/lib/api/credits";
-import { Star } from "lucide-react";
+import { Star, Sparkles } from "lucide-react";
+import { supabase } from "@/lib/supabaseClient";
 
 // Inline TaskRequirementsPanel (original was deleted)
 interface TaskInfo {
@@ -74,6 +75,8 @@ interface ScorecardProps {
     improvements: string;
     setImprovements: (v: string) => void;
     isLocked: boolean;
+    onSuggestAI: () => void;
+    isSuggesting: boolean;
 }
 
 function Scorecard({
@@ -84,12 +87,27 @@ function Scorecard({
     improvements,
     setImprovements,
     isLocked,
+    onSuggestAI,
+    isSuggesting,
 }: ScorecardProps) {
     return (
         <div className="glass-panel rounded-2xl p-6 space-y-6">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-[var(--color-employer)]">
-                Your Review
-            </h3>
+            <div className="flex justify-between items-center">
+                <h3 className="text-xs font-bold uppercase tracking-wider text-[var(--color-employer)]">
+                    Your Review
+                </h3>
+                {!isLocked && (
+                    <button
+                        type="button"
+                        onClick={onSuggestAI}
+                        disabled={isSuggesting}
+                        className="flex items-center gap-1.5 text-xs font-medium text-purple-600 hover:text-purple-700 bg-purple-50 hover:bg-purple-100 dark:bg-purple-900/20 px-3 py-1.5 rounded-lg transition-colors"
+                    >
+                        {isSuggesting ? <Loader2 size={12} className="animate-spin" /> : <Sparkles size={12} />}
+                        Auto-Draft
+                    </button>
+                )}
+            </div>
 
             {/* Star Rating */}
             <div>
@@ -194,6 +212,7 @@ export default function EmployerReviewProof() {
     const [improvements, setImprovements] = useState("");
     const [stars, setStars] = useState<number>(0);
     const [loading, setLoading] = useState(false);
+    const [suggestingAI, setSuggestingAI] = useState(false);
     const [fetching, setFetching] = useState(true);
     const [currentIndex, setCurrentIndex] = useState<number>(0);
 
@@ -231,6 +250,41 @@ export default function EmployerReviewProof() {
     const totalSubmissions = submissionsCache.current.length;
     const prevCandidate = currentIndex > 0 ? submissionsCache.current[currentIndex - 1] : null;
     const nextCandidate = currentIndex < totalSubmissions - 1 ? submissionsCache.current[currentIndex + 1] : null;
+
+    const handleSuggestFeedback = async () => {
+        if (!stars) {
+            toast.error("Please rate with stars first so AI knows the sentiment.");
+            return;
+        }
+        setSuggestingAI(true);
+        const toastId = toast.loading("Analyzing submission...");
+        try {
+            const { data, error } = await supabase.functions.invoke('suggest-feedback', {
+                body: { 
+                    rating: stars, 
+                    criteria: submission?.proof_tasks?.title || "General",
+                    submission_content: submission?.text_response || "Checked file/link."
+                }
+            });
+
+            if (error) throw error;
+            if (data.error) throw new Error(data.error);
+
+            if (data.feedback) {
+                if (stars >= 4) {
+                     setStrengths(prev => prev ? prev + "\n" + data.feedback : data.feedback);
+                } else {
+                     setImprovements(prev => prev ? prev + "\n" + data.feedback : data.feedback);
+                }
+                toast.success("Here's a draft! feel free to edit.", { id: toastId });
+            }
+        } catch (e) {
+            console.error(e);
+            toast.error("Failed to suggest feedback. Check API Key.", { id: toastId });
+        } finally {
+            setSuggestingAI(false);
+        }
+    };
 
     async function handleSubmitFeedback(direction?: "next" | "previous") {
         if (!user?.id || !submission) return;
@@ -567,6 +621,8 @@ export default function EmployerReviewProof() {
                         improvements={improvements}
                         setImprovements={setImprovements}
                         isLocked={!!isReviewed}
+                        onSuggestAI={handleSuggestFeedback}
+                        isSuggesting={suggestingAI}
                     />
                 </div>
 
