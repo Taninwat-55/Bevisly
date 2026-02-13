@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { X, Sparkles, Loader2, Check, AlertCircle, RefreshCw } from "lucide-react";
-import { supabase } from "@/lib/supabaseClient";
 import toast from "react-hot-toast";
 import ReactMarkdown from "react-markdown";
 
