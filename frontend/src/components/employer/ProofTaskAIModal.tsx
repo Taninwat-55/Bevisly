@@ -27,6 +27,7 @@ export default function ProofTaskAIModal({
     estimated_duration: string;
   } | null>(null);
 
+  /* eslint-disable react-hooks/exhaustive-deps */
   // Auto-generate when modal opens if data is present
   useEffect(() => {
     if (isOpen && !result && !isGenerating && !error) {
@@ -37,6 +38,7 @@ export default function ProofTaskAIModal({
       generateTask();
     }
   }, [isOpen]);
+  /* eslint-enable react-hooks/exhaustive-deps */
 
   const generateTask = async () => {
     setIsGenerating(true);
