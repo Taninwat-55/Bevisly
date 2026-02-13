@@ -50,7 +50,7 @@ export default function UserSettings() {
        // Actually, previous default was 'profile'. Let's switch it for employers.
        setActiveTab("profile"); 
     }
-  }, [isEmployer]);
+  }, [isEmployer, activeTab]);
 
   // Sync state with user context updates (e.g. after refreshProfile)
   useEffect(() => {
@@ -175,9 +175,10 @@ export default function UserSettings() {
           
           toast.success("Password updated successfully");
           form.reset();
-      } catch (err: any) {
+      } catch (err: unknown) {
           console.error(err);
-          toast.error(err.message || "Failed to update password");
+          const message = err instanceof Error ? err.message : "Failed to update password";
+          toast.error(message);
       } finally {
           setIsLoading(false);
       }
@@ -221,9 +222,10 @@ export default function UserSettings() {
 
       toast.success("Confirmation link sent to both emails!");
       form.reset();
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
-      toast.error(err.message || "Failed to update email");
+      const message = err instanceof Error ? err.message : "Failed to update email";
+      toast.error(message);
     } finally {
       setIsLoading(false);
     }

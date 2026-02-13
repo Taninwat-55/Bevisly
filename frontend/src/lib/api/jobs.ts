@@ -39,6 +39,7 @@ export async function getAllJobs(): Promise<CandidateJob[]> {
   if (error) throw error;
 
   // Map the nested employer avatar to the top-level company_logo field
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return data.map((job: any) => ({
     ...job,
     company_logo: job.employer?.avatar_url || null,
@@ -86,6 +87,7 @@ export async function getJobWithTasks(job_id: string) {
   // Map the nested employer avatar to the top-level company_logo field
   return {
     ...data,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     company_logo: (data as any).employer?.avatar_url || null,
   };
 }
