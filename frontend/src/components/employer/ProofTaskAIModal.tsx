@@ -110,7 +110,7 @@ export default function ProofTaskAIModal({
             <h3 className="font-semibold text-lg text-[var(--color-text)]">AI Task Generator</h3>
           </div>
           <button onClick={onClose} className="p-1 hover:bg-[var(--color-border)] rounded-full transition-colors">
-            <X className="w-5 h-5 text-[var(--color-text-secondary)]" />
+            <X className="w-5 h-5 text-[var(--color-text-muted)]" />
           </button>
         </div>
 
@@ -126,7 +126,7 @@ export default function ProofTaskAIModal({
               </div>
               <div>
                  <p className="text-lg font-medium text-[var(--color-text)]">Generating Challenge...</p>
-                 <p className="text-sm text-[var(--color-text-secondary)]">Analyzing job description matching "{jobTitle}"</p>
+                 <p className="text-sm text-[var(--color-text-muted)]">Analyzing job description matching "{jobTitle}"</p>
               </div>
             </div>
           )}
@@ -153,21 +153,21 @@ export default function ProofTaskAIModal({
              <div className="space-y-5 animate-in slide-in-from-bottom-2 duration-300">
                 <div className="bg-[var(--color-background)] rounded-lg border border-[var(--color-border)] p-4 space-y-3">
                    <div>
-                      <span className="text-xs uppercase tracking-wider font-semibold text-[var(--color-text-secondary)]">Task Title</span>
+                      <span className="text-xs uppercase tracking-wider font-semibold text-[var(--color-text-muted)]">Task Title</span>
                       <h4 className="text-lg font-medium text-[var(--color-text)] mt-1">{result.title}</h4>
                    </div>
                    
                    <div className="grid grid-cols-2 gap-4 pt-2 border-t border-[var(--color-border)]">
                       <div>
-                        <span className="text-xs uppercase tracking-wider font-semibold text-[var(--color-text-secondary)]">Duration</span>
+                        <span className="text-xs uppercase tracking-wider font-semibold text-[var(--color-text-muted)]">Duration</span>
                         <p className="text-[var(--color-text)] text-sm font-medium">{result.estimated_duration}</p>
                       </div>
                    </div>
                 </div>
 
                 <div className="space-y-2">
-                   <span className="text-xs uppercase tracking-wider font-semibold text-[var(--color-text-secondary)]">Instructions Preview</span>
-                   <div className="bg-[var(--color-background)] rounded-lg border border-[var(--color-border)] p-4 text-sm text-[var(--color-text-secondary)] max-h-60 overflow-y-auto prose prose-invert prose-sm max-w-none">
+                   <span className="text-xs uppercase tracking-wider font-semibold text-[var(--color-text-muted)]">Instructions Preview</span>
+                   <div className="bg-[var(--color-background)] rounded-lg border border-[var(--color-border)] p-4 text-sm text-[var(--color-text)] max-h-60 overflow-y-auto prose prose-invert prose-sm max-w-none">
                       <ReactMarkdown>{result.description}</ReactMarkdown>
                       <h5 className="font-bold mt-4 mb-2 text-[var(--color-text)]">Acceptance Criteria</h5>
                       <ReactMarkdown>{result.acceptance_criteria}</ReactMarkdown>
@@ -182,7 +182,7 @@ export default function ProofTaskAIModal({
            <button 
              onClick={generateTask}
              disabled={isGenerating}
-             className="px-4 py-2 text-sm font-medium text-[var(--color-text-secondary)] hover:text-[var(--color-text)] flex items-center gap-2 hover:bg-[var(--color-surface-hover)] rounded-lg transition-colors"
+             className="px-4 py-2 text-sm font-medium text-[var(--color-text-muted)] hover:text-[var(--color-text)] flex items-center gap-2 hover:bg-[var(--color-surface-hover)] rounded-lg transition-colors"
            >
              <RefreshCw className={`w-4 h-4 ${isGenerating ? 'animate-spin' : ''}`} />
              Regenerate
