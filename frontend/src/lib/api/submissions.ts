@@ -197,7 +197,6 @@ export async function getProofTaskDetails(
 
   const result: ProofTask = {
     ...raw,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     company_name: Array.isArray(raw.jobs)
       ? raw.jobs[0]?.company
       : raw.jobs?.company,
