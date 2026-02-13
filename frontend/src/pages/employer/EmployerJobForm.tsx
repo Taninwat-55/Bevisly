@@ -2,7 +2,6 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import { createJobWithTasks } from "@/lib/api/jobs";
-import { supabase } from "@/lib/supabaseClient";
 import type { EmployerJob, ProofTask } from "@/types";
 import { Input } from "@/components/ui/Input";
 import { Textarea } from "@/components/ui/Textarea";
@@ -10,8 +9,9 @@ import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import type { EmployerJobFormValues } from "@/types/employer";
 import {
-  Briefcase, MapPin, DollarSign, BrainCircuit, ArrowRight, Sparkles
+  Briefcase, MapPin, DollarSign, BrainCircuit, ArrowRight, Sparkles, Calendar
 } from "lucide-react";
+import ProofTaskAIModal from "@/components/employer/ProofTaskAIModal";
 import { POPULAR_JOB_TITLES } from "@/data/popularJobTitles";
 import { useCompany } from "@/hooks/useCompany";
 
@@ -44,8 +44,8 @@ export default function EmployerJobForm({
     requirements: defaultValues?.requirements ?? "",
     company: defaultValues?.company ?? "",
     location: defaultValues?.location ?? "",
-    paid: defaultValues?.paid ?? false,
     payment_amount: defaultValues?.payment_amount ?? null,
+    paid: defaultValues?.paid ?? true,
     payment_currency: defaultValues?.payment_currency ?? "EUR",
     show_salary_range: defaultValues?.show_salary_range ?? false,
     salary_min: defaultValues?.salary_min ?? null,
@@ -54,6 +54,8 @@ export default function EmployerJobForm({
     job_type: defaultValues?.job_type ?? "Full-time",
     department: defaultValues?.department ?? "Engineering",
     work_mode: defaultValues?.work_mode ?? "Remote",
+    start_date: defaultValues?.start_date ?? undefined,
+    application_deadline: defaultValues?.application_deadline ?? undefined,
     proof_tasks: defaultValues?.proof_tasks ?? [
       {
         id: crypto.randomUUID(),
@@ -69,7 +71,9 @@ export default function EmployerJobForm({
 
   
   const [loading, setLoading] = useState(false);
-  const [generatingAI, setGeneratingAI] = useState(false);
+  // const [generatingAI, setGeneratingAI] = useState(false); // REMOVED
+  const [activeTaskIndex, setActiveTaskIndex] = useState<number | null>(null);
+  const [isAIModalOpen, setIsAIModalOpen] = useState(false);
 
   // Handlers
   const handleChange = (field: string, value: unknown) => {
@@ -84,60 +88,34 @@ export default function EmployerJobForm({
 
 
 
-  const handleGenerateAITask = async (index: number) => {
-    if (!values.description || !values.title) {
-        toast.error("Please fill in Job Title and Description first so AI has context.");
-        return;
-    }
-    
-    setGeneratingAI(true);
-    const toastId = toast.loading("Sparking creativity with Gemini (this may take 5-10s)...");
-    
-    // Add timeout to prevent infinite hanging
-    const abortController = new AbortController();
-    const timeoutId = setTimeout(() => abortController.abort(), 15000); // 15s timeout
+  const handleOpenAIModal = (index: number) => {
+    setActiveTaskIndex(index);
+    setIsAIModalOpen(true);
+  };
 
-    try {
-        const { data, error } = await supabase.functions.invoke('generate-proof-task', {
-            body: { job_title: values.title, job_description: values.description },
-            headers: { 'x-client-timeout': '15000' } // Custom header if supported, otherwise just for debug
-        });
+  const handleApplyAITask = (task: { title: string; description: string; expected_time: string }) => {
+    if (activeTaskIndex === null) return;
 
-        clearTimeout(timeoutId);
-
-        if (error) {
-            console.error("Supabase Invoke Error:", error);
-            throw error;
-        }
-        
-        if (data.error) {
-             console.error("Edge Function Error:", data.error);
-             throw new Error(data.error);
-        }
-
-        if (!data.title) throw new Error("Received empty response from AI");
-
-        // Update the task at index
-        const newTasks = [...(values.proof_tasks || [])];
-        newTasks[index] = {
-            ...newTasks[index],
-            title: data.title,
-            description: (data.description + "\n\nAcceptance Criteria:\n" + data.acceptance_criteria),
-            expected_time: data.estimated_duration
-        };
-        handleChange("proof_tasks", newTasks);
-        toast.success("Task generated!", { id: toastId });
-    } catch (err: any) {
-        console.error("AI Generation Failed:", err);
-        let msg = "Failed to generate task.";
-        if (err.name === 'AbortError') msg = "Request timed out. Gemini is taking too long.";
-        else if (err.message) msg = `Error: ${err.message}`;
-        
-        toast.error(msg, { id: toastId, duration: 5000 });
-    } finally {
-        clearTimeout(timeoutId);
-        setGeneratingAI(false);
-    }
+    const newTasks = [...(values.proof_tasks || [])];
+    newTasks[activeTaskIndex] = {
+      ...newTasks[activeTaskIndex],
+      title: task.title,
+      description: task.description,
+      expected_time: task.expected_time
+    };
+    handleChange("proof_tasks", newTasks);
+    // Modal closes itself via props usually, or we close it here
+    // In our implementation, we need to close it:
+    // But wait, the modal calls onApply then onClose? 
+    // The modal implementation: onApply calls props.onApply then props.onClose. 
+    // So we don't strictly need to setIsAIModalOpen(false) if the modal does it, 
+    // but looking at usage below: onClose={() => setIsAIModalOpen(false)}
+    // The Modal calls onApply() then onClose(). 
+    // Actually, looking at the Modal code I wrote:
+    // const handleApply = () => { onApply(...); onClose(); ... }
+    // So here I just need to update state.
+    // I will reset active index here just in case.
+    setActiveTaskIndex(null); 
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -233,7 +211,7 @@ export default function EmployerJobForm({
               <div className="space-y-1.5">
                 <label className="text-sm font-medium text-[var(--color-text)]">Job Type</label>
                 <select
-                  className="w-full h-10 px-3 rounded-[var(--radius-input)] border border-[var(--color-border)] bg-[var(--color-surface)] text-sm focus:ring-2 focus:ring-[var(--color-brand-primary)]/20 outline-none"
+                  className="w-full h-10 px-3 rounded-[var(--radius-input)] border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text)] text-sm focus:ring-2 focus:ring-[var(--color-brand-primary)]/20 outline-none"
                   value={values.job_type ?? "Full-time"}
                   onChange={(e) => handleChange("job_type", e.target.value)}
                 >
@@ -242,13 +220,14 @@ export default function EmployerJobForm({
                   <option>Contract</option>
                   <option>Internship</option>
                   <option>Freelance</option>
+                  <option>Volunteer</option>
                 </select>
               </div>
 
               <div className="space-y-1.5">
                 <label className="text-sm font-medium text-[var(--color-text)]">Work Mode</label>
                 <select
-                  className="w-full h-10 px-3 rounded-[var(--radius-input)] border border-[var(--color-border)] bg-[var(--color-surface)] text-sm focus:ring-2 focus:ring-[var(--color-brand-primary)]/20 outline-none"
+                  className="w-full h-10 px-3 rounded-[var(--radius-input)] border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text)] text-sm focus:ring-2 focus:ring-[var(--color-brand-primary)]/20 outline-none"
                   value={values.work_mode ?? "Remote"}
                   onChange={(e) => handleChange("work_mode", e.target.value)}
                 >
@@ -257,6 +236,27 @@ export default function EmployerJobForm({
                   <option>Hybrid</option>
                 </select>
               </div>
+
+               {/* Dates - Moved here for better UX */}
+              <div className="space-y-1.5">
+                   <Input
+                    label="Start Date (Optional)"
+                    type="date"
+                    value={values.start_date ?? ""}
+                    onChange={(e) => handleChange("start_date", e.target.value)}
+                    leftIcon={<Calendar size={16} />}
+                  />
+              </div>
+
+               <div className="space-y-1.5">
+                 <Input
+                    label="Deadline (Optional)"
+                    type="date"
+                    value={values.application_deadline ?? ""}
+                    onChange={(e) => handleChange("application_deadline", e.target.value)}
+                    leftIcon={<Calendar size={16} />}
+                  />
+               </div>
             </div>
 
             <Textarea
@@ -283,41 +283,73 @@ export default function EmployerJobForm({
               <div className="w-10 h-10 rounded-full bg-emerald-500/10 flex items-center justify-center text-emerald-600">
                 <DollarSign size={20} />
               </div>
+
+
               <div>
                 <h2 className="text-lg font-bold text-[var(--color-text)]">Compensation</h2>
                 <p className="text-sm text-[var(--color-text-muted)]">Salary range and currency.</p>
               </div>
             </div>
 
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-5">
-              <div className="space-y-1.5 col-span-2 md:col-span-1">
-                <label className="text-sm font-medium text-[var(--color-text)]">Currency</label>
-                <select
-                  className="w-full h-10 px-3 rounded-[var(--radius-input)] border border-[var(--color-border)] bg-[var(--color-surface)] text-sm"
-                  value={values.payment_currency ?? "USD"}
-                  onChange={(e) => handleChange("payment_currency", e.target.value)}
-                >
-                  <option value="USD">USD ($)</option>
-                  <option value="EUR">EUR (€)</option>
-                  <option value="GBP">GBP (£)</option>
-                </select>
+            <div className="space-y-4">
+              <div className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  id="is_unpaid"
+                  checked={!values.paid}
+                  onChange={(e) => {
+                    const isUnpaid = e.target.checked;
+                    setValues(prev => ({
+                      ...prev,
+                      paid: !isUnpaid,
+                      // Optional: clear values if unpaid, or keep them hidden
+                      salary_min: isUnpaid ? null : prev.salary_min,
+                      salary_max: isUnpaid ? null : prev.salary_max
+                    }));
+                  }}
+                  className="rounded border-[var(--color-border)] text-[var(--color-brand-primary)] focus:ring-[var(--color-brand-primary)]/20"
+                />
+                <label htmlFor="is_unpaid" className="text-sm text-[var(--color-text)] font-medium">
+                  This is an unpaid / volunteer position
+                </label>
               </div>
 
-              <Input
-                label="Min Salary (Annual)"
-                type="number"
-                placeholder="e.g. 50000"
-                value={values.salary_min ?? ""}
-                onChange={(e) => handleChange("salary_min", e.target.value)}
-              />
+              {values.paid && (
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-5 animate-fade-in">
+                  <div className="space-y-1.5 col-span-2 md:col-span-1">
+                    <label className="text-sm font-medium text-[var(--color-text)]">Currency</label>
+                    <select
+                      className="w-full h-10 px-3 rounded-[var(--radius-input)] border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text)] text-sm"
+                      value={values.payment_currency ?? "USD"}
+                      onChange={(e) => handleChange("payment_currency", e.target.value)}
+                    >
+                      <option value="USD">USD ($)</option>
+                      <option value="EUR">EUR (€)</option>
+                      <option value="GBP">GBP (£)</option>
+                      <option value="SEK">SEK (kr)</option>
+                      <option value="NOK">NOK (kr)</option>
+                      <option value="DKK">DKK (kr)</option>
+                      <option value="ISK">ISK (kr)</option>
+                    </select>
+                  </div>
 
-              <Input
-                label="Max Salary (Annual)"
-                type="number"
-                placeholder="e.g. 80000"
-                value={values.salary_max ?? ""}
-                onChange={(e) => handleChange("salary_max", e.target.value)}
-              />
+                  <Input
+                    label="Min Salary (Annual)"
+                    type="number"
+                    placeholder="e.g. 50000"
+                    value={values.salary_min ?? ""}
+                    onChange={(e) => handleChange("salary_min", e.target.value)}
+                  />
+
+                  <Input
+                    label="Max Salary (Annual)"
+                    type="number"
+                    placeholder="e.g. 80000"
+                    value={values.salary_max ?? ""}
+                    onChange={(e) => handleChange("salary_max", e.target.value)}
+                  />
+                </div>
+              )}
             </div>
 
             <div className="flex items-center gap-2">
@@ -354,12 +386,11 @@ export default function EmployerJobForm({
                     type="button"
                     variant="ghost"
                     size="sm"
-                    onClick={() => handleGenerateAITask(index)}
-                    isLoading={generatingAI}
+                    onClick={() => handleOpenAIModal(index)}
                     leftIcon={<Sparkles size={14} className="text-purple-500" />}
                     className="text-xs text-purple-600 hover:text-purple-700 hover:bg-purple-50 dark:hover:bg-purple-900/20"
                   >
-                    Auto-Generate
+                    Auto-Generate w/ AI
                   </Button>
                 </div>
 
@@ -384,7 +415,7 @@ export default function EmployerJobForm({
                   <div className="space-y-1.5">
                     <label className="text-sm font-medium text-[var(--color-text)]">Submission Format</label>
                     <select
-                      className="w-full h-10 px-3 rounded-[var(--radius-input)] border border-[var(--color-border)] bg-[var(--color-surface)] text-sm"
+                      className="w-full h-10 px-3 rounded-[var(--radius-input)] border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text)] text-sm"
                       value={task.submission_format ?? "github_repo"}
                       onChange={(e) => handleTaskChange(index, "submission_format", e.target.value)}
                     >
@@ -444,6 +475,13 @@ export default function EmployerJobForm({
       </div>
 
 
+      <ProofTaskAIModal
+        isOpen={isAIModalOpen}
+        onClose={() => setIsAIModalOpen(false)}
+        onApply={handleApplyAITask}
+        jobTitle={values.title || ""}
+        jobDescription={values.description || ""}
+      />
     </div>
   );
 }

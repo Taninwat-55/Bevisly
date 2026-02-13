@@ -1,0 +1,27 @@
+name: Supabase Keep-Alive
+
+on:
+  schedule:
+    # Run at 00:00 on Sunday and Wednesday
+    - cron: '0 0 * * 0,3'
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Supabase Project
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+        run: |
+          echo "Pinging Supabase to prevent pausing..."
+          # Ping the REST API root (lightweight)
+          curl -I -X GET "$SUPABASE_URL/rest/v1/" \
+            -H "apikey: $SUPABASE_KEY" \
+            -H "Authorization: Bearer $SUPABASE_KEY"
+          
+          # Optional: Also ping the Edge Function health check/debug if available
+          # This ensures different parts of the infra are touched
+          curl -s -o /dev/null -w "%{http_code}" "$SUPABASE_URL/functions/v1/debug-models" \
+            -H "Authorization: Bearer $SUPABASE_KEY" || true

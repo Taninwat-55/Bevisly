@@ -1,4 +1,3 @@
-// src/components/jobs/JobInfoSection.tsx
 import type { EmployerJob } from "@/types";
 import MarkdownEditor from "@/components/common/MarkdownEditor";
 import { Sparkles } from "lucide-react";

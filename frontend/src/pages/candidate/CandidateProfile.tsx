@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import { useAuth } from "@/hooks/useAuth";
 import { useCandidateStats } from "@/hooks/useCandidateStats";
@@ -46,7 +46,7 @@ export default function CandidateProfile() {
   const resumeInputRef = useRef<HTMLInputElement>(null);
 
   /* Fetch profile info */
-  const fetchProfile = async () => {
+  const fetchProfile = useCallback(async () => {
     if (!user?.id) return;
 
     const { data } = await supabase
@@ -66,11 +66,11 @@ export default function CandidateProfile() {
       setGithub(data.github_url || "");
       setWebsite(data.website_url || "");
     }
-  };
+  }, [user?.id]);
 
   useEffect(() => {
     fetchProfile();
-  }, [user?.id]);
+  }, [fetchProfile]);
 
   /* Fetch resume */
   useEffect(() => {

@@ -206,9 +206,10 @@ export default function AuthPage() {
         },
       });
       if (error) throw error;
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
-      setFormError(err.message || `Failed to sign in with ${provider}.`);
+      const message = err instanceof Error ? err.message : `Failed to sign in with ${provider}.`;
+      setFormError(message);
     }
   }
 

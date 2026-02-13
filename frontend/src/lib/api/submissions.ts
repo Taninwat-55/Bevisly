@@ -1,16 +1,16 @@
 import { supabase } from "../supabaseClient";
 import type {
+  CandidateFeedbackEntry,
   CandidateSubmission,
   EmployerSubmission,
   ProofTask,
-  CandidateFeedbackEntry,
 } from "@/types";
 
 /**
  * Get all submissions by a candidate (for candidate dashboard/profile)
  */
 export async function getCandidateSubmissions(
-  user_id: string
+  user_id: string,
 ): Promise<CandidateSubmission[]> {
   const { data, error } = await supabase
     .from("submissions")
@@ -25,7 +25,7 @@ export async function getCandidateSubmissions(
       reflection,
       jobs ( title, company ),
       proof_tasks ( title )
-    `
+    `,
     )
     .eq("user_id", user_id)
     .order("created_at", { ascending: false });
@@ -35,7 +35,9 @@ export async function getCandidateSubmissions(
   return data.map((s: any): CandidateSubmission => ({
     ...s,
     jobs: Array.isArray(s.jobs) ? s.jobs[0] : s.jobs,
-    proof_tasks: Array.isArray(s.proof_tasks) ? s.proof_tasks[0] : s.proof_tasks,
+    proof_tasks: Array.isArray(s.proof_tasks)
+      ? s.proof_tasks[0]
+      : s.proof_tasks,
   }));
 }
 
@@ -43,7 +45,7 @@ export async function getCandidateSubmissions(
  * Get all submissions for an employer’s jobs (for review dashboard)
  */
 export async function getEmployerSubmissions(
-  employer_id: string
+  employer_id: string,
 ): Promise<EmployerSubmission[]> {
   const { data: jobIds, error: jobErr } = await supabase
     .from("jobs")
@@ -67,7 +69,7 @@ export async function getEmployerSubmissions(
       submission_link,
       reflection,
       proof_tasks ( id, title )
-    `
+    `,
     )
     .in("job_id", ids)
     .order("created_at", { ascending: false });
@@ -76,7 +78,9 @@ export async function getEmployerSubmissions(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return data.map((s: any): EmployerSubmission => ({
     ...s,
-    proof_tasks: Array.isArray(s.proof_tasks) ? s.proof_tasks[0] : s.proof_tasks,
+    proof_tasks: Array.isArray(s.proof_tasks)
+      ? s.proof_tasks[0]
+      : s.proof_tasks,
   }));
 }
 
@@ -84,7 +88,7 @@ export async function getEmployerSubmissions(
  * Get all submissions for a company's jobs (multi-tenant)
  */
 export async function getCompanySubmissions(
-  company_id: string
+  company_id: string,
 ): Promise<EmployerSubmission[]> {
   const { data: jobIds, error: jobErr } = await supabase
     .from("jobs")
@@ -115,12 +119,14 @@ export async function getCompanySubmissions(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return data.map((s: any): EmployerSubmission => ({
     ...s,
-    proof_tasks: Array.isArray(s.proof_tasks) ? s.proof_tasks[0] : s.proof_tasks,
+    proof_tasks: Array.isArray(s.proof_tasks)
+      ? s.proof_tasks[0]
+      : s.proof_tasks,
   }));
 }
 
 export async function getEmployerSubmissionsWithFeedback(
-  employer_id: string
+  employer_id: string,
 ): Promise<EmployerSubmission[]> {
   const { data: jobIds, error: jobErr } = await supabase
     .from("jobs")
@@ -150,7 +156,7 @@ export async function getEmployerSubmissionsWithFeedback(
       jobs ( id, title ),
       feedback ( stars ),
       profiles:user_id ( full_name, email )
-    `
+    `,
     )
     .in("job_id", ids)
     .order("created_at", { ascending: false });
@@ -160,7 +166,9 @@ export async function getEmployerSubmissionsWithFeedback(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return data.map((s: any) => ({
     ...s,
-    proof_tasks: Array.isArray(s.proof_tasks) ? s.proof_tasks[0] : s.proof_tasks,
+    proof_tasks: Array.isArray(s.proof_tasks)
+      ? s.proof_tasks[0]
+      : s.proof_tasks,
     jobs: Array.isArray(s.jobs) ? s.jobs[0] : s.jobs,
     profiles: Array.isArray(s.profiles) ? s.profiles[0] : s.profiles,
   })) as EmployerSubmission[];
@@ -170,18 +178,18 @@ export async function getEmployerSubmissionsWithFeedback(
  * Get details for a single proof task (for job detail / proof workspace)
  */
 export async function getProofTaskDetails(
-  proof_task_id: string
+  proof_task_id: string,
 ): Promise<ProofTask | null> {
   const { data, error } = await supabase
     .from("proof_tasks")
     .select(
-      "id, job_id, title, description, expected_time, submission_format, ai_tools_allowed, attachments, recommended_platform, submission_type, jobs ( company )"
+      "id, job_id, title, description, expected_time, submission_format, ai_tools_allowed, attachments, recommended_platform, submission_type, jobs ( company )",
     )
     .eq("id", proof_task_id)
     .maybeSingle();
 
   if (error) throw error;
-  
+
   if (!data) return null;
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -189,8 +197,9 @@ export async function getProofTaskDetails(
 
   const result: ProofTask = {
     ...raw,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    company_name: Array.isArray(raw.jobs) ? raw.jobs[0]?.company : raw.jobs?.company,
+    company_name: Array.isArray(raw.jobs)
+      ? raw.jobs[0]?.company
+      : raw.jobs?.company,
   };
 
   return result;
@@ -202,7 +211,9 @@ export async function checkSubmissionStatus(job_id: string) {
 
   const { data, error } = await supabase
     .from("submissions")
-    .select("id, status, proof_task_id, submission_link, reflection, resume_url, created_at")
+    .select(
+      "id, status, proof_task_id, submission_link, reflection, resume_url, created_at",
+    )
     .eq("user_id", user.id)
     .eq("job_id", job_id)
     .limit(1) // <-- Critical Fix: Stops crash if duplicates exist
@@ -231,7 +242,7 @@ export async function getCandidateFeedback(user_id: string) {
         comments,
         created_at
       )
-    `
+    `,
     )
     .eq("user_id", user_id)
     .order("created_at", { ascending: false });
@@ -242,7 +253,9 @@ export async function getCandidateFeedback(user_id: string) {
   return data.map((s: any) => ({
     ...s,
     jobs: Array.isArray(s.jobs) ? s.jobs[0] : s.jobs,
-    proof_tasks: Array.isArray(s.proof_tasks) ? s.proof_tasks[0] : s.proof_tasks,
+    proof_tasks: Array.isArray(s.proof_tasks)
+      ? s.proof_tasks[0]
+      : s.proof_tasks,
   })) as CandidateFeedbackEntry[];
 }
 
@@ -272,11 +285,13 @@ export async function getSubmissionById(submission_id: string) {
 
   if (error) throw error;
   if (error) throw error;
-  
+
   // Unwrap nested arrays
   const formatted = {
     ...data,
-    proof_tasks: Array.isArray(data.proof_tasks) ? data.proof_tasks[0] : data.proof_tasks,
+    proof_tasks: Array.isArray(data.proof_tasks)
+      ? data.proof_tasks[0]
+      : data.proof_tasks,
     jobs: Array.isArray(data.jobs) ? data.jobs[0] : data.jobs,
     profiles: Array.isArray(data.profiles) ? data.profiles[0] : data.profiles,
   };
@@ -349,7 +364,9 @@ export async function completeProof(params: any) {
   return submitProof(params);
 }
 
-export async function getSubmissionsByJob(job_id: string): Promise<EmployerSubmission[]> {
+export async function getSubmissionsByJob(
+  job_id: string,
+): Promise<EmployerSubmission[]> {
   const { data, error } = await supabase
     .from("submissions")
     .select(`
@@ -372,7 +389,9 @@ export async function getSubmissionsByJob(job_id: string): Promise<EmployerSubmi
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return data.map((s: any): EmployerSubmission => ({
     ...s,
-    proof_tasks: Array.isArray(s.proof_tasks) ? s.proof_tasks[0] : s.proof_tasks,
+    proof_tasks: Array.isArray(s.proof_tasks)
+      ? s.proof_tasks[0]
+      : s.proof_tasks,
     jobs: Array.isArray(s.jobs) ? s.jobs[0] : s.jobs,
   }));
 }
@@ -409,17 +428,17 @@ export async function startProof(job_id: string, proof_task_id?: string) {
     .single();
 
   if (error) {
-    // ✅ HANDLE RACE CONDITION: 
-    // If error code is 23505 (Unique Violation), it means another request 
+    // ✅ HANDLE RACE CONDITION:
+    // If error code is 23505 (Unique Violation), it means another request
     // created it 1ms ago. We just fetch that one instead of crashing.
-    if (error.code === '23505') {
-       const { data: retry } = await supabase
-         .from("submissions")
-         .select("id")
-         .eq("user_id", user.id)
-         .eq("job_id", job_id)
-         .single();
-       return retry?.id;
+    if (error.code === "23505") {
+      const { data: retry } = await supabase
+        .from("submissions")
+        .select("id")
+        .eq("user_id", user.id)
+        .eq("job_id", job_id)
+        .single();
+      return retry?.id;
     }
     throw error;
   }
