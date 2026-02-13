@@ -20,8 +20,10 @@ export type EmployerJob = {
   work_mode?: string | null;
   created_at: string | null;
   featured?: boolean | null;
-  status?: string | null; 
+  status?: string | null;
   expires_at?: string | null;
+  start_date?: string | null;
+  application_deadline?: string | null;
   company_id?: string | null; // Multi-tenant: Links to companies table
 };
 
@@ -54,8 +56,8 @@ export type EmployerSubmission = {
   created_at: string | null;
   status: string | null;
   submission_link: string | null; // Used ONLY for External Links
-  file_url?: string | null;       // For uploaded files
-  text_response?: string | null;  // For text answers
+  file_url?: string | null; // For uploaded files
+  text_response?: string | null; // For text answers
   video_url?: string | null;
   reflection: string | null;
   proof_tasks: { id: string; title: string | null } | null;
@@ -100,7 +102,6 @@ export type EmployerStats = {
   submissions: EmployerRecentSubmission[];
 };
 
-
 export interface EmployerJobFormValues {
   id?: string;
   title: string;
@@ -119,6 +120,8 @@ export interface EmployerJobFormValues {
   department?: string;
   work_mode?: string;
   proof_tasks: ProofTask[];
+  start_date?: string;
+  application_deadline?: string;
 }
 
 export type EmployerProfile = {

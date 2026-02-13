@@ -13,6 +13,8 @@ export interface Job {
   salary_min?: number | null;
   salary_max?: number | null;
   pay_period?: "hourly" | "monthly" | "yearly" | null;
+  application_deadline?: string | null;
+  start_date?: string | null;
   payment_currency?: string | null;
   payment_amount?: number | null;
 

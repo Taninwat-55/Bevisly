@@ -3,7 +3,7 @@ import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 const corsHeaders = {
     "Access-Control-Allow-Origin": "*",
     "Access-Control-Allow-Headers":
-        "authorization, x-client-info, apikey, content-type",
+        "authorization, x-client-info, apikey, content-type, x-client-timeout",
 };
 
 Deno.serve(async (req) => {
@@ -49,20 +49,58 @@ Deno.serve(async (req) => {
       Draft Feedback:
     `;
 
-        const response = await fetch(
-            `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`,
-            {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    contents: [{ parts: [{ text: prompt }] }],
-                }),
-            },
-        );
+        const models = ["gemini-1.5-flash", "gemini-1.5-pro", "gemini-pro"];
+        let response;
+        let data;
+        let lastError;
+        let feedbackText = "Excellent work!";
 
-        const data = await response.json();
-        const feedbackText = data.candidates?.[0]?.content?.parts?.[0]?.text ||
-            "Excellent work!";
+        for (const model of models) {
+            try {
+                const version = "v1beta";
+
+                response = await fetch(
+                    `https://generativelanguage.googleapis.com/${version}/models/${model}:generateContent?key=${GEMINI_API_KEY}`,
+                    {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                            contents: [{ parts: [{ text: prompt }] }],
+                        }),
+                    },
+                );
+
+                data = await response.json();
+
+                if (response.ok) {
+                    feedbackText =
+                        data.candidates?.[0]?.content?.parts?.[0]?.text ||
+                        "Excellent work!";
+                    break;
+                } else {
+                    lastError = data;
+                }
+            } catch (err) {
+                lastError = err;
+            }
+        }
+
+        if (!response?.ok) {
+            console.error("Gemini API Error (Feedback):", lastError);
+            return new Response(
+                JSON.stringify({
+                    error: lastError?.error?.message ||
+                        "Failed to generate feedback",
+                }),
+                {
+                    status: 200,
+                    headers: {
+                        ...corsHeaders,
+                        "Content-Type": "application/json",
+                    },
+                },
+            );
+        }
 
         return new Response(JSON.stringify({ feedback: feedbackText }), {
             headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -74,7 +112,7 @@ Deno.serve(async (req) => {
         return new Response(
             JSON.stringify({ error: errorMessage }),
             {
-                status: 400,
+                status: 200,
                 headers: { ...corsHeaders, "Content-Type": "application/json" },
             },
         );

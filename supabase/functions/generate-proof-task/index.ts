@@ -3,7 +3,7 @@ import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 const corsHeaders = {
     "Access-Control-Allow-Origin": "*",
     "Access-Control-Allow-Headers":
-        "authorization, x-client-info, apikey, content-type",
+        "authorization, x-client-info, apikey, content-type, x-client-timeout",
 };
 
 Deno.serve(async (req) => {
@@ -53,34 +53,109 @@ Deno.serve(async (req) => {
       }
     `;
 
-        const response = await fetch(
-            `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`,
-            {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                    contents: [{ parts: [{ text: prompt }] }],
-                }),
-            },
-        );
+        // Use a single fast model with timeout to prevent hung requests
+        const model = "gemini-3-flash-preview";
+        const TIMEOUT_MS = 15000; // 15 second timeout
 
-        const data = await response.json();
+        // Create abort controller for timeout
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), TIMEOUT_MS);
+
+        let response;
+        let data;
+
+        try {
+            console.log(`Calling ${model} with ${TIMEOUT_MS}ms timeout`);
+
+            response = await fetch(
+                `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${GEMINI_API_KEY}`,
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                        contents: [{ parts: [{ text: prompt }] }],
+                        generationConfig: {
+                            temperature: 0.7,
+                            maxOutputTokens: 1024,
+                        },
+                    }),
+                    signal: controller.signal,
+                },
+            );
+
+            data = await response.json();
+        } catch (err: unknown) {
+            clearTimeout(timeoutId);
+            if (err instanceof Error && err.name === "AbortError") {
+                throw new Error(
+                    "AI request timed out after 15 seconds. Please try again.",
+                );
+            }
+            throw err;
+        } finally {
+            clearTimeout(timeoutId);
+        }
 
         if (!response.ok) {
-            console.error("Gemini API Error:", data);
-            throw new Error(
-                data.error?.message || "Failed to generate content",
-            );
+            console.error("Gemini API error:", data);
+            throw new Error(data?.error?.message || "AI generation failed");
         }
 
         let rawText = data.candidates?.[0]?.content?.parts?.[0]?.text || "{}";
 
-        // Clean up markdown code blocks if Gemini adds them
-        rawText = rawText.replace(/```json/g, "").replace(/```/g, "").trim();
+        // Cleanup: Remove markdown code blocks and backticks
+        // Sometimes models wrap JSON in ```json ... ``` or just ` ... `
+        rawText = rawText.replace(/```json/gi, "").replace(/```/g, "").replace(
+            /^`|`$/g,
+            "",
+        );
 
-        const parsedTask = JSON.parse(rawText);
+        // Find the first '{' and last '}' to extract just the JSON object
+        const firstOpen = rawText.indexOf("{");
+        const lastClose = rawText.lastIndexOf("}");
+
+        if (firstOpen !== -1 && lastClose !== -1 && lastClose > firstOpen) {
+            rawText = rawText.substring(firstOpen, lastClose + 1);
+        }
+
+        let parsedTask;
+        try {
+            parsedTask = JSON.parse(rawText);
+        } catch (err) {
+            console.error("JSON Parse Error:", err, "Raw:", rawText);
+            return new Response(
+                JSON.stringify({
+                    error: "Failed to parse AI response",
+                    raw: rawText,
+                }),
+                {
+                    status: 200,
+                    headers: {
+                        ...corsHeaders,
+                        "Content-Type": "application/json",
+                    },
+                }, // Return 200 so frontend sees error
+            );
+        }
+
+        if (!parsedTask.title || !parsedTask.description) {
+            console.error("Missing keys in AI response:", parsedTask);
+            return new Response(
+                JSON.stringify({
+                    error: "AI response missing required fields",
+                    raw: JSON.stringify(parsedTask),
+                }),
+                {
+                    status: 200,
+                    headers: {
+                        ...corsHeaders,
+                        "Content-Type": "application/json",
+                    },
+                },
+            );
+        }
 
         return new Response(JSON.stringify(parsedTask), {
             headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -93,7 +168,7 @@ Deno.serve(async (req) => {
         return new Response(
             JSON.stringify({ error: errorMessage }),
             {
-                status: 400,
+                status: 200,
                 headers: { ...corsHeaders, "Content-Type": "application/json" },
             },
         );
