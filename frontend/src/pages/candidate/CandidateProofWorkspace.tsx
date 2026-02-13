@@ -338,7 +338,7 @@ export default function CandidateProofWorkspace() {
 
                 <input
                   type="url"
-                  placeholder="https://loom.com/..."
+                  placeholder="https://loom.com/... or https://youtube.com/..."
                   className="w-full bg-[#252526] border border-[#3e3e42] rounded px-4 py-2 text-sm text-slate-200 focus:border-blue-500 outline-none mb-4"
                   value={videoLink}
                   onChange={(e) => setVideoLink(e.target.value)}

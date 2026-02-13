@@ -417,11 +417,28 @@ export default function EmployerJobForm({
                     <select
                       className="w-full h-10 px-3 rounded-[var(--radius-input)] border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text)] text-sm"
                       value={task.submission_format ?? "github_repo"}
-                      onChange={(e) => handleTaskChange(index, "submission_format", e.target.value)}
+                      onChange={(e) => {
+                        const fmt = e.target.value;
+                        let type: any = "link"; // Default to link
+                        
+                        if (fmt === "github_repo") type = "github_repo";
+                        else if (fmt === "file_upload") type = "file";
+                        else if (fmt === "text_response") type = "text";
+                        else if (fmt === "loom_video" || fmt === "figma_link") type = "link";
+                        
+                        const newTasks = [...(values.proof_tasks || [])];
+                        newTasks[index] = { 
+                          ...newTasks[index], 
+                          submission_format: fmt,
+                          submission_type: type
+                        };
+                        handleChange("proof_tasks", newTasks);
+                      }}
                     >
                       <option value="github_repo">GitHub Repository</option>
                       <option value="file_upload">File Upload (PDF/Zip)</option>
-                      <option value="loom_video">Loom Video Walkthrough</option>
+                      <option value="text_response">Text / Code Snippet</option>
+                      <option value="loom_video">Video Walkthrough (Loom/YouTube)</option>
                       <option value="link">Valid URL</option>
                       <option value="figma_link">Figma Link</option>
                     </select>
