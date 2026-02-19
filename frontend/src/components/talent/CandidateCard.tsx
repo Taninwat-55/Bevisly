@@ -9,7 +9,7 @@ import type { EmployerSubmission, HiringStage } from "@/types";
 import NotesModal from "./NotesModal";
 import { useNavigate } from "react-router-dom";
 
-// ... (rest of file)
+
 
 
 
