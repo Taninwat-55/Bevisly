@@ -4,6 +4,7 @@ import toast from "react-hot-toast";
 import ReactMarkdown from "react-markdown";
 import { motion } from "framer-motion";
 import { createFeedback } from "@/lib/api/feedback";
+import { suggestFeedback } from "@/lib/api/ai";
 import { updateSubmissionStatus } from "@/lib/api/mutations";
 import { getSubmissionById, getSubmissionsByJob } from "@/lib/api/submissions";
 import { useAuth } from "@/hooks/useAuth";
@@ -15,7 +16,7 @@ import {
 } from "lucide-react";
 import { distributeCredits } from "@/lib/api/credits";
 import { Star, Sparkles } from "lucide-react";
-import { supabase } from "@/lib/supabaseClient";
+
 
 // Inline TaskRequirementsPanel (original was deleted)
 interface TaskInfo {
@@ -265,28 +266,24 @@ export default function EmployerReviewProof({ submissionId, onBack }: EmployerRe
         setSuggestingAI(true);
         const toastId = toast.loading("Analyzing submission...");
         try {
-            const { data, error } = await supabase.functions.invoke('suggest-feedback', {
-                body: { 
-                    rating: stars, 
-                    criteria: submission?.proof_tasks?.title || "General",
-                    submission_content: submission?.text_response || "Checked file/link."
-                }
-            });
+            const criteria = submission?.proof_tasks?.title || "General";
+            const content = submission?.text_response || "Checked file/link.";
+            
+            const feedback = await suggestFeedback(stars, criteria, content);
 
-            if (error) throw error;
-            if (data.error) throw new Error(data.error);
-
-            if (data.feedback) {
+            if (feedback) {
                 if (stars >= 4) {
-                     setStrengths(prev => prev ? prev + "\n" + data.feedback : data.feedback);
+                     setStrengths(prev => prev ? prev + "\n" + feedback : feedback);
                 } else {
-                     setImprovements(prev => prev ? prev + "\n" + data.feedback : data.feedback);
+                     setImprovements(prev => prev ? prev + "\n" + feedback : feedback);
                 }
                 toast.success("Here's a draft! feel free to edit.", { id: toastId });
             }
-        } catch (e) {
+        } catch (e: unknown) {
             console.error(e);
-            toast.error("Failed to suggest feedback. Check API Key.", { id: toastId });
+            const errorMessage = e instanceof Error ? e.message : "Failed to suggest feedback.";
+            // Display the actual error message rather than assuming it's the API key
+            toast.error(errorMessage, { id: toastId });
         } finally {
             setSuggestingAI(false);
         }

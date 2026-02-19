@@ -49,51 +49,41 @@ Deno.serve(async (req) => {
       Draft Feedback:
     `;
 
-        const models = ["gemini-1.5-flash", "gemini-1.5-pro", "gemini-pro"];
-        let response;
-        let data;
-        let lastError;
-        let feedbackText = "Excellent work!";
+        // Use the reliable flash model (same as other working functions)
+        const model = "gemini-3-flash-preview";
+        const version = "v1beta";
 
-        for (const model of models) {
-            try {
-                const version = "v1beta";
+        const response = await fetch(
+            `https://generativelanguage.googleapis.com/${version}/models/${model}:generateContent?key=${GEMINI_API_KEY}`,
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    contents: [{ parts: [{ text: prompt }] }],
+                }),
+            },
+        );
 
-                response = await fetch(
-                    `https://generativelanguage.googleapis.com/${version}/models/${model}:generateContent?key=${GEMINI_API_KEY}`,
-                    {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({
-                            contents: [{ parts: [{ text: prompt }] }],
-                        }),
-                    },
-                );
+        const data = await response.json();
 
-                data = await response.json();
+        if (response.ok) {
+            const feedbackText =
+                data.candidates?.[0]?.content?.parts?.[0]?.text ||
+                "Excellent work!";
 
-                if (response.ok) {
-                    feedbackText =
-                        data.candidates?.[0]?.content?.parts?.[0]?.text ||
-                        "Excellent work!";
-                    break;
-                } else {
-                    lastError = data;
-                }
-            } catch (err) {
-                lastError = err;
-            }
-        }
-
-        if (!response?.ok) {
-            console.error("Gemini API Error (Feedback):", lastError);
+            return new Response(JSON.stringify({ feedback: feedbackText }), {
+                headers: { ...corsHeaders, "Content-Type": "application/json" },
+            });
+        } else {
+            console.error("Gemini API Error (Feedback):", data);
             return new Response(
                 JSON.stringify({
-                    error: lastError?.error?.message ||
-                        "Failed to generate feedback",
+                    error: data.error?.message || "Failed to generate feedback",
                 }),
                 {
-                    status: 200,
+                    status: 200, // Return 200 so frontend can parse error JSON
                     headers: {
                         ...corsHeaders,
                         "Content-Type": "application/json",
@@ -101,10 +91,6 @@ Deno.serve(async (req) => {
                 },
             );
         }
-
-        return new Response(JSON.stringify({ feedback: feedbackText }), {
-            headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
     } catch (error) {
         const errorMessage = error instanceof Error
             ? error.message

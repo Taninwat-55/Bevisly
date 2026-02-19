@@ -201,6 +201,18 @@ export async function createJobWithTasks(
   const user = (await supabase.auth.getUser()).data.user;
   if (!user) throw new Error("User not authenticated.");
 
+  // 1️⃣ Get the user's company_id
+  const { data: membership, error: memberError } = await supabase
+    .from("company_members")
+    .select("company_id")
+    .eq("user_id", user.id)
+    .single();
+
+  if (memberError || !membership) {
+    console.error("Error fetching company:", memberError);
+    throw new Error("Could not find company for user. Please contact support.");
+  }
+
   const { data: job, error: jobError } = await supabase
     .from("jobs")
     .insert([
@@ -218,6 +230,7 @@ export async function createJobWithTasks(
         salary_max: values.salary_max ?? null,
         pay_period: values.pay_period ?? "monthly",
         employer_id: user.id,
+        company_id: membership.company_id, // <--- CRITICAL FIX
         expires_at: values.expires_at ?? null,
         is_public: true,
         job_type: values.job_type ?? null,
