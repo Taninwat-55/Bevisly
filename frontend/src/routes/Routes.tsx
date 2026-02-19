@@ -1,4 +1,4 @@
-import { createBrowserRouter } from "react-router-dom";
+import { createBrowserRouter, Outlet } from "react-router-dom";
 import App from "../App";
 import AuthPage from "../pages/auth/AuthPage";
 import LandingPage from "../pages/landing/LandingPage";
@@ -18,14 +18,14 @@ import CandidateProfile from "@/pages/candidate/CandidateProfile";
 import CandidateCredits from "@/pages/candidate/CandidateCredits";
 
 // --- Employer pages
-import EmployerLayout from "@/layout/EmployerLayout";
+
+import DashboardLayout from "@/layout/DashboardLayout";
 
 import EmployerDashboard from "@/pages/employer/EmployerDashboard";
 import EmployerPostJob from "@/pages/employer/EmployerPostJob";
 import EmployerEditJob from "@/pages/employer/EmployerEditJob";
 import EmployerFeedbackSuccess from "@/pages/employer/EmployerFeedbackSuccess";
 import EmployerReview from "@/pages/employer/EmployerReviewProof";
-import EmployerTalentManager from "@/pages/employer/EmployerTalentManager";
 import EmployerTalentPool from "@/pages/employer/EmployerTalentPool";
 
 // --- Admin pages
@@ -105,11 +105,28 @@ export const router = createBrowserRouter([
       </ProtectedRoute>
     ),
     children: [
+      // Unified Dashboard (No Layout Wrapper)
+      { 
+        index: true, 
+        element: (
+          <DashboardLayout showSidebar={false} fullWidth={true}>
+            <EmployerDashboard />
+          </DashboardLayout>
+        )
+      },
+      { 
+        path: "dashboard", 
+        element: (
+          <DashboardLayout showSidebar={false} fullWidth={true}>
+            <EmployerDashboard />
+          </DashboardLayout>
+        ) 
+      },
+
+      // All employer sub-pages use DashboardLayout (no old sidebar)
       {
-        element: <EmployerLayout />,
+        element: <DashboardLayout showSidebar={false} fullWidth={false}><Outlet /></DashboardLayout>,
         children: [
-          { index: true, element: <EmployerDashboard /> },
-          { path: "dashboard", element: <EmployerDashboard /> },
           { path: "review/:id", element: <EmployerReview /> },
           { path: "review/success", element: <EmployerFeedbackSuccess /> },
           { path: "jobs", element: <JobListingPage /> },
@@ -118,7 +135,6 @@ export const router = createBrowserRouter([
           { path: "jobs/:id/edit", element: <EmployerEditJob /> },
           { path: "submissions", element: <EmployerTalentPool /> },
           { path: "talent", element: <EmployerTalentPool /> },
-          { path: "talent/manage", element: <EmployerTalentManager /> },
           { path: "settings", element: <UserSettings /> },
         ],
       },

@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { MoreHorizontal, Star, FileText, ExternalLink, GripVertical, Clock, Briefcase, Mail } from "lucide-react";
+import { MoreHorizontal, Star, FileText, ExternalLink, GripVertical, Clock, Briefcase, Mail, User } from "lucide-react";
 import toast from "react-hot-toast";
 import { updateHiringStage } from "@/lib/api/mutations";
 import type { EmployerSubmission, HiringStage } from "@/types";
@@ -40,6 +40,7 @@ function InnerCard({
   attributes,
   listeners,
   isDragging = false,
+  onReview,
 }: {
   submission: EmployerSubmission;
   isOverlay?: boolean;
@@ -49,6 +50,7 @@ function InnerCard({
   attributes?: Record<string, any>;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   listeners?: Record<string, any>;
+  onReview?: (id: string) => void;
   isDragging?: boolean;
 }) {
   const navigate = useNavigate();
@@ -92,7 +94,11 @@ function InnerCard({
 
   function handleViewProof(e: React.MouseEvent) {
     e.stopPropagation();
-    navigate(`/employer/review/${id}`);
+    if (onReview) {
+        onReview(id);
+    } else {
+        navigate(`/employer/review/${id}`);
+    }
   }
 
   return (
@@ -214,6 +220,18 @@ function InnerCard({
                 >
                   <ExternalLink size={14} className="text-[var(--color-text-muted)]" /> View Proof
                 </button>
+                {submission.user_id && (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setOpen(false);
+                      navigate(`/candidate/${submission.user_id}`);
+                    }}
+                    className="flex items-center gap-2 w-full text-left px-3 py-2 hover:bg-[var(--color-bg)] text-[var(--color-text)] text-xs font-medium transition-colors"
+                  >
+                    <User size={14} className="text-[var(--color-text-muted)]" /> View Profile
+                  </button>
+                )}
                 <a
                   href={`mailto:${profiles?.email}`}
                   onClick={(e) => e.stopPropagation()}
@@ -263,8 +281,10 @@ function InnerCard({
 // 🟢 Standard Sortable Card
 export default function CandidateCard({
   submission,
+  onReview,
 }: {
   submission: EmployerSubmission;
+  onReview?: (id: string) => void;
 }) {
   const { attributes, listeners, setNodeRef, transform, isDragging } =
     useSortable({ id: submission.id });
@@ -283,6 +303,7 @@ export default function CandidateCard({
       attributes={attributes}
       listeners={listeners}
       isDragging={isDragging}
+      onReview={onReview}
     />
   );
 }

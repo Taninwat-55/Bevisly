@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useTheme } from "@/hooks/useTheme";
 import { Sun, Moon, Menu, X, Home } from "lucide-react";
 import UserMenu from "@/components/common/UserMenu";
+import { Button } from "@/components/ui/Button";
 
 export default function Navbar() {
   const navigate = useNavigate();
@@ -12,6 +13,16 @@ export default function Navbar() {
   const { isDark, toggleTheme } = useTheme();
 
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+
+  // Handle scroll effect
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 20);
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   /* Global navigation links */
   const navLinks = [
@@ -22,66 +33,56 @@ export default function Navbar() {
     { label: "About", to: "/about" },
   ];
 
-  /* Append Dashboard link for logged-in users */
-  if (user) {
-    const storedUser = JSON.parse(localStorage.getItem("bevisly_user") || "{}");
-    const role = localStorage.getItem("overrideRole") || storedUser?.role;
-
-    navLinks.splice(1, 0, {
-      label: "Overview",
-      to:
-        role === "admin"
-          ? "/admin"
-          : role === "employer"
-            ? "/employer"
-            : "/candidate",
-    });
-  }
-
   /* Go to dashboard based on role */
   const goToDashboard = () => {
-    const storedUser = JSON.parse(localStorage.getItem("bevisly_user") || "{}");
-    const role = localStorage.getItem("overrideRole") || storedUser?.role;
-    if (role === "admin") navigate("/admin");
-    else if (role === "employer") navigate("/employer");
-    else navigate("/candidate");
+    if (!user) return navigate("/auth");
+    if (user.role === "employer") return navigate("/employer/dashboard");
+    if (user.role === "admin") return navigate("/admin");
+    return navigate("/candidate");
   };
 
   return (
     <header
-      className="sticky top-0 z-40 border-b border-[var(--color-border)] 
-                 bg-[var(--color-surface)] backdrop-blur-md 
-                 shadow-[var(--shadow-soft)] transition-[background,border,color] duration-300"
+      className={`fixed top-0 inset-x-0 z-50 transition-all duration-200 border-b ${
+        scrolled || location.pathname !== "/"
+          ? "bg-[var(--color-bg)]/80 backdrop-blur-md border-[var(--color-border)]"
+          : "bg-transparent border-transparent"
+      }`}
     >
-      <div className="flex items-center justify-between px-6 py-3">
+      <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
         {/* ─── Left: Logo + Mobile toggle ─── */}
         <div className="flex items-center gap-3">
           <button
             onClick={() => setMobileOpen(!mobileOpen)}
-            className="md:hidden text-[var(--color-candidate-dark)]"
+            className="md:hidden text-[var(--color-text)]"
           >
             {mobileOpen ? <X size={22} /> : <Menu size={22} />}
           </button>
 
           <div
-            onClick={() => (user ? goToDashboard() : navigate("/"))}
+            onClick={() => navigate("/")}
             className="flex items-center gap-2 cursor-pointer select-none"
           >
-            <img src="/logo.png" alt="Bevisly" className="h-8 w-auto" />
-            <span className="text-lg font-semibold text-[var(--color-candidate-dark)]">Bevisly</span>
+             <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[var(--color-brand-primary)] to-[var(--color-brand-secondary)] flex items-center justify-center text-white font-bold text-lg">
+              B
+            </div>
+            <span className="text-xl font-bold font-display tracking-tight text-[var(--color-text)]">
+              Bevisly
+            </span>
           </div>
         </div>
 
         {/* ─── Center: Main Nav Links ─── */}
-        <nav className="hidden md:flex items-center gap-6 text-sm font-medium text-[var(--color-text-muted)]">
+        <nav className="hidden md:flex items-center gap-8">
           {navLinks.map(({ label, to }) => (
             <Link
               key={label}
               to={to}
-              className={`hover:text-[var(--color-text)] transition-colors ${location.pathname === to
+              className={`text-sm font-medium transition-colors ${
+                location.pathname === to
                   ? "text-[var(--color-text)] font-semibold"
-                  : ""
-                }`}
+                  : "text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
+              }`}
             >
               {label}
             </Link>
@@ -89,34 +90,33 @@ export default function Navbar() {
         </nav>
 
         {/* ─── Right: Theme + Auth/User ─── */}
-        <div className="flex items-center gap-5">
+        <div className="flex items-center gap-4">
           {/* Theme toggle */}
           <button
             onClick={toggleTheme}
-            className="text-[var(--color-text-muted)] hover:text-[var(--color-candidate-dark)] transition"
+            className="text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition"
             title="Toggle Theme"
           >
-            {isDark ? <Sun size={18} /> : <Moon size={18} />}
+            {isDark ? <Sun size={20} /> : <Moon size={20} />}
           </button>
 
           {/* Auth-dependent content */}
           {!user ? (
             <>
-              <Link
-                to="/auth"
-                className="text-sm text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition"
-              >
-                Log in
-              </Link>
-              <Link
-                to="/auth?mode=signup"
-                className="text-sm rounded-[var(--radius-button)] bg-[var(--color-employer)] text-white px-4 py-2 hover:brightness-110 transition"
-              >
-                Sign up
-              </Link>
+              <Button variant="ghost" size="sm" onClick={() => navigate("/auth")}>
+                  Log in
+              </Button>
+              <Button size="sm" onClick={() => navigate("/auth?mode=signup")}>
+                  Join Beta
+              </Button>
             </>
           ) : (
-            <UserMenu />
+            <>
+               <Button size="sm" onClick={goToDashboard} className="hidden sm:flex">
+                  Dashboard
+               </Button>
+               <UserMenu />
+            </>
           )}
         </div>
       </div>
@@ -124,7 +124,7 @@ export default function Navbar() {
       {/* ─── Mobile Drawer ─── */}
       {mobileOpen && (
         <div className="absolute top-full left-0 w-full bg-[var(--color-surface)] border-t border-[var(--color-border)] md:hidden shadow-lg z-50">
-          <nav className="flex flex-col px-6 py-4 text-sm">
+          <nav className="flex flex-col px-6 py-4 text-sm gap-2">
             {navLinks.map(({ label, to }) => (
               <Link
                 key={label}
@@ -136,13 +136,15 @@ export default function Navbar() {
               </Link>
             ))}
 
+            <div className="h-px bg-[var(--color-border)] my-2" />
+            
             {user && (
               <button
                 onClick={() => {
                   goToDashboard();
                   setMobileOpen(false);
                 }}
-                className="mt-2 flex items-center gap-2 text-[var(--color-candidate-dark)] font-medium"
+                className="flex items-center gap-2 py-2 text-[var(--color-brand-primary)] font-medium"
               >
                 <Home size={16} /> My Dashboard
               </button>
@@ -153,7 +155,7 @@ export default function Navbar() {
                 toggleTheme();
                 setMobileOpen(false);
               }}
-              className="mt-3 flex items-center gap-2 text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition"
+              className="flex items-center gap-2 py-2 text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition"
             >
               {isDark ? <Sun size={16} /> : <Moon size={16} />} Toggle Theme
             </button>

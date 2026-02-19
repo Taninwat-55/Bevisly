@@ -55,7 +55,7 @@ export default function EmployerEditJob() {
     try {
       await deleteJob(id);
       toast.success("Job deleted successfully");
-      navigate("/employer/jobs");
+      navigate("/employer/dashboard");
     } catch (err) {
       console.error(err);
       toast.error("Failed to delete job");
@@ -84,7 +84,7 @@ export default function EmployerEditJob() {
         defaultValues={job}
         onSubmit={handleUpdate}
         submitLabel="Update Job"
-        onSuccess={() => console.log("Job updated successfully!")}
+        onSuccess={() => navigate("/employer/dashboard")}
       />
     </div>
   );
