@@ -9,10 +9,6 @@ import type { EmployerSubmission, HiringStage } from "@/types";
 import NotesModal from "./NotesModal";
 import { useNavigate } from "react-router-dom";
 
-
-
-
-
 const STAGES: { key: HiringStage; label: string; emoji: string }[] = [
   { key: "new", label: "New", emoji: "🆕" },
   { key: "shortlisted", label: "Shortlisted", emoji: "⭐" },
