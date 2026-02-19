@@ -42,6 +42,7 @@ import EmployerTalentPool from "@/pages/employer/EmployerTalentPool";
 import EmployerReviewProof from "./EmployerReviewProof";
 import UserSettings from "@/pages/shared/UserSettings";
 import EmployerJobForm from "./EmployerJobForm";
+import EmployerJobIntentForm from "@/components/employer/EmployerJobIntentForm";
 import type { ProofTask } from "@/types";
 import { AnimatePresence, motion } from "framer-motion";
 
@@ -67,6 +68,13 @@ export default function EmployerDashboard() {
   const [isEditingJob, setIsEditingJob] = useState(false);
   const [editJobData, setEditJobData] = useState<Partial<EmployerJob & { proof_tasks: ProofTask[] }> | null>(null);
   const [editJobLoading, setEditJobLoading] = useState(false);
+
+  // Post Job State
+  const [isPostingJob, setIsPostingJob] = useState(false); // Controls the overlay visibility
+  const [postJobData, setPostJobData] = useState<Partial<EmployerJob & { proof_tasks: ProofTask[] }> | null>(null); // Stores the unified data
+  // Logic: if isPostingJob is true:
+  //   - if postJobData is null -> Show Intent Form
+  //   - if postJobData is set -> Show Main Form (pre-filled)
 
   const handleStatusUpdate = async (status: string) => {
     if (!selectedJobId) return;
@@ -244,7 +252,11 @@ export default function EmployerDashboard() {
 
           <div className="pt-2">
             <Button
-                onClick={() => navigate("/employer/jobs/new")}
+                onClick={() => {
+                  setIsPostingJob(true);
+                  setPostJobData(null); // Reset to show intent form first
+                  setMobileMenuOpen(false);
+                }}
                 className={`w-full justify-start h-10 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg shadow-blue-500/20 border-0 ${isSidebarCollapsed ? "px-2 justify-center" : ""}`}
                 title={isSidebarCollapsed ? "Post New Job" : undefined}
             >
@@ -574,6 +586,74 @@ export default function EmployerDashboard() {
           )}
         </div>
       </main>
+
+      {/* ── Post Job Slide-Over Panel ── */}
+      <AnimatePresence>
+        {isPostingJob && (
+          <>
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm"
+              onClick={() => { setIsPostingJob(false); setPostJobData(null); }}
+            />
+            {/* Panel (Dynamic Width) */}
+            <motion.div
+              initial={{ x: "100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "100%" }}
+              transition={{ type: "spring", damping: 30, stiffness: 300 }}
+              className={`fixed top-0 right-0 z-50 h-full w-full bg-[var(--color-bg)] border-l border-[var(--color-border)] shadow-2xl overflow-y-auto ${
+                 postJobData ? "max-w-2xl" : "max-w-xl flex items-center justify-center bg-gradient-to-br from-slate-900 via-slate-900 to-slate-800"
+              }`}
+            >
+              {!postJobData ? (
+                /* ── Step 1: Intent Form ── */
+                <div className="w-full p-6">
+                    <EmployerJobIntentForm 
+                        onClose={() => setIsPostingJob(false)}
+                        companyName={user?.company_name || "your company"}
+                        onGenerated={(data) => setPostJobData(data)}
+                    />
+                </div>
+              ) : (
+                /* ── Step 2: Full Form (Pre-filled) ── */
+                <>
+                  <div className="sticky top-0 z-10 bg-[var(--color-bg)]/80 backdrop-blur-md border-b border-[var(--color-border)] px-6 py-4 flex items-center justify-between">
+                    <h2 className="text-lg font-bold text-[var(--color-text)]">Review & Publish Job</h2>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => { setIsPostingJob(false); setPostJobData(null); }}
+                    >
+                      ✕ Close
+                    </Button>
+                  </div>
+                  <div className="p-6">
+                    <EmployerJobForm
+                      mode="create"
+                      defaultValues={postJobData}
+                      submitLabel="Publish Job"
+                      onSuccess={async () => {
+                        toast.success("Job published successfully!");
+                        setIsPostingJob(false);
+                        setPostJobData(null);
+                        // Refresh jobs data
+                        if (user?.id) {
+                            const updatedJobs = await getEmployerJobs(user.id);
+                            setJobs(updatedJobs);
+                        }
+                      }}
+                    />
+                  </div>
+                </>
+              )}
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
 
       {/* ── Edit Job Slide-Over Panel ── */}
       <AnimatePresence>
