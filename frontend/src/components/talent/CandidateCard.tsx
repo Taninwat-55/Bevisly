@@ -11,7 +11,7 @@ import { useNavigate } from "react-router-dom";
 
 // ... (rest of file)
 
-        onSave={(updated: string) => console.log("Updated:", updated)}
+
 
 const STAGES: { key: HiringStage; label: string; emoji: string }[] = [
   { key: "new", label: "New", emoji: "🆕" },
