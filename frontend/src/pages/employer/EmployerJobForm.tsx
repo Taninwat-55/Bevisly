@@ -419,7 +419,7 @@ export default function EmployerJobForm({
                       value={task.submission_format ?? "github_repo"}
                       onChange={(e) => {
                         const fmt = e.target.value;
-                        let type: any = "link"; // Default to link
+                        let type: "link" | "file" | "text" | "github_repo" = "link"; // Default to link
                         
                         if (fmt === "github_repo") type = "github_repo";
                         else if (fmt === "file_upload") type = "file";

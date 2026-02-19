@@ -2,12 +2,16 @@ import { useState, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { MoreHorizontal, Star, FileText, ExternalLink, GripVertical, Clock, Briefcase, Mail, User } from "lucide-react";
+import { ExternalLink, GripVertical, User, Mail, Star, FileText, MoreHorizontal } from "lucide-react";
 import toast from "react-hot-toast";
 import { updateHiringStage } from "@/lib/api/mutations";
 import type { EmployerSubmission, HiringStage } from "@/types";
 import NotesModal from "./NotesModal";
 import { useNavigate } from "react-router-dom";
+
+// ... (rest of file)
+
+        onSave={(updated: string) => console.log("Updated:", updated)}
 
 const STAGES: { key: HiringStage; label: string; emoji: string }[] = [
   { key: "new", label: "New", emoji: "🆕" },
@@ -265,7 +269,7 @@ function InnerCard({
         <NotesModal
           submission={submission}
           onClose={() => setShowNotes(false)}
-          onSave={(updated) => console.log("Updated:", updated)}
+          onSave={(updated: Partial<EmployerSubmission>) => console.log("Updated:", updated)}
         />
       )}
     </div>

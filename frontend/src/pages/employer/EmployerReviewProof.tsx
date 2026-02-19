@@ -279,10 +279,11 @@ export default function EmployerReviewProof({ submissionId, onBack }: EmployerRe
                 }
                 toast.success("Here's a draft! feel free to edit.", { id: toastId });
             }
-        } catch (e: any) {
+        } catch (e: unknown) {
             console.error(e);
+            const errorMessage = e instanceof Error ? e.message : "Failed to suggest feedback.";
             // Display the actual error message rather than assuming it's the API key
-            toast.error(e.message || "Failed to suggest feedback.", { id: toastId });
+            toast.error(errorMessage, { id: toastId });
         } finally {
             setSuggestingAI(false);
         }
