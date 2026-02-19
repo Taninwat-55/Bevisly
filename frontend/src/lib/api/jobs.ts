@@ -311,6 +311,19 @@ export async function updateJobWithTasks(
 }
 
 /* ──────────────────────────────────────────────
+ * Update job status (Active / Paused / Closed)
+ * ────────────────────────────────────────────── */
+export async function updateJobStatus(job_id: string, status: string) {
+  const { error } = await supabase
+    .from("jobs")
+    .update({ status, updated_at: new Date().toISOString() })
+    .eq("id", job_id);
+
+  if (error) throw error;
+  return true;
+}
+
+/* ──────────────────────────────────────────────
  * Delete an existing job + proof tasks
  * ────────────────────────────────────────────── */
 export async function deleteJob(job_id: string) {

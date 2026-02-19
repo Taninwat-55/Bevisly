@@ -26,7 +26,7 @@ export default function JobCard({ job, compact = false, isSaved, onToggleSave }:
 
     const handleCardClick = () => {
         if (role === 'employer') {
-            navigate(`/employer/job/${job.id}`);
+            navigate(`/jobs/${job.id}`);
         } else if (role === 'candidate') {
             navigate(`/candidate/job/${job.id}`);
         } else {

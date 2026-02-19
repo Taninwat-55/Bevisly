@@ -200,8 +200,14 @@ const getVideoEmbed = (url: string | null) => {
     return null;
 };
 
-export default function EmployerReviewProof() {
-    const { id } = useParams();
+interface EmployerReviewProofProps {
+    submissionId?: string;
+    onBack?: () => void;
+}
+
+export default function EmployerReviewProof({ submissionId, onBack }: EmployerReviewProofProps) {
+    const params = useParams();
+    const id = submissionId || params.id;
     const { user } = useAuth();
     const navigate = useNavigate();
 
@@ -326,7 +332,7 @@ export default function EmployerReviewProof() {
             } else if (direction === "previous" && prevCandidate) {
                 navigate(`/employer/review/${prevCandidate.id}`);
             } else {
-                navigate("/employer/submissions");
+                navigate("/employer/dashboard");
             }
         } catch (err) {
             console.error(err);
@@ -350,7 +356,7 @@ export default function EmployerReviewProof() {
             <div className="flex flex-col justify-center items-center min-h-screen gap-3">
                 <p className="text-lg text-[var(--color-text)]">Submission not found</p>
                 <button
-                    onClick={() => navigate("/employer/submissions")}
+                    onClick={() => navigate("/employer/dashboard")}
                     className="text-sm text-[var(--color-employer)] hover:underline"
                 >
                     ← Back to Submissions
@@ -399,7 +405,10 @@ export default function EmployerReviewProof() {
             {/* Header */}
             <header className="max-w-7xl mx-auto mb-6">
                 <button
-                    onClick={() => navigate("/employer/submissions")}
+                    onClick={() => {
+                        if (onBack) onBack();
+                        else navigate("/employer/dashboard");
+                    }}
                     className="flex items-center gap-1 text-sm text-[var(--color-text-muted)] hover:text-[var(--color-text)] mb-4 transition-colors"
                 >
                     <ChevronLeft size={16} />

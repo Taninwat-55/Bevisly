@@ -294,7 +294,7 @@ export default function EmployerTalentPool() {
                 padding="none"
                 className={`overflow-hidden group hover:shadow-md transition-all border-l-4 ${isTop ? "border-l-amber-500" : "border-l-transparent"
                   }`}
-                onClick={() => navigate(`/employer/review/${s.id}`)}
+                onClick={() => navigate(`/employer/dashboard`)}
               >
                 <div className="p-5 flex flex-col md:flex-row md:items-center gap-5">
                   {/* Avatar/Initials */}

@@ -41,9 +41,11 @@ const collisionDetectionStrategy: CollisionDetection = (args) => {
 export default function TalentBoard({
   submissions,
   setSubmissions,
+  onReview,
 }: {
   submissions: EmployerSubmission[];
   setSubmissions: React.Dispatch<React.SetStateAction<EmployerSubmission[]>>;
+  onReview?: (id: string) => void;
 }) {
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } })
@@ -171,6 +173,7 @@ export default function TalentBoard({
               stage={key}
               label={`${emoji} ${label}`}
               submissions={grouped[key]}
+              onReview={onReview}
             />
           ))}
         </div>

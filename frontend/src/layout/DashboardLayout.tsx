@@ -3,18 +3,20 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/Button";
 import {
-    Menu, X, Bell, LogOut, ChevronRight, User,
+    Bell, LogOut, ChevronRight, User,
     LayoutDashboard, Briefcase, FileCheck, Settings,
-    Users, CreditCard, UserCheck
+    CreditCard, ArrowLeft, ArrowRight
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
 
 interface DashboardLayoutProps {
     children: ReactNode;
+    showSidebar?: boolean;
+    fullWidth?: boolean;
 }
 
-export default function DashboardLayout({ children }: DashboardLayoutProps) {
+export default function DashboardLayout({ children, showSidebar = true, fullWidth = false }: DashboardLayoutProps) {
     const [isSidebarOpen, setSidebarOpen] = useState(true);
     const { user, signOut } = useAuth();
     const location = useLocation();
@@ -31,9 +33,6 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
     const links = role === "employer" ? [
         { label: "Dashboard", path: "/employer", icon: LayoutDashboard },
         { label: "Create Job", path: "/employer/jobs/new", icon: Briefcase },
-        { label: "Talent Pool", path: "/employer/talent", icon: Users },
-        { label: "Talent Manager", path: "/employer/talent/manage", icon: UserCheck },
-        { label: "Submissions", path: "/employer/submissions", icon: FileCheck },
         { label: "Settings", path: "/employer/settings", icon: Settings },
     ] : role === "admin" ? [
         { label: "Overview", path: "/admin", icon: LayoutDashboard },
@@ -51,6 +50,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         <div className="min-h-screen bg-[var(--color-bg)] transition-colors duration-300">
 
             {/* ── SIDEBAR (Glass Panel) ────────────────────────────── */}
+            {showSidebar && (
             <motion.aside
                 initial={false}
                 animate={{ width: isSidebarOpen ? 280 : 80 }}
@@ -73,7 +73,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                 </Link>
 
                 {/* Navigation */}
-                <nav className="flex-1 py-8 px-4 space-y-2 overflow-y-auto">
+                <nav className="flex-1 py-8 px-3 space-y-3 overflow-y-auto">
                     {links.map((link) => {
                         const isActive = location.pathname === link.path;
                         const Icon = link.icon;
@@ -82,11 +82,12 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                             <Link
                                 key={link.path}
                                 to={link.path}
-                                className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group relative
+                                className={`flex items-center gap-3 px-4 py-3.5 rounded-xl transition-all duration-200 group relative
                   ${isActive
                                         ? "text-[var(--color-brand-primary)] bg-[var(--color-brand-primary)]/10 font-semibold shadow-sm"
                                         : "text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[var(--color-surface-hover)]"
                                     }
+                  ${!isSidebarOpen ? "justify-center" : ""}
                 `}
                             >
                                 <Icon size={isSidebarOpen ? 20 : 24} className={`shrink-0 ${isActive ? "text-[var(--color-brand-primary)]" : "text-[var(--color-text-muted)] group-hover:text-[var(--color-text)]"}`} />
@@ -132,12 +133,12 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                                 {role === "employer" && user?.company_name ? (
                                     <>
                                         <p className="text-sm font-medium text-[var(--color-text)] truncate">{user.company_name}</p>
-                                        <p className="text-xs text-[var(--color-text-muted)] truncate">{user.full_name || user.email}</p>
+                                        <p className="text-xs text-slate-500 dark:text-slate-400 truncate">{user.full_name || user.email}</p>
                                     </>
                                 ) : (
                                     <>
                                         <p className="text-sm font-medium text-[var(--color-text)] truncate">{user?.full_name || user?.email}</p>
-                                        {user?.full_name && <p className="text-xs text-[var(--color-text-muted)] truncate">{user.email}</p>}
+                                        {user?.full_name && <p className="text-xs text-slate-500 dark:text-slate-400 truncate">{user.email}</p>}
                                     </>
                                 )}
                             </div>
@@ -154,23 +155,40 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                         )}
                     </div>
                 </div>
+
+                {/* Toggle Button (Floating on Edge) */}
+                {showSidebar && (
+                    <button
+                        onClick={() => setSidebarOpen(!isSidebarOpen)}
+                        className="absolute -right-3 top-20 z-50 p-1.5 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-full shadow-lg text-[var(--color-text)] hover:text-[var(--color-brand-primary)] hover:border-[var(--color-brand-primary)] transition-all transform hover:scale-105 active:scale-95 flex items-center justify-center"
+                    >
+                        {isSidebarOpen ? <ArrowLeft size={14} strokeWidth={2.5} /> : <ArrowRight size={14} strokeWidth={2.5} />}
+                    </button>
+                )}
             </motion.aside>
+            )}
 
             {/* ── MAIN CONTENT ───────────────────────────── */}
             <div
                 className="flex-1 flex flex-col transition-all duration-300 min-h-screen"
-                style={{ marginLeft: isSidebarOpen ? 280 : 80 }}
+                style={{ marginLeft: showSidebar ? (isSidebarOpen ? 280 : 80) : 0 }}
             >
 
                 {/* Header */}
                 <header className="h-20 glass-panel border-b border-[var(--glass-border)] sticky top-0 z-30 px-8 flex items-center justify-between backdrop-blur-md">
                     <div className="flex items-center gap-4">
-                        <button
-                            onClick={() => setSidebarOpen(!isSidebarOpen)}
-                            className="p-2 rounded-lg hover:bg-[var(--color-surface-hover)] text-[var(--color-text-muted)] transition-colors"
-                        >
-                            {isSidebarOpen ? <X size={20} /> : <Menu size={20} />}
-                        </button>
+
+                        {/* Logo (Visible when sidebar is hidden) */}
+                        {!showSidebar && (
+                            <Link to="/" className="flex items-center gap-2 mr-4">
+                                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[var(--color-brand-primary)] to-[var(--color-brand-secondary)] flex items-center justify-center text-white font-bold text-sm shadow-glow-primary shrink-0">
+                                    B
+                                </div>
+                                <span className="text-lg font-bold font-display text-[var(--color-text)] tracking-tight">
+                                    Bevisly
+                                </span>
+                            </Link>
+                        )}
 
                         {/* Breadcrumbs (Mock) */}
                         <div className="hidden md:flex items-center gap-2 text-sm text-[var(--color-text-muted)]">
@@ -195,8 +213,8 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                 </header>
 
                 {/* Content Area */}
-                <main className="flex-1 p-8 overflow-x-hidden">
-                    <div className="max-w-7xl mx-auto animate-fade-in-up">
+                <main className={`flex-1 overflow-x-hidden ${fullWidth ? 'p-0' : 'p-8'}`}>
+                    <div className={`animate-fade-in-up ${fullWidth ? 'h-full' : 'max-w-7xl mx-auto'}`}>
                         {children}
                     </div>
                 </main>

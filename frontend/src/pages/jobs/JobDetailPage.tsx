@@ -164,7 +164,7 @@ export default function JobDetailPage() {
         </Helmet>
       )}
 
-      <div className="max-w-4xl mx-auto px-6 py-8">
+      <div className="max-w-4xl mx-auto px-6 pt-24 pb-8">
         {/* Back Button */}
         <button
           onClick={() => navigate(-1)}
@@ -291,13 +291,13 @@ export default function JobDetailPage() {
                 {role === "employer" ? (
                   <div className="grid grid-cols-2 gap-3">
                     <button
-                      onClick={() => navigate(`/employer/jobs/${id}/edit`)}
+                      onClick={() => navigate(`/employer/dashboard`)}
                       className="px-4 py-2.5 bg-[var(--color-surface-hover)] hover:bg-[var(--color-border)] text-[var(--color-text)] text-sm font-medium rounded-xl transition-colors text-center"
                     >
                       Edit
                     </button>
                     <button
-                      onClick={() => navigate(`/employer/submissions`)}
+                      onClick={() => navigate(`/employer/dashboard`)}
                       className="px-4 py-2.5 bg-[var(--color-brand-primary)] hover:bg-[var(--color-brand-primary-dark)] text-white text-sm font-medium rounded-xl transition-colors text-center"
                     >
                       Submissions
