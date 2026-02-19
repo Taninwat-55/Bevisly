@@ -66,7 +66,7 @@ Deno.serve(async (req) => {
 
         // Use the same model as generate-proof-task (which works)
         const model = "gemini-3-flash-preview";
-        const TIMEOUT_MS = 55000; // 55 second timeout (generation can be slow)
+        const TIMEOUT_MS = 115000; // 115 second timeout (generation can be slow)
 
         // Create abort controller for timeout
         const controller = new AbortController();

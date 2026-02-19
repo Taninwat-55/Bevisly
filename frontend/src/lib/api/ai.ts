@@ -1,5 +1,6 @@
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
+import { supabase } from "../supabaseClient";
 
 export interface GeneratedJobListing {
     description: string;
@@ -20,7 +21,7 @@ export async function generateJobListing(
     const controller = new AbortController();
     const timeoutId = setTimeout(() => {
         controller.abort();
-    }, 65000); // 65s timeout (AI generation can be slow on first call)
+    }, 120000); // 120s timeout (AI generation can be slow on first call)
 
     try {
         const response = await fetch(
@@ -53,4 +54,30 @@ export async function generateJobListing(
         console.error("AI Generation Error:", err);
         throw err;
     }
+}
+
+export async function suggestFeedback(
+    rating: number,
+    criteria: string,
+    submissionContent: string,
+): Promise<string> {
+    const { data, error } = await supabase.functions.invoke(
+        "suggest-feedback",
+        {
+            body: {
+                rating,
+                criteria,
+                submission_content: submissionContent,
+            },
+        },
+    );
+
+    if (error) {
+        throw error; // Throws FunctionsHttpError if not 2xx
+    }
+    if (data?.error) {
+        throw new Error(data.error);
+    }
+
+    return data.feedback;
 }

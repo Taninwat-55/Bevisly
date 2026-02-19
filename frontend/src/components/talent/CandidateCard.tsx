@@ -101,20 +101,28 @@ function InnerCard({
     }
   }
 
+  // Derive a status tag
+  const statusTag = (() => {
+    if (rating && rating >= 4) return { label: "Strong Match", color: "text-emerald-600 bg-emerald-500/10 border-emerald-500/20" };
+    if (rating) return { label: "Rated", color: "text-amber-600 bg-amber-500/10 border-amber-500/20" };
+    if (proof_tasks?.title) return { label: "Proof Submitted", color: "text-blue-600 bg-blue-500/10 border-blue-500/20" };
+    return { label: "New", color: "text-slate-500 bg-slate-500/10 border-slate-500/20" };
+  })();
+
   return (
     <div
       ref={setNodeRef}
       style={style}
       {...attributes}
       {...listeners}
-      className={`group relative flex flex-col gap-3 bg-[var(--color-surface)] border border-[var(--color-border)] 
-      rounded-xl p-4 shadow-sm hover:shadow-md hover:border-[var(--color-brand-primary)]/40 
-      transition-all duration-200Selectable-none touch-none ${isDragging ? "shadow-none ring-0 opacity-30" : "cursor-grab active:cursor-grabbing"} 
+      className={`group relative flex flex-col gap-2.5 bg-[var(--color-surface)] border border-[var(--color-border)] 
+      rounded-xl p-3.5 shadow-sm hover:shadow-md hover:border-[var(--color-brand-primary)]/40 
+      transition-all duration-200 select-none touch-none ${isDragging ? "shadow-none ring-0 opacity-30" : "cursor-grab active:cursor-grabbing"} 
       ${isOverlay ? "cursor-grabbing rotate-2 shadow-xl ring-2 ring-[var(--color-brand-primary)]/20 bg-[var(--color-surface)]" : ""}`}
     >
-      {/* Header: Avatar + Name + Time */}
-      <div className="flex items-start justify-between gap-3">
-        <div className="flex items-center gap-3 min-w-0">
+      {/* Row 1: Name + Status Tag */}
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2.5 min-w-0">
           {/* Avatar */}
           <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0 shadow-sm
             ${rating && rating >= 4
@@ -123,84 +131,70 @@ function InnerCard({
             }`}>
             {initials}
           </div>
-
           <div className="min-w-0">
-            <h4 className="font-semibold text-[var(--color-text)] truncate text-[14px] leading-tight">
+            <h4 className="font-semibold text-[var(--color-text)] truncate text-[13px] leading-tight">
               {candidateName}
             </h4>
-            <div className="flex items-center gap-1.5 mt-0.5 text-[11px] text-[var(--color-text-muted)]">
-              <Clock size={10} className="shrink-0" />
-              <span>{getRelativeTime(created_at)}</span>
-            </div>
+            <p className="text-[11px] text-[var(--color-text-muted)] truncate mt-0.5">
+              {jobTitle}
+            </p>
           </div>
         </div>
 
-        {/* Drag Handle (Visual Only) */}
-        <div
-          className="text-[var(--color-text-muted)] opacity-0 group-hover:opacity-50 transition-opacity p-1"
-        >
+        {/* Drag Handle */}
+        <div className="text-[var(--color-text-muted)] opacity-0 group-hover:opacity-50 transition-opacity p-0.5">
           <GripVertical size={14} />
         </div>
       </div>
 
-      {/* Main Content: Job + Task */}
+      {/* Row 2: Score + Status Tag (the main decision signals) */}
       <div
-        className="pb-2 border-b border-[var(--color-border)] cursor-pointer hover:opacity-80 transition-opacity"
+        className="flex items-center justify-between gap-2 cursor-pointer hover:opacity-80 transition-opacity"
         onClick={handleViewProof}
-        onPointerDown={(e) => e.stopPropagation()} // Stop drag start
+        onPointerDown={(e) => e.stopPropagation()}
         role="button"
       >
-        <div className="flex items-center gap-1.5 mb-1">
-          <Briefcase size={12} className="text-[var(--color-brand-primary)] shrink-0" />
-          <p className="text-xs font-medium text-[var(--color-brand-primary)] truncate">
-            {jobTitle}
-          </p>
-        </div>
-        <p className="text-xs text-[var(--color-text-muted)] line-clamp-2 leading-relaxed">
-          {proof_tasks?.title || "Submitted Proof Task"}
-        </p>
+        {/* Rating (prominent) */}
+        {rating ? (
+          <div className="flex items-center gap-1 bg-amber-50 dark:bg-amber-900/20 px-2 py-1 rounded-md text-sm font-bold text-amber-600 border border-amber-100 dark:border-amber-800">
+            <Star size={13} fill="currentColor" />
+            {rating.toFixed(1)}
+          </div>
+        ) : (
+          <span className="text-[11px] text-[var(--color-text-muted)] italic">No score yet</span>
+        )}
+
+        {/* Status Tag */}
+        <span className={`text-[10px] font-semibold uppercase tracking-wide px-2 py-0.5 rounded-full border ${statusTag.color}`}>
+          {statusTag.label}
+        </span>
       </div>
 
-      {/* Footer: Rating + Actions */}
-      <div className="flex items-center justify-between pt-0.5">
-        {/* Rating */}
-        <div className="flex items-center gap-2">
-          {rating ? (
-            <div className="flex items-center gap-1.5">
-              <div className="flex items-center gap-1 bg-amber-50 dark:bg-amber-900/20 px-1.5 py-0.5 rounded text-[11px] font-bold text-amber-600 border border-amber-100 dark:border-amber-800">
-                <Star size={10} fill="currentColor" />
-                {rating.toFixed(1)}
-              </div>
-              {rating >= 4 && (
-                <span className="text-[10px] font-medium text-amber-600 uppercase tracking-wide">Match</span>
-              )}
-            </div>
-          ) : (
-            <span className="text-[11px] text-[var(--color-text-muted)] italic px-1">Unrated</span>
-          )}
-        </div>
+      {/* Row 3: Quick Actions (compact) */}
+      <div className="flex items-center justify-between pt-1 border-t border-[var(--color-border)]">
+        <span className="text-[10px] text-[var(--color-text-muted)]">
+          {getRelativeTime(created_at)}
+        </span>
 
-        {/* Quick Actions */}
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-0.5">
           <button
             onPointerDown={(e) => e.stopPropagation()}
             onClick={(e) => { e.stopPropagation(); setShowNotes(true); }}
-            className={`p-1.5 rounded-md transition-colors ${employer_notes
+            className={`p-1 rounded-md transition-colors ${employer_notes
               ? "text-blue-600 bg-blue-50 dark:bg-blue-900/20 hover:bg-blue-100"
               : "text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[var(--color-bg)]"}`}
             title={employer_notes ? "Edit Note" : "Add Note"}
           >
-            <FileText size={14} />
+            <FileText size={13} />
           </button>
-          <div className="h-3 w-[1px] bg-[var(--color-border)] mx-0.5" />
           <div className="relative">
             <button
               ref={dropdownRef}
               onPointerDown={(e) => e.stopPropagation()}
               onClick={(e) => { e.stopPropagation(); setOpen(!open); }}
-              className="p-1.5 rounded-md text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[var(--color-bg)] transition-colors"
+              className="p-1 rounded-md text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[var(--color-bg)] transition-colors"
             >
-              <MoreHorizontal size={14} />
+              <MoreHorizontal size={13} />
             </button>
 
             {open && typeof document !== "undefined" && createPortal(
@@ -209,7 +203,7 @@ function InnerCard({
                 style={{
                   top: (dropdownRef.current?.getBoundingClientRect().bottom ?? 0) + 4,
                   left: (dropdownRef.current?.getBoundingClientRect().right ?? 0),
-                  transform: "translateX(-100%)" // Anchor top-right
+                  transform: "translateX(-100%)"
                 }}
                 onPointerDown={(e) => e.stopPropagation()}
                 onClick={(e) => e.stopPropagation()}
@@ -271,7 +265,7 @@ function InnerCard({
         <NotesModal
           submission={submission}
           onClose={() => setShowNotes(false)}
-          onSave={(updated) => console.log("Updated:", updated)} // Add logic to update local state if needed
+          onSave={(updated) => console.log("Updated:", updated)}
         />
       )}
     </div>
