@@ -4,7 +4,7 @@ import { useTheme } from "@/hooks/useTheme";
 import { motion, AnimatePresence } from "framer-motion";
 import toast from "react-hot-toast";
 import { supabase } from "@/lib/supabaseClient";
-import { updateProfileData } from "@/lib/api/profiles";
+import { updateProfileData, downloadUserData } from "@/lib/api/profiles";
 import {
   User, Building2, Bell, Shield,
   Moon, Sun, LogOut, Trash2, Camera,
@@ -235,7 +235,7 @@ export default function UserSettings() {
       if(!user) return;
       
       toast.promise(
-          import("@/lib/api/profiles").then(async ({ downloadUserData }) => {
+          (async () => {
                // Default to "candidate" if role is null (shouldn't happen for logged in users) check
                const role = user.role || "candidate";
                const blob = await downloadUserData(user.id, role);
@@ -247,7 +247,7 @@ export default function UserSettings() {
                a.click();
                window.URL.revokeObjectURL(url);
                document.body.removeChild(a);
-          }),
+          })(),
           {
               loading: 'Preparing data export...',
               success: 'Download started!',
