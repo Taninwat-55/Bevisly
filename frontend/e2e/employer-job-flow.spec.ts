@@ -11,7 +11,7 @@ test.describe("Employer Job Posting Flow", () => {
 
         // 2. We need to login as an employer.
         // Assuming there's a Login/Sign Up button on the homepage
-        await page.getByRole("link", { name: /login/i }).click();
+        await page.getByRole("button", { name: /log in/i }).click();
 
         // Fill in employer credentials.
         // Note: Since this runs locally, we assume "bevislyapp@gmail.com" works
