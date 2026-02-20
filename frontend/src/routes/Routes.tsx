@@ -105,14 +105,7 @@ export const router = createBrowserRouter([
           </DashboardLayout>
         )
       },
-      { 
-        path: "dashboard", 
-        element: (
-          <DashboardLayout showSidebar={false} fullWidth={true}>
-            <EmployerDashboard />
-          </DashboardLayout>
-        ) 
-      },
+
 
       {
         element: <DashboardLayout showSidebar={true} fullWidth={false}><Outlet /></DashboardLayout>,

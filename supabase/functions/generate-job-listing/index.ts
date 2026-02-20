@@ -13,10 +13,10 @@ Deno.serve(async (req) => {
     }
 
     try {
-        const { job_title, skills, company_name } = await req.json();
+        const { raw_input, company_name } = await req.json();
 
-        if (!job_title || !skills) {
-            throw new Error("Missing job_title or skills");
+        if (!raw_input) {
+            throw new Error("Missing raw_input");
         }
 
         const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY");
@@ -40,17 +40,19 @@ Deno.serve(async (req) => {
       Act as an expert Technical Hiring Manager for ${
             company_name || "a tech company"
         }.
-      Based on the following Job Title and Core Skills, generate a compelling Job Description, Requirements, and a practical Proof Task.
+      Based on the following raw, unstructured inputs from a hiring manager, generate a compelling Job Description, extract a concise Job Title, list the Requirements, and design a practical Proof Task.
       
-      Job Title: ${job_title}
-      Core Skills: ${skills}
+      Raw Input / Ideas:
+      ${raw_input}
 
+      The Job Title should be concise and professional (e.g. "Senior React Developer", "Growth Marketing Specialist").
       The Job Description should be engaging and highlight the impact of the role.
       The Requirements should be clear bullet points.
-      The Proof Task should be a realistic challenge (45-60 mins) to verify the core skills.
+      The Proof Task should be a realistic challenge (45-60 mins) to verify the core skills implied by the input.
 
       Return ONLY a JSON object with this exact structure (no markdown formatting):
       {
+        "title": "Extracted Job Title",
         "description": "Full job description text (can use markdown)",
         "requirements": "List of requirements (markdown bullet points)",
         "proof_tasks": [

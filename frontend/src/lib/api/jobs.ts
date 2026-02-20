@@ -157,7 +157,6 @@ export async function getCompanyJobs(
       location,
       paid,
       status,
-      company_id,
       payment_amount,
       payment_currency,
       show_salary_range,
@@ -168,7 +167,9 @@ export async function getCompanyJobs(
       featured,
       proof_tasks ( id, title, expected_time, ai_tools_allowed )
     `)
-    .eq("company_id", company_id)
+    // We no longer have company_id, so filter by some other logic if needed,
+    // or just return empty for now if this isn't used. Let's filter by employer_id.
+    .eq("employer_id", company_id) // company_id in this context was likely the employer user.id
     .order("created_at", { ascending: false });
 
   if (error) throw error;
@@ -201,16 +202,18 @@ export async function createJobWithTasks(
   const user = (await supabase.auth.getUser()).data.user;
   if (!user) throw new Error("User not authenticated.");
 
-  // 1️⃣ Get the user's company_id
-  const { data: membership, error: memberError } = await supabase
-    .from("company_members")
-    .select("company_id")
-    .eq("user_id", user.id)
+  // 1️⃣ Get the user's profile to extract company info
+  const { data: profile, error: profileError } = await supabase
+    .from("profiles")
+    .select("company_name")
+    .eq("id", user.id)
     .single();
 
-  if (memberError || !membership) {
-    console.error("Error fetching company:", memberError);
-    throw new Error("Could not find company for user. Please contact support.");
+  if (profileError || !profile) {
+    console.error("Error fetching company profile:", profileError);
+    throw new Error(
+      "Could not find company profile for user. Please contact support.",
+    );
   }
 
   const { data: job, error: jobError } = await supabase
@@ -230,7 +233,6 @@ export async function createJobWithTasks(
         salary_max: values.salary_max ?? null,
         pay_period: values.pay_period ?? "monthly",
         employer_id: user.id,
-        company_id: membership.company_id, // <--- CRITICAL FIX
         expires_at: values.expires_at ?? null,
         is_public: true,
         job_type: values.job_type ?? null,

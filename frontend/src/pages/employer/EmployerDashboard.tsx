@@ -414,7 +414,7 @@ export default function EmployerDashboard() {
             >
               {!postJobData ? (
                 /* ── Step 1: Intent Form ── */
-                <div className="w-full p-6">
+                <div className="w-full px-6">
                     <EmployerJobIntentForm 
                         onClose={() => setIsPostingJob(false)}
                         companyName={user?.company_name || "your company"}

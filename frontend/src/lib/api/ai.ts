@@ -3,8 +3,9 @@ const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
 import { supabase } from "../supabaseClient";
 
 export interface GeneratedJobListing {
+    title: string;
     description: string;
-    requirements: string[]; // or string, depending on how I handle it. The edge function returns string (markdown bullet points).
+    requirements: string[]; // Edge function returns markdown bullet points.
     proof_tasks: {
         title: string;
         description: string;
@@ -14,8 +15,7 @@ export interface GeneratedJobListing {
 }
 
 export async function generateJobListing(
-    title: string,
-    skills: string,
+    rawInput: string,
     companyName: string,
 ): Promise<GeneratedJobListing> {
     const controller = new AbortController();
@@ -33,8 +33,7 @@ export async function generateJobListing(
                     Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
                 },
                 body: JSON.stringify({
-                    job_title: title,
-                    skills: skills,
+                    raw_input: rawInput,
                     company_name: companyName,
                 }),
                 signal: controller.signal,
