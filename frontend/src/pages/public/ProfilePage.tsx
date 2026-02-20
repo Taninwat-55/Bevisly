@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { supabase } from "@/lib/supabaseClient";
 import {
-    Copy, Loader2, Trophy, Star, BadgeCheck, Briefcase,
+    Copy, Loader2, Star, BadgeCheck, Briefcase,
     Lock, UserX
 } from "lucide-react";
 import toast from "react-hot-toast";
@@ -22,7 +22,6 @@ export default function PublicProfilePage() {
     const { username } = useParams<{ username: string }>();
     const [profile, setProfile] = useState<PublicProfile | null>(null);
     const [cards, setCards] = useState<ProofCardLite[]>([]);
-    const [rank, setRank] = useState<number | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<"not_found" | "private" | null>(null);
     const [showAll, setShowAll] = useState(false);
@@ -60,16 +59,8 @@ export default function PublicProfilePage() {
 
                 setProfile(profileData);
 
-                // Fetch rank and proofs in parallel
-                const [
-                    { data: rankData },
-                    { data: rpcTimeline },
-                ] = await Promise.all([
-                    supabase.rpc("get_user_rank", { user_id: prof.id }),
-                    supabase.rpc("get_recent_activity", { user_id: prof.id }),
-                ]);
-
-                setRank(rankData ?? null);
+                // Fetch proofs
+                const { data: rpcTimeline } = await supabase.rpc("get_recent_activity", { user_id: prof.id });
 
                 if (rpcTimeline && Array.isArray(rpcTimeline) && rpcTimeline.length > 0) {
                     setCards(rpcTimeline);
@@ -215,19 +206,9 @@ export default function PublicProfilePage() {
 
                             {/* Stats */}
                             <div className="flex flex-wrap justify-center gap-4 mt-4 text-sm font-medium text-[var(--color-text-muted)]">
-                                <span className="flex items-center gap-1.5">
-                                    <Trophy size={14} className="text-yellow-500" />
-                                    {profile.credits ?? 0} Credits
-                                </span>
-                                {rank && (
-                                    <span className="flex items-center gap-1.5">
-                                        <Star size={14} className="text-purple-500" />
-                                        Rank #{rank}
-                                    </span>
-                                )}
-                                <span className="flex items-center gap-1.5">
-                                    <BadgeCheck size={14} className="text-emerald-500" />
-                                    {cards.length} Proofs
+                                <span className="flex items-center gap-1.5 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400 px-3 py-1 rounded-full font-bold">
+                                    <BadgeCheck size={16} className="text-emerald-500" />
+                                    {cards.length} Verified Proof{cards.length === 1 ? '' : 's'}
                                 </span>
                             </div>
 
@@ -325,6 +306,19 @@ export default function PublicProfilePage() {
                             />
                         </section>
                     )}
+                </div>
+
+                {/* Sticky CTA Footer */}
+                <div className="fixed bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-[var(--color-bg)] via-[var(--color-bg)] to-transparent z-50 pointer-events-none flex justify-center pb-8">
+                    <div className="pointer-events-auto shadow-[0_0_40px_rgba(var(--color-brand-primary),0.3)] rounded-full">
+                        <a
+                            href={`mailto:${profile.email}?subject=Interview Request via Bevisly`}
+                            className="flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-[var(--color-candidate)] to-[var(--color-candidate-dark)] text-white rounded-full font-bold text-lg hover:scale-105 transition-transform"
+                        >
+                            <Briefcase size={20} />
+                            Hire {profile.full_name?.split(' ')[0] || "Candidate"}
+                        </a>
+                    </div>
                 </div>
             </motion.div>
         </>

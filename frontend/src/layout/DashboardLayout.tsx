@@ -3,9 +3,9 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/Button";
 import {
-    Bell, LogOut, ChevronRight, User,
+    Bell, LogOut, ChevronRight,
     LayoutDashboard, Briefcase, FileCheck, Settings,
-    CreditCard, ArrowLeft, ArrowRight
+    ArrowLeft, ArrowRight
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
@@ -32,7 +32,6 @@ export default function DashboardLayout({ children, showSidebar = true, fullWidt
 
     const links = role === "employer" ? [
         { label: "Dashboard", path: "/employer", icon: LayoutDashboard },
-        { label: "Create Job", path: "/employer/jobs/new", icon: Briefcase },
         { label: "Settings", path: "/employer/settings", icon: Settings },
     ] : role === "admin" ? [
         { label: "Overview", path: "/admin", icon: LayoutDashboard },
@@ -40,9 +39,7 @@ export default function DashboardLayout({ children, showSidebar = true, fullWidt
     ] : [
         { label: "Dashboard", path: "/candidate", icon: LayoutDashboard },
         { label: "Find Jobs", path: "/candidate/jobs", icon: Briefcase },
-        { label: "My Profile", path: "/candidate/profile", icon: User },
         { label: "My Proofs", path: "/candidate/proofs", icon: FileCheck },
-        { label: "Credits", path: "/candidate/credits", icon: CreditCard },
         { label: "Settings", path: "/candidate/settings", icon: Settings },
     ];
 

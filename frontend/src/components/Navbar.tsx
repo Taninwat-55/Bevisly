@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate, Link, useLocation } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useTheme } from "@/hooks/useTheme";
 import { Sun, Moon, Menu, X, Home } from "lucide-react";
@@ -24,14 +24,7 @@ export default function Navbar() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  /* Global navigation links */
-  const navLinks = [
-    { label: "Home", to: "/" },
-    { label: "Jobs", to: "/jobs" },
-    { label: "Leaderboard", to: "/leaderboard" },
-    { label: "Learn", to: "/learn-more" },
-    { label: "About", to: "/about" },
-  ];
+
 
   /* Go to dashboard based on role */
   const goToDashboard = () => {
@@ -72,22 +65,8 @@ export default function Navbar() {
           </div>
         </div>
 
-        {/* ─── Center: Main Nav Links ─── */}
-        <nav className="hidden md:flex items-center gap-8">
-          {navLinks.map(({ label, to }) => (
-            <Link
-              key={label}
-              to={to}
-              className={`text-sm font-medium transition-colors ${
-                location.pathname === to
-                  ? "text-[var(--color-text)] font-semibold"
-                  : "text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
-              }`}
-            >
-              {label}
-            </Link>
-          ))}
-        </nav>
+        {/* ─── Center: Main Nav Links (Removed for Minimalist UI) ─── */}
+        <div className="hidden md:flex items-center gap-8 flex-1" />
 
         {/* ─── Right: Theme + Auth/User ─── */}
         <div className="flex items-center gap-4">
@@ -106,7 +85,7 @@ export default function Navbar() {
               <Button variant="ghost" size="sm" onClick={() => navigate("/auth")}>
                   Log in
               </Button>
-              <Button size="sm" onClick={() => navigate("/auth?mode=signup")}>
+              <Button size="sm" className="shadow-glow-primary" onClick={() => navigate("/auth?mode=signup")}>
                   Join Beta
               </Button>
             </>
@@ -125,18 +104,6 @@ export default function Navbar() {
       {mobileOpen && (
         <div className="absolute top-full left-0 w-full bg-[var(--color-surface)] border-t border-[var(--color-border)] md:hidden shadow-lg z-50">
           <nav className="flex flex-col px-6 py-4 text-sm gap-2">
-            {navLinks.map(({ label, to }) => (
-              <Link
-                key={label}
-                to={to}
-                onClick={() => setMobileOpen(false)}
-                className="py-2 text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors"
-              >
-                {label}
-              </Link>
-            ))}
-
-            <div className="h-px bg-[var(--color-border)] my-2" />
             
             {user && (
               <button

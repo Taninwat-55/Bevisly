@@ -124,12 +124,12 @@ export default function UserMenu() {
           {/* Menu items */}
           <button
             onClick={() => {
-              navigate("/candidate/profile");
+              navigate("/candidate");
               setDropdownOpen(false);
             }}
             className="w-full text-left px-4 py-2 text-sm flex items-center gap-2 text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[var(--color-bg-hover)] transition"
           >
-            <UserCircle2 size={16} /> My Profile
+            <UserCircle2 size={16} /> My Dashboard
           </button>
 
           <button

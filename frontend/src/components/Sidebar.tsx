@@ -15,8 +15,7 @@ import {
   House,
   ChevronLeft,
   ChevronRight,
-  MessageCircle,
-  Coins
+  MessageCircle
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -124,16 +123,6 @@ export default function Sidebar({ role }: SidebarProps) {
             to: "/candidate/proofs",
             label: "My Proofs",
             icon: <FileText size={17} />,
-          },
-          {
-            to: "/candidate/profile",
-            label: "Profile",
-            icon: <UserSquare2 size={17} />,
-          },
-          {
-            to: "/candidate/credits",
-            label: "Credits",
-            icon: <Coins size={17} />,
           },
           {
             to: "/candidate/settings",

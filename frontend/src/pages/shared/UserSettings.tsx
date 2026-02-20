@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import toast from "react-hot-toast";
 import { supabase } from "@/lib/supabaseClient";
 import { updateProfileData, downloadUserData } from "@/lib/api/profiles";
+import { useNavigate } from "react-router-dom";
 import {
   User, Building2, Bell, Shield,
   Moon, Sun, LogOut, Trash2, Camera,
@@ -18,6 +19,7 @@ type Tab = "profile" | "account" | "notifications" | "security" | "privacy";
 export default function UserSettings() {
   const { user, signOut, refreshProfile } = useAuth();
   const { isDark, toggleTheme } = useTheme();
+  const navigate = useNavigate();
 
   // Default tab depends on role. Candidates don't have "profile" tab here anymore.
   // We can default to "account" for everyone or check role.
@@ -525,12 +527,12 @@ export default function UserSettings() {
                             </div>
                             <div>
                               <h3 className="font-medium text-[var(--color-text)]">Available Credits</h3>
-                              <p className="text-sm text-[var(--color-text-muted)]">
-                                {user?.credits || 0} Credits
-                              </p>
+                              <div className="flex items-center gap-2">
+                                <span className="font-semibold text-lg">{user?.credits || 0}</span>
+                                <Button size="sm" variant="outline" onClick={() => navigate('/candidate')}>Get More</Button>
+                              </div>
                             </div>
                           </div>
-                          <Button size="sm" variant="outline" onClick={() => window.location.href='/candidate/credits'}>Get More</Button>
                         </div>
                       )}
 

@@ -10,23 +10,16 @@ import RequestResetPage from "@/pages/auth/RequestResetPage";
 
 // --- Candidate pages
 import CandidateLayout from "@/layout/CandidateLayout";
-import CandidateHome from "@/pages/candidate/CandidateOverview";
-
+import CandidateUnifiedDashboard from "@/pages/candidate/CandidateUnifiedDashboard";
 import CandidateProofWorkspace from "@/pages/candidate/CandidateProofWorkspace";
 import CandidateFeedbackView from "@/pages/candidate/CandidateFeedbackView";
-import CandidateProfile from "@/pages/candidate/CandidateProfile";
-import CandidateCredits from "@/pages/candidate/CandidateCredits";
 
 // --- Employer pages
 
 import DashboardLayout from "@/layout/DashboardLayout";
 
 import EmployerDashboard from "@/pages/employer/EmployerDashboard";
-import EmployerPostJob from "@/pages/employer/EmployerPostJob";
-import EmployerEditJob from "@/pages/employer/EmployerEditJob";
-import EmployerFeedbackSuccess from "@/pages/employer/EmployerFeedbackSuccess";
-import EmployerReview from "@/pages/employer/EmployerReviewProof";
-import EmployerTalentPool from "@/pages/employer/EmployerTalentPool";
+// (Employer tools are accessed as slide-overs in the Dashboard)
 
 // --- Admin pages
 import AdminDashboard from "@/pages/admin/AdminDashboard";
@@ -82,14 +75,12 @@ export const router = createBrowserRouter([
       {
         element: <CandidateLayout />,
         children: [
-          { index: true, element: <CandidateHome /> },
-          { path: "dashboard", element: <CandidateHome /> },
+          { index: true, element: <CandidateUnifiedDashboard /> },
+          { path: "dashboard", element: <CandidateUnifiedDashboard /> },
           { path: "jobs", element: <JobListingPage /> },
           { path: "job/:id", element: <JobDetailPage /> },
           { path: "proof/:id", element: <CandidateProofWorkspace /> },
           { path: "proofs", element: <CandidateFeedbackView /> },
-          { path: "profile", element: <CandidateProfile /> },
-          { path: "credits", element: <CandidateCredits /> },
           { path: "settings", element: <UserSettings /> },
         ],
       },
@@ -109,7 +100,7 @@ export const router = createBrowserRouter([
       { 
         index: true, 
         element: (
-          <DashboardLayout showSidebar={false} fullWidth={true}>
+          <DashboardLayout showSidebar={true} fullWidth={false}>
             <EmployerDashboard />
           </DashboardLayout>
         )
@@ -123,18 +114,11 @@ export const router = createBrowserRouter([
         ) 
       },
 
-      // All employer sub-pages use DashboardLayout (no old sidebar)
       {
-        element: <DashboardLayout showSidebar={false} fullWidth={false}><Outlet /></DashboardLayout>,
+        element: <DashboardLayout showSidebar={true} fullWidth={false}><Outlet /></DashboardLayout>,
         children: [
-          { path: "review/:id", element: <EmployerReview /> },
-          { path: "review/success", element: <EmployerFeedbackSuccess /> },
           { path: "jobs", element: <JobListingPage /> },
-          { path: "jobs/new", element: <EmployerPostJob /> },
           { path: "job/:id", element: <JobDetailPage /> },
-          { path: "jobs/:id/edit", element: <EmployerEditJob /> },
-          { path: "submissions", element: <EmployerTalentPool /> },
-          { path: "talent", element: <EmployerTalentPool /> },
           { path: "settings", element: <UserSettings /> },
         ],
       },

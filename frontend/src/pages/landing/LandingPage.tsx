@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/Button";
-import { ArrowRight, CheckCircle, Play, Check, Mail } from "lucide-react";
+import { ArrowRight, CheckCircle, Play, Check, Search } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import UserMenu from "@/components/common/UserMenu";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
@@ -151,13 +151,30 @@ export default function LandingPage() {
                 Currently in private beta for select partners.
               </p>
 
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-fade-in-up" style={{ animationDelay: "0.3s" }}>
-                <Button size="lg" className="h-14 px-8 text-lg rounded-xl" onClick={handleCTA} rightIcon={<ArrowRight size={20} />}>
-                  Have an Invite? Join
-                </Button>
-                <Button variant="outline" size="lg" className="h-14 px-8 text-lg rounded-xl bg-[var(--color-surface)]" onClick={handleRequestAccess} leftIcon={<Mail size={20} />}>
-                  Request Access
-                </Button>
+              <div className="max-w-2xl mx-auto relative animate-fade-in-up" style={{ animationDelay: "0.3s" }}>
+                <form 
+                  onSubmit={(e) => { e.preventDefault(); handleCTA(); }}
+                  className="relative flex items-center w-full shadow-[0_0_40px_rgba(var(--color-brand-primary),0.15)] rounded-2xl bg-[var(--color-surface)] border-2 border-[var(--color-brand-primary)]/30 focus-within:border-[var(--color-brand-primary)] transition-colors overflow-hidden"
+                >
+                  <Search className="absolute left-4 md:left-6 text-[var(--color-text-muted)]" size={24} />
+                  <input 
+                     type="text" 
+                     placeholder="e.g. Need a Senior React Developer..." 
+                     className="w-full bg-transparent border-none py-5 pl-14 md:pl-16 pr-32 md:pr-40 text-lg md:text-xl text-[var(--color-text)] outline-none placeholder:text-[var(--color-text-muted)]"
+                  />
+                  <button 
+                     type="submit"
+                     className="absolute right-2 top-2 bottom-2 bg-gradient-to-r from-[var(--color-brand-primary)] to-[var(--color-brand-secondary)] text-white font-bold px-4 md:px-8 rounded-xl hover:opacity-90 transition-opacity flex items-center gap-2"
+                  >
+                     <span>Generate</span>
+                     <ArrowRight size={18} className="hidden sm:block" />
+                  </button>
+                </form>
+                <div className="flex items-center justify-center gap-4 mt-6">
+                  <p className="text-sm font-medium text-[var(--color-text-muted)]">
+                    Enter a job description to instantly generate a skill proof task.
+                  </p>
+                </div>
               </div>
             </div>
 
