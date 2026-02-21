@@ -2,8 +2,11 @@ import { useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/Button";
-import { ArrowRight, CheckCircle, Play, Check, Search } from "lucide-react";
+import { ArrowRight, CheckCircle, Play, Check, Search, Loader2 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
+import type { GeneratedJobListing } from "@/lib/api/ai";
+import { generateJobListing } from "@/lib/api/ai";
+import toast from "react-hot-toast";
 import UserMenu from "@/components/common/UserMenu";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
 import RequestAccessModal from "@/components/common/RequestAccessModal";
@@ -15,6 +18,11 @@ export default function LandingPage() {
   const [pricingMode, setPricingMode] = useState<"employer" | "candidate">("employer");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isContactOpen, setIsContactOpen] = useState(false);
+
+  // Magic Box State
+  const [rawInput, setRawInput] = useState("");
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [generatedData, setGeneratedData] = useState<GeneratedJobListing | null>(null);
 
   // 1. JSON-LD Structured Data for GEO
   const structuredData = {
@@ -60,6 +68,27 @@ export default function LandingPage() {
         ]
       }
     ]
+  };
+
+  const handleGenerateProofTask = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!rawInput.trim()) {
+      toast.error("Please enter a job description first.");
+      return;
+    }
+
+    setIsGenerating(true);
+    setGeneratedData(null);
+    try {
+      // Pass 'Guest Company' or similar because they aren't logged in
+      const data = await generateJobListing(rawInput, "your company");
+      setGeneratedData(data);
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to generate task. Please try again.");
+    } finally {
+      setIsGenerating(false);
+    }
   };
 
   const handleCTA = () => {
@@ -153,21 +182,34 @@ export default function LandingPage() {
 
               <div className="max-w-2xl mx-auto relative animate-fade-in-up" style={{ animationDelay: "0.3s" }}>
                 <form 
-                  onSubmit={(e) => { e.preventDefault(); handleCTA(); }}
-                  className="relative flex items-center w-full shadow-[0_0_40px_rgba(var(--color-brand-primary),0.15)] rounded-2xl bg-[var(--color-surface)] border-2 border-[var(--color-brand-primary)]/30 focus-within:border-[var(--color-brand-primary)] transition-colors overflow-hidden"
+                  onSubmit={handleGenerateProofTask}
+                  className={`relative flex items-center w-full shadow-[0_0_40px_rgba(var(--color-brand-primary),0.15)] rounded-2xl bg-[var(--color-surface)] border-2 transition-colors overflow-hidden ${isGenerating ? 'border-[var(--color-brand-primary)] opacity-80 pointer-events-none' : 'border-[var(--color-brand-primary)]/30 focus-within:border-[var(--color-brand-primary)]'}`}
                 >
-                  <Search className="absolute left-4 md:left-6 text-[var(--color-text-muted)]" size={24} />
+                  <Search className={`absolute left-4 md:left-6 transition-colors ${isGenerating ? 'text-[var(--color-brand-primary)]' : 'text-[var(--color-text-muted)]'}`} size={24} />
                   <input 
                      type="text" 
+                     value={rawInput}
+                     onChange={(e) => setRawInput(e.target.value)}
+                     disabled={isGenerating}
                      placeholder="e.g. Need a Senior React Developer..." 
-                     className="w-full bg-transparent border-none py-5 pl-14 md:pl-16 pr-32 md:pr-40 text-lg md:text-xl text-[var(--color-text)] outline-none placeholder:text-[var(--color-text-muted)]"
+                     className="w-full bg-transparent border-none py-5 pl-14 md:pl-16 pr-32 md:pr-48 text-lg md:text-xl text-[var(--color-text)] outline-none placeholder:text-[var(--color-text-muted)] disabled:opacity-50"
                   />
                   <button 
                      type="submit"
-                     className="absolute right-2 top-2 bottom-2 bg-gradient-to-r from-[var(--color-brand-primary)] to-[var(--color-brand-secondary)] text-white font-bold px-4 md:px-8 rounded-xl hover:opacity-90 transition-opacity flex items-center gap-2"
+                     disabled={isGenerating || !rawInput.trim()}
+                     className="absolute right-2 top-2 bottom-2 bg-gradient-to-r from-[var(--color-brand-primary)] to-[var(--color-brand-secondary)] text-white font-bold px-4 md:px-8 rounded-xl hover:opacity-90 disabled:opacity-50 transition-opacity flex items-center gap-2"
                   >
-                     <span>Generate</span>
-                     <ArrowRight size={18} className="hidden sm:block" />
+                     {isGenerating ? (
+                        <>
+                          <Loader2 size={18} className="animate-spin" />
+                          <span className="hidden sm:inline">Generating...</span>
+                        </>
+                     ) : (
+                        <>
+                          <span>Generate</span>
+                          <ArrowRight size={18} className="hidden sm:block" />
+                        </>
+                     )}
                   </button>
                 </form>
                 <div className="flex items-center justify-center gap-4 mt-6">
@@ -194,63 +236,135 @@ export default function LandingPage() {
                     </div>
                   </div>
 
-                  {/* Mock Content */}
+                  {/* Dynamic Content Area */}
                   <div className="flex-1 flex overflow-hidden">
-                    {/* Mock Sidebar */}
-                    <div className="w-48 border-r border-slate-800 bg-slate-900/30 hidden md:flex flex-col p-4 gap-3">
-                      <div className="h-2 w-20 bg-slate-800 rounded mb-4" />
-                      <div className="h-8 w-full bg-blue-500/10 border border-blue-500/20 rounded-lg flex items-center px-3 gap-2">
-                        <div className="w-4 h-4 bg-blue-500/50 rounded-full" />
-                        <div className="h-2 w-16 bg-blue-500/30 rounded" />
+                    {isGenerating ? (
+                      /* ── STATE 1: GENERATING (SKELETON) ── */
+                      <div className="flex-1 flex flex-col items-center justify-center p-8 space-y-6 animate-pulse">
+                        <div className="w-16 h-16 rounded-full bg-gradient-to-br from-[var(--color-brand-primary)] to-[var(--color-brand-secondary)] flex items-center justify-center text-white shadow-[0_0_30px_rgba(var(--color-brand-primary),0.3)] animate-bounce">
+                          <CheckCircle size={32} />
+                        </div>
+                        <div className="text-center space-y-2">
+                           <h3 className="text-xl font-bold font-sans text-white">Analyzing Requirements...</h3>
+                           <p className="text-slate-400 font-mono text-sm max-w-sm mx-auto">Gemini AI is extracting the ideal job title, requirements, and building a practical Proof Task.</p>
+                        </div>
+                        
+                        <div className="w-full max-w-md space-y-3 mt-4">
+                           <div className="h-4 w-3/4 bg-slate-800 rounded"></div>
+                           <div className="h-4 w-1/2 bg-slate-800 rounded"></div>
+                           <div className="h-4 w-5/6 bg-slate-800 rounded"></div>
+                        </div>
                       </div>
-                      <div className="h-8 w-full rounded-lg flex items-center px-3 gap-2 opacity-50">
-                        <div className="w-4 h-4 bg-slate-700 rounded-full" />
-                        <div className="h-2 w-12 bg-slate-700 rounded" />
-                      </div>
-                      <div className="h-8 w-full rounded-lg flex items-center px-3 gap-2 opacity-50">
-                        <div className="w-4 h-4 bg-slate-700 rounded-full" />
-                        <div className="h-2 w-20 bg-slate-700 rounded" />
-                      </div>
-                    </div>
+                    ) : generatedData ? (
 
-                    {/* Mock Main Area */}
-                    <div className="flex-1 p-6 md:p-8 flex flex-col gap-6 font-mono text-xs md:text-sm text-slate-400">
-                      <div className="flex justify-between items-start">
-                        <div>
-                          <div className="bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 px-3 py-1 rounded-full inline-flex items-center gap-2 mb-2">
-                            <CheckCircle size={12} />
-                            <span className="font-semibold">Verification Complete</span>
+                      /* ── STATE 2: SUCCESS (AI RESULTS) ── */
+                      <div className="flex-1 p-6 md:p-10 flex flex-col gap-6 overflow-y-auto bg-slate-900/50">
+                        {/* Header Row */}
+                        <div className="flex flex-col md:flex-row md:justify-between md:items-start gap-4 border-b border-slate-800 pb-6">
+                          <div>
+                            <div className="bg-[var(--color-brand-primary)]/10 text-[var(--color-brand-primary)] border border-[var(--color-brand-primary)]/20 px-3 py-1 rounded-full inline-flex items-center gap-2 mb-3">
+                              <CheckCircle size={12} />
+                              <span className="font-semibold text-xs tracking-wider uppercase">AI Generated</span>
+                            </div>
+                            <h3 className="text-white text-2xl md:text-3xl font-bold font-display tracking-tight mb-2">
+                              {generatedData.title}
+                            </h3>
+                            <p className="text-slate-400 text-sm line-clamp-2 md:line-clamp-3 max-w-2xl leading-relaxed">
+                              {generatedData.description.replace(/[#*]/g, '') /* Simple strip of MD syntax for quick preview */}
+                            </p>
                           </div>
-                          <h3 className="text-slate-100 text-lg md:text-xl font-bold font-sans">Submit & Verify Task</h3>
+                          <div className="shrink-0">
+                            <Button size="lg" className="w-full md:w-auto shadow-glow-primary" onClick={() => navigate('/auth?tab=signup&role=employer')}>
+                              Post this Job for Free <ArrowRight className="ml-2 w-4 h-4" />
+                            </Button>
+                          </div>
                         </div>
-                        <div className="bg-blue-600 text-white px-4 py-2 rounded-lg font-sans font-medium text-xs shadow-glow-primary">
-                          98/100 Score
+
+                        {/* Proof Task Generated */}
+                        <div className="grid grid-cols-1 gap-4">
+                          <h4 className="text-sm font-semibold text-slate-300 uppercase tracking-widest">Recommended Proof Task</h4>
+                          {generatedData.proof_tasks.map((task, i) => (
+                              <div key={i} className="p-5 rounded-2xl border border-slate-800 bg-slate-950/50 flex flex-col gap-4">
+                                <div className="flex justify-between items-start gap-4">
+                                  <h5 className="text-lg font-medium text-white">{task.title}</h5>
+                                  <div className="flex gap-2 shrink-0">
+                                    <span className="px-2 py-1 rounded-md bg-purple-500/10 text-purple-400 border border-purple-500/20 text-xs font-mono">
+                                      {task.expected_time}
+                                    </span>
+                                    <span className="px-2 py-1 rounded-md bg-blue-500/10 text-blue-400 border border-blue-500/20 text-xs font-mono">
+                                      {task.submission_format}
+                                    </span>
+                                  </div>
+                                </div>
+                                <p className="text-sm text-slate-400 font-mono leading-relaxed line-clamp-3">
+                                  {task.description}
+                                </p>
+                              </div>
+                          ))}
                         </div>
                       </div>
 
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="p-4 rounded-xl border border-slate-800 bg-slate-900/50 space-y-2">
-                          <div className="h-2 w-12 bg-slate-700 rounded" />
-                          <div className="h-2 w-24 bg-slate-600 rounded" />
-                          <div className="mt-4 space-y-1">
-                            <div className="flex gap-2"><span className="text-purple-400">const</span> <span className="text-blue-400">result</span> = <span className="text-yellow-400">await</span> fn();</div>
-                            <div className="flex gap-2"><span className="text-purple-400">if</span> (result.ok) <span className="text-slate-600">{"{"}</span></div>
-                            <div className="pl-4 text-slate-500">// Task validated successfully</div>
-                            <div className="pl-4"><span className="text-blue-400">return</span> <span className="text-emerald-400">true</span>;</div>
-                            <div className="text-slate-600">{"}"}</div>
+                    ) : (
+
+                      /* ── STATE 3: DEFAULT MOCKUP ── */
+                      <>
+                        {/* Mock Sidebar */}
+                        <div className="w-48 border-r border-slate-800 bg-slate-900/30 hidden md:flex flex-col p-4 gap-3">
+                          <div className="h-2 w-20 bg-slate-800 rounded mb-4" />
+                          <div className="h-8 w-full bg-blue-500/10 border border-blue-500/20 rounded-lg flex items-center px-3 gap-2">
+                            <div className="w-4 h-4 bg-blue-500/50 rounded-full" />
+                            <div className="h-2 w-16 bg-blue-500/30 rounded" />
+                          </div>
+                          <div className="h-8 w-full rounded-lg flex items-center px-3 gap-2 opacity-50">
+                            <div className="w-4 h-4 bg-slate-700 rounded-full" />
+                            <div className="h-2 w-12 bg-slate-700 rounded" />
+                          </div>
+                          <div className="h-8 w-full rounded-lg flex items-center px-3 gap-2 opacity-50">
+                            <div className="w-4 h-4 bg-slate-700 rounded-full" />
+                            <div className="h-2 w-20 bg-slate-700 rounded" />
                           </div>
                         </div>
-                        <div className="p-4 rounded-xl border border-slate-800 bg-slate-900/50 flex flex-col justify-center items-center gap-3">
-                          <div className="w-12 h-12 rounded-full border-2 border-emerald-500/50 flex items-center justify-center text-emerald-500">
-                            <CheckCircle />
+
+                        {/* Mock Main Area */}
+                        <div className="flex-1 p-6 md:p-8 flex flex-col gap-6 font-mono text-xs md:text-sm text-slate-400">
+                          <div className="flex justify-between items-start">
+                            <div>
+                              <div className="bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 px-3 py-1 rounded-full inline-flex items-center gap-2 mb-2">
+                                <CheckCircle size={12} />
+                                <span className="font-semibold">Verification Complete</span>
+                              </div>
+                              <h3 className="text-slate-100 text-lg md:text-xl font-bold font-sans">Submit & Verify Task</h3>
+                            </div>
+                            <div className="bg-blue-600 text-white px-4 py-2 rounded-lg font-sans font-medium text-xs shadow-glow-primary">
+                              98/100 Score
+                            </div>
                           </div>
-                          <div className="text-center">
-                            <div className="text-slate-200 font-sans font-medium">All Tests Passed</div>
-                            <div className="text-slate-600 text-[10px]">24/24 assertions checks</div>
+
+                          <div className="grid grid-cols-2 gap-4">
+                            <div className="p-4 rounded-xl border border-slate-800 bg-slate-900/50 space-y-2">
+                              <div className="h-2 w-12 bg-slate-700 rounded" />
+                              <div className="h-2 w-24 bg-slate-600 rounded" />
+                              <div className="mt-4 space-y-1">
+                                <div className="flex gap-2"><span className="text-purple-400">const</span> <span className="text-blue-400">result</span> = <span className="text-yellow-400">await</span> fn();</div>
+                                <div className="flex gap-2"><span className="text-purple-400">if</span> (result.ok) <span className="text-slate-600">{"{"}</span></div>
+                                <div className="pl-4 text-slate-500">// Task validated successfully</div>
+                                <div className="pl-4"><span className="text-blue-400">return</span> <span className="text-emerald-400">true</span>;</div>
+                                <div className="text-slate-600">{"}"}</div>
+                              </div>
+                            </div>
+                            <div className="p-4 rounded-xl border border-slate-800 bg-slate-900/50 flex flex-col justify-center items-center gap-3">
+                              <div className="w-12 h-12 rounded-full border-2 border-emerald-500/50 flex items-center justify-center text-emerald-500">
+                                <CheckCircle />
+                              </div>
+                              <div className="text-center">
+                                <div className="text-slate-200 font-sans font-medium">All Tests Passed</div>
+                                <div className="text-slate-600 text-[10px]">24/24 assertions checks</div>
+                              </div>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    </div>
+                      </>
+                    )}
                   </div>
                 </div>
               </div>

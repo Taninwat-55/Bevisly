@@ -65,8 +65,13 @@ export default function Navbar() {
           </div>
         </div>
 
-        {/* ─── Center: Main Nav Links (Removed for Minimalist UI) ─── */}
-        <div className="hidden md:flex items-center gap-8 flex-1" />
+        {/* ─── Center: Main Nav Links ─── */}
+        <nav className="hidden md:flex items-center justify-center gap-8 flex-1">
+          <a href="/#features" className="text-sm font-medium text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors">Features</a>
+          <a href="/#employers" className="text-sm font-medium text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors">For Employers</a>
+          <a href="/#candidates" className="text-sm font-medium text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors">For Candidates</a>
+          <a href="/#pricing" className="text-sm font-medium text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors">Pricing</a>
+        </nav>
 
         {/* ─── Right: Theme + Auth/User ─── */}
         <div className="flex items-center gap-4">
@@ -105,6 +110,11 @@ export default function Navbar() {
         <div className="absolute top-full left-0 w-full bg-[var(--color-surface)] border-t border-[var(--color-border)] md:hidden shadow-lg z-50">
           <nav className="flex flex-col px-6 py-4 text-sm gap-2">
             
+            <a href="/#features" onClick={() => setMobileOpen(false)} className="py-2 text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors">Features</a>
+            <a href="/#employers" onClick={() => setMobileOpen(false)} className="py-2 text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors">For Employers</a>
+            <a href="/#candidates" onClick={() => setMobileOpen(false)} className="py-2 text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors">For Candidates</a>
+            <a href="/#pricing" onClick={() => setMobileOpen(false)} className="py-2 text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors">Pricing</a>
+
             {user && (
               <button
                 onClick={() => {

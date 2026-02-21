@@ -6,15 +6,25 @@ export default function PrivacyPolicy() {
   const [isContactOpen, setIsContactOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-[var(--color-bg)] text-[var(--color-text)] px-6 py-12 transition-colors">
-      <div className="max-w-3xl mx-auto">
-        <BackButton to="/" />
+    <div className="min-h-screen bg-[var(--color-bg)] transition-colors pb-20">
+      {/* ── Fancy Banner / Header ── */}
+      <div className="relative py-12 px-8 bg-gradient-to-r from-[var(--color-brand-primary)] to-[var(--color-brand-secondary)] text-white shadow-xl overflow-hidden mt-2 rounded-b-[3rem] mx-4 mb-10">
+        <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20" />
+        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3 pointer-events-none" />
 
-        <article className="mt-8 prose dark:prose-invert max-w-none">
-          <h1 className="heading-lg mb-2">Privacy Policy</h1>
-          <p className="text-[var(--color-text-muted)] mb-8 text-sm">
-            Last updated: {new Date().toLocaleDateString()}
+        <div className="relative z-10 max-w-3xl mx-auto">
+          <BackButton to="/" className="mb-6" variant="glass" label="Back to Home" />
+          <h1 className="text-4xl font-bold font-display leading-tight mb-2">
+            Privacy Policy
+          </h1>
+          <p className="text-blue-100 max-w-xl text-lg opacity-90">
+             Last updated: {new Date().toLocaleDateString()}
           </p>
+        </div>
+      </div>
+
+      <div className="px-8 max-w-3xl mx-auto">
+        <article className="prose dark:prose-invert max-w-none bg-[var(--color-surface)] border border-[var(--color-border)] p-8 rounded-2xl shadow-sm">
 
           <section className="space-y-6 text-sm leading-relaxed text-[var(--color-text-muted)]">
             <div>

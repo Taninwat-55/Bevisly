@@ -31,7 +31,7 @@ export async function getAllJobs(): Promise<CandidateJob[]> {
       apply_url,
       employer_id,
       proof_tasks ( id, title, expected_time ),
-      employer:employer_id ( avatar_url )
+      employer:profiles!jobs_employer_id_fkey ( avatar_url )
     `)
     .eq("status", "active")
     .order("created_at", { ascending: false });
@@ -77,7 +77,7 @@ export async function getJobWithTasks(job_id: string) {
         ai_tools_allowed,
         attachments
       ),
-      employer:employer_id ( avatar_url )
+      employer:profiles!jobs_employer_id_fkey ( avatar_url )
     `)
     .eq("id", job_id)
     .single();

@@ -3,16 +3,22 @@ import { Target, Eye, Lightbulb } from "lucide-react";
 
 export default function AboutPage() {
   return (
-    <div className="min-h-screen bg-[var(--color-bg)] text-[var(--color-text)]">
-      {/* Hero */}
-      <section className="text-center py-24 border-b border-[var(--color-border)] bg-[var(--color-surface)] relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[color-mix(in srgb,var(--color-candidate)5%,transparent)] to-transparent opacity-60" />
-        <h1 className="heading-lg mb-4 relative z-10">About Bevisly</h1>
-        <p className="body-base text-[var(--color-text-muted)] max-w-2xl mx-auto relative z-10">
-          Bevisly is reimagining hiring through verified, proof-based experience — where
-          skill speaks louder than words.
-        </p>
-      </section>
+    <div className="min-h-screen bg-[var(--color-bg)] text-[var(--color-text)] transition-colors pb-20">
+      {/* ── Fancy Banner / Header ── */}
+      <div className="relative py-16 px-8 bg-gradient-to-r from-[var(--color-brand-primary)] to-[var(--color-brand-secondary)] text-white shadow-xl overflow-hidden mt-2 rounded-b-[3rem] mx-4 text-center">
+        <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20" />
+        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3 pointer-events-none" />
+        <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-white/10 rounded-full blur-3xl translate-y-1/2 -translate-x-1/4 pointer-events-none" />
+
+        <div className="relative z-10 max-w-3xl mx-auto">
+          <h1 className="text-5xl font-bold font-display leading-tight mb-4">
+            About Bevisly
+          </h1>
+          <p className="text-blue-100 text-xl max-w-2xl mx-auto opacity-90 leading-relaxed">
+            Bevisly is reimagining hiring through verified, proof-based experience — where skill speaks louder than words.
+          </p>
+        </div>
+      </div>
 
       {/* Mission */}
       <section className="max-w-5xl mx-auto px-6 py-20 grid md:grid-cols-2 gap-10 items-center border-b border-[var(--color-border)]">

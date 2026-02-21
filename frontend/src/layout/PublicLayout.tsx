@@ -22,7 +22,7 @@ export default function PublicLayout() {
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -8 }}
           transition={{ duration: 0.25, ease: "easeOut" }}
-          className="flex-1"
+          className={`flex-1 ${location.pathname !== "/" ? "pt-16" : ""}`}
         >
           <Outlet />
         </motion.main>

@@ -6,45 +6,41 @@ import EmployerGuide from "./EmployerGuide";
 export default function LearnMorePage() {
   const [mode, setMode] = useState<"candidate" | "employer">("candidate");
 
-  const accent =
-    mode === "candidate"
-      ? "var(--color-candidate-dark)"
-      : "var(--color-employer-dark)";
-
   return (
-    <div className="min-h-screen bg-[var(--color-bg)] text-[var(--color-text)]">
-      {/* Header */}
-      <header className="border-b border-[var(--color-border)] bg-[var(--color-surface)] py-20 text-center relative overflow-hidden">
-        <div
-          className="absolute inset-0 opacity-60"
-          style={{
-            background: `linear-gradient(to bottom right, color-mix(in srgb, ${accent} 10%, transparent), transparent)`,
-          }}
-        />
-        <h1 className="heading-lg mb-3 relative z-10">Learn How Bevisly Works</h1>
-        <p className="body-base text-[var(--color-text-muted)] max-w-2xl mx-auto relative z-10">
-          Discover how Bevisly empowers both candidates and employers through
-          verified, proof-based hiring — where skill replaces guesswork.
-        </p>
+    <div className="min-h-screen bg-[var(--color-bg)] text-[var(--color-text)] transition-colors pb-20">
+      {/* ── Fancy Banner / Header ── */}
+      <header className="relative py-16 px-8 bg-gradient-to-r from-[var(--color-brand-primary)] to-[var(--color-brand-secondary)] text-white shadow-xl overflow-hidden mt-2 rounded-b-[3rem] mx-4 text-center mb-10">
+        <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20" />
+        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3 pointer-events-none" />
+        <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-white/10 rounded-full blur-3xl translate-y-1/2 -translate-x-1/4 pointer-events-none" />
 
-        {/* Toggle */}
-        <div className="inline-flex border border-[var(--color-border)] rounded-[var(--radius-button)] overflow-hidden mt-8 relative z-10">
+        <div className="relative z-10 max-w-3xl mx-auto">
+          <h1 className="text-4xl md:text-5xl font-bold font-display leading-tight mb-4">
+            Learn How Bevisly Works
+          </h1>
+          <p className="text-blue-100 text-lg md:text-xl max-w-2xl mx-auto opacity-90 leading-relaxed">
+            Discover how Bevisly empowers both candidates and employers through verified, proof-based hiring — where skill replaces guesswork.
+          </p>
+        </div>
+
+        {/* Toggle inside banner */}
+        <div className="inline-flex bg-black/20 p-1 backdrop-blur-md border border-white/20 rounded-xl overflow-hidden mt-8 relative z-10">
           <button
             onClick={() => setMode("candidate")}
-            className={`px-5 py-2 text-sm font-medium transition-all ${
+            className={`px-6 py-2.5 text-sm font-medium transition-all rounded-lg ${
               mode === "candidate"
-                ? "bg-[var(--color-candidate)] text-white shadow-md"
-                : "text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
+                ? "bg-white text-[var(--color-brand-primary)] shadow-md"
+                : "text-white/80 hover:text-white hover:bg-white/10"
             }`}
           >
             🎓 For Candidates
           </button>
           <button
             onClick={() => setMode("employer")}
-            className={`px-5 py-2 text-sm font-medium transition-all ${
+            className={`px-6 py-2.5 text-sm font-medium transition-all rounded-lg ml-1 ${
               mode === "employer"
-                ? "bg-[var(--color-employer)] text-white shadow-md"
-                : "text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
+                ? "bg-white text-[var(--color-brand-primary)] shadow-md"
+                : "text-white/80 hover:text-white hover:bg-white/10"
             }`}
           >
             🏢 For Employers
