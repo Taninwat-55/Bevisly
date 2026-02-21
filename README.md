@@ -18,6 +18,11 @@
 </p>
 
 <p align="center">
+  <img src="https://img.shields.io/badge/Release-v0.1.0_MVP-6C5CE7?style=flat-square" alt="Release v0.1.0 MVP" />
+  <img src="https://img.shields.io/badge/Status-v0.2.0_In_Development-4A90E2?style=flat-square" alt="v0.2.0 In Development" />
+</p>
+
+<p align="center">
   <img src="https://img.shields.io/badge/React-18.x-61DAFB?logo=react" alt="React" />
   <img src="https://img.shields.io/badge/TypeScript-5.x-3178C6?logo=typescript" alt="TypeScript" />
   <img src="https://img.shields.io/badge/Supabase-PostgreSQL-3FCF8E?logo=supabase" alt="Supabase" />
@@ -26,24 +31,37 @@
 
 ---
 
+## 🚀 Roadmap
+
+Bevisly **v0.1.0** (MVP) is live! We are currently working on **v0.2.0**, which
+focuses heavily on Security, Data Integrity, and UX improvements (like
+Slide-over panels).
+
+👉 **[View the full v0.2.0 Roadmap here](./v0.2.0-roadmap.md)**
+
+---
+
 ## Overview
 
-**Bevisly** is a proof-of-skill platform that creates a fair bridge between learning and employment. Through short, real-world proof tasks, candidates build credibility while employers hire based on verified ability — not just résumés.
+**Bevisly** is a proof-of-skill platform that creates a fair bridge between
+learning and employment. Through short, real-world proof tasks, candidates build
+credibility while employers hire based on verified ability — not just résumés.
 
 ### The Problem We Solve
 
-| Traditional Hiring | Bevisly Approach |
-|-------------------|------------------|
-| Résumés & keywords | Verified skill demonstrations |
-| Interview anxiety | Async proof submissions |
-| Bias-prone screening | Objective work samples |
-| Time-consuming processes | Streamlined evaluation |
+| Traditional Hiring       | Bevisly Approach              |
+| ------------------------ | ----------------------------- |
+| Résumés & keywords       | Verified skill demonstrations |
+| Interview anxiety        | Async proof submissions       |
+| Bias-prone screening     | Objective work samples        |
+| Time-consuming processes | Streamlined evaluation        |
 
 ---
 
 ## Features
 
 ### For Candidates 💜
+
 - **Dashboard** — Track completed proofs, ratings, and credits
 - **Proof Workspace** — Submit work samples with reflections
 - **Public Profile** — SEO-friendly portfolio at `bevisly.com/@username`
@@ -51,6 +69,7 @@
 - **Leaderboard** — Compete and showcase your proof credits
 
 ### For Employers 💙
+
 - **Talent Board** — Kanban-style candidate pipeline management
 - **Proof Tasks** — Define real-world skill assessments
 - **Scorecard Reviews** — Structured feedback with category ratings
@@ -58,6 +77,7 @@
 - **Side-by-Side Review** — Compare requirements vs submissions
 
 ### For Admins 🔧
+
 - **User Management** — Role assignments and oversight
 - **Platform Analytics** — System-wide metrics and insights
 - **Data Viewer** — Direct database inspection tools
@@ -66,14 +86,14 @@
 
 ## Tech Stack
 
-| Layer | Technology |
-|-------|------------|
-| **Frontend** | React 18 + TypeScript + Vite |
-| **Styling** | CSS Variables + Glassmorphism Design |
-| **State** | React Context + React Router v6 |
-| **Backend** | Supabase (PostgreSQL + Auth + RLS) |
-| **UI/UX** | Framer Motion + Lucide Icons |
-| **Drag & Drop** | @dnd-kit/core + @dnd-kit/sortable |
+| Layer           | Technology                           |
+| --------------- | ------------------------------------ |
+| **Frontend**    | React 18 + TypeScript + Vite         |
+| **Styling**     | CSS Variables + Glassmorphism Design |
+| **State**       | React Context + React Router v6      |
+| **Backend**     | Supabase (PostgreSQL + Auth + RLS)   |
+| **UI/UX**       | Framer Motion + Lucide Icons         |
+| **Drag & Drop** | @dnd-kit/core + @dnd-kit/sortable    |
 
 ---
 
@@ -150,14 +170,14 @@ frontend/src/
 
 ### Core Tables
 
-| Table | Purpose |
-|-------|---------|
-| `profiles` | User data, roles, credits, username |
-| `jobs` | Employer job listings |
-| `proof_tasks` | Skill assessment definitions |
-| `submissions` | Candidate work samples |
-| `feedback` | Employer reviews & ratings |
-| `proof_cards` | Verified achievement records |
+| Table         | Purpose                             |
+| ------------- | ----------------------------------- |
+| `profiles`    | User data, roles, credits, username |
+| `jobs`        | Employer job listings               |
+| `proof_tasks` | Skill assessment definitions        |
+| `submissions` | Candidate work samples              |
+| `feedback`    | Employer reviews & ratings          |
+| `proof_cards` | Verified achievement records        |
 
 ### Row Level Security
 
@@ -171,11 +191,11 @@ frontend/src/
 
 ### Color Tokens
 
-| Role | Primary Color | Usage |
-|------|---------------|-------|
-| Candidate | `#6C5CE7` | Purple accents |
-| Employer | `#4A90E2` | Blue accents |
-| Neutral | System defaults | Shared UI |
+| Role      | Primary Color   | Usage          |
+| --------- | --------------- | -------------- |
+| Candidate | `#6C5CE7`       | Purple accents |
+| Employer  | `#4A90E2`       | Blue accents   |
+| Neutral   | System defaults | Shared UI      |
 
 ### UI Features
 
@@ -188,13 +208,13 @@ frontend/src/
 
 ## Scripts
 
-| Command | Description |
-|---------|-------------|
-| `npm run dev` | Start development server |
-| `npm run build` | Build for production |
-| `npm run preview` | Preview production build |
-| `npm run lint` | Run ESLint |
-| `npm run typecheck` | Run TypeScript checks |
+| Command             | Description              |
+| ------------------- | ------------------------ |
+| `npm run dev`       | Start development server |
+| `npm run build`     | Build for production     |
+| `npm run preview`   | Preview production build |
+| `npm run lint`      | Run ESLint               |
+| `npm run typecheck` | Run TypeScript checks    |
 
 ---
 
@@ -208,12 +228,12 @@ frontend/src/
 
 ### Branch Strategy
 
-| Branch | Purpose |
-|--------|---------|
-| `main` | Production-ready code |
-| `dev` | Active development |
-| `feature/*` | New features |
-| `fix/*` | Bug fixes |
+| Branch      | Purpose               |
+| ----------- | --------------------- |
+| `main`      | Production-ready code |
+| `dev`       | Active development    |
+| `feature/*` | New features          |
+| `fix/*`     | Bug fixes             |
 
 ---
 
