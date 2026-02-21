@@ -3,12 +3,12 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { supabase } from "../../lib/supabaseClient";
 import { useAuth } from "../../hooks/useAuth";
 import { notify } from "@/components/common/Notify";
-import { Eye, EyeOff, ArrowRight, CheckCircle2 } from "lucide-react";
+import { Eye, EyeOff, ArrowRight, CheckCircle2, Github } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
+import MFAChallengeModal from "@/components/auth/MFAChallengeModal";
 
-/* Social Login Temporarily Disabled for MVP
 const GoogleIcon = () => (
   <svg viewBox="0 0 24 24" width="18" height="18" xmlns="http://www.w3.org/2000/svg">
     <g transform="matrix(1, 0, 0, 1, 27.009001, -39.238998)">
@@ -19,7 +19,6 @@ const GoogleIcon = () => (
     </g>
   </svg>
 );
-*/
 
 export default function AuthPage() {
   const [email, setEmail] = useState("");
@@ -32,6 +31,7 @@ export default function AuthPage() {
   const [formLoading, setFormLoading] = useState(false);
   const [isLogin, setIsLogin] = useState(true);
   const [formError, setFormError] = useState<string | null>(null);
+  const [showMFAChallenge, setShowMFAChallenge] = useState(false);
 
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
@@ -160,6 +160,17 @@ export default function AuthPage() {
         return;
       }
 
+      // Check for MFA
+      const aal = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+      if (aal.error) {
+        throw aal.error;
+      }
+
+      if (aal.data.nextLevel === "aal2" && aal.data.currentLevel === "aal1") {
+        setShowMFAChallenge(true);
+        return; // Stop normal execution; wait for MFA challenge success
+      }
+
       const { data: sessionData } = await supabase.auth.getSession();
       const sessionUser = sessionData.session?.user;
       if (sessionUser) {
@@ -206,7 +217,15 @@ export default function AuthPage() {
       if (error) {
          setFormError(error.message);
       } else {
-         notify.success("✨ Magic Link sent! Check your email to log in.");
+        // After sending magic link, check if MFA is required upon session establishment
+        // This typically happens on the redirect page, but if the session is immediately available, check here.
+        // For magic links, the user clicks a link in email, which then establishes the session.
+        // The MFA check would usually happen on the page they land on after clicking the link.
+        // However, if we want to show the modal *before* they leave, we'd need a different flow.
+        // For now, we'll assume the MFA check will be handled on the redirect target or after the session is established.
+        // If the user is redirected back to this page and a session is established, the useEffect for user will handle it.
+        // If MFA is required, the session will be AAL1 and the redirect target should handle AAL2 challenge.
+        notify.success("✨ Magic Link sent! Check your email to log in.");
       }
     } catch (err) {
       console.error(err);
@@ -216,7 +235,6 @@ export default function AuthPage() {
     }
   }
 
-/*
   async function handleSocialLogin(provider: "google" | "github") {
     setFormError(null);
     try {
@@ -227,13 +245,17 @@ export default function AuthPage() {
         },
       });
       if (error) throw error;
+      // For social logins, the user is redirected to the provider and then back.
+      // The session is established upon return.
+      // The MFA check would typically happen on the page they land on after the redirect.
+      // If the user is redirected back to this page and a session is established, the useEffect for user will handle it.
+      // If MFA is required, the session will be AAL1 and the redirect target should handle AAL2 challenge.
     } catch (err: unknown) {
       console.error(err);
       const message = err instanceof Error ? err.message : `Failed to sign in with ${provider}.`;
       setFormError(message);
     }
   }
-*/
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -478,7 +500,6 @@ export default function AuthPage() {
                     ✨ Sign in with Magic Link
                   </Button>
 
-                  {/* Social Login Temporarily Disabled for MVP 
                   <div className="grid grid-cols-2 gap-3">
                     <Button
                       type="button"
@@ -501,7 +522,6 @@ export default function AuthPage() {
                       GitHub
                     </Button>
                   </div>
-                  */}
                </div>
             )}
           </form>
@@ -534,6 +554,20 @@ export default function AuthPage() {
           </div>
         </div>
       </div>
+
+      <MFAChallengeModal 
+        isOpen={showMFAChallenge}
+        onSuccess={() => {
+          setShowMFAChallenge(false);
+          // Assuming user and role are set properly or redirect handles logic
+          navigate("/dashboard");
+        }}
+        onCancel={async () => {
+          setShowMFAChallenge(false);
+          await supabase.auth.signOut();
+          notify.error("Sign in cancelled.");
+        }}
+      />
     </div>
   );
 }

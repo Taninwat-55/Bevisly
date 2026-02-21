@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useTheme } from "@/hooks/useTheme";
 import { motion, AnimatePresence } from "framer-motion";
+import MFASettings from "@/components/auth/MFASettings";
 import toast from "react-hot-toast";
 import { supabase } from "@/lib/supabaseClient";
 import { updateProfileData, downloadUserData } from "@/lib/api/profiles";
@@ -658,22 +659,8 @@ export default function UserSettings() {
                         </div>
                       )}
 
-                      {/* Two-Factor Authentication Stub
-                      <div className="flex items-center justify-between p-4 rounded-xl border border-[var(--color-border)] opacity-60">
-                        <div className="flex items-center gap-4">
-                          <div className="p-2 rounded-lg bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600">
-                            <Smartphone size={20} />
-                          </div>
-                          <div>
-                            <h3 className="font-medium text-[var(--color-text)]">Two-Factor Authentication</h3>
-                            <div className="flex items-center gap-2 mt-1">
-                              <span className="text-xs font-bold px-2 py-0.5 rounded bg-slate-200 dark:bg-slate-700 text-[var(--color-text-muted)]">Coming Soon</span>
-                            </div>
-                          </div>
-                        </div>
-                        <Button size="sm" variant="outline" disabled>Enable</Button>
-                      </div>
-                      */}
+                      {/* Two-Factor Authentication Settings */}
+                      <MFASettings />
                     </div>
                   </motion.div>
                 )}
