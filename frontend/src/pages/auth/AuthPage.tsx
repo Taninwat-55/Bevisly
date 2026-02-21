@@ -1,13 +1,14 @@
 import { useState, useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { supabase } from "../../lib/supabaseClient";
 import { useAuth } from "../../hooks/useAuth";
 import { notify } from "@/components/common/Notify";
-import { Eye, EyeOff, ArrowRight, CheckCircle2, Github } from "lucide-react";
+import { Eye, EyeOff, ArrowRight, CheckCircle2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 
+/* Social Login Temporarily Disabled for MVP
 const GoogleIcon = () => (
   <svg viewBox="0 0 24 24" width="18" height="18" xmlns="http://www.w3.org/2000/svg">
     <g transform="matrix(1, 0, 0, 1, 27.009001, -39.238998)">
@@ -18,6 +19,7 @@ const GoogleIcon = () => (
     </g>
   </svg>
 );
+*/
 
 export default function AuthPage() {
   const [email, setEmail] = useState("");
@@ -33,7 +35,25 @@ export default function AuthPage() {
 
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const emailRef = useRef<HTMLInputElement>(null);
+
+  // Parse URL parameters for initial state
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const tabParam = params.get("tab");
+    const roleParam = params.get("role");
+
+    if (tabParam === "signup") {
+      setIsLogin(false);
+    } else if (tabParam === "login") {
+      setIsLogin(true);
+    }
+
+    if (roleParam === "employer" || roleParam === "candidate") {
+      setRole(roleParam);
+    }
+  }, [location.search]);
 
   // Auto-focus email
   useEffect(() => {
@@ -196,6 +216,7 @@ export default function AuthPage() {
     }
   }
 
+/*
   async function handleSocialLogin(provider: "google" | "github") {
     setFormError(null);
     try {
@@ -212,6 +233,7 @@ export default function AuthPage() {
       setFormError(message);
     }
   }
+*/
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -456,6 +478,7 @@ export default function AuthPage() {
                     ✨ Sign in with Magic Link
                   </Button>
 
+                  {/* Social Login Temporarily Disabled for MVP 
                   <div className="grid grid-cols-2 gap-3">
                     <Button
                       type="button"
@@ -478,6 +501,7 @@ export default function AuthPage() {
                       GitHub
                     </Button>
                   </div>
+                  */}
                </div>
             )}
           </form>

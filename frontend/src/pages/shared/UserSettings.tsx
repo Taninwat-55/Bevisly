@@ -9,7 +9,7 @@ import { useNavigate } from "react-router-dom";
 import {
   User, Building2, Bell, Shield,
   Moon, Sun, LogOut, Trash2, Camera,
-  Mail, Smartphone, Upload, Loader2,
+  Mail, Upload, Loader2,
   FileJson, Eye, EyeOff
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
@@ -485,7 +485,6 @@ export default function UserSettings() {
                               </p>
                             </div>
                           </div>
-                          <Button size="sm" variant="outline" disabled>Manage</Button>
                         </div>
                       )}
 
@@ -659,6 +658,7 @@ export default function UserSettings() {
                         </div>
                       )}
 
+                      {/* Two-Factor Authentication Stub
                       <div className="flex items-center justify-between p-4 rounded-xl border border-[var(--color-border)] opacity-60">
                         <div className="flex items-center gap-4">
                           <div className="p-2 rounded-lg bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600">
@@ -673,6 +673,7 @@ export default function UserSettings() {
                         </div>
                         <Button size="sm" variant="outline" disabled>Enable</Button>
                       </div>
+                      */}
                     </div>
                   </motion.div>
                 )}
