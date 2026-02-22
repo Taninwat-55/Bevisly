@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Helmet } from "react-helmet-async";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/Button";
@@ -38,6 +38,7 @@ export default function LandingPage() {
   const [rawInput, setRawInput] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedData, setGeneratedData] = useState<GeneratedJobListing | null>(null);
+  const magicBoxRef = useRef<HTMLDivElement>(null);
 
   // 1. JSON-LD Structured Data for GEO
   const structuredData = {
@@ -98,6 +99,12 @@ export default function LandingPage() {
       // Pass 'Guest Company' or similar because they aren't logged in
       const data = await generateJobListing(rawInput, "your company");
       setGeneratedData(data);
+      
+      // Scroll to the result slightly after it renders
+      setTimeout(() => {
+         magicBoxRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 100);
+      
     } catch (error) {
       console.error(error);
       toast.error("Failed to generate task. Please try again.");
@@ -237,7 +244,7 @@ export default function LandingPage() {
             </div>
 
             {/* Hero Visual / Mockup */}
-            <div className="relative mx-auto max-w-5xl mt-16 animate-scale-in" style={{ animationDelay: "0.4s" }}>
+            <div ref={magicBoxRef} className="relative mx-auto max-w-5xl mt-16 animate-scale-in" style={{ animationDelay: "0.4s" }}>
               <div className="glass-panel p-2 rounded-2xl md:rounded-[2rem] shadow-2xl border-gradient-primary bg-slate-900/50 backdrop-blur-xl">
                 <div className="bg-slate-950 rounded-xl md:rounded-[1.5rem] overflow-hidden border border-slate-800 aspect-[16/9] relative flex flex-col">
                   {/* Mock Window Header */}
