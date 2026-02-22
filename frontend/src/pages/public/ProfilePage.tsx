@@ -165,18 +165,24 @@ export default function PublicProfilePage() {
                 <title>{profile.full_name || username} - Bevisly Profile</title>
                 <meta
                     name="description"
-                    content={`${profile.full_name || username}'s verified skills portfolio. ${cards.length} proofs completed, ${profile.credits || 0} credits earned.`}
+                    content={`${profile.full_name || username}'s verified skills portfolio. ${cards.length} proofs completed.`}
                 />
-                <meta property="og:title" content={`${profile.full_name} - Bevisly`} />
-                <meta property="og:description" content={`View ${profile.full_name}'s verified proof portfolio on Bevisly`} />
+                
+                {/* Open Graph (Targeting LinkedIn & Facebook) */}
+                <meta property="og:site_name" content="Bevisly" />
+                <meta property="og:title" content={`${profile.full_name || username} | Bevisly Profile`} />
+                <meta property="og:description" content={`View ${profile.full_name || username}'s verified proof portfolio. ${cards.length} proofs completed.`} />
                 <meta property="og:type" content="profile" />
                 <meta property="og:url" content={profileUrl} />
                 <meta property="og:image" content={profile.avatar_url || "https://bevisly.com/og-card-default.png"} />
+                <meta property="og:image:alt" content={`${profile.full_name || username}'s Profile avatar`} />
+                {profile.username && <meta property="profile:username" content={profile.username} />}
 
                 {/* Twitter Cards fallback */}
                 <meta name="twitter:card" content="summary_large_image" />
-                <meta name="twitter:title" content={`${profile.full_name} - Bevisly`} />
-                <meta name="twitter:description" content={`View ${profile.full_name}'s verified proof portfolio on Bevisly`} />
+                <meta name="twitter:site" content="@bevisly" />
+                <meta name="twitter:title" content={`${profile.full_name || username} | Bevisly Profile`} />
+                <meta name="twitter:description" content={`View ${profile.full_name || username}'s verified proof portfolio. ${cards.length} proofs completed.`} />
                 <meta name="twitter:image" content={profile.avatar_url || "https://bevisly.com/og-card-default.png"} />
 
                 <link rel="canonical" href={profileUrl} />

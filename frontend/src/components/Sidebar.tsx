@@ -59,16 +59,6 @@ export default function Sidebar({ role }: SidebarProps) {
           icon: <FolderKanban size={17} />,
         },
         {
-          to: "/employer/talent",
-          label: "Talent Pool",
-          icon: <Users size={17} />,
-        },
-        {
-          to: "/employer/talent/manage",
-          label: "Talent Manager",
-          icon: <UserSquare2 size={17} />,
-        },
-        {
           to: "/employer/settings",
           label: "Settings",
           icon: <Settings size={17} />,

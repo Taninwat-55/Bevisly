@@ -12,6 +12,7 @@ import { ThemeToggle } from "@/components/ui/ThemeToggle";
 import RequestAccessModal from "@/components/common/RequestAccessModal";
 import ContactModal from "@/components/common/ContactModal";
 import ReactMarkdown, { type Components } from "react-markdown";
+import DOMPurify from "dompurify";
 
 const markdownComponents: Components = {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -183,10 +184,11 @@ export default function LandingPage() {
               </div>
 
               <h1 className="text-5xl md:text-7xl font-bold font-display tracking-tight text-[var(--color-text)] mb-6 leading-[1.1] animate-fade-in-up" style={{ animationDelay: "0.1s" }}>
-                Stop Hiring Resumes. <br />
+                Prove your skills. <br />
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-[var(--color-brand-primary)] to-[var(--color-brand-secondary)]">
-                  Start Hiring Proof.
-                </span>
+                  Get hired.
+                </span> <br />
+                Keep the proof forever.
               </h1>
 
               <p className="text-xl text-[var(--color-text-muted)] mb-10 max-w-2xl mx-auto leading-relaxed animate-fade-in-up" style={{ animationDelay: "0.2s" }}>
@@ -288,11 +290,15 @@ export default function LandingPage() {
                                     {generatedData.title}
                                 </h3>
                                 <div className="text-slate-400 text-sm leading-relaxed flex-1 relative z-10 overflow-y-auto custom-scrollbar pr-2">
-                                    <ReactMarkdown components={markdownComponents}>{generatedData.description}</ReactMarkdown>
+                                    <ReactMarkdown components={markdownComponents}>
+                                        {DOMPurify.sanitize(generatedData.description)}
+                                    </ReactMarkdown>
                                     
                                     <div className="mt-4 pt-4 border-t border-slate-800/60">
                                         <h4 className="text-slate-200 font-semibold mb-3">Key Requirements</h4>
-                                        <ReactMarkdown components={markdownComponents}>{generatedData.requirements}</ReactMarkdown>
+                                        <ReactMarkdown components={markdownComponents}>
+                                            {DOMPurify.sanitize(generatedData.requirements)}
+                                        </ReactMarkdown>
                                     </div>
                                 </div>
                             </div>
@@ -615,64 +621,64 @@ export default function LandingPage() {
 
               {pricingMode === "employer" ? (
                 <>
-                  {/* Free Starter */}
-                  <div className="flex-1 min-w-[300px] glass-panel p-8 rounded-2xl border border-[var(--color-border)] hover:border-[var(--color-brand-primary)]/50 transition-all group">
+                  {/* Free Tier */}
+                  <div className="flex-1 min-w-[300px] glass-panel p-8 rounded-2xl border border-[var(--color-border)] hover:border-[var(--color-brand-primary)]/50 transition-all group relative">
                     <div className="mb-6">
-                      <h3 className="text-xl font-bold text-[var(--color-text)]">Beta Starter</h3>
-                      <p className="text-[var(--color-text-muted)] text-sm mt-2">For early-stage startups.</p>
+                      <h3 className="text-xl font-bold text-[var(--color-text)]">Free</h3>
+                      <p className="text-[var(--color-text-muted)] text-sm mt-2">Core features for early usage.</p>
                     </div>
                     <div className="mb-6">
                       <span className="text-4xl font-bold text-[var(--color-text)]">0 DKK</span>
                       <span className="text-[var(--color-text-muted)]"> / month</span>
                     </div>
-                    <Button variant="outline" className="w-full mb-8 group-hover:border-[var(--color-brand-primary)] group-hover:text-[var(--color-brand-primary)]" onClick={handleRequestAccess}>Request Invite</Button>
+                    <Button variant="outline" className="w-full mb-8 group-hover:border-[var(--color-brand-primary)] group-hover:text-[var(--color-brand-primary)]" onClick={handleRequestAccess}>Start for Free</Button>
                     <ul className="space-y-4 text-sm text-[var(--color-text-muted)]">
-                      <li className="flex items-center gap-3"><Check size={16} className="text-[var(--color-brand-primary)]" /> <span>Unlimited Job Posts (Standard)</span></li>
-                      <li className="flex items-center gap-3"><Check size={16} className="text-[var(--color-brand-primary)]" /> <span>Manual Review</span></li>
+                      <li className="flex items-center gap-3"><Check size={16} className="text-[var(--color-brand-primary)]" /> <span>Post standard Job Listings</span></li>
+                      <li className="flex items-center gap-3"><Check size={16} className="text-[var(--color-brand-primary)]" /> <span>Basic candidate review</span></li>
                       <li className="flex items-center gap-3"><Check size={16} className="text-[var(--color-brand-primary)]" /> <span>Standard Support</span></li>
                     </ul>
                   </div>
 
-                  {/* Founder Pro */}
+                  {/* Pro Tier (Popular) */}
                   <div className="flex-1 min-w-[300px] glass-panel p-8 rounded-2xl border border-[var(--color-brand-secondary)]/50 relative hover:shadow-glow-secondary transition-all">
                     <div className="absolute top-0 right-0 bg-[var(--color-brand-secondary)] text-white text-xs font-bold px-3 py-1 rounded-bl-xl rounded-tr-lg">
                        POPULAR
                     </div>
                     <div className="mb-6">
-                      <h3 className="text-xl font-bold text-[var(--color-text)]">Founder Pro</h3>
-                      <p className="text-[var(--color-text-muted)] text-sm mt-2">For solo founders & small teams.</p>
+                      <h3 className="text-xl font-bold text-[var(--color-text)]">Pro</h3>
+                      <p className="text-[var(--color-text-muted)] text-sm mt-2">Advanced features & automation.</p>
                     </div>
                     <div className="mb-6">
-                      <span className="text-4xl font-bold text-[var(--color-text)]">449 DKK</span>
+                      <span className="text-4xl font-bold text-[var(--color-text)]">149 DKK</span>
                       <span className="text-[var(--color-text-muted)]"> / month</span>
                     </div>
-                    <Button className="w-full mb-8 bg-[var(--color-brand-secondary)] hover:bg-[var(--color-brand-secondary)]/90 text-white" onClick={handleRequestAccess}>Request Invite</Button>
+                    <Button className="w-full mb-8 bg-[var(--color-brand-secondary)] hover:bg-[var(--color-brand-secondary)]/90 text-white" onClick={handleRequestAccess}>Upgrade to Pro</Button>
                     <ul className="space-y-4 text-sm text-[var(--color-text-muted)]">
-                      <li className="flex items-center gap-3"><Check size={16} className="text-[var(--color-brand-secondary)]" /> <span>AI-Copilot (Drafting)</span></li>
-                      <li className="flex items-center gap-3"><Check size={16} className="text-[var(--color-brand-secondary)]" /> <span>5 Active Proof Tasks</span></li>
-                      <li className="flex items-center gap-3"><Check size={16} className="text-[var(--color-brand-secondary)]" /> <span>1 Featured Slot (7 days)</span></li>
+                      <li className="flex items-center gap-3"><Check size={16} className="text-[var(--color-brand-secondary)]" /> <span>Magic Box AI Proof Tasks</span></li>
+                      <li className="flex items-center gap-3"><Check size={16} className="text-[var(--color-brand-secondary)]" /> <span>AI Feedback Drafting</span></li>
+                      <li className="flex items-center gap-3"><Check size={16} className="text-[var(--color-brand-secondary)]" /> <span>Priority Support</span></li>
                     </ul>
                   </div>
 
-                  {/* Growth SaaS */}
+                  {/* Business Tier */}
                   <div className="flex-1 min-w-[300px] glass-panel p-8 rounded-2xl border-2 border-[var(--color-brand-primary)] relative shadow-glow-primary">
                     <div className="absolute top-0 right-0 bg-[var(--color-brand-primary)] text-white text-xs font-bold px-3 py-1 rounded-bl-xl rounded-tr-lg">
                       BEST VALUE
                     </div>
                     <div className="mb-6">
-                      <h3 className="text-xl font-bold text-[var(--color-text)]">Growth SaaS</h3>
-                      <p className="text-[var(--color-text-muted)] text-sm mt-2">For agencies & scaleups.</p>
+                      <h3 className="text-xl font-bold text-[var(--color-text)]">Business</h3>
+                      <p className="text-[var(--color-text-muted)] text-sm mt-2">Team scale and deep analytics.</p>
                     </div>
                     <div className="mb-6">
-                      <span className="text-4xl font-bold text-[var(--color-text)]">1,499 DKK</span>
+                      <span className="text-4xl font-bold text-[var(--color-text)]">349 DKK</span>
                       <span className="text-[var(--color-text-muted)]"> / month</span>
                     </div>
-                    <Button className="w-full mb-8 bg-[var(--color-brand-primary)] hover:bg-[var(--color-brand-primary)]/90 text-white" onClick={handleRequestAccess}>Request Invite</Button>
+                    <Button className="w-full mb-8 bg-[var(--color-brand-primary)] hover:bg-[var(--color-brand-primary)]/90 text-white" onClick={handleRequestAccess}>Start Business</Button>
                     <ul className="space-y-4 text-sm text-[var(--color-text-muted)]">
-                      <li className="flex items-center gap-3"><Check size={16} className="text-[var(--color-brand-primary)]" /> <span>Unlimited Proof Tasks</span></li>
-                      <li className="flex items-center gap-3"><Check size={16} className="text-[var(--color-brand-primary)]" /> <span>Team Collaboration</span></li>
-                      <li className="flex items-center gap-3"><Check size={16} className="text-[var(--color-brand-primary)]" /> <span>3 Featured Slots (Rolling)</span></li>
-                      <li className="flex items-center gap-3"><Check size={16} className="text-[var(--color-brand-primary)]" /> <span>Priority Support</span></li>
+                      <li className="flex items-center gap-3"><Check size={16} className="text-[var(--color-brand-primary)]" /> <span>Everything in Pro</span></li>
+                      <li className="flex items-center gap-3"><Check size={16} className="text-[var(--color-brand-primary)]" /> <span>Multi-seat Team Collaboration</span></li>
+                      <li className="flex items-center gap-3"><Check size={16} className="text-[var(--color-brand-primary)]" /> <span>Advanced Cohort Analytics</span></li>
+                      <li className="flex items-center gap-3"><Check size={16} className="text-[var(--color-brand-primary)]" /> <span>Dedicated Success Manager</span></li>
                     </ul>
                   </div>
                 </>

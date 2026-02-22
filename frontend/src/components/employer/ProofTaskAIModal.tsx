@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { X, Sparkles, Loader2, Check, AlertCircle, RefreshCw } from "lucide-react";
-import toast from "react-hot-toast";
 import ReactMarkdown from "react-markdown";
+import DOMPurify from "dompurify";
 
 interface ProofTaskAIModalProps {
   isOpen: boolean;
@@ -88,10 +88,15 @@ export default function ProofTaskAIModal({
   const handleApply = () => {
     if (!result) return;
     
+    // Sanitize AI outputs before passing them down
+    const safeTitle = DOMPurify.sanitize(result.title, { ALLOWED_TAGS: [] }); // Strip all HTML from title
+    const safeDescription = DOMPurify.sanitize(result.description);
+    const safeCriteria = DOMPurify.sanitize(result.acceptance_criteria);
+
     onApply({
-      title: result.title,
-      description: result.description + "\n\n### Acceptance Criteria:\n" + result.acceptance_criteria,
-      expected_time: result.estimated_duration
+      title: safeTitle,
+      description: safeDescription + "\n\n### Acceptance Criteria:\n" + safeCriteria,
+      expected_time: DOMPurify.sanitize(result.estimated_duration, { ALLOWED_TAGS: [] })
     });
     onClose();
     toast.success("Task applied to form!");
@@ -168,9 +173,9 @@ export default function ProofTaskAIModal({
                 <div className="space-y-2">
                    <span className="text-xs uppercase tracking-wider font-semibold text-[var(--color-text-muted)]">Instructions Preview</span>
                    <div className="bg-[var(--color-background)] rounded-lg border border-[var(--color-border)] p-4 text-sm text-[var(--color-text)] max-h-60 overflow-y-auto prose prose-invert prose-sm max-w-none">
-                      <ReactMarkdown>{result.description}</ReactMarkdown>
+                      <ReactMarkdown>{DOMPurify.sanitize(result.description)}</ReactMarkdown>
                       <h5 className="font-bold mt-4 mb-2 text-[var(--color-text)]">Acceptance Criteria</h5>
-                      <ReactMarkdown>{result.acceptance_criteria}</ReactMarkdown>
+                      <ReactMarkdown>{DOMPurify.sanitize(result.acceptance_criteria)}</ReactMarkdown>
                    </div>
                 </div>
              </div>

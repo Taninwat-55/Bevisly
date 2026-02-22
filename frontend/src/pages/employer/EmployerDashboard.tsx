@@ -31,7 +31,6 @@ import {
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import TalentBoard from "@/components/talent/TalentBoard";
-import EmployerTalentPool from "@/pages/employer/EmployerTalentPool";
 import EmployerReviewProof from "./EmployerReviewProof";
 import UserSettings from "@/pages/shared/UserSettings";
 import EmployerJobForm from "./EmployerJobForm";
@@ -352,8 +351,25 @@ export default function EmployerDashboard() {
                     <h2 className="text-xl font-bold font-display text-[var(--color-text)]">Active Jobs</h2>
                 </div>
                 {jobs.length === 0 ? (
-                    <div className="text-center p-8 border border-dashed border-[var(--color-border)] rounded-2xl">
-                        <p className="text-[var(--color-text-muted)]">No jobs posted yet.</p>
+                    <div className="text-center p-12 border border-dashed border-[var(--color-border)] rounded-2xl bg-[var(--color-surface)] shadow-sm">
+                        <div className="w-16 h-16 mx-auto bg-[var(--color-brand-primary)]/10 text-[var(--color-brand-primary)] rounded-full flex items-center justify-center mb-4">
+                            <Briefcase size={32} />
+                        </div>
+                        <h3 className="text-xl font-bold text-[var(--color-text)] mb-2">Welcome to Bevisly!</h3>
+                        <p className="text-[var(--color-text-muted)] max-w-md mx-auto mb-6">
+                            You don't have any active jobs yet. Create your first role with an AI-generated Proof Task and start hiring based on actual skills.
+                        </p>
+                        <Button
+                            onClick={() => {
+                                setPostJobData(null);
+                                setIsPostingJob(true);
+                            }}
+                            size="lg"
+                            className="shadow-glow-primary"
+                            leftIcon={<Plus size={18} />}
+                        >
+                            Post Your First Role
+                        </Button>
                     </div>
                 ) : (
                     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -381,15 +397,6 @@ export default function EmployerDashboard() {
                         ))}
                     </div>
                 )}
-              </div>
-
-              {/* Integrated Talent Pool View */}
-              <div className="mt-8 border-t border-[var(--color-border)] pt-8">
-                <EmployerTalentPool 
-                    onReview={(id) => {
-                        setSelectedSubmissionId(id);
-                    }}
-                />
               </div>
             </div>
       )}

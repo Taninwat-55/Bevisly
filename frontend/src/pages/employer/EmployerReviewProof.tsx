@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import toast from "react-hot-toast";
 import ReactMarkdown from "react-markdown";
+import DOMPurify from "dompurify";
 import { motion } from "framer-motion";
 import { createFeedback } from "@/lib/api/feedback";
 import { suggestFeedback } from "@/lib/api/ai";
@@ -606,7 +607,7 @@ export default function EmployerReviewProof({ submissionId, onBack, onNavigate }
                                         <span className="text-xs font-bold uppercase">Text Response</span>
                                     </div>
                                     <div className="prose prose-sm dark:prose-invert max-w-none text-[var(--color-text)]">
-                                        <ReactMarkdown>{displayText}</ReactMarkdown>
+                                        <ReactMarkdown>{DOMPurify.sanitize(displayText)}</ReactMarkdown>
                                     </div>
                                 </div>
                             )}
@@ -657,7 +658,7 @@ export default function EmployerReviewProof({ submissionId, onBack, onNavigate }
                                 <div className="relative p-4 bg-[var(--color-bg)] border border-[var(--color-border)] rounded-xl">
                                     <Quote size={20} className="absolute top-4 left-4 text-[var(--color-border)] opacity-50" />
                                     <div className="pl-8 prose prose-sm dark:prose-invert max-w-none text-[var(--color-text)]">
-                                        <ReactMarkdown>{submission.reflection}</ReactMarkdown>
+                                        <ReactMarkdown>{DOMPurify.sanitize(submission.reflection)}</ReactMarkdown>
                                     </div>
                                 </div>
                             </div>
