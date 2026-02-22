@@ -31,7 +31,7 @@ export default function MFAChallengeModal({ isOpen, onSuccess, onCancel }: MFACh
       const { data: factorsData, error: factorsError } = await supabase.auth.mfa.listFactors();
       if (factorsError) throw factorsError;
       
-      const totpFactor = factorsData.totp.find((f: any) => f.status === "verified");
+      const totpFactor = factorsData.totp.find((f: { status: string; id: string }) => f.status === "verified");
       if (!totpFactor) throw new Error("No verified MFA factor found on this account.");
 
       // 2. Challenge the factor
@@ -52,9 +52,10 @@ export default function MFAChallengeModal({ isOpen, onSuccess, onCancel }: MFACh
       notify.success("Identity verified successfully.");
       setCode("");
       onSuccess();
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("MFA Challenge Error:", err);
-      notify.error(err.message || "Invalid or expired code. Please try again.");
+      const errorMessage = err instanceof Error ? err.message : "Invalid or expired code. Please try again.";
+      notify.error(errorMessage);
     } finally {
       setLoading(false);
     }

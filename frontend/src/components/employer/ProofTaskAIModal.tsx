@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { X, Sparkles, Loader2, Check, AlertCircle, RefreshCw } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import DOMPurify from "dompurify";
+import toast from "react-hot-toast";
 
 interface ProofTaskAIModalProps {
   isOpen: boolean;

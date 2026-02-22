@@ -8,7 +8,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import QRCode from "react-qr-code";
 
 export default function MFASettings() {
-  const [factors, setFactors] = useState<any[]>([]);
+  const [factors, setFactors] = useState<{ id: string; status: string; friendly_name?: string; created_at: string; [key: string]: unknown }[]>([]);
   const [loading, setLoading] = useState(true);
   const [isEnrolling, setIsEnrolling] = useState(false);
   const [totpUri, setTotpUri] = useState("");
@@ -29,7 +29,7 @@ export default function MFASettings() {
       if (error) throw error;
       
       // Filter the TOTP factors that have actually been verified
-      const verifiedTotp = data.totp.filter((factor: any) => factor.status === "verified");
+      const verifiedTotp = data.totp.filter((factor: { status: string; id: string; [key: string]: unknown }) => factor.status === "verified");
       setFactors(verifiedTotp);
     } catch (err) {
       console.error("Failed to load MFA factors", err);
@@ -47,7 +47,7 @@ export default function MFASettings() {
       // Sometimes "unverified" factors linger if enrollment wasn't completed
       const { data: existingFactors } = await supabase.auth.mfa.listFactors();
       if (existingFactors && existingFactors.totp) {
-        const unverified = existingFactors.totp.filter((f: any) => f.status !== "verified");
+        const unverified = existingFactors.totp.filter((f: { status: string; id: string; [key: string]: unknown }) => f.status !== "verified");
         for (const factor of unverified) {
           try {
              await supabase.auth.mfa.unenroll({ factorId: factor.id });
@@ -67,9 +67,10 @@ export default function MFASettings() {
       setTotpUri(data.totp.uri);
       setTotpSecret(data.totp.secret);
       setIsEnrolling(true);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("MFA Enrollment Error", err);
-      notify.error(err.message || "Failed to start 2FA enrollment");
+      const errorMessage = err instanceof Error ? err.message : "Failed to start 2FA enrollment";
+      notify.error(errorMessage);
     } finally {
       setActionLoading(false);
     }
@@ -101,15 +102,17 @@ export default function MFASettings() {
       setIsEnrolling(false);
       setTotpUri("");
       await loadFactors();
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("MFA Verification Error", err);
-      notify.error(err.message || "Invalid or expired code. Please try again.");
+      const errorMessage = err instanceof Error ? err.message : "Invalid or expired code. Please try again.";
+      notify.error(errorMessage);
     } finally {
       setActionLoading(false);
     }
   }
 
   // Auto-submit when exactly 6 digits are typed/pasted
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (verifyCode.length === 6 && !actionLoading && factorId) {
       const syntheticEvent = { preventDefault: () => {} } as React.FormEvent;
@@ -129,9 +132,10 @@ export default function MFASettings() {
 
       notify.success("Two-Factor Authentication disabled.");
       await loadFactors();
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("MFA Unenroll Error", err);
-      notify.error(err.message || "Failed to disable 2FA.");
+      const errorMessage = err instanceof Error ? err.message : "Failed to disable 2FA.";
+      notify.error(errorMessage);
     } finally {
       setActionLoading(false);
     }

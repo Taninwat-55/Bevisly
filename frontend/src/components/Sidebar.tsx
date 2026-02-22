@@ -7,7 +7,6 @@ import {
   Users,
   Shield,
   FolderKanban,
-  UserSquare2,
   PlusCircle,
   Settings,
   House,
