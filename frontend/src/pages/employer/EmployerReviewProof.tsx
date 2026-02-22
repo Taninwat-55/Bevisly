@@ -42,7 +42,7 @@ function TaskRequirementsPanel({ task }: { task: TaskInfo | null }) {
 
     return (
         <div className="glass-panel rounded-2xl p-6 space-y-4">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-[var(--color-employer)] mb-2">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-[var(--color-employer)] dark:text-blue-400 mb-2">
                 Task Requirements
             </h3>
             <div>
@@ -95,7 +95,7 @@ function Scorecard({
     return (
         <div className="glass-panel rounded-2xl p-6 space-y-6">
             <div className="flex justify-between items-center">
-                <h3 className="text-xs font-bold uppercase tracking-wider text-[var(--color-employer)]">
+                <h3 className="text-xs font-bold uppercase tracking-wider text-[var(--color-employer)] dark:text-blue-400">
                     Your Review
                 </h3>
                 {!isLocked && (
@@ -416,7 +416,7 @@ export default function EmployerReviewProof({ submissionId, onBack, onNavigate }
                         if (onBack) onBack();
                         else navigate("/employer");
                     }}
-                    className="flex items-center gap-1 text-sm text-[var(--color-text-muted)] hover:text-[var(--color-text)] mb-4 transition-colors"
+                    className="flex items-center gap-1 text-sm font-medium text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 mb-4 transition-colors"
                 >
                     <ChevronLeft size={16} />
                     Back to Submissions
@@ -424,8 +424,8 @@ export default function EmployerReviewProof({ submissionId, onBack, onNavigate }
 
                 <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                     <div>
-                        <h1 className="heading-lg mb-1">{submission.proof_tasks?.title || "Review Submission"}</h1>
-                        <p className="text-[var(--color-text-muted)]">
+                        <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100 mb-1">{submission.proof_tasks?.title || "Review Submission"}</h1>
+                        <p className="text-slate-600 dark:text-slate-400 font-medium">
                             Job: {submission.jobs?.title || "—"}
                         </p>
                     </div>
@@ -440,14 +440,14 @@ export default function EmployerReviewProof({ submissionId, onBack, onNavigate }
                                 }
                             }}
                             disabled={!prevCandidate}
-                            className="p-2 rounded-lg border border-[var(--color-border)] text-[var(--color-text-muted)] 
-                hover:bg-[var(--color-surface)] hover:text-[var(--color-text)] 
+                            className="p-2 rounded-lg border border-[var(--color-border)] text-slate-500 dark:text-slate-400 
+                hover:bg-[var(--color-surface)] hover:text-slate-900 dark:hover:text-slate-200 
                 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
                         >
                             <ArrowLeft size={18} />
                         </button>
 
-                        <span className="text-sm text-[var(--color-text-muted)] font-medium">
+                        <span className="text-sm text-slate-500 dark:text-slate-400 font-medium">
                             {currentIndex + 1} of {totalSubmissions || 1}
                         </span>
 
@@ -459,8 +459,8 @@ export default function EmployerReviewProof({ submissionId, onBack, onNavigate }
                                 }
                             }}
                             disabled={!nextCandidate}
-                            className="p-2 rounded-lg border border-[var(--color-border)] text-[var(--color-text-muted)] 
-                hover:bg-[var(--color-surface)] hover:text-[var(--color-text)] 
+                            className="p-2 rounded-lg border border-[var(--color-border)] text-slate-500 dark:text-slate-400 
+                hover:bg-[var(--color-surface)] hover:text-slate-900 dark:hover:text-slate-200 
                 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
                         >
                             <ArrowRight size={18} />
@@ -522,7 +522,7 @@ export default function EmployerReviewProof({ submissionId, onBack, onNavigate }
 
                         {/* Submission Content */}
                         <div className="glass-panel rounded-2xl p-6 space-y-5">
-                            <h3 className="text-xs font-bold uppercase tracking-wider text-[var(--color-employer)] mb-4">
+                            <h3 className="text-xs font-bold uppercase tracking-wider text-[var(--color-employer)] dark:text-blue-400 mb-4">
                                 Candidate Submission
                             </h3>
 
@@ -614,7 +614,7 @@ export default function EmployerReviewProof({ submissionId, onBack, onNavigate }
 
                             {/* Empty State */}
                             {!hasAnySubmission && !submission.video_url && (
-                                <div className="p-8 text-center border border-dashed border-[var(--color-border)] rounded-xl text-[var(--color-text-muted)]">
+                                <div className="p-8 text-center border border-dashed border-[var(--color-border)] rounded-xl text-slate-500 dark:text-slate-400">
                                     No submission content found. Check reflections below.
                                 </div>
                             )}
@@ -623,7 +623,7 @@ export default function EmployerReviewProof({ submissionId, onBack, onNavigate }
                         {/* Resume / CV Panel */}
                         {(submission.resume_url || submission.profiles?.resume_url) && (
                             <div className="glass-panel p-6 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] shadow-sm">
-                                <h3 className="text-xs font-bold uppercase tracking-wider text-[var(--color-employer)] mb-4 flex items-center gap-2">
+                                <h3 className="text-xs font-bold uppercase tracking-wider text-[var(--color-employer)] dark:text-blue-400 mb-4 flex items-center gap-2">
                                 <FileText size={16} /> Candidate Resume / CV
                                 </h3>
                                 
@@ -641,7 +641,7 @@ export default function EmployerReviewProof({ submissionId, onBack, onNavigate }
                                         href={submission.resume_url || submission.profiles?.resume_url || undefined}
                                         target="_blank"
                                         rel="noreferrer"
-                                        className="flex items-center gap-2 px-4 py-2 border border-[var(--color-border)] bg-[var(--color-surface)] hover:bg-[var(--color-bg)] rounded-xl text-sm font-semibold transition"
+                                        className="flex items-center gap-2 px-4 py-2 border border-[var(--color-border)] bg-[var(--color-surface)] hover:bg-[var(--color-bg)] rounded-xl text-sm font-semibold text-slate-800 dark:text-slate-200 transition"
                                     >
                                         <Download size={16} /> Download Open
                                     </a>
@@ -652,7 +652,7 @@ export default function EmployerReviewProof({ submissionId, onBack, onNavigate }
                         {/* Reflection */}
                         {submission.reflection && (
                             <div className="glass-panel rounded-2xl p-6">
-                                <h3 className="text-xs font-bold uppercase tracking-wider text-[var(--color-text-muted)] mb-3">
+                                <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-3">
                                     Candidate Reflection
                                 </h3>
                                 <div className="relative p-4 bg-[var(--color-bg)] border border-[var(--color-border)] rounded-xl">
@@ -686,7 +686,7 @@ export default function EmployerReviewProof({ submissionId, onBack, onNavigate }
                     <button
                         onClick={() => prevCandidate && navigate(`/employer/review/${prevCandidate.id}`)}
                         disabled={!prevCandidate}
-                        className="flex items-center gap-2 text-sm text-[var(--color-text-muted)] hover:text-[var(--color-text)] disabled:opacity-30 transition-colors"
+                        className="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 disabled:opacity-30 transition-colors"
                     >
                         <ChevronLeft size={16} /> Previous
                     </button>
@@ -710,7 +710,7 @@ export default function EmployerReviewProof({ submissionId, onBack, onNavigate }
                     <button
                         onClick={() => nextCandidate && handleSubmitFeedback("next")}
                         disabled={!nextCandidate}
-                        className={`flex items-center gap-2 text-sm text-[var(--color-text-muted)] hover:text-[var(--color-text)] disabled:opacity-30 transition-colors ${!isReviewed ? 'invisible' : ''}`}
+                        className={`flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 disabled:opacity-30 transition-colors ${!isReviewed ? 'invisible' : ''}`}
                     >
                         Next <ChevronRight size={16} />
                     </button>
