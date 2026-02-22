@@ -9,13 +9,10 @@ import {
   FolderKanban,
   UserSquare2,
   PlusCircle,
-  Database,
-  Star,
   Settings,
   House,
   ChevronLeft,
-  ChevronRight,
-  MessageCircle
+  ChevronRight
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -85,21 +82,6 @@ export default function Sidebar({ role }: SidebarProps) {
             to: "/admin/jobs",
             label: "Jobs Overview",
             icon: <Briefcase size={17} />,
-          },
-          {
-            to: "/admin/data-viewer",
-            label: "Data Viewer",
-            icon: <Database size={17} />,
-          },
-          {
-            to: "/admin/feedback",
-            label: "Feedback Logs",
-            icon: <Star size={17} />,
-          },
-          {
-            to: "/admin/feedback-messages",
-            label: "User Feedback",
-            icon: <MessageCircle size={17} />,
           },
           {
             to: "/admin/settings",

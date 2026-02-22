@@ -1,7 +1,6 @@
 import { useState } from "react";
 import CandidateOverview from "./CandidateOverview";
 import CandidateProfile from "./CandidateProfile";
-import CandidateCredits from "./CandidateCredits";
 import { Briefcase, User } from "lucide-react";
 
 export default function CandidateUnifiedDashboard() {
@@ -42,10 +41,11 @@ export default function CandidateUnifiedDashboard() {
           <div className="space-y-12">
             <CandidateProfile />
             
-            {/* Credits section merged into profile view */}
+            {/* Credits section hidden for MVP Simplification
             <div className="border-t border-[var(--color-border)] pt-8">
                <CandidateCredits />
             </div>
+            */}
           </div>
         )}
       </div>

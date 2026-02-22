@@ -172,6 +172,13 @@ export default function PublicProfilePage() {
                 <meta property="og:type" content="profile" />
                 <meta property="og:url" content={profileUrl} />
                 <meta property="og:image" content={profile.avatar_url || "https://bevisly.com/og-card-default.png"} />
+
+                {/* Twitter Cards fallback */}
+                <meta name="twitter:card" content="summary_large_image" />
+                <meta name="twitter:title" content={`${profile.full_name} - Bevisly`} />
+                <meta name="twitter:description" content={`View ${profile.full_name}'s verified proof portfolio on Bevisly`} />
+                <meta name="twitter:image" content={profile.avatar_url || "https://bevisly.com/og-card-default.png"} />
+
                 <link rel="canonical" href={profileUrl} />
                 <script type="application/ld+json">{JSON.stringify(jsonLd)}</script>
             </Helmet>
