@@ -204,9 +204,10 @@ const getVideoEmbed = (url: string | null) => {
 interface EmployerReviewProofProps {
     submissionId?: string;
     onBack?: () => void;
+    onNavigate?: (id: string) => void;
 }
 
-export default function EmployerReviewProof({ submissionId, onBack }: EmployerReviewProofProps) {
+export default function EmployerReviewProof({ submissionId, onBack, onNavigate }: EmployerReviewProofProps) {
     const params = useParams();
     const id = submissionId || params.id;
     const { user } = useAuth();
@@ -293,8 +294,13 @@ export default function EmployerReviewProof({ submissionId, onBack }: EmployerRe
         if (!user?.id || !submission) return;
 
         if (isReviewed) {
-            if (direction === "next" && nextCandidate) navigate(`/employer/review/${nextCandidate.id}`);
-            else if (direction === "previous" && prevCandidate) navigate(`/employer/review/${prevCandidate.id}`);
+            if (direction === "next" && nextCandidate) {
+                if (onNavigate) onNavigate(nextCandidate.id);
+                else navigate(`/employer/review/${nextCandidate.id}`);
+            } else if (direction === "previous" && prevCandidate) {
+                if (onNavigate) onNavigate(prevCandidate.id);
+                else navigate(`/employer/review/${prevCandidate.id}`);
+            }
             return;
         }
 
@@ -325,11 +331,14 @@ export default function EmployerReviewProof({ submissionId, onBack }: EmployerRe
             toast.success("✅ Feedback submitted!");
 
             if (direction === "next" && nextCandidate) {
-                navigate(`/employer/review/${nextCandidate.id}`);
+                if (onNavigate) onNavigate(nextCandidate.id);
+                else navigate(`/employer/review/${nextCandidate.id}`);
             } else if (direction === "previous" && prevCandidate) {
-                navigate(`/employer/review/${prevCandidate.id}`);
+                if (onNavigate) onNavigate(prevCandidate.id);
+                else navigate(`/employer/review/${prevCandidate.id}`);
             } else {
-                navigate("/employer/dashboard");
+                if (onBack) onBack();
+                else navigate("/employer");
             }
         } catch (err) {
             console.error(err);
@@ -353,7 +362,7 @@ export default function EmployerReviewProof({ submissionId, onBack }: EmployerRe
             <div className="flex flex-col justify-center items-center min-h-screen gap-3">
                 <p className="text-lg text-[var(--color-text)]">Submission not found</p>
                 <button
-                    onClick={() => navigate("/employer/dashboard")}
+                    onClick={() => navigate("/employer")}
                     className="text-sm text-[var(--color-employer)] hover:underline"
                 >
                     ← Back to Submissions
@@ -404,7 +413,7 @@ export default function EmployerReviewProof({ submissionId, onBack }: EmployerRe
                 <button
                     onClick={() => {
                         if (onBack) onBack();
-                        else navigate("/employer/dashboard");
+                        else navigate("/employer");
                     }}
                     className="flex items-center gap-1 text-sm text-[var(--color-text-muted)] hover:text-[var(--color-text)] mb-4 transition-colors"
                 >
@@ -423,7 +432,12 @@ export default function EmployerReviewProof({ submissionId, onBack }: EmployerRe
                     {/* Candidate Navigation */}
                     <div className="flex items-center gap-3">
                         <button
-                            onClick={() => prevCandidate && navigate(`/employer/review/${prevCandidate.id}`)}
+                            onClick={() => {
+                                if (prevCandidate) {
+                                    if (onNavigate) onNavigate(prevCandidate.id);
+                                    else navigate(`/employer/review/${prevCandidate.id}`);
+                                }
+                            }}
                             disabled={!prevCandidate}
                             className="p-2 rounded-lg border border-[var(--color-border)] text-[var(--color-text-muted)] 
                 hover:bg-[var(--color-surface)] hover:text-[var(--color-text)] 
@@ -437,7 +451,12 @@ export default function EmployerReviewProof({ submissionId, onBack }: EmployerRe
                         </span>
 
                         <button
-                            onClick={() => nextCandidate && navigate(`/employer/review/${nextCandidate.id}`)}
+                            onClick={() => {
+                                if (nextCandidate) {
+                                    if (onNavigate) onNavigate(nextCandidate.id);
+                                    else navigate(`/employer/review/${nextCandidate.id}`);
+                                }
+                            }}
                             disabled={!nextCandidate}
                             className="p-2 rounded-lg border border-[var(--color-border)] text-[var(--color-text-muted)] 
                 hover:bg-[var(--color-surface)] hover:text-[var(--color-text)] 
@@ -599,6 +618,35 @@ export default function EmployerReviewProof({ submissionId, onBack }: EmployerRe
                                 </div>
                             )}
                         </div>
+
+                        {/* Resume / CV Panel */}
+                        {(submission.resume_url || submission.profiles?.resume_url) && (
+                            <div className="glass-panel p-6 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] shadow-sm">
+                                <h3 className="text-xs font-bold uppercase tracking-wider text-[var(--color-employer)] mb-4 flex items-center gap-2">
+                                <FileText size={16} /> Candidate Resume / CV
+                                </h3>
+                                
+                                <div className="flex items-center justify-between p-4 bg-[var(--color-bg)] rounded-xl border border-[var(--color-border)]">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-10 h-10 rounded-lg bg-orange-100 dark:bg-orange-900/20 flex items-center justify-center text-orange-600">
+                                            <FileText size={20} />
+                                        </div>
+                                        <div>
+                                            <p className="font-medium text-[var(--color-text)]">{submission.profiles?.full_name}'s Resume</p>
+                                            <p className="text-xs text-[var(--color-text-muted)]">Available for review</p>
+                                        </div>
+                                    </div>
+                                    <a
+                                        href={submission.resume_url || submission.profiles?.resume_url || undefined}
+                                        target="_blank"
+                                        rel="noreferrer"
+                                        className="flex items-center gap-2 px-4 py-2 border border-[var(--color-border)] bg-[var(--color-surface)] hover:bg-[var(--color-bg)] rounded-xl text-sm font-semibold transition"
+                                    >
+                                        <Download size={16} /> Download Open
+                                    </a>
+                                </div>
+                            </div>
+                        )}
 
                         {/* Reflection */}
                         {submission.reflection && (

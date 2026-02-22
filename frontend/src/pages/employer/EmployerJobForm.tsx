@@ -145,7 +145,7 @@ export default function EmployerJobForm({
         await createJobWithTasks(values);
         toast.success("Job posted successfully!");
         onSuccess?.();
-        navigate("/employer/dashboard");
+        navigate("/employer");
       }
     } catch (err) {
       console.error(err);

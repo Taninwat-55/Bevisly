@@ -5,7 +5,7 @@ import { supabase } from "../supabaseClient";
 export interface GeneratedJobListing {
     title: string;
     description: string;
-    requirements: string[]; // Edge function returns markdown bullet points.
+    requirements: string; // Edge function returns markdown bullet points.
     proof_tasks: {
         title: string;
         description: string;
@@ -24,10 +24,6 @@ export async function generateJobListing(
     }, 120000); // 120s timeout (AI generation can be slow on first call)
 
     try {
-        console.log(
-            "Calling Edge Function with URL:",
-            `${SUPABASE_URL}/functions/v1/generate-job-listing`,
-        );
         const response = await fetch(
             `${SUPABASE_URL}/functions/v1/generate-job-listing`,
             {
@@ -45,15 +41,8 @@ export async function generateJobListing(
         );
         clearTimeout(timeoutId);
 
-        console.log(
-            "Edge Function Response Status:",
-            response.status,
-            response.statusText,
-        );
-
         let data;
         const textResponse = await response.text();
-        console.log("Raw Edge Function Response Text:", textResponse);
 
         try {
             data = JSON.parse(textResponse);
@@ -62,10 +51,6 @@ export async function generateJobListing(
             throw new Error(
                 `Invalid server response: ${textResponse.substring(0, 100)}`,
             );
-        }
-
-        if (!response.ok) {
-            console.log("Response not OK, error body:", data);
         }
 
         if (data && data.error) {

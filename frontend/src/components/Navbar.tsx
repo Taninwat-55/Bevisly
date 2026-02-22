@@ -29,7 +29,7 @@ export default function Navbar() {
   /* Go to dashboard based on role */
   const goToDashboard = () => {
     if (!user) return navigate("/auth");
-    if (user.role === "employer") return navigate("/employer/dashboard");
+    if (user.role === "employer") return navigate("/employer");
     if (user.role === "admin") return navigate("/admin");
     return navigate("/candidate");
   };

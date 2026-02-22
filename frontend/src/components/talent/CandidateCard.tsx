@@ -96,8 +96,6 @@ function InnerCard({
     e.stopPropagation();
     if (onReview) {
         onReview(id);
-    } else {
-        navigate(`/employer/review/${id}`);
     }
   }
 

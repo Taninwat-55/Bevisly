@@ -5,7 +5,6 @@ import { getEmployerJobs } from "@/lib/api/jobs";
 import { deductCompanyCredits } from "@/lib/api/companies"; // New Import
 import { useCompany } from "@/hooks/useCompany"; // For credit balance
 import type { EmployerSubmission } from "@/types";
-import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import {
   Loader2,
@@ -24,9 +23,12 @@ import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 
-export default function EmployerTalentPool() {
+export default function EmployerTalentPool({
+  onReview
+}: {
+  onReview?: (id: string) => void;
+}) {
   const { user } = useAuth();
-  const navigate = useNavigate();
 
   const [submissions, setSubmissions] = useState<EmployerSubmission[]>([]);
   const [jobs, setJobs] = useState<{ id: string; title: string }[]>([]);
@@ -293,8 +295,12 @@ export default function EmployerTalentPool() {
                 key={s.id}
                 padding="none"
                 className={`overflow-hidden group hover:shadow-md transition-all border-l-4 ${isTop ? "border-l-amber-500" : "border-l-transparent"
-                  }`}
-                onClick={() => navigate(`/employer/dashboard`)}
+                  } cursor-pointer`}
+                onClick={() => {
+                  if (onReview) {
+                    onReview(s.id);
+                  }
+                }}
               >
                 <div className="p-5 flex flex-col md:flex-row md:items-center gap-5">
                   {/* Avatar/Initials */}
@@ -352,7 +358,17 @@ export default function EmployerTalentPool() {
                         {s.status}
                       </span>
 
-                      <Button size="sm" variant="outline" rightIcon={<ArrowRight size={14} />}>
+                      <Button 
+                        size="sm" 
+                        variant="outline" 
+                        rightIcon={<ArrowRight size={14} />}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (onReview) {
+                            onReview(s.id);
+                          }
+                        }}
+                      >
                         Review
                       </Button>
                     </div>

@@ -11,6 +11,20 @@ import UserMenu from "@/components/common/UserMenu";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
 import RequestAccessModal from "@/components/common/RequestAccessModal";
 import ContactModal from "@/components/common/ContactModal";
+import ReactMarkdown, { type Components } from "react-markdown";
+
+const markdownComponents: Components = {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  strong: ({ node, ...props }) => <strong className="font-bold text-white" {...props} />,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  ul: ({ node, ...props }) => <ul className="list-disc pl-5 my-2 space-y-1" {...props} />,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  ol: ({ node, ...props }) => <ol className="list-decimal pl-5 my-2 space-y-1" {...props} />,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  li: ({ node, ...props }) => <li className="text-slate-300" {...props} />,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  p: ({ node, ...props }) => <p className="mb-3 leading-relaxed" {...props} />,
+};
 
 export default function LandingPage() {
   const navigate = useNavigate();
@@ -93,7 +107,7 @@ export default function LandingPage() {
 
   const handleCTA = () => {
     if (user) {
-      if (user.role === "employer") return navigate("/employer/dashboard");
+      if (user.role === "employer") return navigate("/employer");
       return navigate("/candidate");
     }
     navigate("/auth");
@@ -258,49 +272,71 @@ export default function LandingPage() {
                     ) : generatedData ? (
 
                       /* ── STATE 2: SUCCESS (AI RESULTS) ── */
-                      <div className="flex-1 p-6 md:p-10 flex flex-col gap-6 overflow-y-auto bg-slate-900/50">
-                        {/* Header Row */}
-                        <div className="flex flex-col md:flex-row md:justify-between md:items-start gap-4 border-b border-slate-800 pb-6">
-                          <div>
-                            <div className="bg-[var(--color-brand-primary)]/10 text-[var(--color-brand-primary)] border border-[var(--color-brand-primary)]/20 px-3 py-1 rounded-full inline-flex items-center gap-2 mb-3">
-                              <CheckCircle size={12} />
-                              <span className="font-semibold text-xs tracking-wider uppercase">AI Generated</span>
+                      <div className="flex-1 p-4 md:p-6 flex flex-col gap-4 overflow-y-auto bg-slate-900/50">
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 h-full">
+                            
+                            {/* Card 1: Job Listing */}
+                            <div className="bg-slate-950/80 border border-slate-800 rounded-2xl p-5 md:p-6 flex flex-col shadow-lg relative overflow-hidden">
+                                {/* Decorative Glow */}
+                                <div className="absolute top-0 right-0 w-32 h-32 bg-[var(--color-brand-primary)]/10 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2 pointer-events-none" />
+                                
+                                <div className="bg-[var(--color-brand-primary)]/10 text-[var(--color-brand-primary)] border border-[var(--color-brand-primary)]/20 px-3 py-1 rounded-full inline-flex items-center gap-2 mb-4 self-start relative z-10">
+                                    <CheckCircle size={12} />
+                                    <span className="font-semibold text-[10px] tracking-widest uppercase">1. Job Listing</span>
+                                </div>
+                                <h3 className="text-white text-xl font-bold font-display tracking-tight mb-3 relative z-10 shrink-0">
+                                    {generatedData.title}
+                                </h3>
+                                <div className="text-slate-400 text-sm leading-relaxed flex-1 relative z-10 overflow-y-auto custom-scrollbar pr-2">
+                                    <ReactMarkdown components={markdownComponents}>{generatedData.description}</ReactMarkdown>
+                                    
+                                    <div className="mt-4 pt-4 border-t border-slate-800/60">
+                                        <h4 className="text-slate-200 font-semibold mb-3">Key Requirements</h4>
+                                        <ReactMarkdown components={markdownComponents}>{generatedData.requirements}</ReactMarkdown>
+                                    </div>
+                                </div>
                             </div>
-                            <h3 className="text-white text-2xl md:text-3xl font-bold font-display tracking-tight mb-2">
-                              {generatedData.title}
-                            </h3>
-                            <p className="text-slate-400 text-sm line-clamp-2 md:line-clamp-3 max-w-2xl leading-relaxed">
-                              {generatedData.description.replace(/[#*]/g, '') /* Simple strip of MD syntax for quick preview */}
-                            </p>
-                          </div>
-                          <div className="shrink-0">
-                            <Button size="lg" className="w-full md:w-auto shadow-glow-primary" onClick={() => navigate('/auth?tab=signup&role=employer')}>
-                              Post this Job for Free <ArrowRight className="ml-2 w-4 h-4" />
-                            </Button>
-                          </div>
+
+                            {/* Card 2: Proof Task */}
+                            <div className="bg-slate-950/80 border border-slate-800 rounded-2xl p-5 md:p-6 flex flex-col shadow-lg relative overflow-hidden">
+                                {/* Decorative Glow */}
+                                <div className="absolute top-0 left-0 w-32 h-32 bg-purple-500/10 rounded-full blur-2xl -translate-y-1/2 -translate-x-1/2 pointer-events-none" />
+                                
+                                <div className="bg-purple-500/10 text-purple-400 border border-purple-500/20 px-3 py-1 rounded-full inline-flex items-center gap-2 mb-4 self-start relative z-10">
+                                    <CheckCircle size={12} />
+                                    <span className="font-semibold text-[10px] tracking-widest uppercase">2. Proof Task</span>
+                                </div>
+                                
+                                <div className="flex flex-col gap-5 flex-1 overflow-y-auto custom-scrollbar pr-2 relative z-10">
+                                    {generatedData.proof_tasks.map((task, i) => (
+                                        <div key={i} className="flex flex-col gap-2">
+                                            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2">
+                                                <h4 className="text-base font-medium text-white leading-tight">
+                                                    {task.title}
+                                                </h4>
+                                                <div className="flex flex-row gap-1.5 shrink-0 items-center">
+                                                    <span className="px-2 py-0.5 rounded-md bg-slate-800 text-slate-300 border border-slate-700 text-[10px] font-mono whitespace-nowrap">
+                                                        {task.expected_time}
+                                                    </span>
+                                                    <span className="px-2 py-0.5 rounded-md bg-blue-500/10 text-blue-400 border border-blue-500/20 text-[10px] font-mono whitespace-nowrap uppercase">
+                                                        {task.submission_format}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            <div className="text-sm text-slate-400 font-mono leading-relaxed">
+                                                <ReactMarkdown components={markdownComponents}>{task.description}</ReactMarkdown>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
                         </div>
 
-                        {/* Proof Task Generated */}
-                        <div className="grid grid-cols-1 gap-4">
-                          <h4 className="text-sm font-semibold text-slate-300 uppercase tracking-widest">Recommended Proof Task</h4>
-                          {generatedData.proof_tasks.map((task, i) => (
-                              <div key={i} className="p-5 rounded-2xl border border-slate-800 bg-slate-950/50 flex flex-col gap-4">
-                                <div className="flex justify-between items-start gap-4">
-                                  <h5 className="text-lg font-medium text-white">{task.title}</h5>
-                                  <div className="flex gap-2 shrink-0">
-                                    <span className="px-2 py-1 rounded-md bg-purple-500/10 text-purple-400 border border-purple-500/20 text-xs font-mono">
-                                      {task.expected_time}
-                                    </span>
-                                    <span className="px-2 py-1 rounded-md bg-blue-500/10 text-blue-400 border border-blue-500/20 text-xs font-mono">
-                                      {task.submission_format}
-                                    </span>
-                                  </div>
-                                </div>
-                                <p className="text-sm text-slate-400 font-mono leading-relaxed line-clamp-3">
-                                  {task.description}
-                                </p>
-                              </div>
-                          ))}
+                        {/* CTA Row */}
+                        <div className="pt-2 flex justify-end shrink-0">
+                            <Button size="md" className="w-full md:w-auto shadow-glow-primary" onClick={() => navigate('/auth?tab=signup&role=employer')}>
+                                Post this Job for Free <ArrowRight className="ml-2 w-4 h-4" />
+                            </Button>
                         </div>
                       </div>
 

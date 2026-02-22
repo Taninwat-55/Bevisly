@@ -42,7 +42,7 @@ export default function Sidebar({ role }: SidebarProps) {
       ? [
         { to: "/employer", label: "Overview", icon: <House size={17} /> },
         {
-          to: "/employer/dashboard",
+          to: "/employer",
           label: "Dashboard",
           icon: <LayoutDashboard size={17} />,
         },

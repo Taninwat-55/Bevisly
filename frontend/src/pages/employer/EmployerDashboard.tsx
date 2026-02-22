@@ -385,7 +385,11 @@ export default function EmployerDashboard() {
 
               {/* Integrated Talent Pool View */}
               <div className="mt-8 border-t border-[var(--color-border)] pt-8">
-                <EmployerTalentPool />
+                <EmployerTalentPool 
+                    onReview={(id) => {
+                        setSelectedSubmissionId(id);
+                    }}
+                />
               </div>
             </div>
       )}

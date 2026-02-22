@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
+import ContactModal from "@/components/common/ContactModal";
 
 interface DashboardLayoutProps {
     children: ReactNode;
@@ -18,6 +19,7 @@ interface DashboardLayoutProps {
 
 export default function DashboardLayout({ children, showSidebar = true, fullWidth = false }: DashboardLayoutProps) {
     const [isSidebarOpen, setSidebarOpen] = useState(true);
+    const [isContactOpen, setIsContactOpen] = useState(false);
     const { user, signOut } = useAuth();
     const location = useLocation();
     const navigate = useNavigate();
@@ -203,7 +205,7 @@ export default function DashboardLayout({ children, showSidebar = true, fullWidt
                             <Bell size={20} />
                             <span className="absolute top-2 right-2 w-2 h-2 rounded-full bg-[var(--color-brand-secondary)] border border-[var(--color-surface)]" />
                         </button>
-                        <Button size="sm" variant="outline" className="hidden sm:flex">
+                        <Button size="sm" variant="outline" className="hidden sm:flex" onClick={() => setIsContactOpen(true)}>
                             Help & Support
                         </Button>
                     </div>
@@ -216,6 +218,8 @@ export default function DashboardLayout({ children, showSidebar = true, fullWidt
                     </div>
                 </main>
             </div>
+
+            <ContactModal isOpen={isContactOpen} onClose={() => setIsContactOpen(false)} />
         </div>
     );
 }
