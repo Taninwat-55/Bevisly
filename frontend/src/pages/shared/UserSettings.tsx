@@ -240,7 +240,7 @@ export default function UserSettings() {
       toast.promise(
           (async () => {
                // Default to "candidate" if role is null (shouldn't happen for logged in users) check
-               const role = user.role || "candidate";
+               const role = user.role === "demo_admin" ? "admin" : (user.role || "candidate");
                const blob = await downloadUserData(user.id, role);
                const url = window.URL.createObjectURL(blob);
                const a = document.createElement('a');

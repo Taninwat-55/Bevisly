@@ -17,8 +17,9 @@ import {
 import { motion } from "framer-motion";
 
 export default function AdminDashboard() {
-  const { setOverride } = useAuth();
+  const { setOverride, user } = useAuth();
   const navigate = useNavigate();
+  const isDemoAdmin = user?.role === "demo_admin";
 
   const [stats, setStats] = useState<{
     total_users: number;
@@ -44,13 +45,30 @@ export default function AdminDashboard() {
   }, []);
 
   const handleOverride = (role: "candidate" | "employer" | "admin") => {
-    setOverride?.(role);
+    // For demo_admin, reset back to demo_admin instead of full admin
+    const actualRole = role === "admin" && isDemoAdmin ? "demo_admin" : role;
+    setOverride?.(actualRole);
     toast.success(`🔁 Viewing as ${role}`);
     navigate(role === "admin" ? "/admin" : `/${role}`, { replace: true });
   };
 
   return (
     <div className="min-h-screen bg-[var(--color-bg)] text-[var(--color-text)] px-6 md:px-10 py-12 transition-colors font-sans">
+
+      {/* Demo Mode Banner */}
+      {isDemoAdmin && (
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-6 p-4 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-700 dark:text-amber-300 flex items-center gap-3"
+        >
+          <span className="text-2xl">🔒</span>
+          <div>
+            <p className="font-semibold text-sm">Demo Mode — Read-Only Access</p>
+            <p className="text-xs opacity-80">You can explore all views and switch perspectives, but write actions (editing roles, credits, featured jobs) are disabled.</p>
+          </div>
+        </motion.div>
+      )}
 
       {/* ── Header ────────────────────────────────────────── */}
       <header className="mb-10 flex flex-col md:flex-row md:items-center justify-between gap-4">

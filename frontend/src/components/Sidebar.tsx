@@ -16,13 +16,15 @@ import {
 import { useAuth } from "@/hooks/useAuth";
 
 interface SidebarProps {
-  role?: "candidate" | "employer" | "admin";
+  role?: "candidate" | "employer" | "admin" | "demo_admin";
 }
 
 export default function Sidebar({ role }: SidebarProps) {
   const { user } = useAuth();
   const [collapsed, setCollapsed] = useState(false);
-  const resolvedRole = role || user?.role || "candidate";
+  const rawRole = role || user?.role || "candidate";
+  // Treat demo_admin as admin for sidebar display
+  const resolvedRole = rawRole === "demo_admin" ? "admin" : rawRole;
 
   /* Accent color per role */
   const accentColorMap = {

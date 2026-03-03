@@ -2,10 +2,13 @@ import { useEffect, useState, useMemo } from "react";
 import { getAllUsers, updateUserRole, addCredits } from "@/lib/api/admin";
 import toast from "react-hot-toast";
 import type { BevislyUser } from "@/types/admin";
-import { ArrowDownUp, Search, User, MoreHorizontal, Shield, Briefcase, GraduationCap, PlusCircle, Coins } from "lucide-react";
+import { ArrowDownUp, Search, User, MoreHorizontal, Shield, Briefcase, GraduationCap, PlusCircle, Coins, Eye } from "lucide-react";
 import { motion } from "framer-motion";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function AdminUsers() {
+  const { user: authUser } = useAuth();
+  const isDemoAdmin = authUser?.role === "demo_admin";
   const [users, setUsers] = useState<BevislyUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState<string | null>(null);
@@ -105,6 +108,13 @@ export default function AdminUsers() {
         </span>
       );
     }
+    if (role === 'demo_admin') {
+      return (
+        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-amber-500/10 text-amber-600 dark:text-amber-400 text-xs font-semibold border border-amber-500/20">
+          <Eye size={12} /> Demo
+        </span>
+      );
+    }
     if (role === 'employer') {
       return (
         <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-blue-500/10 text-blue-600 dark:text-blue-400 text-xs font-semibold border border-blue-500/20">
@@ -136,23 +146,22 @@ export default function AdminUsers() {
               </div>
             </div>
             
-            <button
-                onClick={() => {
-                    const email = prompt("Enter email verification to invite:");
-                    if (email) {
-                         // Simulate invite for now or copying a link
-                         // In a real app we'd call an edge function.
-                         // For MVP, we'll generate a signup link they can share.
-                         const link = `${window.location.origin}/auth?invite=${btoa(email)}`;
-                         navigator.clipboard.writeText(link);
-                         toast.success(`Invite link for ${email} copied to clipboard!`);
-                    }
-                }}
-                className="flex items-center gap-2 px-4 py-2 bg-[var(--color-brand-primary)] text-white rounded-xl text-sm font-medium hover:brightness-110 transition shadow-glow-primary"
-            >
-                <PlusCircle size={18} />
-                <span>Invite User</span>
-            </button>
+            {!isDemoAdmin && (
+              <button
+                  onClick={() => {
+                      const email = prompt("Enter email verification to invite:");
+                      if (email) {
+                           const link = `${window.location.origin}/auth?invite=${btoa(email)}`;
+                           navigator.clipboard.writeText(link);
+                           toast.success(`Invite link for ${email} copied to clipboard!`);
+                      }
+                  }}
+                  className="flex items-center gap-2 px-4 py-2 bg-[var(--color-brand-primary)] text-white rounded-xl text-sm font-medium hover:brightness-110 transition shadow-glow-primary"
+              >
+                  <PlusCircle size={18} />
+                  <span>Invite User</span>
+              </button>
+            )}
         </div>
       </header>
 
@@ -182,6 +191,7 @@ export default function AdminUsers() {
             <option value="candidate">Candidates</option>
             <option value="employer">Employers</option>
             <option value="admin">Admins</option>
+            <option value="demo_admin">Demo Admins</option>
           </select>
 
           <button
@@ -235,14 +245,16 @@ export default function AdminUsers() {
                           <Coins size={12} className="text-amber-500" />
                           {u.credits ?? 0}
                         </div>
-                        <button
-                          onClick={() => handleAddCredits(u.id, 10)}
-                          disabled={updating === u.id}
-                          className="text-[var(--color-brand-primary)] hover:bg-[var(--color-brand-primary)]/10 p-1 rounded transition-colors"
-                          title="Add 10 Credits"
-                        >
-                          <PlusCircle size={16} />
-                        </button>
+                        {!isDemoAdmin && (
+                          <button
+                            onClick={() => handleAddCredits(u.id, 10)}
+                            disabled={updating === u.id}
+                            className="text-[var(--color-brand-primary)] hover:bg-[var(--color-brand-primary)]/10 p-1 rounded transition-colors"
+                            title="Add 10 Credits"
+                          >
+                            <PlusCircle size={16} />
+                          </button>
+                        )}
                       </div>
                     </td>
                     <td className="py-4 px-6 text-[var(--color-text-muted)] font-medium">
@@ -253,25 +265,30 @@ export default function AdminUsers() {
                       })}
                     </td>
                     <td className="py-4 px-6 text-right">
-                      <div className="relative inline-block">
-                        <select
-                          value={u.role}
-                          disabled={updating === u.id}
-                          onChange={(e) => handleChangeRole(u.id, e.target.value as BevislyUser["role"])}
-                          className={`
-                               appearance-none bg-transparent pl-3 pr-8 py-1.5 rounded-lg border border-[var(--color-border)] text-xs font-medium cursor-pointer
-                               hover:border-[var(--color-brand-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--color-brand-primary)]/20 transition-all
-                               ${updating === u.id ? 'opacity-50 pointer-events-none' : ''}
-                            `}
-                        >
-                          <option value="candidate">Candidate</option>
-                          <option value="employer">Employer</option>
-                          <option value="admin">Admin</option>
-                        </select>
-                        <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-[var(--color-text-muted)]">
-                          <MoreHorizontal size={14} />
+                      {isDemoAdmin ? (
+                        <RoleBadge role={u.role} />
+                      ) : (
+                        <div className="relative inline-block">
+                          <select
+                            value={u.role}
+                            disabled={updating === u.id}
+                            onChange={(e) => handleChangeRole(u.id, e.target.value as BevislyUser["role"])}
+                            className={`
+                                 appearance-none bg-transparent pl-3 pr-8 py-1.5 rounded-lg border border-[var(--color-border)] text-xs font-medium cursor-pointer
+                                 hover:border-[var(--color-brand-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--color-brand-primary)]/20 transition-all
+                                 ${updating === u.id ? 'opacity-50 pointer-events-none' : ''}
+                              `}
+                          >
+                            <option value="candidate">Candidate</option>
+                            <option value="employer">Employer</option>
+                            <option value="admin">Admin</option>
+                            <option value="demo_admin">Demo Admin</option>
+                          </select>
+                          <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-[var(--color-text-muted)]">
+                            <MoreHorizontal size={14} />
+                          </div>
                         </div>
-                      </div>
+                      )}
                     </td>
                   </tr>
                 ))

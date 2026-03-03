@@ -27,10 +27,13 @@ export default function ProtectedRoute({
     return <Navigate to="/auth" replace />;
   }
 
+  // Effective role: demo_admin is treated as admin for routing
+  const effectiveRole = user.role === "demo_admin" ? "admin" : user.role;
+
   // Wrong role → redirect to their own dashboard
-  if (allowedRole && user.role !== allowedRole) {
-    if (user.role === "admin") return <Navigate to="/admin" replace />;
-    if (user.role === "employer") return <Navigate to="/employer" replace />;
+  if (allowedRole && effectiveRole !== allowedRole) {
+    if (effectiveRole === "admin") return <Navigate to="/admin" replace />;
+    if (effectiveRole === "employer") return <Navigate to="/employer" replace />;
     return <Navigate to="/candidate/dashboard" replace />;
   }
 

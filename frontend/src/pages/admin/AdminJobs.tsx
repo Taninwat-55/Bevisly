@@ -2,10 +2,13 @@ import { useEffect, useState, useMemo } from "react";
 import { getAllJobs, toggleFeaturedJob } from "@/lib/api/admin";
 import type { AdminJob } from "@/types/admin";
 import toast from "react-hot-toast";
-import { ArrowDownUp, Search, Star, Building, MapPin, Clock } from "lucide-react";
+import { ArrowDownUp, Search, Star, Building, MapPin, Clock, FlaskConical } from "lucide-react";
 import { motion } from "framer-motion";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function AdminJobs() {
+  const { user } = useAuth();
+  const isDemoAdmin = user?.role === "demo_admin";
   const [jobs, setJobs] = useState<AdminJob[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -14,6 +17,7 @@ export default function AdminJobs() {
   const [statusFilter, setStatusFilter] = useState<"all" | "open" | "closed">("all");
   const [employerFilter, setEmployerFilter] = useState("all");
   const [sortOrder, setSortOrder] = useState<"newest" | "oldest">("newest");
+  const [demoFilter, setDemoFilter] = useState(false);
 
   // Pagination
   const [page, setPage] = useState(1);
@@ -55,6 +59,8 @@ export default function AdminJobs() {
       result = result.filter((j) => j.status === statusFilter);
     if (employerFilter !== "all")
       result = result.filter((j) => j.employer_email === employerFilter);
+    if (demoFilter)
+      result = result.filter((j) => j.employer_email === "demo@bevisly.com");
 
     result.sort((a, b) => {
       const da = new Date(a.created_at).getTime();
@@ -63,7 +69,7 @@ export default function AdminJobs() {
     });
 
     return result;
-  }, [jobs, searchTerm, statusFilter, employerFilter, sortOrder]);
+  }, [jobs, searchTerm, statusFilter, employerFilter, sortOrder, demoFilter]);
 
   const uniqueEmployers = useMemo(
     () => Array.from(new Set(jobs.map((j) => j.employer_email))).sort(),
@@ -147,6 +153,18 @@ export default function AdminJobs() {
             <ArrowDownUp size={16} className="text-[var(--color-text-muted)]" />
             {sortOrder === 'newest' ? 'Newest' : 'Oldest'}
           </button>
+
+          <button
+            onClick={() => setDemoFilter(prev => !prev)}
+            className={`flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition border ${
+              demoFilter
+                ? 'bg-amber-500/10 border-amber-500/30 text-amber-600 dark:text-amber-400'
+                : 'bg-[var(--color-bg)] border-[var(--color-border)] text-[var(--color-text-muted)] hover:bg-[var(--color-surface-hover)]'
+            }`}
+          >
+            <FlaskConical size={16} />
+            Demo Only
+          </button>
         </div>
       </div>
 
@@ -171,7 +189,14 @@ export default function AdminJobs() {
                 <tr key={j.id} className="group hover:bg-[var(--color-bg)]/50 transition-colors">
                   <td className="py-4 px-6">
                     <div className="flex flex-col gap-1">
-                      <span className="font-bold text-[var(--color-text)] text-base">{j.title}</span>
+                      <div className="flex items-center gap-2">
+                        <span className="font-bold text-[var(--color-text)] text-base">{j.title}</span>
+                        {j.employer_email === 'demo@bevisly.com' && (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 text-[10px] font-bold border border-amber-500/20 uppercase tracking-wider">
+                            <FlaskConical size={10} /> Demo
+                          </span>
+                        )}
+                      </div>
                       <div className="flex items-center gap-3 text-xs text-[var(--color-text-muted)]">
                         <span className="flex items-center gap-1"><Building size={12} /> {j.company || 'Unknown Company'}</span>
                         <span className="flex items-center gap-1"><MapPin size={12} /> {j.location || 'Remote'}</span>
@@ -193,25 +218,37 @@ export default function AdminJobs() {
                   </td>
 
                   <td className="py-4 px-6 text-center">
-                    <button
-                      onClick={async () => {
-                        try {
-                          await toggleFeaturedJob(j.id, !j.featured);
-                          toast.success(j.featured ? "Removed from featured" : "Added to featured ⭐");
-                          setJobs((prev) => prev.map((job) => job.id === j.id ? { ...job, featured: !j.featured } : job));
-                        } catch (err) {
-                          console.error(err);
-                          toast.error("Failed to update status");
-                        }
-                      }}
-                      className={`
-                          w-8 h-8 rounded-lg inline-flex items-center justify-center transition-all
-                          ${j.featured ? 'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/40 dark:text-yellow-400' : 'bg-[var(--color-bg)]/50 text-[var(--color-text-muted)] hover:bg-[var(--color-bg-hover)]'}
-                       `}
-                      title="Toggle Featured"
-                    >
-                      <Star size={16} fill={j.featured ? "currentColor" : "none"} />
-                    </button>
+                    {isDemoAdmin ? (
+                      <div
+                        className={`
+                            w-8 h-8 rounded-lg inline-flex items-center justify-center
+                            ${j.featured ? 'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/40 dark:text-yellow-400' : 'bg-[var(--color-bg)]/50 text-[var(--color-text-muted)]'}
+                         `}
+                        title="Featured toggle disabled in demo mode"
+                      >
+                        <Star size={16} fill={j.featured ? "currentColor" : "none"} />
+                      </div>
+                    ) : (
+                      <button
+                        onClick={async () => {
+                          try {
+                            await toggleFeaturedJob(j.id, !j.featured);
+                            toast.success(j.featured ? "Removed from featured" : "Added to featured ⭐");
+                            setJobs((prev) => prev.map((job) => job.id === j.id ? { ...job, featured: !j.featured } : job));
+                          } catch (err) {
+                            console.error(err);
+                            toast.error("Failed to update status");
+                          }
+                        }}
+                        className={`
+                            w-8 h-8 rounded-lg inline-flex items-center justify-center transition-all
+                            ${j.featured ? 'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/40 dark:text-yellow-400' : 'bg-[var(--color-bg)]/50 text-[var(--color-text-muted)] hover:bg-[var(--color-bg-hover)]'}
+                         `}
+                        title="Toggle Featured"
+                      >
+                        <Star size={16} fill={j.featured ? "currentColor" : "none"} />
+                      </button>
+                    )}
                   </td>
 
                   <td className="py-4 px-6 text-right">

@@ -3,7 +3,7 @@ import { createContext } from "react";
 export type SessionUser = {
   id: string;
   email: string;
-  role: "candidate" | "employer" | "admin" | null;
+  role: "candidate" | "employer" | "admin" | "demo_admin" | null;
   full_name?: string | null;
   avatar_url?: string | null;
   company_name?: string | null;

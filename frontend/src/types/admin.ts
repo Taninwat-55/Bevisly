@@ -9,7 +9,7 @@ export interface AdminStats {
 export interface BevislyUser {
   id: string;
   email: string;
-  role: "candidate" | "employer" | "admin";
+  role: "candidate" | "employer" | "admin" | "demo_admin";
   created_at: string;
   credits?: number; // Added for Credit Management
 }
