@@ -281,7 +281,7 @@ export default function LandingPage() {
                     ) : generatedData ? (
 
                       /* ── STATE 2: SUCCESS (AI RESULTS) ── */
-                      <div className="flex-1 p-4 md:p-6 flex flex-col gap-4 overflow-y-auto bg-slate-900/50">
+                      <div className="flex-1 p-4 md:p-6 flex flex-col gap-4 overflow-y-auto bg-slate-900/50 relative">
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 h-full">
                             
                             {/* Card 1: Job Listing */}
@@ -345,9 +345,9 @@ export default function LandingPage() {
                             </div>
                         </div>
 
-                        {/* CTA Row */}
-                        <div className="pt-2 flex justify-end shrink-0">
-                            <Button size="md" className="w-full md:w-auto shadow-glow-primary" onClick={() => navigate('/auth?tab=signup&role=employer')}>
+                        {/* CTA - Bottom Right */}
+                        <div className="absolute bottom-4 right-4 z-30">
+                            <Button size="md" className="shadow-glow-primary shadow-lg" onClick={() => navigate('/auth?tab=signup&role=employer')}>
                                 Post this Job for Free <ArrowRight className="ml-2 w-4 h-4" />
                             </Button>
                         </div>
