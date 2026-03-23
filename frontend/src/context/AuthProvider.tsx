@@ -96,33 +96,45 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
 
     // Always confirm current Supabase session and fetch profile from DB
-    supabase.auth.getSession().then(async ({ data }) => {
-      const sessionUser = data.session?.user;
-      if (sessionUser) {
-        const profile = await fetchProfileFromDB(sessionUser.id);
-        const newUser: SessionUser = {
-          id: sessionUser.id,
-          email: sessionUser.email!,
-          role: profile.role,
-          full_name: profile.full_name,
-          avatar_url: profile.avatar_url,
-          company_name: profile.company_name,
-          credits: profile.credits,
-          subscription_tier: profile.subscription_tier,
-          is_public: profile.is_public,
-          app_metadata: {
-            provider: sessionUser.app_metadata?.provider,
-            providers: sessionUser.app_metadata?.providers,
-          },
-        };
-        setUser(newUser);
-        localStorage.setItem("bevisly_user", JSON.stringify(newUser));
-      } else {
+    const initializeAuth = async () => {
+      try {
+        const { data, error } = await supabase.auth.getSession();
+        if (error) throw error;
+        
+        const sessionUser = data.session?.user;
+        if (sessionUser) {
+          const profile = await fetchProfileFromDB(sessionUser.id);
+          const newUser: SessionUser = {
+            id: sessionUser.id,
+            email: sessionUser.email!,
+            role: profile.role,
+            full_name: profile.full_name,
+            avatar_url: profile.avatar_url,
+            company_name: profile.company_name,
+            credits: profile.credits,
+            subscription_tier: profile.subscription_tier,
+            is_public: profile.is_public,
+            app_metadata: {
+              provider: sessionUser.app_metadata?.provider,
+              providers: sessionUser.app_metadata?.providers,
+            },
+          };
+          setUser(newUser);
+          localStorage.setItem("bevisly_user", JSON.stringify(newUser));
+        } else {
+          setUser(null);
+          localStorage.removeItem("bevisly_user");
+        }
+      } catch (err) {
+        console.warn("Auth initialization error:", err);
         setUser(null);
         localStorage.removeItem("bevisly_user");
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
-    });
+    };
+
+    initializeAuth();
 
     // Auth change listener - fetch profile from database
     const { data: listener } = supabase.auth.onAuthStateChange(

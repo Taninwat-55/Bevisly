@@ -27,8 +27,12 @@ export default function ProtectedRoute({
     return <Navigate to="/auth" replace />;
   }
 
-  // Effective role: demo_admin is treated as admin for routing
-  const effectiveRole = user.role === "demo_admin" ? "admin" : user.role;
+  // Demo admin gets full access to test all features
+  if (user.role === "demo_admin") {
+    return <>{children || <Outlet />}</>;
+  }
+
+  const effectiveRole = user.role;
 
   // Wrong role → redirect to their own dashboard
   if (allowedRole && effectiveRole !== allowedRole) {

@@ -37,7 +37,11 @@ export default function AdminUsers() {
   };
 
   const handleChangeRole = async (id: string, newRole: BevislyUser["role"]) => {
-    setUpdating(id);
+    if (isDemoAdmin) {
+    toast.error("Demo accounts cannot change user roles.");
+    return;
+  }
+  setUpdating(id);
     try {
       await updateUserRole(id, newRole);
       toast.success(`✅ Role updated to ${newRole}`);
@@ -56,7 +60,11 @@ export default function AdminUsers() {
   };
 
   const handleAddCredits = async (id: string, amount: number) => {
-    if (!confirm(`Add ${amount} credits to this user?`)) return;
+    if (isDemoAdmin) {
+    toast.error("Demo accounts cannot add credits.");
+    return;
+  }
+  if (!confirm(`Add ${amount} credits to this user?`)) return;
     setUpdating(id);
     try {
       const newBal = await addCredits(id, amount);

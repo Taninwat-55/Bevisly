@@ -64,7 +64,7 @@ export default function AuthPage() {
   useEffect(() => {
     if (!authLoading && user) {
       if (user.role === "employer") navigate("/employer");
-      else if (user.role === "admin") navigate("/admin");
+      else if (user.role === "admin" || user.role === "demo_admin") navigate("/admin");
       else navigate("/candidate");
     }
   }, [user, authLoading, navigate]);
@@ -173,6 +173,7 @@ export default function AuthPage() {
 
       const { data: sessionData } = await supabase.auth.getSession();
       const sessionUser = sessionData.session?.user;
+
       if (sessionUser) {
         const { data: profile } = await supabase
           .from("profiles")
@@ -180,15 +181,15 @@ export default function AuthPage() {
           .eq("id", sessionUser.id)
           .single();
 
-        const role = (profile?.role as "candidate" | "employer" | "admin") ?? "candidate";
+        const role = (profile?.role as "candidate" | "employer" | "admin" | "demo_admin") ?? "candidate";
 
         localStorage.setItem(
           "bevisly_user",
           JSON.stringify({ id: sessionUser.id, email: sessionUser.email, role })
         );
 
-        notify.success("✅ Logged in successfully!", role);
-        navigate(role === "admin" ? "/admin" : role === "employer" ? "/employer" : "/candidate");
+        notify.success("✅ Logged in successfully!", role === "demo_admin" ? "admin" : role);
+        navigate((role === "admin" || role === "demo_admin") ? "/admin" : role === "employer" ? "/employer" : "/candidate");
       }
     } catch (err) {
       console.error(err);

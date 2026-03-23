@@ -214,7 +214,20 @@ as $$
   select exists (
     select 1 from profiles
     where id = auth.uid()
-    and role = 'admin'
+    and role in ('admin', 'demo_admin')
+  );
+$$;
+
+-- Helper: Check Demo Admin Status
+create or replace function is_demo_admin()
+returns boolean
+language sql
+security definer
+as $$
+  select exists (
+    select 1 from profiles
+    where id = auth.uid()
+    and role = 'demo_admin'
   );
 $$;
 
@@ -309,10 +322,10 @@ create policy "Employers can insert jobs"
   on jobs for insert with check (auth.uid() = employer_id);
 
 create policy "Employers can update own jobs"
-  on jobs for update using (auth.uid() = employer_id);
+  on jobs for update using (auth.uid() = employer_id and not is_demo_admin());
 
 create policy "Employers can delete own jobs"
-  on jobs for delete using (auth.uid() = employer_id);
+  on jobs for delete using (auth.uid() = employer_id and not is_demo_admin());
 
 create policy "Admins can view all jobs"
   on jobs for select using (is_admin());
@@ -325,7 +338,7 @@ create policy "Employers can manage proof tasks via jobs"
   on proof_tasks for all
   using (exists (
     select 1 from jobs where jobs.id = proof_tasks.job_id and jobs.employer_id = auth.uid()
-  ));
+  ) and not is_demo_admin());
 
 -- SUBMISSIONS
 create policy "Candidates can view own submissions"
@@ -347,7 +360,7 @@ create policy "Employers can update submissions (status/stage)"
   on submissions for update
   using (exists (
     select 1 from jobs where jobs.id = submissions.job_id and jobs.employer_id = auth.uid()
-  ));
+  ) and not is_demo_admin());
 
 create policy "Admins can view all submissions"
   on submissions for select using (is_admin());
@@ -361,7 +374,7 @@ create policy "Feedback viewable by candidate and employer"
   );
 
 create policy "Employers can insert feedback"
-  on feedback for insert with check (auth.uid() = employer_id);
+  on feedback for insert with check (auth.uid() = employer_id and not is_demo_admin());
 
 create policy "Admins can view all feedback"
   on feedback for select using (is_admin());

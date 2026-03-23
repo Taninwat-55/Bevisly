@@ -666,7 +666,6 @@ export default function EmployerReviewProof({ submissionId, onBack, onNavigate }
                     </div>
                 </div>
 
-                {/* Scorecard Section */}
                 <div className="mt-8">
                     <Scorecard
                         stars={stars}
@@ -675,7 +674,7 @@ export default function EmployerReviewProof({ submissionId, onBack, onNavigate }
                         setStrengths={setStrengths}
                         improvements={improvements}
                         setImprovements={setImprovements}
-                        isLocked={!!isReviewed}
+                        isLocked={!!isReviewed || user?.role === "demo_admin"}
                         onSuggestAI={handleSuggestFeedback}
                         isSuggesting={suggestingAI}
                     />
