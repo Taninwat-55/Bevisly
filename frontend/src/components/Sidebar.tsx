@@ -11,7 +11,8 @@ import {
   Settings,
   House,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  LogOut
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -20,7 +21,7 @@ interface SidebarProps {
 }
 
 export default function Sidebar({ role }: SidebarProps) {
-  const { user } = useAuth();
+  const { user, signOut } = useAuth();
   const [collapsed, setCollapsed] = useState(false);
   const rawRole = role || user?.role || "candidate";
   // Treat demo_admin as admin for sidebar display
@@ -156,6 +157,22 @@ export default function Sidebar({ role }: SidebarProps) {
           </NavLink>
         ))}
       </nav>
+
+      {/* Footer / Logout */}
+      <div className="mt-auto px-2 py-4 border-t border-[var(--color-border)]">
+        <button
+          onClick={() => {
+            if (confirm("Are you sure you want to log out?")) {
+              signOut();
+            }
+          }}
+          className={`flex items-center gap-3 px-3 py-2 w-full rounded-[var(--radius-button)] text-sm font-medium transition-all text-red-500 hover:bg-red-500/10 hover:text-red-600`}
+          title="Log Out"
+        >
+          <LogOut size={17} />
+          {!collapsed && <span>Log Out</span>}
+        </button>
+      </div>
     </aside>
   );
 }

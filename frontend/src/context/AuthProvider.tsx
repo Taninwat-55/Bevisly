@@ -217,6 +217,44 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser((u) => (u ? { ...u, role } : null));
   };
 
+  // Session Timeout Logic (2 hours)
+  useEffect(() => {
+    if (!user) return;
+
+    const SESSION_TIMEOUT = 2 * 60 * 60 * 1000; // 2 hours in ms
+    const STORAGE_KEY = "bevisly_last_activity";
+
+    const checkTimeout = () => {
+      const lastActivity = localStorage.getItem(STORAGE_KEY);
+      if (lastActivity) {
+        const timeSinceActivity = Date.now() - parseInt(lastActivity, 10);
+        if (timeSinceActivity > SESSION_TIMEOUT) {
+          console.log("Session timed out after 2 hours of inactivity.");
+          signOut();
+        }
+      }
+    };
+
+    const updateActivity = () => {
+      localStorage.setItem(STORAGE_KEY, Date.now().toString());
+    };
+
+    // Initial check
+    checkTimeout();
+
+    // Update activity on various events
+    const events = ["mousedown", "keydown", "scroll", "touchstart"];
+    events.forEach(event => window.addEventListener(event, updateActivity));
+
+    // Periodic check every minute
+    const interval = setInterval(checkTimeout, 60 * 1000);
+
+    return () => {
+      events.forEach(event => window.removeEventListener(event, updateActivity));
+      clearInterval(interval);
+    };
+  }, [user, signOut]);
+
   return (
     <AuthContext.Provider
       value={{ user: effectiveUser, loading, signOut, setOverride, refreshProfile }}
