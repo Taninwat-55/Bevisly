@@ -1,50 +1,60 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/Button";
 import CandidateGuide from "./CandidateGuide";
 import EmployerGuide from "./EmployerGuide";
 
 export default function LearnMorePage() {
   const [mode, setMode] = useState<"candidate" | "employer">("candidate");
+  const navigate = useNavigate();
 
   return (
     <div className="min-h-screen bg-[var(--color-bg)] text-[var(--color-text)] transition-colors pb-20">
-      {/* ── Fancy Banner / Header ── */}
-      <header className="relative py-16 px-8 bg-gradient-to-r from-[var(--color-brand-primary)] to-[var(--color-brand-secondary)] text-white shadow-xl overflow-hidden mt-2 rounded-b-[3rem] mx-4 text-center mb-10">
-        <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20" />
-        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3 pointer-events-none" />
-        <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-white/10 rounded-full blur-3xl translate-y-1/2 -translate-x-1/4 pointer-events-none" />
+      {/* ── Hero Banner ── */}
+      <header className="relative py-16 px-8 overflow-hidden mt-2 rounded-b-[3rem] mx-4 text-center mb-10 bg-[#0B0C10]">
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[500px] bg-[var(--color-brand-primary)]/20 rounded-full blur-[120px] -z-0" />
+        <div className="absolute bottom-0 right-0 w-[600px] h-[400px] bg-[var(--color-brand-secondary)]/10 rounded-full blur-[100px] -z-0" />
+        <div className="absolute inset-0 bg-noise opacity-[0.03] mix-blend-overlay pointer-events-none" />
 
         <div className="relative z-10 max-w-3xl mx-auto">
-          <h1 className="text-4xl md:text-5xl font-bold font-display leading-tight mb-4">
-            Learn How Bevisly Works
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 shadow-sm mb-6">
+            <span className="w-2 h-2 rounded-full bg-[var(--color-brand-primary)] animate-pulse" />
+            <span className="text-sm font-medium text-white/70">How It Works</span>
+          </div>
+          <h1 className="text-4xl md:text-6xl font-bold font-display leading-tight mb-4 text-white">
+            Learn How{" "}
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-[var(--color-brand-primary)] to-[var(--color-brand-secondary)]">
+              Bevisly
+            </span>{" "}
+            Works
           </h1>
-          <p className="text-blue-100 text-lg md:text-xl max-w-2xl mx-auto opacity-90 leading-relaxed">
+          <p className="text-lg md:text-xl max-w-2xl mx-auto text-white/60 leading-relaxed">
             Discover how Bevisly empowers both candidates and employers through verified, proof-based hiring — where skill replaces guesswork.
           </p>
-        </div>
 
-        {/* Toggle inside banner */}
-        <div className="inline-flex bg-black/20 p-1 backdrop-blur-md border border-white/20 rounded-xl overflow-hidden mt-8 relative z-10">
-          <button
-            onClick={() => setMode("candidate")}
-            className={`px-6 py-2.5 text-sm font-medium transition-all rounded-lg ${
-              mode === "candidate"
-                ? "bg-white text-[var(--color-brand-primary)] shadow-md"
-                : "text-white/80 hover:text-white hover:bg-white/10"
-            }`}
-          >
-            🎓 For Candidates
-          </button>
-          <button
-            onClick={() => setMode("employer")}
-            className={`px-6 py-2.5 text-sm font-medium transition-all rounded-lg ml-1 ${
-              mode === "employer"
-                ? "bg-white text-[var(--color-brand-primary)] shadow-md"
-                : "text-white/80 hover:text-white hover:bg-white/10"
-            }`}
-          >
-            🏢 For Employers
-          </button>
+          {/* Toggle inside banner */}
+          <div className="inline-flex items-center p-1 rounded-full bg-white/5 border border-white/10 shadow-sm mt-8">
+            <button
+              onClick={() => setMode("candidate")}
+              className={`px-6 py-2.5 rounded-full text-sm font-medium transition-all ${
+                mode === "candidate"
+                  ? "bg-white text-[var(--color-brand-primary)] shadow-md"
+                  : "text-white/60 hover:text-white"
+              }`}
+            >
+              🎓 For Candidates
+            </button>
+            <button
+              onClick={() => setMode("employer")}
+              className={`px-6 py-2.5 rounded-full text-sm font-medium transition-all ${
+                mode === "employer"
+                  ? "bg-white text-[var(--color-brand-primary)] shadow-md"
+                  : "text-white/60 hover:text-white"
+              }`}
+            >
+              🏢 For Employers
+            </button>
+          </div>
         </div>
       </header>
 
@@ -54,25 +64,34 @@ export default function LearnMorePage() {
       </main>
 
       {/* CTA */}
-      <footer className="text-center border-t border-[var(--color-border)] py-20 bg-[var(--color-surface)]">
-        <h2 className="heading-md mb-4">
-          Ready to experience proof-based hiring?
-        </h2>
-        <div className="flex flex-wrap justify-center gap-3">
-          <Link
-            to="/auth?role=candidate"
-            className="px-5 py-3 rounded-[var(--radius-button)] bg-[var(--color-candidate)] text-white hover:brightness-110 transition"
-          >
-            Create My Proof Profile
-          </Link>
-          <Link
-            to="/auth?role=employer"
-            className="px-5 py-3 rounded-[var(--radius-button)] bg-[var(--color-employer)] text-white hover:brightness-110 transition"
-          >
-            Post a Role
-          </Link>
+      <section className="py-32 relative overflow-hidden bg-[var(--color-surface)]">
+        <div className="absolute inset-0 bg-gradient-to-br from-[var(--color-brand-primary)]/5 to-[var(--color-brand-secondary)]/5" />
+
+        <div className="max-w-4xl mx-auto px-6 text-center relative z-10">
+          <h2 className="text-4xl md:text-5xl font-bold font-display text-[var(--color-text)] mb-6 tracking-tight">
+            Ready to experience{" "}
+            <span className="text-[var(--color-brand-primary)]">proof-based hiring?</span>
+          </h2>
+
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <Button
+              size="lg"
+              className="h-14 px-8 text-lg rounded-2xl shadow-glow-primary hover:scale-105 transition-transform"
+              onClick={() => navigate("/auth?role=candidate")}
+            >
+              Create My Proof Profile
+            </Button>
+            <Button
+              variant="outline"
+              size="lg"
+              className="h-14 px-8 text-lg rounded-2xl hover:scale-105 transition-transform"
+              onClick={() => navigate("/auth?role=employer")}
+            >
+              Post a Role
+            </Button>
+          </div>
         </div>
-      </footer>
+      </section>
     </div>
   );
 }

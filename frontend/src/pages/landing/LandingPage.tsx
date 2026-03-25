@@ -134,14 +134,17 @@ export default function LandingPage() {
       {/* ── HEADER ────────────────────────────── */}
       <header className="fixed top-0 inset-x-0 z-50 transition-all duration-200 bg-[var(--color-bg)]/80 backdrop-blur-md border-b border-[var(--color-border)]">
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-2">
+          <button
+            onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+            className="flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity"
+          >
             <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[var(--color-brand-primary)] to-[var(--color-brand-secondary)] flex items-center justify-center text-white font-bold text-lg">
               B
             </div>
             <span className="text-xl font-bold font-display tracking-tight text-[var(--color-text)]">
               Bevisly
             </span>
-          </div>
+          </button>
 
           <nav className="hidden md:flex items-center gap-8">
             <a href="#features" className="text-sm font-medium text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors">Features</a>
@@ -690,27 +693,49 @@ export default function LandingPage() {
                   </div>
                 </>
               ) : (
-                /* Candidate Pro */
-                <div className="flex-1 max-w-md w-full glass-panel p-8 rounded-2xl border-2 border-[var(--color-candidate)] relative shadow-glow-orange">
-                  <div className="absolute top-0 right-0 bg-[var(--color-candidate)] text-white text-xs font-bold px-3 py-1 rounded-bl-xl rounded-tr-lg">
-                    CAREER BOOST
+                <>
+                  {/* Candidate Free */}
+                  <div className="flex-1 min-w-[300px] glass-panel p-8 rounded-2xl border border-[var(--color-border)] hover:border-[var(--color-candidate)]/50 transition-all group relative">
+                    <div className="mb-6">
+                      <h3 className="text-xl font-bold text-[var(--color-text)]">Free</h3>
+                      <p className="text-[var(--color-text-muted)] text-sm mt-2">Everything you need to get started.</p>
+                    </div>
+                    <div className="mb-6">
+                      <span className="text-4xl font-bold text-[var(--color-text)]">0 DKK</span>
+                      <span className="text-[var(--color-text-muted)]"> / forever</span>
+                    </div>
+                    <Button variant="outline" className="w-full mb-8 group-hover:border-[var(--color-candidate)] group-hover:text-[var(--color-candidate)]" onClick={handleCTA}>Get Started Free</Button>
+                    <ul className="space-y-4 text-sm text-[var(--color-text-muted)]">
+                      <li className="flex items-center gap-3"><Check size={16} className="text-[var(--color-candidate)]" /> <span>Create your verified profile</span></li>
+                      <li className="flex items-center gap-3"><Check size={16} className="text-[var(--color-candidate)]" /> <span>Complete Proof Tasks</span></li>
+                      <li className="flex items-center gap-3"><Check size={16} className="text-[var(--color-candidate)]" /> <span>Earn skill badges</span></li>
+                      <li className="flex items-center gap-3"><Check size={16} className="text-[var(--color-candidate)]" /> <span>Apply to open roles</span></li>
+                    </ul>
                   </div>
-                  <div className="mb-6">
-                    <h3 className="text-xl font-bold text-[var(--color-text)]">Candidate Pro</h3>
-                    <p className="text-[var(--color-text-muted)] text-sm mt-2">Stand out from the crowd.</p>
+
+                  {/* Candidate Pro */}
+                  <div className="flex-1 min-w-[300px] glass-panel p-8 rounded-2xl border-2 border-[var(--color-candidate)] relative shadow-glow-orange">
+                    <div className="absolute top-0 right-0 bg-[var(--color-candidate)] text-white text-xs font-bold px-3 py-1 rounded-bl-xl rounded-tr-lg">
+                      CAREER BOOST
+                    </div>
+                    <div className="mb-6">
+                      <h3 className="text-xl font-bold text-[var(--color-text)]">Candidate Pro</h3>
+                      <p className="text-[var(--color-text-muted)] text-sm mt-2">Stand out from the crowd.</p>
+                    </div>
+                    <div className="mb-6">
+                      <span className="text-4xl font-bold text-[var(--color-text)]">89 DKK</span>
+                      <span className="text-[var(--color-text-muted)]"> / month</span>
+                    </div>
+                    <Button className="w-full mb-8 bg-[var(--color-candidate)] hover:bg-[var(--color-candidate)]/90 text-white" onClick={handleRequestAccess}>Upgrade to Pro</Button>
+                    <ul className="space-y-4 text-sm text-[var(--color-text-muted)]">
+                      <li className="flex items-center gap-3"><Check size={16} className="text-[var(--color-candidate)]" /> <span>Everything in Free</span></li>
+                      <li className="flex items-center gap-3"><Check size={16} className="text-[var(--color-candidate)]" /> <span>Permanent Profile Hosting</span></li>
+                      <li className="flex items-center gap-3"><Check size={16} className="text-[var(--color-candidate)]" /> <span>Advanced View Analytics</span></li>
+                      <li className="flex items-center gap-3"><Check size={16} className="text-[var(--color-candidate)]" /> <span>Custom Profile URL</span></li>
+                      <li className="flex items-center gap-3"><Check size={16} className="text-[var(--color-candidate)]" /> <span>Priority Placement</span></li>
+                    </ul>
                   </div>
-                  <div className="mb-6">
-                    <span className="text-4xl font-bold text-[var(--color-text)]">89 DKK</span>
-                    <span className="text-[var(--color-text-muted)]"> / month</span>
-                  </div>
-                  <Button className="w-full mb-8 bg-[var(--color-candidate)] hover:bg-[var(--color-candidate)]/90 text-white" onClick={handleRequestAccess}>Request Invite</Button>
-                  <ul className="space-y-4 text-sm text-[var(--color-text-muted)]">
-                    <li className="flex items-center gap-3"><Check size={16} className="text-[var(--color-candidate)]" /> <span>Permanent Profile Hosting</span></li>
-                    <li className="flex items-center gap-3"><Check size={16} className="text-[var(--color-candidate)]" /> <span>Advanced View Analytics</span></li>
-                    <li className="flex items-center gap-3"><Check size={16} className="text-[var(--color-candidate)]" /> <span>Custom Profile URL</span></li>
-                    <li className="flex items-center gap-3"><Check size={16} className="text-[var(--color-candidate)]" /> <span>Priority Placement</span></li>
-                  </ul>
-                </div>
+                </>
               )}
 
             </div>
