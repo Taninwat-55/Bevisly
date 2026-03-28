@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import type { ProofTask } from "@/types/shared";
 import ReactMarkdown from 'react-markdown';
+import DOMPurify from 'dompurify';
 import { Button } from "@/components/ui/Button";
 
 // -- IDE Components -----------------------------------------
@@ -211,7 +212,7 @@ export default function CandidateProofWorkspace() {
             TASK.md
           </div>
           <div className="flex-1 overflow-y-auto p-6 prose prose-invert prose-sm max-w-none prose-headings:text-slate-200 prose-p:text-slate-400 prose-code:text-orange-400 prose-code:bg-[#2d2d30] prose-code:px-1 prose-code:py-0.5 prose-code:rounded">
-            <ReactMarkdown>{task.description || "*No description provided.*"}</ReactMarkdown>
+            <ReactMarkdown>{DOMPurify.sanitize(task.description || "*No description provided.*")}</ReactMarkdown>
 
             <div className="mt-8 pt-8 border-t border-[#3e3e42]">
               <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">Constraints</h4>

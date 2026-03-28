@@ -340,7 +340,7 @@ export default function LandingPage() {
                                                 </div>
                                             </div>
                                             <div className="text-sm text-slate-400 font-mono leading-relaxed">
-                                                <ReactMarkdown components={markdownComponents}>{task.description}</ReactMarkdown>
+                                                <ReactMarkdown components={markdownComponents}>{DOMPurify.sanitize(task.description)}</ReactMarkdown>
                                             </div>
                                         </div>
                                     ))}
