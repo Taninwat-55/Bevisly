@@ -377,16 +377,25 @@ export default function JobListingPage() {
         {/* ── Empty State Candidate ── */}
         {role !== "employer" && !filteredJobs.length && (
           <div className="py-20 flex flex-col items-center justify-center text-center max-w-lg mx-auto">
-            <div className="w-24 h-24 bg-[var(--color-surface)] border-2 border-[var(--color-border)] rounded-full flex items-center justify-center mb-6">
+            <div className="w-24 h-24 bg-[var(--color-surface)] border-2 border-[var(--color-border)] rounded-full flex items-center justify-center mb-6 shadow-sm">
               <Briefcase size={40} className="text-[var(--color-text-muted)] opacity-50" />
             </div>
-            <h3 className="text-xl font-bold text-[var(--color-text)] mb-2">No roles found</h3>
+            <h3 className="text-xl font-bold text-[var(--color-text)] mb-2">
+              {publicJobs.length === 0 ? "No roles available yet" : "No roles found"}
+            </h3>
             <p className="text-[var(--color-text-muted)] mb-6">
               {publicJobs.length > 0 && jobs.length === 0
-                ? "You've caught up! checks your dashboard for updates on applied roles."
-                : "Try adjusting your filters or search query to see more results."}
+                ? "You've caught up! Check your dashboard for updates on your applications."
+                : publicJobs.length === 0
+                  ? "Companies haven't posted any proof-based roles yet. Please check back soon!"
+                  : "Try adjusting your filters or search query to see more results."}
             </p>
-            <Button onClick={handleClearAll} variant="outline">Clear All Filters</Button>
+            <div className="flex gap-4 justify-center">
+              <Button onClick={handleClearAll} variant="outline">Clear Filters</Button>
+              {publicJobs.length > 0 && jobs.length === 0 && (
+                <Button onClick={() => navigate('/candidate')} variant="primary">Go to Dashboard</Button>
+              )}
+            </div>
           </div>
         )}
 

@@ -147,6 +147,9 @@ export default function EmployerDashboard() {
     const totalSubmissions = submissions.length;
     const totalHires = submissions.filter((s) => s.status === "hired").length;
     
+    const startedSubmissions = submissions.filter((s) => s.status === "in_progress").length;
+    const finishedSubmissions = submissions.filter((s) => s.status !== "in_progress").length;
+
     const validRatings = summaries
       .map((s) => s.avg_score)
       .filter((v): v is number => v !== null);
@@ -155,7 +158,7 @@ export default function EmployerDashboard() {
       ? (validRatings.reduce((a, b) => a + b, 0) / validRatings.length).toFixed(1)
       : "—";
 
-    return { totalJobs, totalSubmissions, totalHires, avgRating };
+    return { totalJobs, totalSubmissions, totalHires, avgRating, startedSubmissions, finishedSubmissions };
   }, [jobs, submissions, summaries]);
 
   /* ── Render ───────────────────────────────────── */
@@ -328,6 +331,13 @@ export default function EmployerDashboard() {
                 <MetricCard
                   title="Total Candidates"
                   value={metrics.totalSubmissions}
+                  subValue={
+                    <div className="flex items-center gap-2 text-xs font-medium mt-1">
+                      <span className="text-amber-500">{metrics.startedSubmissions} Started</span>
+                      <span className="text-[var(--color-border)]">•</span>
+                      <span className="text-emerald-500">{metrics.finishedSubmissions} Finished</span>
+                    </div>
+                  }
                   icon={<Users size={20} />}
                   color="purple"
                 />
@@ -596,11 +606,13 @@ function MetricCard({
   title,
   value,
   icon,
+  subValue,
   color = "blue",
 }: {
   title: string;
   value: string | number;
   icon?: React.ReactNode;
+  subValue?: React.ReactNode;
   color?: "blue" | "purple" | "emerald" | "amber";
 }) {
   const colorStyles = {
@@ -625,6 +637,7 @@ function MetricCard({
         <p className="text-3xl font-bold font-display text-[var(--color-text)] tracking-tight">
           {value}
         </p>
+        {subValue && <div>{subValue}</div>}
       </div>
       
       {/* Decorative gradient blur */}

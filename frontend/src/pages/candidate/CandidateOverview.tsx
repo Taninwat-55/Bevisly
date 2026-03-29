@@ -117,9 +117,24 @@ export default function CandidateDashboard() {
           </div>
         ) : (
           <div className="grid md:grid-cols-3 gap-6">
-            {jobs.map((job) => (
-              <JobCard key={job.id} job={job} />
-            ))}
+            {jobs.length === 0 ? (
+              <div className="col-span-3 text-center p-12 border border-dashed border-[var(--color-border)] rounded-2xl bg-[var(--color-surface)] shadow-sm">
+                 <div className="w-16 h-16 mx-auto bg-[var(--color-brand-primary)]/10 text-[var(--color-brand-primary)] rounded-full flex items-center justify-center mb-4">
+                     <Briefcase size={32} />
+                 </div>
+                 <h3 className="text-xl font-bold text-[var(--color-text)] mb-2">No recommended roles right now</h3>
+                 <p className="text-[var(--color-text-muted)] max-w-md mx-auto mb-6">
+                     Complete your first proof task to start getting matched with companies.
+                 </p>
+                 <Button onClick={() => window.location.href = '/candidate/jobs'} size="lg" className="shadow-glow-primary bg-[var(--color-brand-primary)] text-white hover:bg-blue-700">
+                     Browse All Jobs
+                 </Button>
+              </div>
+            ) : (
+              jobs.map((job) => (
+                <JobCard key={job.id} job={job} />
+              ))
+            )}
           </div>
         )}
       </div>

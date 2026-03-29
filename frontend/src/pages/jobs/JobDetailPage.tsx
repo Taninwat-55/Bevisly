@@ -18,7 +18,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import type { Job } from "@/types/job";
 import { checkSubmissionStatus } from "@/lib/api/submissions";
 import { Helmet } from "react-helmet-async";
-
+import DOMPurify from "dompurify";
+import ReactMarkdown from "react-markdown";
 /* ─── Component ─────────────────────────────────────────────── */
 export default function JobDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -232,8 +233,12 @@ export default function JobDetailPage() {
               <h3 className="text-lg font-semibold text-[var(--color-text)] mb-4 flex items-center gap-2">
                 <Package size={18} className="text-[var(--color-brand-primary)]" /> About the Role
               </h3>
-              <div className="prose prose-invert max-w-none text-[var(--color-text-muted)] leading-relaxed whitespace-pre-line text-sm md:text-base">
-                {job.description || "No description provided."}
+              <div className="prose prose-invert max-w-none text-[var(--color-text-muted)] leading-relaxed text-sm md:text-base">
+                {job.description ? (
+                  <ReactMarkdown>{DOMPurify.sanitize(job.description)}</ReactMarkdown>
+                ) : (
+                  "No description provided."
+                )}
               </div>
             </section>
 
@@ -243,8 +248,8 @@ export default function JobDetailPage() {
                 <h3 className="text-lg font-semibold text-[var(--color-text)] mb-4 flex items-center gap-2">
                   <CheckCircle size={18} className="text-[var(--color-brand-primary)]" />  Requirements
                 </h3>
-                <div className="prose prose-invert max-w-none text-[var(--color-text-muted)] leading-relaxed whitespace-pre-line text-sm md:text-base bg-[var(--color-surface)]/50 p-6 rounded-2xl border border-[var(--color-border)] border-dashed">
-                  {job.requirements}
+                <div className="prose prose-invert max-w-none text-[var(--color-text-muted)] leading-relaxed text-sm md:text-base bg-[var(--color-surface)]/50 p-6 rounded-2xl border border-[var(--color-border)] border-dashed">
+                  <ReactMarkdown>{DOMPurify.sanitize(job.requirements)}</ReactMarkdown>
                 </div>
               </section>
             )}

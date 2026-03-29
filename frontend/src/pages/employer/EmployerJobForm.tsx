@@ -120,9 +120,24 @@ export default function EmployerJobForm({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!values.title || !values.company || !values.location) {
+    if (!values.title?.trim() || !values.company?.trim() || !values.location?.trim()) {
       toast.error("Please fill in all required fields");
       return;
+    }
+
+    if (values.paid) {
+      if (values.salary_min !== null && Number(values.salary_min) < 0) {
+        toast.error("Salary amounts cannot be negative");
+        return;
+      }
+      if (values.salary_max !== null && Number(values.salary_max) < 0) {
+        toast.error("Salary amounts cannot be negative");
+        return;
+      }
+      if (values.salary_min !== null && values.salary_max !== null && Number(values.salary_min) > Number(values.salary_max)) {
+        toast.error("Minimum salary cannot be greater than maximum salary");
+        return;
+      }
     }
 
     // 🔒 GUARD: Freemium Limit Check
