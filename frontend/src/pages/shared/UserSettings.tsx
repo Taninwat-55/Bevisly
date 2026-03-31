@@ -137,6 +137,13 @@ export default function UserSettings() {
       if (isEmployer) updates.company_name = company;
 
       await updateProfileData(user!.id, updates);
+
+      // Also sync company name to the real companies table
+      if (isEmployer && company && user?.company_id) {
+        const { updateCompanyName } = await import("@/lib/api/companies");
+        await updateCompanyName(user.company_id, company);
+      }
+
       await refreshProfile?.(); // Refresh context for immediate UI update
       toast.success("Profile updated successfully");
     } catch {

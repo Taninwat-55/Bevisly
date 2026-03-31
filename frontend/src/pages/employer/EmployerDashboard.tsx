@@ -9,6 +9,7 @@ import {
   deleteJob,
 } from "@/lib/api";
 import { getJobWithTasks, updateJobWithTasks } from "@/lib/api/jobs";
+import { getErrorMessage, withTimeout } from "@/lib/errorUtils";
 import { useAuth } from "@/hooks/useAuth";
 import type {
   EmployerJob,
@@ -68,28 +69,39 @@ export default function EmployerDashboard() {
   const handleStatusUpdate = async (status: string) => {
     if (!selectedJobId) return;
     try {
-        await updateJobStatus(selectedJobId, status);
+        await withTimeout(
+          updateJobStatus(selectedJobId, status),
+          10000,
+          () => toast.loading("This is taking longer than expected...", { id: "timeout-warning" })
+        );
+        toast.dismiss("timeout-warning");
         toast.success(`Job marked as ${status}`);
-        // Optimistic update
         setJobs(jobs.map(j => j.id === selectedJobId ? { ...j, status } : j));
         setShowJobActions(false);
-    } catch (error) {
-        toast.error("Failed to update status");
+    } catch (error: unknown) {
+        toast.dismiss("timeout-warning");
         console.error(error);
+        toast.error(getErrorMessage(error, "Failed to update status"));
     }
   };
 
   const handleDeleteJob = async () => {
     if (!selectedJobId || !confirm("Are you sure you want to delete this job? This cannot be undone.")) return;
     try {
-        await deleteJob(selectedJobId);
+        await withTimeout(
+          deleteJob(selectedJobId),
+          10000,
+          () => toast.loading("This is taking longer than expected...", { id: "timeout-warning" })
+        );
+        toast.dismiss("timeout-warning");
         toast.success("Job deleted");
         setJobs(jobs.filter(j => j.id !== selectedJobId));
         setSelectedJobId(null);
         setActiveView("overview");
-    } catch (error) {
-        toast.error("Failed to delete job");
+    } catch (error: unknown) {
+        toast.dismiss("timeout-warning");
         console.error(error);
+        toast.error(getErrorMessage(error, "Failed to delete job"));
     }
   };
 

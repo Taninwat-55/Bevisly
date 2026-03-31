@@ -5,6 +5,7 @@ import type {
   EmployerJobSummary,
   ProofTask,
 } from "@/types";
+import { getCurrentCompanyId } from "./companies";
 
 /* ──────────────────────────────────────────────
  * Fetch all public jobs (for candidates)
@@ -167,9 +168,7 @@ export async function getCompanyJobs(
       featured,
       proof_tasks ( id, title, expected_time, ai_tools_allowed )
     `)
-    // We no longer have company_id, so filter by some other logic if needed,
-    // or just return empty for now if this isn't used. Let's filter by employer_id.
-    .eq("employer_id", company_id) // company_id in this context was likely the employer user.id
+    .eq("company_id", company_id)
     .order("created_at", { ascending: false });
 
   if (error) throw error;
@@ -202,18 +201,18 @@ export async function createJobWithTasks(
   const user = (await supabase.auth.getUser()).data.user;
   if (!user) throw new Error("User not authenticated.");
 
-  // 1️⃣ Get the user's profile to extract company info
-  const { data: profile, error: profileError } = await supabase
-    .from("profiles")
-    .select("company_name")
-    .eq("id", user.id)
-    .single();
+  // 1️⃣ Look up the user's company_id and company name
+  const companyId = await getCurrentCompanyId();
 
-  if (profileError || !profile) {
-    console.error("Error fetching company profile:", profileError);
-    throw new Error(
-      "Could not find company profile for user. Please contact support.",
-    );
+  let companyName = values.company ?? "";
+  if (companyId && !companyName) {
+    // Fetch company name if not provided
+    const { data: companyData } = await supabase
+      .from("companies")
+      .select("name")
+      .eq("id", companyId)
+      .single();
+    companyName = companyData?.name ?? "";
   }
 
   const { data: job, error: jobError } = await supabase
@@ -221,7 +220,7 @@ export async function createJobWithTasks(
     .insert([
       {
         title: values.title ?? "",
-        company: values.company ?? "",
+        company: companyName,
         location: values.location ?? "",
         description: values.description ?? "",
         requirements: values.requirements ?? "",
@@ -233,6 +232,7 @@ export async function createJobWithTasks(
         salary_max: values.salary_max ?? null,
         pay_period: values.pay_period ?? "monthly",
         employer_id: user.id,
+        company_id: companyId,
         expires_at: values.expires_at ?? null,
         is_public: true,
         job_type: values.job_type ?? null,

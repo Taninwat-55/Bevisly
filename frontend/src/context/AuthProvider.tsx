@@ -9,6 +9,7 @@ async function fetchProfileFromDB(userId: string): Promise<{
   full_name: string | null;
   avatar_url: string | null;
   company_name: string | null;
+  company_id: string | null;
   credits: number;
   subscription_tier?: "free" | "pro_saas";
   is_public?: boolean;
@@ -21,22 +22,37 @@ async function fetchProfileFromDB(userId: string): Promise<{
 
   if (error) {
     console.warn("Failed to fetch profile from profiles:", error.message);
-    // Return default values if fetch fails
     return { 
         role: "candidate", 
         full_name: null, 
         avatar_url: null, 
         company_name: null,
+        company_id: null,
         credits: 0,
         subscription_tier: "free",
         is_public: false
     };
   }
+
+  // Look up company_id from company_members
+  let companyId: string | null = null;
+  const { data: membership } = await supabase
+    .from("company_members")
+    .select("company_id")
+    .eq("user_id", userId)
+    .limit(1)
+    .single();
+  
+  if (membership) {
+    companyId = membership.company_id;
+  }
+
   return {
     role: (data?.role as SessionUser["role"]) ?? "candidate",
     full_name: data?.full_name ?? null,
     avatar_url: data?.avatar_url ?? null,
     company_name: data?.company_name ?? null,
+    company_id: companyId,
     credits: data?.credits ?? 0,
     subscription_tier: data?.subscription_tier as "free" | "pro_saas" | undefined,
     is_public: data?.is_public ?? false,
@@ -75,6 +91,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         full_name: profile.full_name,
         avatar_url: profile.avatar_url,
         company_name: profile.company_name,
+        company_id: profile.company_id,
         credits: profile.credits,
         subscription_tier: profile.subscription_tier,
         is_public: profile.is_public,
@@ -111,6 +128,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             full_name: profile.full_name,
             avatar_url: profile.avatar_url,
             company_name: profile.company_name,
+            company_id: profile.company_id,
             credits: profile.credits,
             subscription_tier: profile.subscription_tier,
             is_public: profile.is_public,
@@ -154,6 +172,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             full_name: profile.full_name,
             avatar_url: profile.avatar_url,
             company_name: profile.company_name,
+            company_id: profile.company_id,
             credits: profile.credits,
             subscription_tier: profile.subscription_tier,
             is_public: profile.is_public,

@@ -7,6 +7,7 @@ export type SessionUser = {
   full_name?: string | null;
   avatar_url?: string | null;
   company_name?: string | null;
+  company_id?: string | null;
   credits?: number;
   subscription_tier?: "free" | "pro_saas";
   is_public?: boolean;

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import { createJobWithTasks } from "@/lib/api/jobs";
+import { getErrorMessage } from "@/lib/errorUtils";
 import type { EmployerJob, ProofTask } from "@/types";
 import { Input } from "@/components/ui/Input";
 import { Textarea } from "@/components/ui/Textarea";
@@ -37,12 +38,15 @@ export default function EmployerJobForm({
   const navigate = useNavigate();
   const { company } = useCompany(); // Hook for checking limits
 
+  // Auto-fill company name from the real company record
+  const companyName = company?.name ?? defaultValues?.company ?? "";
+
   // State
   const [values, setValues] = useState<EmployerJobFormValues>({
     title: defaultValues?.title ?? "",
     description: defaultValues?.description ?? "",
     requirements: defaultValues?.requirements ?? "",
-    company: defaultValues?.company ?? "",
+    company: defaultValues?.company ?? companyName,
     location: defaultValues?.location ?? "",
     payment_amount: defaultValues?.payment_amount ?? null,
     paid: defaultValues?.paid ?? true,
@@ -162,9 +166,9 @@ export default function EmployerJobForm({
         onSuccess?.();
         navigate("/employer");
       }
-    } catch (err) {
+    } catch (err: unknown) {
       console.error(err);
-      toast.error("Failed to submit job");
+      toast.error(getErrorMessage(err, "Failed to submit job"));
     } finally {
       setLoading(false);
     }
@@ -206,13 +210,22 @@ export default function EmployerJobForm({
                 </datalist>
               </div>
 
-              <Input
-                label="Company Name"
-                placeholder="e.g. Acme Corp"
-                value={values.company ?? ""}
-                onChange={(e) => handleChange("company", e.target.value)}
-                required
-              />
+              <div className="relative">
+                <Input
+                  label="Company Name"
+                  placeholder="e.g. Acme Corp"
+                  value={values.company || companyName}
+                  onChange={(e) => mode === "edit" ? handleChange("company", e.target.value) : undefined}
+                  required
+                  readOnly={mode === "create"}
+                  className={mode === "create" ? "bg-[var(--color-surface-hover)] cursor-default" : ""}
+                />
+                {mode === "create" && companyName && (
+                  <p className="text-xs text-[var(--color-text-muted)] mt-1">
+                    Auto-filled from your company profile. Change it in <button type="button" onClick={() => navigate('/settings')} className="text-[var(--color-brand-primary)] hover:underline">Settings</button>.
+                  </p>
+                )}
+              </div>
 
               <Input
                 label="Location"
