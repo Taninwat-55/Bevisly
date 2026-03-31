@@ -18,6 +18,7 @@ import type { ProofTask } from "@/types/shared";
 import ReactMarkdown from 'react-markdown';
 import DOMPurify from 'dompurify';
 import { Button } from "@/components/ui/Button";
+import SuccessCelebration from "@/components/common/SuccessCelebration";
 
 // -- IDE Components -----------------------------------------
 
@@ -70,6 +71,7 @@ export default function CandidateProofWorkspace() {
   // Submission Modal State
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [consentChecked, setConsentChecked] = useState(false);
+  const [showCelebration, setShowCelebration] = useState(false);
 
   useEffect(() => {
     if (!proof_task_id) return;
@@ -134,7 +136,7 @@ export default function CandidateProofWorkspace() {
         file: file || undefined,
       });
       toast.success("Proof Deployed Successfully", { id: "submit" });
-      navigate("/candidate/dashboard");
+      setShowCelebration(true);
     } catch (err: unknown) {
       toast.error(err instanceof Error ? err.message : "Submission failed", { id: "submit" });
     } finally {
@@ -152,6 +154,7 @@ export default function CandidateProofWorkspace() {
   if (!task) return null;
 
   return (
+    <>
     <div className="h-screen flex flex-col bg-[#1e1e1e] text-slate-300 font-sans overflow-hidden">
 
       {/* ── IDE Header ────────────────────────────────────────── */}
@@ -460,5 +463,18 @@ export default function CandidateProofWorkspace() {
       )}
 
     </div>
+
+      {/* Success Celebration */}
+      <SuccessCelebration
+        isVisible={showCelebration}
+        onDismiss={() => {
+          setShowCelebration(false);
+          navigate("/candidate/dashboard");
+        }}
+        variant="proof-submitted"
+        actionLabel="Back to Dashboard"
+        onAction={() => navigate("/candidate/dashboard")}
+      />
+    </>
   );
 }

@@ -13,6 +13,7 @@ import {
   ArrowRight
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
+import WelcomeBanner from "@/components/common/WelcomeBanner";
 
 export default function CandidateDashboard() {
   const { user } = useAuth();
@@ -38,6 +39,12 @@ export default function CandidateDashboard() {
 
   return (
     <div className="space-y-8 pb-10">
+
+      {/* ── Welcome Banner (first visit) ────────────────────────── */}
+      <WelcomeBanner
+        role="candidate"
+        userName={displayName}
+      />
 
       {/* ── Hero Section ────────────────────────────── */}
       <div className="relative group overflow-hidden rounded-3xl p-8 lg:p-10 border border-[var(--color-border)] bg-[var(--color-surface)] shadow-2xl">

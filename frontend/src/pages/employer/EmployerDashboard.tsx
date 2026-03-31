@@ -36,6 +36,8 @@ import EmployerReviewProof from "./EmployerReviewProof";
 import UserSettings from "@/pages/shared/UserSettings";
 import EmployerJobForm from "./EmployerJobForm";
 import EmployerJobIntentForm from "@/components/employer/EmployerJobIntentForm";
+import WelcomeBanner from "@/components/common/WelcomeBanner";
+import SuccessCelebration from "@/components/common/SuccessCelebration";
 import type { ProofTask } from "@/types";
 import { AnimatePresence, motion } from "framer-motion";
 
@@ -61,7 +63,8 @@ export default function EmployerDashboard() {
 
   // Post Job State
   const [isPostingJob, setIsPostingJob] = useState(false); // Controls the overlay visibility
-  const [postJobData, setPostJobData] = useState<Partial<EmployerJob & { proof_tasks: ProofTask[] }> | null>(null); // Stores the unified data
+  const [postJobData, setPostJobData] = useState<Partial<EmployerJob & { proof_tasks: ProofTask[] }> | null>(null);
+  const [showCelebration, setShowCelebration] = useState(false); // Stores the unified data
   // Logic: if isPostingJob is true:
   //   - if postJobData is null -> Show Intent Form
   //   - if postJobData is set -> Show Main Form (pre-filled)
@@ -300,6 +303,12 @@ export default function EmployerDashboard() {
           ) : (
             /* ── Overview View ── */
             <div className="space-y-8 max-w-5xl mx-auto">
+              {/* ── Welcome Banner (first visit) ── */}
+              <WelcomeBanner
+                role="employer"
+                userName={user?.full_name || user?.company_name || undefined}
+              />
+
               {/* ── Hero Section ────────────────────────────── */}
               <div className="relative group overflow-hidden rounded-3xl p-8 lg:p-10 border border-[var(--color-border)] bg-[var(--color-surface)] shadow-2xl mb-8">
                 {/* Background Gradient/Mesh */}
@@ -473,9 +482,9 @@ export default function EmployerDashboard() {
                       defaultValues={postJobData}
                       submitLabel="Publish Job"
                       onSuccess={async () => {
-                        toast.success("Job published successfully!");
                         setIsPostingJob(false);
                         setPostJobData(null);
+                        setShowCelebration(true);
                         // Refresh jobs data
                         if (user?.id) {
                             const updatedJobs = await getEmployerJobs(user.id);
@@ -610,6 +619,14 @@ export default function EmployerDashboard() {
           </>
         )}
       </AnimatePresence>
+
+      {/* Success Celebration Overlay */}
+      <SuccessCelebration
+        isVisible={showCelebration}
+        onDismiss={() => setShowCelebration(false)}
+        variant="job-posted"
+        onAction={() => setActiveView("overview")}
+      />
     </div>
   );
 }
