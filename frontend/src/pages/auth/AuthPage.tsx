@@ -179,7 +179,7 @@ export default function AuthPage() {
           .from("profiles")
           .select("role")
           .eq("id", sessionUser.id)
-          .single();
+          .maybeSingle();
 
         const role = (profile?.role as "candidate" | "employer" | "admin" | "demo_admin") ?? "candidate";
 

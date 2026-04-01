@@ -61,7 +61,7 @@ export function useCandidateStats(): CandidateStats {
           .from("profiles")
           .select("credits")
           .eq("id", user.id)
-          .single();
+          .maybeSingle();
 
         setStats({
           proofsCompleted: totalProofs || 0,

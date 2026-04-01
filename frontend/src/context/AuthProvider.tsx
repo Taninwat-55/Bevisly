@@ -18,10 +18,30 @@ async function fetchProfileFromDB(userId: string): Promise<{
     .from("profiles")
     .select("role, full_name, avatar_url, company_name, credits, subscription_tier, is_public")
     .eq("id", userId)
-    .single();
+    .maybeSingle();
 
-  if (error) {
-    console.warn("Failed to fetch profile from profiles:", error.message);
+  if (error || !data) {
+    if (error) {
+      console.warn("Failed to fetch profile from profiles:", error.message);
+    } else {
+      console.warn("No profile found for user:", userId, "- attempting auto-creation.");
+      try {
+        const { data: sessionData } = await supabase.auth.getSession();
+        const activeUser = sessionData?.session?.user;
+        if (activeUser && activeUser.id === userId) {
+          await supabase.from("profiles").insert({
+            id: userId,
+            email: activeUser.email,
+            role: activeUser.user_metadata?.role || "candidate",
+            full_name: activeUser.user_metadata?.full_name || null
+          });
+          console.log("Auto-provisioned missing profile for", userId);
+        }
+      } catch (e) {
+        console.error("Failed to auto-provision profile", e);
+      }
+    }
+
     return { 
         role: "candidate", 
         full_name: null, 
