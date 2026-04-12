@@ -41,6 +41,7 @@ function InnerCard({
   listeners,
   isDragging = false,
   onReview,
+  onUpdateSubmission,
 }: {
   submission: EmployerSubmission;
   isOverlay?: boolean;
@@ -52,6 +53,7 @@ function InnerCard({
   listeners?: Record<string, any>;
   onReview?: (id: string) => void;
   isDragging?: boolean;
+  onUpdateSubmission?: (id: string, updated: Partial<EmployerSubmission>) => void;
 }) {
   const navigate = useNavigate();
   const { id, profiles, proof_tasks, feedback, employer_notes, hiring_stage, jobs, created_at } =
@@ -85,6 +87,7 @@ function InnerCard({
   async function handleMove(stage: HiringStage) {
     try {
       await updateHiringStage(id, stage, employer_notes ?? "");
+      onUpdateSubmission?.(id, { hiring_stage: stage });
       toast.success(`Moved to ${stage}`);
       setOpen(false);
     } catch {
@@ -263,7 +266,7 @@ function InnerCard({
         <NotesModal
           submission={submission}
           onClose={() => setShowNotes(false)}
-          onSave={(updated: Partial<EmployerSubmission>) => console.log("Updated:", updated)}
+          onSave={(updated: Partial<EmployerSubmission>) => onUpdateSubmission?.(id, updated)}
         />
       )}
     </div>
@@ -274,9 +277,11 @@ function InnerCard({
 export default function CandidateCard({
   submission,
   onReview,
+  onUpdateSubmission,
 }: {
   submission: EmployerSubmission;
   onReview?: (id: string) => void;
+  onUpdateSubmission?: (id: string, updated: Partial<EmployerSubmission>) => void;
 }) {
   const { attributes, listeners, setNodeRef, transform, isDragging } =
     useSortable({ id: submission.id });
@@ -296,6 +301,7 @@ export default function CandidateCard({
       listeners={listeners}
       isDragging={isDragging}
       onReview={onReview}
+      onUpdateSubmission={onUpdateSubmission}
     />
   );
 }
@@ -303,8 +309,16 @@ export default function CandidateCard({
 // 🔵 Overlay Card (Pure Visual, no sortable logic)
 export function CandidateCardOverlay({
   submission,
+  onUpdateSubmission,
 }: {
   submission: EmployerSubmission;
+  onUpdateSubmission?: (id: string, updated: Partial<EmployerSubmission>) => void;
 }) {
-  return <InnerCard submission={submission} isOverlay={true} />;
+  return (
+    <InnerCard
+      submission={submission}
+      isOverlay={true}
+      onUpdateSubmission={onUpdateSubmission}
+    />
+  );
 }

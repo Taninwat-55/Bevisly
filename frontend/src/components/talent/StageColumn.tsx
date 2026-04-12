@@ -12,6 +12,7 @@ interface StageColumnProps {
   label: string;
   submissions: EmployerSubmission[];
   onReview?: (id: string) => void;
+  onUpdateSubmission?: (id: string, updated: Partial<EmployerSubmission>) => void;
 }
 
 const stageStyles: Record<
@@ -61,6 +62,7 @@ export default function StageColumn({
   label,
   submissions,
   onReview,
+  onUpdateSubmission,
 }: StageColumnProps) {
   const { setNodeRef, isOver } = useDroppable({ id: stage, data: { stage } });
   const style = stageStyles[stage];
@@ -108,7 +110,12 @@ export default function StageColumn({
               </div>
             ) : (
               submissions.map((submission) => (
-                <CandidateCard key={submission.id} submission={submission} onReview={onReview} />
+                <CandidateCard
+                  key={submission.id}
+                  submission={submission}
+                  onReview={onReview}
+                  onUpdateSubmission={onUpdateSubmission}
+                />
               ))
             )}
           </div>
