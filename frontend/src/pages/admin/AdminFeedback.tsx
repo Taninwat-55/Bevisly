@@ -194,7 +194,7 @@ export default function AdminFeedback() {
           <a 
             href={`/employer/review/${f.submission_id}`} 
             target="_blank" 
-            rel="noreferrer"
+            rel="noopener noreferrer"
             className="text-[var(--color-employer)] hover:underline font-medium"
           >
             View Proof

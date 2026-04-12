@@ -501,6 +501,7 @@ export default function EmployerReviewProof({ submissionId, onBack, onNavigate }
                                 <Link
                                     to={`/candidate/${submission.user_id}`}
                                     target="_blank"
+                                    rel="noopener noreferrer"
                                     className="p-2 rounded-lg hover:bg-[var(--color-bg)] text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-all"
                                     title="View Profile"
                                 >
@@ -510,7 +511,7 @@ export default function EmployerReviewProof({ submissionId, onBack, onNavigate }
                                     <a
                                         href={submission.resume_url}
                                         target="_blank"
-                                        rel="noreferrer"
+                                        rel="noopener noreferrer"
                                         className="p-2 rounded-lg hover:bg-[var(--color-bg)] text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-all"
                                         title="View Resume"
                                     >
@@ -537,7 +538,7 @@ export default function EmployerReviewProof({ submissionId, onBack, onNavigate }
                                         <a
                                             href={submission.video_url}
                                             target="_blank"
-                                            rel="noreferrer"
+                                            rel="noopener noreferrer"
                                             className="flex items-center justify-between p-3 bg-[var(--color-bg)] border border-[var(--color-border)] rounded-xl hover:bg-[var(--color-bg-hover)] transition group"
                                         >
                                             <span className="text-sm text-[var(--color-text)] underline decoration-dotted truncate max-w-[300px]">
@@ -562,7 +563,7 @@ export default function EmployerReviewProof({ submissionId, onBack, onNavigate }
                                     <a
                                         href={displayFile}
                                         target="_blank"
-                                        rel="noreferrer"
+                                        rel="noopener noreferrer"
                                         className="flex items-center gap-2 px-4 py-2 bg-[var(--color-employer)] text-white rounded-xl hover:brightness-110 text-sm font-medium transition"
                                     >
                                         <Download size={16} />
@@ -582,7 +583,7 @@ export default function EmployerReviewProof({ submissionId, onBack, onNavigate }
                                         <a
                                             href={displayLink}
                                             target="_blank"
-                                            rel="noreferrer"
+                                            rel="noopener noreferrer"
                                             className="text-xs text-[var(--color-employer-dark)] hover:underline truncate block"
                                         >
                                             {displayLink}
@@ -591,7 +592,7 @@ export default function EmployerReviewProof({ submissionId, onBack, onNavigate }
                                     <a
                                         href={displayLink}
                                         target="_blank"
-                                        rel="noreferrer"
+                                        rel="noopener noreferrer"
                                         className="flex items-center gap-2 px-4 py-2 border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text)] rounded-xl hover:bg-[var(--color-bg)] text-sm font-medium transition"
                                     >
                                         Open <ArrowRight size={14} />
@@ -640,7 +641,7 @@ export default function EmployerReviewProof({ submissionId, onBack, onNavigate }
                                     <a
                                         href={submission.resume_url || submission.profiles?.resume_url || undefined}
                                         target="_blank"
-                                        rel="noreferrer"
+                                        rel="noopener noreferrer"
                                         className="flex items-center gap-2 px-4 py-2 border border-[var(--color-border)] bg-[var(--color-surface)] hover:bg-[var(--color-bg)] rounded-xl text-sm font-semibold text-slate-800 dark:text-slate-200 transition"
                                     >
                                         <Download size={16} /> Download Open

@@ -109,7 +109,7 @@ export default function ProfileUrlBadge({
                 <a
                     href={profileUrl!}
                     target="_blank"
-                    rel="noreferrer"
+                    rel="noopener noreferrer"
                     className="p-2 rounded-lg text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-800/50 transition-colors"
                     title="View profile"
                 >

@@ -179,7 +179,7 @@ export default function ProofTasksSection({
                     {task.attachments.map((url, i) => (
                       <div key={i} className="flex text-[var(--color-text)] items-center gap-1 text-xs bg-[var(--color-surface)] border border-[var(--color-border)] px-2 py-1 rounded">
                         <Paperclip size={12} />
-                        <a href={url} target="_blank" rel="noreferrer" className="hover:underline max-w-[120px] truncate">File {i + 1}</a>
+                        <a href={url} target="_blank" rel="noopener noreferrer" className="hover:underline max-w-[120px] truncate">File {i + 1}</a>
                       </div>
                     ))}
                   </div>
