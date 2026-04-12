@@ -48,13 +48,15 @@ export default function MFASettings() {
       const { data: existingFactors } = await supabase.auth.mfa.listFactors();
       if (existingFactors && existingFactors.totp) {
         const unverified = existingFactors.totp.filter((f: { status: string; id: string; [key: string]: unknown }) => f.status !== "verified");
-        for (const factor of unverified) {
-          try {
-             await supabase.auth.mfa.unenroll({ factorId: factor.id });
-          } catch (e) {
-             console.log("Could not unenroll factor", factor.id, e);
-          }
-        }
+        await Promise.allSettled(
+          unverified.map(async (factor: { id: string }) => {
+            try {
+              await supabase.auth.mfa.unenroll({ factorId: factor.id });
+            } catch (e) {
+              console.log("Could not unenroll factor", factor.id, e);
+            }
+          })
+        );
       }
 
       const { data, error } = await supabase.auth.mfa.enroll({
