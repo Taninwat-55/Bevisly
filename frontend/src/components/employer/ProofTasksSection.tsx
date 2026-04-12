@@ -44,17 +44,25 @@ export default function ProofTasksSection({
     if (!files || files.length === 0) return;
     setUploading(true);
     try {
-      const newAttachments: string[] = [...(proofTasks[index].attachments || [])];
-      for (let i = 0; i < files.length; i++) {
-        const file = files[i];
-        const filePath = `task-assets/${Date.now()}-${file.name}`;
+      const timestamp = Date.now();
+      const uploadPromises = Array.from(files).map(async (file, i) => {
+        const filePath = `task-assets/${timestamp}-${i}-${file.name}`;
         const { error } = await supabase.storage
           .from("task_attachments")
           .upload(filePath, file);
+
         if (error) throw error;
+
         const { data } = supabase.storage.from("task_attachments").getPublicUrl(filePath);
-        newAttachments.push(data.publicUrl);
-      }
+        return data.publicUrl;
+      });
+
+      const uploadedUrls = await Promise.all(uploadPromises);
+      const newAttachments: string[] = [
+        ...(proofTasks[index].attachments || []),
+        ...uploadedUrls,
+      ];
+
       handleChange(index, "attachments", newAttachments);
       toast.success("Files uploaded!");
     } catch (error) {
