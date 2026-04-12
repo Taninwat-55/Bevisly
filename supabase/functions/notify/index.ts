@@ -80,6 +80,9 @@ async function notifyEmployer(record: any) {
   // @ts-ignore
   const employerEmail = job?.profiles?.email;
   const candidateName = candidate?.full_name || "A Candidate";
+  const escapedCandidateName = escapeHtml(candidateName);
+  const escapedJobTitle = escapeHtml(job?.title || "");
+  const escapedRecordId = escapeHtml(String(record.id));
 
   if (employerEmail) {
     await sendEmail({
@@ -87,9 +90,9 @@ async function notifyEmployer(record: any) {
       subject: `🚀 New Submission: ${job?.title}`,
       html: `
         <h2>New Proof Submitted</h2>
-        <p><strong>${candidateName}</strong> just submitted work for <strong>${job?.title}</strong>.</p>
+        <p><strong>${escapedCandidateName}</strong> just submitted work for <strong>${escapedJobTitle}</strong>.</p>
         <p style="margin-top: 20px;">
-          <a href="https://bevisly.vercel.app/employer/review/${record.id}" style="background-color: #0077cc; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">
+          <a href="https://bevisly.vercel.app/employer/review/${escapedRecordId}" style="background-color: #0077cc; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">
             Review Submission
           </a>
         </p>
@@ -112,6 +115,9 @@ async function notifyCandidate(record: any) {
     .single();
 
   if (candidate?.email) {
+    const escapedCandidateName = escapeHtml(candidate.full_name || "Candidate");
+    const escapedJobTitle = escapeHtml(job?.title || "");
+
     // ✅ Better HTML Design
     await sendEmail({
       to: [candidate.email],
@@ -122,9 +128,9 @@ async function notifyCandidate(record: any) {
             <h1 style="color: white; margin: 0; font-size: 24px;">Proof Reviewed!</h1>
           </div>
           <div style="padding: 30px; background-color: #ffffff;">
-            <p style="font-size: 16px; color: #333; margin-bottom: 10px;">Hi <strong>${candidate.full_name || 'Candidate'}</strong>,</p>
+            <p style="font-size: 16px; color: #333; margin-bottom: 10px;">Hi <strong>${escapedCandidateName}</strong>,</p>
             <p style="font-size: 16px; color: #555; line-height: 1.5;">
-              Good news! An employer has reviewed your proof submission for <strong>${job?.title}</strong>.
+              Good news! An employer has reviewed your proof submission for <strong>${escapedJobTitle}</strong>.
             </p>
             <div style="text-align: center; margin: 30px 0;">
               <a href="https://bevis.app/candidate/proofs" 
@@ -168,4 +174,13 @@ async function sendEmail({ to, subject, html }: { to: string[]; subject: string;
   } else {
     console.log(`✅ Email sent to ${to.join(", ")}`);
   }
+}
+function escapeHtml(str: string) {
+  if (!str) return "";
+  return str
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
 }
