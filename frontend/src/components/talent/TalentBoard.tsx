@@ -76,6 +76,12 @@ export default function TalentBoard({
     ? submissions.find((s) => s.id === activeId) ?? null
     : null;
 
+  function handleUpdateSubmission(id: string, updated: Partial<EmployerSubmission>) {
+    setSubmissions((prev) =>
+      prev.map((s) => (s.id === id ? { ...s, ...updated } : s))
+    );
+  }
+
   async function handleDragEnd(event: DragEndEvent) {
     const { active, over } = event;
     setActiveId(null);
@@ -174,6 +180,7 @@ export default function TalentBoard({
               label={`${emoji} ${label}`}
               submissions={grouped[key]}
               onReview={onReview}
+              onUpdateSubmission={handleUpdateSubmission}
             />
           ))}
         </div>
