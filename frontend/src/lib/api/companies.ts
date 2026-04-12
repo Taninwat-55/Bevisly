@@ -189,15 +189,13 @@ export async function updateCompanyName(companyId: string, name: string): Promis
 /**
  * Get company members (stub for MVP — real implementation later)
  */
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-export async function getCompanyMembers(_companyId: string): Promise<CompanyMember[]> {
+export async function getCompanyMembers(): Promise<CompanyMember[]> {
   return []; // Team features coming in Pro plan
 }
 
 /**
  * Invite to company (stub)
  */
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-export async function inviteToCompany(_companyId: string, _email: string) {
+export async function inviteToCompany() {
   throw new Error("Team features available in Pro SaaS plan.");
 }
