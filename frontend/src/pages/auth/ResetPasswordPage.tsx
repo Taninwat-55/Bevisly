@@ -47,9 +47,9 @@ export default function ResetPasswordPage() {
       console.log("Password updated successfully!");
       setSuccess(true);
       notify.success("✅ Password updated!");
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Catch block error:", err);
-      const message = err.message || "Reset failed. Try again.";
+      const message = err instanceof Error ? err.message : "Reset failed. Try again.";
       
       if (message.includes("Password should contain")) {
         setErrorMsg("⚠️ Password too weak. Include uppercase, lowercase, number, and symbol.");

@@ -47,9 +47,9 @@ export default function RequestResetPage() {
       setSentTo(cleanEmail);
       notify.success("📧 Reset link sent! Check your inbox.");
       setCooldown(60);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Reset error:", err);
-      const message = err.message || "Failed to send reset link.";
+      const message = err instanceof Error ? err.message : "Failed to send reset link.";
 
       const secondsMatch = message.match(/after (\d+) seconds/);
       const isExceeded = message.toLowerCase().includes("rate limit exceeded");

@@ -114,13 +114,13 @@ export default function MFASettings() {
   }
 
   // Auto-submit when exactly 6 digits are typed/pasted
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (verifyCode.length === 6 && !actionLoading && factorId) {
       const syntheticEvent = { preventDefault: () => {} } as React.FormEvent;
       verifyEnrollment(syntheticEvent);
     }
-  }, [verifyCode]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [verifyCode, actionLoading, factorId]);
 
   async function unenrollFactor(id: string) {
     if (!window.confirm("Are you sure you want to disable 2FA? This will reduce the security of your account.")) {

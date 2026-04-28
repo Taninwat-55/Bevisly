@@ -83,7 +83,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<SessionUser | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const signOut = async () => {
+  const signOut = useCallback(async () => {
     try {
       toast.success("👋 Logging out...");
       await supabase.auth.signOut();
@@ -96,7 +96,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       localStorage.removeItem("overrideRole");
       window.location.replace("/");
     }
-  };
+  }, []);
 
   // Refresh profile data from database - call this after profile updates
   const refreshProfile = useCallback(async () => {
