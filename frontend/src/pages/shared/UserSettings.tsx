@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useTheme } from "@/hooks/useTheme";
+import { useCompany } from "@/hooks/useCompany";
 import { motion, AnimatePresence } from "framer-motion";
 import MFASettings from "@/components/auth/MFASettings";
 import toast from "react-hot-toast";
@@ -19,6 +20,7 @@ type Tab = "profile" | "account" | "notifications" | "security" | "privacy";
 
 export default function UserSettings() {
   const { user, signOut, refreshProfile } = useAuth();
+  const { company: currentCompanyRecord, refresh: refreshCompany } = useCompany();
   const { isDark, toggleTheme } = useTheme();
   const navigate = useNavigate();
 
@@ -139,9 +141,13 @@ export default function UserSettings() {
       await updateProfileData(user!.id, updates);
 
       // Also sync company name to the real companies table
-      if (isEmployer && company && user?.company_id) {
-        const { updateCompanyName } = await import("@/lib/api/companies");
-        await updateCompanyName(user.company_id, company);
+      if (isEmployer && company) {
+        const { updateCompanyName, getCurrentCompanyId } = await import("@/lib/api/companies");
+        const companyId = currentCompanyRecord?.id || await getCurrentCompanyId();
+        if (companyId) {
+          await updateCompanyName(companyId, company);
+          await refreshCompany(); // Update global context immediately
+        }
       }
 
       await refreshProfile?.(); // Refresh context for immediate UI update

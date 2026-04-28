@@ -1,4 +1,4 @@
-import "jsr:@supabase/functions-js/edge-runtime.d.ts";
+import "jsr:@supabase/functions-js@^2/edge-runtime.d.ts";
 
 const corsHeaders = {
     "Access-Control-Allow-Origin": "*",
@@ -54,53 +54,81 @@ Deno.serve(async (req) => {
     `;
 
         // Use a single fast model with timeout to prevent hung requests
-        const model = "gemini-3-flash-preview";
-        const TIMEOUT_MS = 15000; // 15 second timeout
+        const model = "gemini-2.5-flash";
+        const TIMEOUT_MS = 60000; // 60 second timeout
 
-        // Create abort controller for timeout
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), TIMEOUT_MS);
+        type GeminiResponse = {
+            candidates?: {
+                content?: {
+                    parts?: { text?: string }[];
+                };
+            }[];
+        };
+        let data: GeminiResponse | null = null;
+        let lastError: string | null = null;
+        const MAX_RETRIES = 3;
 
-        let response;
-        let data;
+        for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), TIMEOUT_MS);
 
-        try {
-            console.log(`Calling ${model} with ${TIMEOUT_MS}ms timeout`);
+            try {
+                console.log(`Calling ${model} with ${TIMEOUT_MS}ms timeout (Attempt ${attempt})`);
 
-            response = await fetch(
-                `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${GEMINI_API_KEY}`,
-                {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify({
-                        contents: [{ parts: [{ text: prompt }] }],
-                        generationConfig: {
-                            temperature: 0.7,
-                            maxOutputTokens: 1024,
+                const response = await fetch(
+                    `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${GEMINI_API_KEY}`,
+                    {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
                         },
-                    }),
-                    signal: controller.signal,
-                },
-            );
-
-            data = await response.json();
-        } catch (err: unknown) {
-            clearTimeout(timeoutId);
-            if (err instanceof Error && err.name === "AbortError") {
-                throw new Error(
-                    "AI request timed out after 15 seconds. Please try again.",
+                        body: JSON.stringify({
+                            contents: [{ parts: [{ text: prompt }] }],
+                            generationConfig: {
+                                temperature: 0.7,
+                                maxOutputTokens: 1024,
+                                responseMimeType: "application/json",
+                            },
+                        }),
+                        signal: controller.signal,
+                    },
                 );
+
+                const responseData = await response.json();
+                clearTimeout(timeoutId);
+
+                if (!response.ok) {
+                    console.error(`Gemini API error (Attempt ${attempt}):`, responseData);
+                    const isOverloaded = response.status === 503 || response.status === 429;
+                    if (isOverloaded && attempt < MAX_RETRIES) {
+                        console.log(`Retrying in ${attempt * 2} seconds...`);
+                        await new Promise((resolve) => setTimeout(resolve, attempt * 2000));
+                        continue; // Retry
+                    }
+                    throw new Error(responseData?.error?.message || "AI generation failed");
+                }
+                
+                data = responseData;
+                break; // Success! Break out of the loop
+            } catch (err: unknown) {
+                clearTimeout(timeoutId);
+                const isAbort = err instanceof Error && err.name === "AbortError";
+                lastError = err instanceof Error ? err.message : "Network error";
+                
+                if (!isAbort && attempt < MAX_RETRIES) {
+                    console.log(`Network error (Attempt ${attempt}). Retrying...`);
+                    await new Promise((resolve) => setTimeout(resolve, attempt * 2000));
+                    continue; // Retry
+                }
+                if (isAbort) {
+                    throw new Error("AI request timed out after 60 seconds. Please try again.");
+                }
+                throw err;
             }
-            throw err;
-        } finally {
-            clearTimeout(timeoutId);
         }
 
-        if (!response.ok) {
-            console.error("Gemini API error:", data);
-            throw new Error(data?.error?.message || "AI generation failed");
+        if (!data) {
+            throw new Error(lastError || "AI generation failed after multiple attempts");
         }
 
         let rawText = data.candidates?.[0]?.content?.parts?.[0]?.text || "{}";

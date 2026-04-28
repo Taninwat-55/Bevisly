@@ -213,7 +213,7 @@ export default function EmployerJobForm({
                 />
                 {mode === "create" && companyName && (
                   <p className="text-xs text-[var(--color-text-muted)] mt-1">
-                    Auto-filled from your company profile. Change it in <button type="button" onClick={() => navigate('/settings')} className="text-[var(--color-brand-primary)] hover:underline">Settings</button>.
+                    Auto-filled from your company profile. Change it in <button type="button" onClick={() => navigate('/employer/settings')} className="text-[var(--color-brand-primary)] hover:underline">Settings</button>.
                   </p>
                 )}
               </div>

@@ -16,7 +16,8 @@ Deno.serve(async (req) => {
 
     try {
         const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? "";
-        const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
+        const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ??
+            "";
         const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
         const { raw_input, company_name } = await req.json();
@@ -31,7 +32,8 @@ Deno.serve(async (req) => {
 
         if (authHeader) {
             // 1. Try to verify as a logged-in user
-            const { data: { user }, error: authError } = await supabase.auth.getUser(authHeader.replace("Bearer ", ""));
+            const { data: { user }, error: authError } = await supabase.auth
+                .getUser(authHeader.replace("Bearer ", ""));
             if (!authError && user) {
                 isAuthorized = true;
                 console.log(`Authorized request from user: ${user.email}`);
@@ -40,23 +42,31 @@ Deno.serve(async (req) => {
 
         if (!isAuthorized) {
             // 2. Fallback to IP-based rate limiting for landing page demo
-            const clientIP = req.headers.get("x-real-ip") || req.headers.get("x-forwarded-for") || "unknown";
-            
-            const { data: allowed, error: limitError } = await supabase.rpc("check_ai_rate_limit", { 
-                p_ip: clientIP,
-                p_limit: 3 // Allow 3 requests per 24h for visitors
-            });
+            const clientIP = req.headers.get("x-real-ip") ||
+                req.headers.get("x-forwarded-for") || "unknown";
+
+            const { data: allowed, error: limitError } = await supabase.rpc(
+                "check_ai_rate_limit",
+                {
+                    p_ip: clientIP,
+                    p_limit: 3, // Allow 3 requests per 24h for visitors
+                },
+            );
 
             if (limitError || !allowed) {
                 return new Response(
                     JSON.stringify({
-                        error: "Trial limit reached. Please sign up to generate more job tasks!",
+                        error:
+                            "Trial limit reached. Please sign up to generate more job tasks!",
                         isLimit: true,
                     }),
                     {
                         status: 429, // Too Many Requests
-                        headers: { ...corsHeaders, "Content-Type": "application/json" },
-                    }
+                        headers: {
+                            ...corsHeaders,
+                            "Content-Type": "application/json",
+                        },
+                    },
                 );
             }
             console.log(`Public request allowed for IP: ${clientIP}`);
@@ -67,13 +77,23 @@ Deno.serve(async (req) => {
         if (!GEMINI_API_KEY) {
             console.error("GEMINI_API_KEY is missing");
             return new Response(
-                JSON.stringify({ error: "Server configuration error: Missing AI Key" }),
-                { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+                JSON.stringify({
+                    error: "Server configuration error: Missing AI Key",
+                }),
+                {
+                    status: 500,
+                    headers: {
+                        ...corsHeaders,
+                        "Content-Type": "application/json",
+                    },
+                },
             );
         }
 
         const prompt = `
-      Act as an expert Technical Hiring Manager for ${company_name || "a tech company"}.
+      Act as an expert Technical Hiring Manager for ${
+            company_name || "a tech company"
+        }.
       Based on the following raw, unstructured inputs from a hiring manager, generate a compelling Job Description, extract a concise Job Title, list the Requirements, and design a practical Proof Task.
       
       Raw Input / Ideas:
@@ -130,27 +150,41 @@ Deno.serve(async (req) => {
                 throw new Error(data?.error?.message || "AI generation failed");
             }
 
-            let rawText = data.candidates?.[0]?.content?.parts?.[0]?.text || "{}";
-            rawText = rawText.replace(/```json/gi, "").replace(/```/g, "").replace(/^`|`$/g, "");
+            let rawText = data.candidates?.[0]?.content?.parts?.[0]?.text ||
+                "{}";
+            rawText = rawText.replace(/```json/gi, "").replace(/```/g, "")
+                .replace(/^`|`$/g, "");
 
             const parsedData = JSON.parse(rawText);
             return new Response(JSON.stringify(parsedData), {
                 headers: { ...corsHeaders, "Content-Type": "application/json" },
             });
-
         } catch (err: unknown) {
             clearTimeout(timeoutId);
-            const errorMessage = err instanceof Error ? err.message : "AI generation failed";
+            const errorMessage = err instanceof Error
+                ? err.message
+                : "AI generation failed";
             return new Response(
                 JSON.stringify({ error: errorMessage }),
-                { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+                {
+                    status: 500,
+                    headers: {
+                        ...corsHeaders,
+                        "Content-Type": "application/json",
+                    },
+                },
             );
         }
     } catch (error) {
         console.error("Error:", error);
         return new Response(
-            JSON.stringify({ error: error instanceof Error ? error.message : "Unknown error" }),
-            { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+            JSON.stringify({
+                error: error instanceof Error ? error.message : "Unknown error",
+            }),
+            {
+                status: 500,
+                headers: { ...corsHeaders, "Content-Type": "application/json" },
+            },
         );
     }
 });
