@@ -78,8 +78,9 @@ export default function ProofTasksSection({
   return (
     <section>
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-base font-semibold text-[var(--color-text)]">
+        <h2 className="text-base font-semibold text-[var(--color-text)] flex items-center gap-2">
           Proof Tasks (Skill Verification)
+          <span className="text-[10px] font-bold uppercase tracking-widest px-1.5 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-500 border border-slate-200 dark:border-slate-700">Optional</span>
         </h2>
         <button
           type="button"

@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import type { EmployerJobFormValues } from "@/types/employer";
 import {
-  Briefcase, MapPin, DollarSign, BrainCircuit, ArrowRight, Sparkles, Calendar
+  Briefcase, MapPin, DollarSign, BrainCircuit, ArrowRight, Sparkles, Calendar, Plus, Trash2
 } from "lucide-react";
 import ProofTaskAIModal from "@/components/employer/ProofTaskAIModal";
 import { POPULAR_JOB_TITLES } from "@/data/popularJobTitles";
@@ -60,16 +60,7 @@ export default function EmployerJobForm({
     work_mode: defaultValues?.work_mode ?? "Remote",
     start_date: defaultValues?.start_date ?? undefined,
     application_deadline: defaultValues?.application_deadline ?? undefined,
-    proof_tasks: defaultValues?.proof_tasks ?? [
-      {
-        id: crypto.randomUUID(),
-        title: "",
-        description: "",
-        expected_time: "2-4 hours",
-        submission_format: "github_repo",
-        ai_tools_allowed: true,
-      },
-    ],
+    proof_tasks: defaultValues?.proof_tasks ?? [],
   });
 
 
@@ -157,11 +148,11 @@ export default function EmployerJobForm({
     setLoading(true);
     try {
       if (mode === "edit" && onSubmit) {
-        await onSubmit(values);
+        await onSubmit(values as any);
         toast.success("Job updated successfully!");
         onSuccess?.();
       } else {
-        await createJobWithTasks(values);
+        await createJobWithTasks(values as any);
         toast.success("Job posted successfully!");
         onSuccess?.();
         navigate("/employer");
@@ -396,30 +387,72 @@ export default function EmployerJobForm({
 
           {/* 3. Proof Tasks (The Core Value) */}
           <Card className="p-6 md:p-8 space-y-6 border-l-4 border-l-[var(--color-brand-primary)] shadow-glow-primary">
-            <div className="flex items-center gap-3 mb-2">
-              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[var(--color-brand-primary)] to-purple-600 flex items-center justify-center text-white shadow-md">
-                <BrainCircuit size={20} />
-              </div>
               <div>
-                <h2 className="text-lg font-bold text-[var(--color-text)]">Proof Task</h2>
+                <div className="flex items-center justify-between">
+                  <h2 className="text-lg font-bold text-[var(--color-text)] flex items-center gap-2">
+                    Proof Task
+                    <span className="text-[10px] font-bold uppercase tracking-widest px-1.5 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-500 border border-slate-200 dark:border-slate-700">Optional</span>
+                  </h2>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      const newTask: ProofTask = {
+                        id: crypto.randomUUID(),
+                        title: "",
+                        description: "",
+                        expected_time: "2-4 hours",
+                        submission_format: "github_repo",
+                        ai_tools_allowed: true,
+                      };
+                      handleChange("proof_tasks", [...(values.proof_tasks || []), newTask]);
+                    }}
+                    leftIcon={<Plus size={14} />}
+                  >
+                    Add Task
+                  </Button>
+                </div>
                 <p className="text-sm text-[var(--color-text-muted)]">The practical challenge candidates must solve.</p>
               </div>
-            </div>
+
+            {(!values.proof_tasks || values.proof_tasks.length === 0) && (
+              <div className="text-center py-10 border-2 border-dashed border-[var(--color-border)] rounded-2xl bg-[var(--color-bg)]/50">
+                <BrainCircuit size={40} className="mx-auto text-slate-300 dark:text-slate-700 mb-3" />
+                <p className="text-[var(--color-text-muted)] text-sm max-w-xs mx-auto">
+                  No proof tasks added. Candidates will only submit their profile and resume.
+                </p>
+              </div>
+            )}
 
             {values.proof_tasks?.map((task, index) => (
               <div key={task.id || index} className="p-5 bg-[var(--color-bg)] rounded-[var(--radius-card)] border border-[var(--color-border)] space-y-5 animate-fade-in-up">
                 <div className="flex justify-between items-start">
                   <h4 className="font-semibold text-[var(--color-text)] text-sm uppercase tracking-wider">Task Details</h4>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleOpenAIModal(index)}
-                    leftIcon={<Sparkles size={14} className="text-purple-500" />}
-                    className="text-xs text-purple-600 hover:text-purple-700 hover:bg-purple-50 dark:hover:bg-purple-900/20"
-                  >
-                    Auto-Generate w/ AI
-                  </Button>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleOpenAIModal(index)}
+                      leftIcon={<Sparkles size={14} className="text-purple-500" />}
+                      className="text-xs text-purple-600 hover:text-purple-700 hover:bg-purple-50 dark:hover:bg-purple-900/20"
+                    >
+                      Auto-Generate w/ AI
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => {
+                        const newTasks = values.proof_tasks?.filter((_, i) => i !== index);
+                        handleChange("proof_tasks", newTasks);
+                      }}
+                      className="text-red-500 hover:text-red-600 hover:bg-red-50"
+                    >
+                      <Trash2 size={14} />
+                    </Button>
+                  </div>
                 </div>
 
                 <Input
