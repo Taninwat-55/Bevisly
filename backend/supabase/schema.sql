@@ -416,6 +416,7 @@ create policy "Users can upload own avatar"
   to authenticated
   with check (
     bucket_id = 'avatars' AND
+    (storage.foldername(name))[1] = auth.uid()::text AND
     (storage.extension(name) = any(array['jpg', 'png', 'jpeg', 'webp'])) AND
     ((metadata->>'size')::bigint < 2097152) -- 2MB limit
   );
@@ -424,3 +425,82 @@ create policy "Public can view avatars"
   on storage.objects for select
   to public
   using ( bucket_id = 'avatars' );
+
+create policy "Employers can upload task assets"
+  on storage.objects for insert
+  to authenticated
+  with check (
+    bucket_id = 'task_attachments' AND
+    (storage.foldername(name))[1] = auth.uid()::text
+  );
+
+create policy "Anyone can view task assets"
+  on storage.objects for select
+  to public
+  using ( bucket_id = 'task_attachments' );
+
+-- UPDATE policies (allow users to replace their own files)
+create policy "Candidates can update own proofs"
+  on storage.objects for update
+  to authenticated
+  using (
+    bucket_id = 'proofs' AND
+    (storage.foldername(name))[1] = auth.uid()::text
+  );
+
+create policy "Candidates can update own resumes"
+  on storage.objects for update
+  to authenticated
+  using (
+    bucket_id = 'resumes' AND
+    (storage.foldername(name))[1] = auth.uid()::text
+  );
+
+create policy "Users can update own avatar"
+  on storage.objects for update
+  to authenticated
+  using (
+    bucket_id = 'avatars' AND
+    (storage.foldername(name))[1] = auth.uid()::text
+  );
+
+create policy "Employers can update own task assets"
+  on storage.objects for update
+  to authenticated
+  using (
+    bucket_id = 'task_attachments' AND
+    (storage.foldername(name))[1] = auth.uid()::text
+  );
+
+-- DELETE policies (allow users to remove their own files)
+create policy "Candidates can delete own proofs"
+  on storage.objects for delete
+  to authenticated
+  using (
+    bucket_id = 'proofs' AND
+    (storage.foldername(name))[1] = auth.uid()::text
+  );
+
+create policy "Candidates can delete own resumes"
+  on storage.objects for delete
+  to authenticated
+  using (
+    bucket_id = 'resumes' AND
+    (storage.foldername(name))[1] = auth.uid()::text
+  );
+
+create policy "Users can delete own avatar"
+  on storage.objects for delete
+  to authenticated
+  using (
+    bucket_id = 'avatars' AND
+    (storage.foldername(name))[1] = auth.uid()::text
+  );
+
+create policy "Employers can delete own task assets"
+  on storage.objects for delete
+  to authenticated
+  using (
+    bucket_id = 'task_attachments' AND
+    (storage.foldername(name))[1] = auth.uid()::text
+  );

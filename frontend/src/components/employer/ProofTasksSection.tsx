@@ -4,6 +4,7 @@ import { supabase } from "@/lib/supabaseClient";
 import toast from "react-hot-toast";
 import type { ProofTask } from "@/types";
 import MarkdownEditor from "@/components/common/MarkdownEditor";
+import { useAuth } from "@/hooks/useAuth";
 
 interface ProofTasksSectionProps {
   proofTasks: ProofTask[];
@@ -20,6 +21,7 @@ export default function ProofTasksSection({
   onChange,
   errors,
 }: ProofTasksSectionProps) {
+  const { user } = useAuth();
   const [uploading, setUploading] = useState(false);
 
   const handleChange = (index: number, field: keyof ProofTask, value: unknown) => {
@@ -46,7 +48,7 @@ export default function ProofTasksSection({
     try {
       const timestamp = Date.now();
       const uploadPromises = Array.from(files).map(async (file, i) => {
-        const filePath = `task-assets/${timestamp}-${i}-${file.name}`;
+        const filePath = `${user?.id}/task-assets/${timestamp}-${i}-${file.name}`;
         const { error } = await supabase.storage
           .from("task_attachments")
           .upload(filePath, file);
