@@ -10,9 +10,8 @@ import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import type { EmployerJobFormValues } from "@/types/employer";
 import {
-  Briefcase, MapPin, DollarSign, BrainCircuit, ArrowRight, Sparkles, Calendar, Plus, Trash2
+  Briefcase, MapPin, DollarSign, BrainCircuit, ArrowRight, Calendar, Plus, Trash2
 } from "lucide-react";
-import ProofTaskAIModal from "@/components/employer/ProofTaskAIModal";
 import { POPULAR_JOB_TITLES } from "@/data/popularJobTitles";
 import { useCompany } from "@/hooks/useCompany";
 
@@ -67,9 +66,6 @@ export default function EmployerJobForm({
   
   const [loading, setLoading] = useState(false);
   // const [generatingAI, setGeneratingAI] = useState(false); // REMOVED
-  const [activeTaskIndex, setActiveTaskIndex] = useState<number | null>(null);
-  const [isAIModalOpen, setIsAIModalOpen] = useState(false);
-
   // Handlers
   const handleChange = (field: string, value: unknown) => {
     setValues((prev) => ({ ...prev, [field]: value }));
@@ -79,38 +75,6 @@ export default function EmployerJobForm({
     const newTasks = [...(values.proof_tasks || [])];
     newTasks[index] = { ...newTasks[index], [field]: value };
     handleChange("proof_tasks", newTasks);
-  };
-
-
-
-  const handleOpenAIModal = (index: number) => {
-    setActiveTaskIndex(index);
-    setIsAIModalOpen(true);
-  };
-
-  const handleApplyAITask = (task: { title: string; description: string; expected_time: string }) => {
-    if (activeTaskIndex === null) return;
-
-    const newTasks = [...(values.proof_tasks || [])];
-    newTasks[activeTaskIndex] = {
-      ...newTasks[activeTaskIndex],
-      title: task.title,
-      description: task.description,
-      expected_time: task.expected_time
-    };
-    handleChange("proof_tasks", newTasks);
-    // Modal closes itself via props usually, or we close it here
-    // In our implementation, we need to close it:
-    // But wait, the modal calls onApply then onClose? 
-    // The modal implementation: onApply calls props.onApply then props.onClose. 
-    // So we don't strictly need to setIsAIModalOpen(false) if the modal does it, 
-    // but looking at usage below: onClose={() => setIsAIModalOpen(false)}
-    // The Modal calls onApply() then onClose(). 
-    // Actually, looking at the Modal code I wrote:
-    // const handleApply = () => { onApply(...); onClose(); ... }
-    // So here I just need to update state.
-    // I will reset active index here just in case.
-    setActiveTaskIndex(null); 
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -434,16 +398,6 @@ export default function EmployerJobForm({
                       type="button"
                       variant="ghost"
                       size="sm"
-                      onClick={() => handleOpenAIModal(index)}
-                      leftIcon={<Sparkles size={14} className="text-purple-500" />}
-                      className="text-xs text-purple-600 hover:text-purple-700 hover:bg-purple-50 dark:hover:bg-purple-900/20"
-                    >
-                      Auto-Generate w/ AI
-                    </Button>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
                       onClick={() => {
                         const newTasks = values.proof_tasks?.filter((_, i) => i !== index);
                         handleChange("proof_tasks", newTasks);
@@ -551,15 +505,6 @@ export default function EmployerJobForm({
           </div>
         </form>
       </div>
-
-
-      <ProofTaskAIModal
-        isOpen={isAIModalOpen}
-        onClose={() => setIsAIModalOpen(false)}
-        onApply={handleApplyAITask}
-        jobTitle={values.title || ""}
-        jobDescription={values.description || ""}
-      />
     </div>
   );
 }

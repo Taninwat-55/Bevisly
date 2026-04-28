@@ -12,6 +12,8 @@ import { getCurrentCompanyId } from "./companies";
  * Includes salary range and pay fields for transparency
  * ────────────────────────────────────────────── */
 export async function getAllJobs(): Promise<CandidateJob[]> {
+  const now = new Date().toISOString();
+
   const { data, error } = await supabase
     .from("jobs")
     .select(`
@@ -35,6 +37,8 @@ export async function getAllJobs(): Promise<CandidateJob[]> {
       employer:profiles!jobs_employer_id_fkey ( avatar_url )
     `)
     .eq("status", "active")
+    // Use an OR condition to include jobs with no deadline, or jobs whose deadline is in the future
+    .or(`expires_at.is.null,expires_at.gt.${now}`)
     .order("created_at", { ascending: false });
 
   if (error) throw error;
@@ -179,6 +183,8 @@ export async function getCompanyJobs(
  * Featured jobs for homepage
  * ────────────────────────────────────────────── */
 export async function getFeaturedJobs() {
+  const now = new Date().toISOString();
+
   const { data, error } = await supabase
     .from("jobs")
     .select(
@@ -186,6 +192,8 @@ export async function getFeaturedJobs() {
     )
     .eq("featured", true)
     .eq("is_public", true)
+    .eq("status", "active")
+    .or(`expires_at.is.null,expires_at.gt.${now}`)
     .limit(6);
 
   if (error) throw error;
