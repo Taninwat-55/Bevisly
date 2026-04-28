@@ -16,11 +16,12 @@ import {
   ChevronDown,
   Layers,
   Search,
+  Inbox,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
-import { getEmployerJobs } from "@/lib/api";
-import type { EmployerJob } from "@/types";
+import { getEmployerJobs, getEmployerSubmissionsWithFeedback } from "@/lib/api";
+import type { EmployerJob, EmployerSubmission } from "@/types";
 import ContactModal from "@/components/common/ContactModal";
 
 interface DashboardLayoutProps {
@@ -39,6 +40,7 @@ export default function DashboardLayout({
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [jobs, setJobs] = useState<EmployerJob[]>([]);
+  const [submissions, setSubmissions] = useState<EmployerSubmission[]>([]);
   const { user, signOut } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
@@ -49,9 +51,19 @@ export default function DashboardLayout({
 
   useEffect(() => {
     if (user?.role === "employer" && user?.id) {
-        getEmployerJobs(user.id).then(setJobs).catch(console.error);
+        Promise.all([
+            getEmployerJobs(user.id),
+            getEmployerSubmissionsWithFeedback(user.id)
+        ]).then(([jobsData, subsData]) => {
+            setJobs(jobsData);
+            setSubmissions(subsData);
+        }).catch(console.error);
     }
   }, [user?.role, user?.id]);
+  
+  const needsReviewCount = submissions.filter(s => 
+    s.status === 'submitted' && (!s.feedback || s.feedback.length === 0)
+  ).length;
 
   const handleSignOut = async () => {
     if (confirm("Are you sure you want to log out?")) {
@@ -66,7 +78,10 @@ export default function DashboardLayout({
   // "Settings" removed from main nav links array
   const links =
     role === "employer"
-      ? [{ label: "Dashboard", path: "/employer", icon: LayoutDashboard }]
+      ? [
+          { label: "Dashboard", path: "/employer", icon: LayoutDashboard },
+          { label: "Action Items", path: "/employer/inbox", icon: Inbox, badge: needsReviewCount },
+        ]
       : role === "admin"
         ? [
             { label: "Overview", path: "/admin", icon: LayoutDashboard },
@@ -296,10 +311,19 @@ export default function DashboardLayout({
                     <motion.span
                       initial={{ opacity: 0, x: -10 }}
                       animate={{ opacity: 1, x: 0 }}
-                      className="whitespace-nowrap"
+                      className="whitespace-nowrap flex-1"
                     >
                       {link.label}
                     </motion.span>
+                  )}
+
+                  {link.badge !== undefined && link.badge > 0 && (
+                    <div className={`
+                      flex items-center justify-center rounded-full bg-red-500 text-white font-bold
+                      ${isSidebarOpen ? "px-2 py-0.5 text-[10px] min-w-[20px]" : "absolute top-2 right-2 w-4 h-4 text-[8px]"}
+                    `}>
+                      {link.badge}
+                    </div>
                   )}
 
                   {/* Active Indicator Strip */}

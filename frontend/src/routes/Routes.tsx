@@ -19,6 +19,7 @@ import CandidateFeedbackView from "@/pages/candidate/CandidateFeedbackView";
 import DashboardLayout from "@/layout/DashboardLayout";
 
 import EmployerDashboard from "@/pages/employer/EmployerDashboard";
+import EmployerInbox from "@/pages/employer/EmployerInbox";
 // (Employer tools are accessed as slide-overs in the Dashboard)
 
 // --- Admin pages
@@ -110,6 +111,7 @@ export const router = createBrowserRouter([
       {
         element: <DashboardLayout showSidebar={true} fullWidth={false}><Outlet /></DashboardLayout>,
         children: [
+          { path: "inbox", element: <EmployerInbox /> },
           { path: "jobs", element: <JobListingPage /> },
           { path: "job/:id", element: <JobDetailPage /> },
           { path: "settings", element: <UserSettings /> },
