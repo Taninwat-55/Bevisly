@@ -9,6 +9,7 @@ export type ProofCard = {
   rating: number | null;
   comments: string | null;
   reviewed_at: string | null;
+  is_public: boolean;
 };
 
 export function useProofs() {
@@ -40,5 +41,31 @@ export function useProofs() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.id]);
 
-  return { cards, credits, loading };
+  const toggleProofPublic = async (submissionId: string, currentStatus: boolean) => {
+    try {
+      const newStatus = !currentStatus;
+      const { error } = await supabase
+        .from("submissions")
+        .update({ is_public: newStatus })
+        .eq("id", submissionId);
+        
+      if (error) throw error;
+      
+      // Update local state
+      setCards((prev) => 
+        prev.map((card) => 
+          card.submission_id === submissionId 
+            ? { ...card, is_public: newStatus } 
+            : card
+        )
+      );
+      
+      return { success: true, is_public: newStatus };
+    } catch (err) {
+      console.error("Error toggling proof visibility:", err);
+      return { success: false, error: err };
+    }
+  };
+
+  return { cards, credits, loading, toggleProofPublic };
 }

@@ -252,7 +252,7 @@ export default function PublicProfilePage() {
                     <section className="mt-10">
                         <h2 className="text-xl font-bold text-[var(--color-text)] mb-6 flex items-center gap-2">
                             <BadgeCheck className="text-[var(--color-candidate)]" />
-                            Verified Proofs
+                            Verified Portfolio
                         </h2>
 
                         {cards.length === 0 ? (

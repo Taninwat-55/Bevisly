@@ -370,12 +370,12 @@ export default function CandidateProfile() {
         {/* ── Right Column: Proofs ────────────────────────────── */}
         <div className="lg:col-span-2">
           <h2 className="heading-md mb-6 flex items-center gap-2">
-            <Award size={20} className="text-amber-500" /> Proof History
+            <Award size={20} className="text-amber-500" /> Verified Proofs Vault
           </h2>
 
           {/* Using the existing grid component but wrapped nicely */}
           <div className="bg-[var(--color-surface)]/50 rounded-2xl">
-            <ProofCardsGrid />
+            <ProofCardsGrid allowTogglePublic={true} />
           </div>
         </div>
 
