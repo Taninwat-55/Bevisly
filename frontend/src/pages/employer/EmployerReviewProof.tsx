@@ -106,7 +106,7 @@ function Scorecard({
                         className="flex items-center gap-1.5 text-xs font-medium text-purple-600 hover:text-purple-700 bg-purple-50 hover:bg-purple-100 dark:bg-purple-900/20 px-3 py-1.5 rounded-lg transition-colors"
                     >
                         {isSuggesting ? <Loader2 size={12} className="animate-spin" /> : <Sparkles size={12} />}
-                        Auto-Draft
+                        AI Evaluate
                     </button>
                 )}
             </div>
@@ -261,25 +261,24 @@ export default function EmployerReviewProof({ submissionId, onBack, onNavigate }
     const nextCandidate = currentIndex < totalSubmissions - 1 ? submissionsCache.current[currentIndex + 1] : null;
 
     const handleSuggestFeedback = async () => {
-        if (!stars) {
-            toast.error("Please rate with stars first so AI knows the sentiment.");
-            return;
-        }
         setSuggestingAI(true);
-        const toastId = toast.loading("Analyzing submission...");
+        const toastId = toast.loading("AI is analyzing submission...");
         try {
             const criteria = submission?.proof_tasks?.title || "General";
             const content = submission?.text_response || "Checked file/link.";
             
-            const feedback = await suggestFeedback(stars, criteria, content);
+            const result = await suggestFeedback(stars || 0, criteria, content);
 
-            if (feedback) {
-                if (stars >= 4) {
-                     setStrengths(prev => prev ? prev + "\n" + feedback : feedback);
+            if (result && result.feedback) {
+                const newStars = result.suggested_rating || stars || 3;
+                setStars(newStars);
+                
+                if (newStars >= 4) {
+                     setStrengths(prev => prev ? prev + "\n" + result.feedback : result.feedback);
                 } else {
-                     setImprovements(prev => prev ? prev + "\n" + feedback : feedback);
+                     setImprovements(prev => prev ? prev + "\n" + result.feedback : result.feedback);
                 }
-                toast.success("Here's a draft! feel free to edit.", { id: toastId });
+                toast.success("AI Evaluation complete! Feel free to edit.", { id: toastId });
             }
         } catch (e: unknown) {
             console.error(e);

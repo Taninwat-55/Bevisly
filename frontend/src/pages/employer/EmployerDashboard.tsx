@@ -1,4 +1,5 @@
 import { useEffect, useState, useMemo } from "react";
+import { createPortal } from "react-dom";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import toast from "react-hot-toast";
 import {
@@ -466,251 +467,260 @@ export default function EmployerDashboard() {
       )}
 
       {/* ── Post Job Slide-Over Panel ── */}
-      <AnimatePresence>
-        {isPostingJob && (
-          <>
-            {/* Backdrop */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm"
-              onClick={() => { setIsPostingJob(false); setPostJobData(null); }}
-            />
-            {/* Panel (Dynamic Width) */}
-            <motion.div
-              initial={{ x: "100%" }}
-              animate={{ x: 0 }}
-              exit={{ x: "100%" }}
-              transition={{ type: "spring", damping: 30, stiffness: 300 }}
-              className={`fixed top-0 right-0 z-50 h-full w-full bg-[var(--color-bg)] border-l border-[var(--color-border)] shadow-2xl overflow-y-auto ${
-                 postJobCreationMode === "select" ? "max-w-2xl" : postJobData ? "max-w-4xl" : "max-w-2xl bg-gradient-to-br from-slate-900 via-slate-900 to-slate-800"
-              }`}
-            >
-              {postJobCreationMode === "select" ? (
-                /* ── Choice View ── */
-                <div className="w-full min-h-screen p-8 md:p-12 flex flex-col justify-start pt-20 pb-12">
-                  <div className="mb-10 text-center">
-                    <h2 className="text-3xl font-bold font-display text-[var(--color-text)] mb-3">Post a New Job</h2>
-                    <p className="text-[var(--color-text-muted)]">How would you like to build this listing?</p>
-                  </div>
+      {createPortal(
+        <AnimatePresence>
+          {isPostingJob && (
+            <>
+              {/* Backdrop */}
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm"
+                onClick={() => { setIsPostingJob(false); setPostJobData(null); }}
+              />
+              {/* Panel (Dynamic Width) */}
+              <motion.div
+                initial={{ x: "100%" }}
+                animate={{ x: 0 }}
+                exit={{ x: "100%" }}
+                transition={{ type: "spring", damping: 30, stiffness: 300 }}
+                className={`fixed top-0 right-0 z-50 h-full w-full bg-[var(--color-bg)] border-l border-[var(--color-border)] shadow-2xl overflow-y-auto ${
+                   postJobCreationMode === "select" ? "max-w-2xl" : postJobData ? "max-w-4xl" : "max-w-2xl bg-gradient-to-br from-slate-900 via-slate-900 to-slate-800"
+                }`}
+              >
+                {postJobCreationMode === "select" ? (
+                  /* ── Choice View ── */
+                  <div className="w-full min-h-screen p-8 md:p-12 flex flex-col justify-start pt-20 pb-12">
+                    <div className="mb-10 text-center">
+                      <h2 className="text-3xl font-bold font-display text-[var(--color-text)] mb-3">Post a New Job</h2>
+                      <p className="text-[var(--color-text-muted)]">How would you like to build this listing?</p>
+                    </div>
 
-                  <div className="grid gap-6">
-                    {/* AI Option */}
-                    <button
-                      onClick={() => setPostJobCreationMode("ai")}
-                      className="group relative flex items-start gap-5 p-6 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] hover:border-[var(--color-brand-primary)] hover:shadow-xl hover:shadow-[var(--color-brand-primary)]/5 transition-all text-left"
+                    <div className="grid gap-6">
+                      {/* AI Option */}
+                      <button
+                        onClick={() => setPostJobCreationMode("ai")}
+                        className="group relative flex items-start gap-5 p-6 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] hover:border-[var(--color-brand-primary)] hover:shadow-xl hover:shadow-[var(--color-brand-primary)]/5 transition-all text-left"
+                      >
+                        <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-indigo-600 to-blue-500 flex items-center justify-center text-white shrink-0 shadow-lg group-hover:scale-110 transition-transform">
+                          <Sparkles size={28} />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h3 className="text-xl font-bold text-[var(--color-text)] mb-1 flex items-center gap-2">
+                            Auto-Generate with AI
+                            <span className="text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full bg-indigo-500/10 text-indigo-500 border border-indigo-500/20">Recommended</span>
+                          </h3>
+                          <p className="text-sm text-[var(--color-text-muted)] leading-relaxed">
+                            Briefly describe the role, and AI will write the description, requirements, and build a tailored proof task for you in seconds.
+                          </p>
+                        </div>
+                        <ArrowRight size={20} className="text-[var(--color-text-muted)] group-hover:text-[var(--color-brand-primary)] group-hover:translate-x-1 transition-all shrink-0 mt-1" />
+                      </button>
+
+                      {/* Manual Option */}
+                      <button
+                        onClick={() => {
+                          setPostJobData({});
+                          setPostJobCreationMode("manual");
+                        }}
+                        className="group relative flex items-start gap-5 p-6 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] hover:border-[var(--color-brand-primary)] hover:shadow-xl hover:shadow-[var(--color-brand-primary)]/5 transition-all text-left"
+                      >
+                        <div className="w-14 h-14 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500 shrink-0 border border-[var(--color-border)] group-hover:scale-110 transition-transform">
+                          <PenTool size={28} />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h3 className="text-xl font-bold text-[var(--color-text)] mb-1">
+                            Start from Scratch
+                          </h3>
+                          <p className="text-sm text-[var(--color-text-muted)] leading-relaxed">
+                            Write your own job details and requirements. You can optionally add proof tasks later to verify candidate skills.
+                          </p>
+                        </div>
+                        <ArrowRight size={20} className="text-[var(--color-text-muted)] group-hover:text-[var(--color-brand-primary)] group-hover:translate-x-1 transition-all shrink-0 mt-1" />
+                      </button>
+                    </div>
+
+                    <button 
+                      onClick={() => setIsPostingJob(false)}
+                      className="mt-10 text-sm text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors"
                     >
-                      <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-indigo-600 to-blue-500 flex items-center justify-center text-white shrink-0 shadow-lg group-hover:scale-110 transition-transform">
-                        <Sparkles size={28} />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <h3 className="text-xl font-bold text-[var(--color-text)] mb-1 flex items-center gap-2">
-                          Auto-Generate with AI
-                          <span className="text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full bg-indigo-500/10 text-indigo-500 border border-indigo-500/20">Recommended</span>
-                        </h3>
-                        <p className="text-sm text-[var(--color-text-muted)] leading-relaxed">
-                          Briefly describe the role, and AI will write the description, requirements, and build a tailored proof task for you in seconds.
-                        </p>
-                      </div>
-                      <ArrowRight size={20} className="text-[var(--color-text-muted)] group-hover:text-[var(--color-brand-primary)] group-hover:translate-x-1 transition-all shrink-0 mt-1" />
-                    </button>
-
-                    {/* Manual Option */}
-                    <button
-                      onClick={() => {
-                        setPostJobData({});
-                        setPostJobCreationMode("manual");
-                      }}
-                      className="group relative flex items-start gap-5 p-6 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] hover:border-[var(--color-brand-primary)] hover:shadow-xl hover:shadow-[var(--color-brand-primary)]/5 transition-all text-left"
-                    >
-                      <div className="w-14 h-14 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500 shrink-0 border border-[var(--color-border)] group-hover:scale-110 transition-transform">
-                        <PenTool size={28} />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <h3 className="text-xl font-bold text-[var(--color-text)] mb-1">
-                          Start from Scratch
-                        </h3>
-                        <p className="text-sm text-[var(--color-text-muted)] leading-relaxed">
-                          Write your own job details and requirements. You can optionally add proof tasks later to verify candidate skills.
-                        </p>
-                      </div>
-                      <ArrowRight size={20} className="text-[var(--color-text-muted)] group-hover:text-[var(--color-brand-primary)] group-hover:translate-x-1 transition-all shrink-0 mt-1" />
+                      Cancel and return to dashboard
                     </button>
                   </div>
+                ) : !postJobData ? (
+                  /* ── Step 1: Intent Form ── */
+                  <div className="w-full px-6 py-20 min-h-screen flex flex-col justify-start">
+                      <EmployerJobIntentForm 
+                          onClose={() => setIsPostingJob(false)}
+                          companyName={user?.company_name || "your company"}
+                          onGenerated={(data) => setPostJobData(data)}
+                      />
+                  </div>
+                ) : (
+                  /* ── Step 2: Full Form (Pre-filled) ── */
+                  <>
+                    <div className="sticky top-0 z-10 bg-[var(--color-bg)]/80 backdrop-blur-md border-b border-[var(--color-border)] px-6 py-4 flex items-center justify-between">
+                      <h2 className="text-lg font-bold text-[var(--color-text)]">Review & Publish Job</h2>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => { setIsPostingJob(false); setPostJobData(null); }}
+                      >
+                        ✕ Close
+                      </Button>
+                    </div>
+                    <div className="p-6">
+                      <EmployerJobForm
+                        mode="create"
+                        defaultValues={postJobData}
+                        submitLabel="Publish Job"
+                        onSuccess={async () => {
+                          setIsPostingJob(false);
+                          setPostJobData(null);
+                          setShowCelebration(true);
+                          // Refresh jobs data
+                          if (user?.id) {
+                              const updatedJobs = await getEmployerJobs(user.id);
+                              setJobs(updatedJobs);
+                          }
+                        }}
+                      />
+                    </div>
+                  </>
+                )}
+              </motion.div>
+            </>
+          )}
+        </AnimatePresence>,
+        document.body
+      )}
 
-                  <button 
-                    onClick={() => setIsPostingJob(false)}
-                    className="mt-10 text-sm text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors"
-                  >
-                    Cancel and return to dashboard
-                  </button>
-                </div>
-              ) : !postJobData ? (
-                /* ── Step 1: Intent Form ── */
-                <div className="w-full px-6 py-20 min-h-screen flex flex-col justify-start">
-                    <EmployerJobIntentForm 
-                        onClose={() => setIsPostingJob(false)}
-                        companyName={user?.company_name || "your company"}
-                        onGenerated={(data) => setPostJobData(data)}
-                    />
-                </div>
-              ) : (
-                /* ── Step 2: Full Form (Pre-filled) ── */
-                <>
-                  <div className="sticky top-0 z-10 bg-[var(--color-bg)]/80 backdrop-blur-md border-b border-[var(--color-border)] px-6 py-4 flex items-center justify-between">
-                    <h2 className="text-lg font-bold text-[var(--color-text)]">Review & Publish Job</h2>
+      {/* ── Edit Job Slide-Over Panel ── */}
+      {createPortal(
+        <AnimatePresence>
+          {isEditingJob && editJobData && (
+            <>
+              {/* Backdrop */}
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm"
+                onClick={() => { setIsEditingJob(false); setEditJobData(null); }}
+              />
+              {/* Panel */}
+              <motion.div
+                initial={{ x: "100%" }}
+                animate={{ x: 0 }}
+                exit={{ x: "100%" }}
+                transition={{ type: "spring", damping: 30, stiffness: 300 }}
+                className="fixed top-0 right-0 z-50 h-full w-full max-w-2xl bg-[var(--color-bg)] border-l border-[var(--color-border)] shadow-2xl overflow-y-auto"
+              >
+                <div className="sticky top-0 z-10 bg-[var(--color-bg)]/80 backdrop-blur-md border-b border-[var(--color-border)] px-6 py-4 flex items-center justify-between">
+                  <h2 className="text-lg font-bold text-[var(--color-text)]">Edit Job</h2>
+                  <div className="flex items-center gap-2">
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => { setIsPostingJob(false); setPostJobData(null); }}
+                      className="text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/10"
+                      onClick={async () => {
+                        if (!selectedJobId || !confirm("Are you sure you want to delete this job?")) return;
+                        try {
+                          await deleteJob(selectedJobId);
+                          toast.success("Job deleted");
+                          setJobs(jobs.filter(j => j.id !== selectedJobId));
+                          setSelectedJobId(null);
+                          setActiveView("overview");
+                          setIsEditingJob(false);
+                          setEditJobData(null);
+                        } catch {
+                          toast.error("Failed to delete job");
+                        }
+                      }}
+                    >
+                      Delete Job
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => { setIsEditingJob(false); setEditJobData(null); }}
                     >
                       ✕ Close
                     </Button>
                   </div>
-                  <div className="p-6">
-                    <EmployerJobForm
-                      mode="create"
-                      defaultValues={postJobData}
-                      submitLabel="Publish Job"
-                      onSuccess={async () => {
-                        setIsPostingJob(false);
-                        setPostJobData(null);
-                        setShowCelebration(true);
-                        // Refresh jobs data
-                        if (user?.id) {
-                            const updatedJobs = await getEmployerJobs(user.id);
-                            setJobs(updatedJobs);
-                        }
-                      }}
-                    />
-                  </div>
-                </>
-              )}
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
-
-      {/* ── Edit Job Slide-Over Panel ── */}
-      <AnimatePresence>
-        {isEditingJob && editJobData && (
-          <>
-            {/* Backdrop */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm"
-              onClick={() => { setIsEditingJob(false); setEditJobData(null); }}
-            />
-            {/* Panel */}
-            <motion.div
-              initial={{ x: "100%" }}
-              animate={{ x: 0 }}
-              exit={{ x: "100%" }}
-              transition={{ type: "spring", damping: 30, stiffness: 300 }}
-              className="fixed top-0 right-0 z-50 h-full w-full max-w-2xl bg-[var(--color-bg)] border-l border-[var(--color-border)] shadow-2xl overflow-y-auto"
-            >
-              <div className="sticky top-0 z-10 bg-[var(--color-bg)]/80 backdrop-blur-md border-b border-[var(--color-border)] px-6 py-4 flex items-center justify-between">
-                <h2 className="text-lg font-bold text-[var(--color-text)]">Edit Job</h2>
-                <div className="flex items-center gap-2">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/10"
-                    onClick={async () => {
-                      if (!selectedJobId || !confirm("Are you sure you want to delete this job?")) return;
-                      try {
-                        await deleteJob(selectedJobId);
-                        toast.success("Job deleted");
-                        setJobs(jobs.filter(j => j.id !== selectedJobId));
-                        setSelectedJobId(null);
-                        setActiveView("overview");
-                        setIsEditingJob(false);
-                        setEditJobData(null);
-                      } catch {
-                        toast.error("Failed to delete job");
+                </div>
+                <div className="p-6">
+                  <EmployerJobForm
+                    mode="edit"
+                    defaultValues={editJobData}
+                    onSubmit={async (values) => {
+                      if (!selectedJobId) return;
+                      await updateJobWithTasks(selectedJobId, values);
+                    }}
+                    submitLabel="Update Job"
+                    onSuccess={async () => {
+                      toast.success("Job updated!");
+                      setIsEditingJob(false);
+                      setEditJobData(null);
+                      // Refresh jobs data
+                      if (user?.id) {
+                        const updatedJobs = await getEmployerJobs(user.id);
+                        setJobs(updatedJobs);
                       }
                     }}
-                  >
-                    Delete Job
-                  </Button>
+                  />
+                </div>
+              </motion.div>
+            </>
+          )}
+        </AnimatePresence>,
+        document.body
+      )}
+
+      {/* ── Review Proof Slide-Over Panel ── */}
+      {createPortal(
+        <AnimatePresence>
+          {selectedSubmissionId && (
+            <>
+              {/* Backdrop */}
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm"
+                onClick={() => setSelectedSubmissionId(null)}
+              />
+              {/* Panel */}
+              <motion.div
+                initial={{ x: "100%" }}
+                animate={{ x: 0 }}
+                exit={{ x: "100%" }}
+                transition={{ type: "spring", damping: 30, stiffness: 300 }}
+                className="fixed top-0 right-0 z-50 h-full w-full max-w-3xl bg-[var(--color-bg)] border-l border-[var(--color-border)] shadow-2xl overflow-y-auto"
+              >
+                <div className="sticky top-0 z-10 bg-[var(--color-bg)]/80 backdrop-blur-md border-b border-[var(--color-border)] px-6 py-4 flex items-center justify-between">
+                  <h2 className="text-lg font-bold text-[var(--color-text)]">Review Proof</h2>
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={() => { setIsEditingJob(false); setEditJobData(null); }}
+                    onClick={() => setSelectedSubmissionId(null)}
                   >
                     ✕ Close
                   </Button>
                 </div>
-              </div>
-              <div className="p-6">
-                <EmployerJobForm
-                  mode="edit"
-                  defaultValues={editJobData}
-                  onSubmit={async (values) => {
-                    if (!selectedJobId) return;
-                    await updateJobWithTasks(selectedJobId, values);
-                  }}
-                  submitLabel="Update Job"
-                  onSuccess={async () => {
-                    toast.success("Job updated!");
-                    setIsEditingJob(false);
-                    setEditJobData(null);
-                    // Refresh jobs data
-                    if (user?.id) {
-                      const updatedJobs = await getEmployerJobs(user.id);
-                      setJobs(updatedJobs);
-                    }
-                  }}
-                />
-              </div>
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
-
-      {/* ── Review Proof Slide-Over Panel ── */}
-      <AnimatePresence>
-        {selectedSubmissionId && (
-          <>
-            {/* Backdrop */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm"
-              onClick={() => setSelectedSubmissionId(null)}
-            />
-            {/* Panel */}
-            <motion.div
-              initial={{ x: "100%" }}
-              animate={{ x: 0 }}
-              exit={{ x: "100%" }}
-              transition={{ type: "spring", damping: 30, stiffness: 300 }}
-              className="fixed top-0 right-0 z-50 h-full w-full max-w-3xl bg-[var(--color-bg)] border-l border-[var(--color-border)] shadow-2xl overflow-y-auto"
-            >
-              <div className="sticky top-0 z-10 bg-[var(--color-bg)]/80 backdrop-blur-md border-b border-[var(--color-border)] px-6 py-4 flex items-center justify-between">
-                <h2 className="text-lg font-bold text-[var(--color-text)]">Review Proof</h2>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setSelectedSubmissionId(null)}
-                >
-                  ✕ Close
-                </Button>
-              </div>
-              <div className="p-0">
-                <EmployerReviewProof
-                  submissionId={selectedSubmissionId}
-                  onBack={() => setSelectedSubmissionId(null)}
-                />
-              </div>
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
+                <div className="p-0">
+                  <EmployerReviewProof
+                    submissionId={selectedSubmissionId}
+                    onBack={() => setSelectedSubmissionId(null)}
+                  />
+                </div>
+              </motion.div>
+            </>
+          )}
+        </AnimatePresence>,
+        document.body
+      )}
 
       {/* Success Celebration Overlay */}
       <SuccessCelebration

@@ -1,4 +1,5 @@
 import { useEffect, useState, useMemo } from "react";
+import { createPortal } from "react-dom";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { getEmployerSubmissionsWithFeedback } from "@/lib/api";
@@ -189,49 +190,52 @@ export default function EmployerInbox() {
             </div>
 
             {/* Review Slide-Over Panel */}
-            <AnimatePresence>
-                {selectedSubmissionId && (
-                    <>
-                        <motion.div
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
-                            className="fixed inset-0 z-[60] bg-black/50 backdrop-blur-sm"
-                            onClick={() => setSelectedSubmissionId(null)}
-                        />
-                        <motion.div
-                            initial={{ x: "100%" }}
-                            animate={{ x: 0 }}
-                            exit={{ x: "100%" }}
-                            transition={{ type: "spring", damping: 30, stiffness: 300 }}
-                            className="fixed top-0 right-0 z-[70] h-full w-full max-w-3xl bg-[var(--color-bg)] border-l border-[var(--color-border)] shadow-2xl overflow-y-auto"
-                        >
-                            <div className="sticky top-0 z-10 bg-[var(--color-bg)]/80 backdrop-blur-md border-b border-[var(--color-border)] px-6 py-4 flex items-center justify-between">
-                                <h2 className="text-lg font-bold text-[var(--color-text)]">Review Submission</h2>
-                                <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    onClick={() => setSelectedSubmissionId(null)}
-                                >
-                                    ✕ Close
-                                </Button>
-                            </div>
-                            <div className="p-0">
-                                <EmployerReviewProof
-                                    submissionId={selectedSubmissionId}
-                                    onBack={() => {
-                                        setSelectedSubmissionId(null);
-                                        // Refresh the list after review
-                                        if (user?.id) {
-                                            getEmployerSubmissionsWithFeedback(user.id).then(setSubmissions);
-                                        }
-                                    }}
-                                />
-                            </div>
-                        </motion.div>
-                    </>
-                )}
-            </AnimatePresence>
+            {createPortal(
+                <AnimatePresence>
+                    {selectedSubmissionId && (
+                        <>
+                            <motion.div
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                exit={{ opacity: 0 }}
+                                className="fixed inset-0 z-[60] bg-black/50 backdrop-blur-sm"
+                                onClick={() => setSelectedSubmissionId(null)}
+                            />
+                            <motion.div
+                                initial={{ x: "100%" }}
+                                animate={{ x: 0 }}
+                                exit={{ x: "100%" }}
+                                transition={{ type: "spring", damping: 30, stiffness: 300 }}
+                                className="fixed top-0 right-0 z-[70] h-full w-full max-w-3xl bg-[var(--color-bg)] border-l border-[var(--color-border)] shadow-2xl overflow-y-auto"
+                            >
+                                <div className="sticky top-0 z-10 bg-[var(--color-bg)]/80 backdrop-blur-md border-b border-[var(--color-border)] px-6 py-4 flex items-center justify-between">
+                                    <h2 className="text-lg font-bold text-[var(--color-text)]">Review Submission</h2>
+                                    <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        onClick={() => setSelectedSubmissionId(null)}
+                                    >
+                                        ✕ Close
+                                    </Button>
+                                </div>
+                                <div className="p-0">
+                                    <EmployerReviewProof
+                                        submissionId={selectedSubmissionId}
+                                        onBack={() => {
+                                            setSelectedSubmissionId(null);
+                                            // Refresh the list after review
+                                            if (user?.id) {
+                                                getEmployerSubmissionsWithFeedback(user.id).then(setSubmissions);
+                                            }
+                                        }}
+                                    />
+                                </div>
+                            </motion.div>
+                        </>
+                    )}
+                </AnimatePresence>,
+                document.body
+            )}
         </div>
     );
 }
