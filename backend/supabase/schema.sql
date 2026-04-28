@@ -1,6 +1,6 @@
 -- ============================================================
 -- Bevisly MVP Database Schema
--- Version: v0.4 (Final MVP Candidate)
+-- Version: v0.5 (Secured & Hardened)
 -- Description: Core tables, Views, Functions, and Security Policies
 -- ============================================================
 
@@ -231,19 +231,6 @@ as $$
   );
 $$;
 
--- Helper: Promote Self to Admin (Dev Utility)
-create or replace function promote_to_admin()
-returns void
-language plpgsql
-security definer
-as $$
-begin
-  update public.profiles
-  set role = 'admin'
-  where id = auth.uid();
-end;
-$$;
-
 -- Helper: Auto-create Profile on Auth Signup
 create or replace function handle_new_user()
 returns trigger
@@ -255,7 +242,7 @@ begin
   values (
     new.id,
     new.email,
-    coalesce(new.raw_user_meta_data->>'role', 'candidate'),
+    'candidate', -- Default role for all new signups
     new.raw_user_meta_data->>'full_name'
   );
   return new;
@@ -391,14 +378,49 @@ create policy "Users view own transactions"
   on credit_transactions for select 
   using (auth.uid() = user_id);
 
--- STORAGE POLICIES (New)
--- Ensure 'proofs' bucket is created in storage section first
--- create policy "Allow authenticated uploads"
---   on storage.objects for insert
---   to authenticated
---   with check ( bucket_id = 'proofs' );
+-- STORAGE POLICIES
+-- Ensure 'proofs', 'resumes', and 'avatars' buckets are created in storage section
 
--- create policy "Allow public viewing"
---   on storage.objects for select
---   to public
---   using ( bucket_id = 'proofs' );
+create policy "Candidates can upload proofs"
+  on storage.objects for insert
+  to authenticated
+  with check (
+    bucket_id = 'proofs' AND 
+    (storage.foldername(name))[1] = auth.uid()::text AND
+    (storage.extension(name) = any(array['pdf', 'zip', 'txt', 'jpg', 'png', 'jpeg'])) AND
+    ((metadata->>'size')::bigint < 10485760) -- 10MB limit
+  );
+
+create policy "Anyone can view proofs"
+  on storage.objects for select
+  to public
+  using ( bucket_id = 'proofs' );
+
+create policy "Candidates can upload own resumes"
+  on storage.objects for insert
+  to authenticated
+  with check (
+    bucket_id = 'resumes' AND 
+    (storage.foldername(name))[1] = auth.uid()::text AND
+    (storage.extension(name) = any(array['pdf', 'doc', 'docx'])) AND
+    ((metadata->>'size')::bigint < 5242880) -- 5MB limit
+  );
+
+create policy "Public read access for resumes"
+  on storage.objects for select
+  to public
+  using ( bucket_id = 'resumes' );
+
+create policy "Users can upload own avatar"
+  on storage.objects for insert
+  to authenticated
+  with check (
+    bucket_id = 'avatars' AND
+    (storage.extension(name) = any(array['jpg', 'png', 'jpeg', 'webp'])) AND
+    ((metadata->>'size')::bigint < 2097152) -- 2MB limit
+  );
+
+create policy "Public can view avatars"
+  on storage.objects for select
+  to public
+  using ( bucket_id = 'avatars' );
