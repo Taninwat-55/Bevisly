@@ -18,7 +18,6 @@ import {
   Search,
   Inbox,
   Users,
-  Star,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";

@@ -148,11 +148,11 @@ export default function EmployerJobForm({
     setLoading(true);
     try {
       if (mode === "edit" && onSubmit) {
-        await onSubmit(values as any);
+        await onSubmit(values as Partial<EmployerJob & { proof_tasks?: ProofTask[] }>);
         toast.success("Job updated successfully!");
         onSuccess?.();
       } else {
-        await createJobWithTasks(values as any);
+        await createJobWithTasks(values as Partial<EmployerJob & { proof_tasks?: ProofTask[] }>);
         toast.success("Job posted successfully!");
         onSuccess?.();
         navigate("/employer");
