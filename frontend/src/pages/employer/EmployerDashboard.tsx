@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import toast from "react-hot-toast";
 import {
   getEmployerJobs,
@@ -44,6 +44,7 @@ import { AnimatePresence, motion } from "framer-motion";
 export default function EmployerDashboard() {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
 
   // Data State
   const [jobs, setJobs] = useState<EmployerJob[]>([]);
@@ -68,6 +69,31 @@ export default function EmployerDashboard() {
   // Logic: if isPostingJob is true:
   //   - if postJobData is null -> Show Intent Form
   //   - if postJobData is set -> Show Main Form (pre-filled)
+  
+  // Listen for global "Post Job" trigger via URL
+  useEffect(() => {
+    if (searchParams.get("post") === "true") {
+      setPostJobData(null);
+      setIsPostingJob(true);
+      
+      // Clean up only the 'post' param, preserving others (like jobId)
+      const newParams = new URLSearchParams(searchParams);
+      newParams.delete("post");
+      setSearchParams(newParams, { replace: true });
+    }
+  }, [searchParams, setSearchParams]);
+
+  // Listen for global context switcher (jobId)
+  useEffect(() => {
+    const jobId = searchParams.get("jobId");
+    if (jobId) {
+      setSelectedJobId(jobId);
+      setActiveView("kanban");
+    } else {
+      setSelectedJobId(null);
+      setActiveView("overview");
+    }
+  }, [searchParams]);
 
   const handleStatusUpdate = async (status: string) => {
     if (!selectedJobId) return;
@@ -331,8 +357,8 @@ export default function EmployerDashboard() {
                           setIsPostingJob(true);
                         }}
                         size="lg"
-                        className="shadow-glow-primary"
-                        leftIcon={<Plus size={18} />}
+                        className="bg-gradient-to-br from-indigo-600 to-blue-500 hover:from-indigo-500 hover:to-blue-400 border-0 text-white font-bold"
+                        leftIcon={<Plus size={18} strokeWidth={3} />}
                       >
                         Post a Job
                       </Button>
@@ -396,8 +422,8 @@ export default function EmployerDashboard() {
                                 setIsPostingJob(true);
                             }}
                             size="lg"
-                            className="shadow-glow-primary"
-                            leftIcon={<Plus size={18} />}
+                            className="bg-gradient-to-br from-indigo-600 to-blue-500 hover:from-indigo-500 hover:to-blue-400 border-0 text-white font-bold"
+                            leftIcon={<Plus size={18} strokeWidth={3} />}
                         >
                             Post Your First Role
                         </Button>
