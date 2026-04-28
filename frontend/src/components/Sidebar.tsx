@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { NavLink } from "react-router-dom";
+import { NavLink, Link } from "react-router-dom";
 import {
   LayoutDashboard,
   Briefcase,
@@ -35,13 +35,13 @@ export default function Sidebar({ role }: SidebarProps) {
   } as const;
   const accentColor = accentColorMap[resolvedRole];
 
-  /* Role-based links */
+  /* Role-based links (Settings removed from here) */
   const links =
     resolvedRole === "employer"
       ? [
         { to: "/employer", label: "Overview", icon: <House size={17} /> },
         {
-          to: "/employer",
+          to: "/employer/dashboard",
           label: "Dashboard",
           icon: <LayoutDashboard size={17} />,
         },
@@ -60,11 +60,6 @@ export default function Sidebar({ role }: SidebarProps) {
           label: "Submissions",
           icon: <FolderKanban size={17} />,
         },
-        {
-          to: "/employer/settings",
-          label: "Settings",
-          icon: <Settings size={17} />,
-        },
       ]
       : resolvedRole === "admin"
         ? [
@@ -74,11 +69,6 @@ export default function Sidebar({ role }: SidebarProps) {
             to: "/admin/jobs",
             label: "Jobs Overview",
             icon: <Briefcase size={17} />,
-          },
-          {
-            to: "/admin/settings",
-            label: "Settings",
-            icon: <Settings size={17} />,
           },
         ]
         : [
@@ -97,11 +87,6 @@ export default function Sidebar({ role }: SidebarProps) {
             to: "/candidate/proofs",
             label: "My Proofs",
             icon: <FileText size={17} />,
-          },
-          {
-            to: "/candidate/settings",
-            label: "Settings",
-            icon: <Settings size={17} />,
           },
         ];
 
@@ -132,13 +117,13 @@ export default function Sidebar({ role }: SidebarProps) {
       </div>
 
       {/* Navigation */}
-      <nav className="flex flex-col px-2 py-3 space-y-1">
+      <nav className="flex-1 flex flex-col px-2 py-3 space-y-1 overflow-y-auto">
         {links.map(({ to, label, icon }) => (
           <NavLink
             key={to}
             to={to}
             end
-            title={label} // tooltip for collapsed mode
+            title={label}
             className={({ isActive }) =>
               `flex items-center gap-3 px-3 py-2 rounded-[var(--radius-button)] text-sm font-medium transition-all
      ${isActive
@@ -158,8 +143,16 @@ export default function Sidebar({ role }: SidebarProps) {
         ))}
       </nav>
 
-      {/* Footer / Logout */}
-      <div className="mt-auto px-2 py-4 border-t border-[var(--color-border)]">
+      {/* Footer / User Settings & Logout */}
+      <div className="mt-auto px-2 py-4 border-t border-[var(--color-border)] space-y-1">
+        <Link
+          to={`/${resolvedRole}/settings`}
+          className="flex items-center gap-3 px-3 py-2 w-full rounded-[var(--radius-button)] text-sm font-medium transition-all text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[var(--color-bg)]"
+          title="Settings"
+        >
+          <Settings size={17} />
+          {!collapsed && <span>Settings</span>}
+        </Link>
         <button
           onClick={() => {
             if (confirm("Are you sure you want to log out?")) {

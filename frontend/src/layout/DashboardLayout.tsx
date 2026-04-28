@@ -25,16 +25,18 @@ export default function DashboardLayout({ children, showSidebar = true, fullWidt
     const navigate = useNavigate();
 
     const handleSignOut = async () => {
-        await signOut();
-        navigate("/");
+        if (confirm("Are you sure you want to log out?")) {
+            await signOut();
+            navigate("/");
+        }
     };
 
     // Determine role-based links
     const role = user?.role || "candidate";
 
+    // "Settings" removed from main nav links array
     const links = role === "employer" ? [
         { label: "Dashboard", path: "/employer", icon: LayoutDashboard },
-        { label: "Settings", path: "/employer/settings", icon: Settings },
     ] : role === "admin" ? [
         { label: "Overview", path: "/admin", icon: LayoutDashboard },
         { label: "Data Viewer", path: "/admin/data", icon: FileCheck },
@@ -42,7 +44,6 @@ export default function DashboardLayout({ children, showSidebar = true, fullWidt
         { label: "Dashboard", path: "/candidate", icon: LayoutDashboard },
         { label: "Find Jobs", path: "/candidate/jobs", icon: Briefcase },
         { label: "My Proofs", path: "/candidate/proofs", icon: FileCheck },
-        { label: "Settings", path: "/candidate/settings", icon: Settings },
     ];
 
     return (
@@ -110,47 +111,62 @@ export default function DashboardLayout({ children, showSidebar = true, fullWidt
                     })}
                 </nav>
 
-                {/* User Footer */}
-                <div className="p-4 border-t border-[var(--color-border)]/50">
+                {/* User Footer (Now includes Settings) */}
+                <div className="p-4 border-t border-[var(--color-border)]/50 bg-[var(--color-surface-hover)]/30">
                     <div className={`flex items-center ${isSidebarOpen ? "gap-3" : "justify-center"}`}>
-                        <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-slate-200 to-slate-100 dark:from-slate-700 dark:to-slate-800 flex items-center justify-center border border-[var(--color-border)] shrink-0">
-                            <span className="font-semibold text-[var(--color-text)]">
-                                {user?.avatar_url ? (
-                                    <img src={user.avatar_url} alt="User" className="w-full h-full object-cover rounded-full" />
-                                ) : (
-                                    (
-                                        user?.company_name?.[0]?.toUpperCase() ||
-                                        user?.full_name?.[0]?.toUpperCase() ||
-                                        user?.email?.[0].toUpperCase()
-                                    )
-                                )}
-                            </span>
-                        </div>
-
-                        {isSidebarOpen && (
-                            <div className="overflow-hidden">
-                                {role === "employer" && user?.company_name ? (
-                                    <>
-                                        <p className="text-sm font-medium text-[var(--color-text)] truncate">{user.company_name}</p>
-                                        <p className="text-xs text-slate-500 dark:text-slate-400 truncate">{user.full_name || user.email}</p>
-                                    </>
-                                ) : (
-                                    <>
-                                        <p className="text-sm font-medium text-[var(--color-text)] truncate">{user?.full_name || user?.email}</p>
-                                        {user?.full_name && <p className="text-xs text-slate-500 dark:text-slate-400 truncate">{user.email}</p>}
-                                    </>
-                                )}
+                        <Link 
+                            to={`/${role}/settings`}
+                            className={`flex items-center gap-3 group overflow-hidden ${!isSidebarOpen ? "justify-center" : "flex-1"}`}
+                            title="Account Settings"
+                        >
+                            <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-slate-200 to-slate-100 dark:from-slate-700 dark:to-slate-800 flex items-center justify-center border border-[var(--color-border)] shrink-0 group-hover:border-[var(--color-brand-primary)] transition-all shadow-sm group-hover:shadow-glow-primary/20">
+                                <span className="font-semibold text-[var(--color-text)]">
+                                    {user?.avatar_url ? (
+                                        <img src={user.avatar_url} alt="User" className="w-full h-full object-cover rounded-full" />
+                                    ) : (
+                                        (
+                                            user?.company_name?.[0]?.toUpperCase() ||
+                                            user?.full_name?.[0]?.toUpperCase() ||
+                                            user?.email?.[0].toUpperCase()
+                                        )
+                                    )}
+                                </span>
                             </div>
-                        )}
+
+                            {isSidebarOpen && (
+                                <div className="overflow-hidden text-left">
+                                    {role === "employer" && user?.company_name ? (
+                                        <>
+                                            <p className="text-sm font-semibold text-[var(--color-text)] truncate group-hover:text-[var(--color-brand-primary)] transition-colors">{user.company_name}</p>
+                                            <p className="text-[10px] text-slate-500 dark:text-slate-400 truncate uppercase tracking-wider">{user.full_name || "Employer"}</p>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <p className="text-sm font-semibold text-[var(--color-text)] truncate group-hover:text-[var(--color-brand-primary)] transition-colors">{user?.full_name || user?.email}</p>
+                                            {user?.full_name && <p className="text-[10px] text-slate-500 dark:text-slate-400 truncate uppercase tracking-wider">Candidate</p>}
+                                        </>
+                                    )}
+                                </div>
+                            )}
+                        </Link>
 
                         {isSidebarOpen && (
-                            <button
-                                onClick={handleSignOut}
-                                className="ml-auto p-2 text-[var(--color-text-muted)] hover:text-red-500 transition-colors"
-                                title="Sign Out"
-                            >
-                                <LogOut size={18} />
-                            </button>
+                            <div className="flex items-center gap-0.5">
+                                <Link
+                                    to={`/${role}/settings`}
+                                    className="p-2 text-[var(--color-text-muted)] hover:text-[var(--color-brand-primary)] hover:bg-[var(--color-brand-primary)]/10 rounded-lg transition-all"
+                                    title="Settings"
+                                >
+                                    <Settings size={18} />
+                                </Link>
+                                <button
+                                    onClick={handleSignOut}
+                                    className="p-2 text-[var(--color-text-muted)] hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-all"
+                                    title="Sign Out"
+                                >
+                                    <LogOut size={18} />
+                                </button>
+                            </div>
                         )}
                     </div>
                 </div>

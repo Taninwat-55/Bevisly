@@ -8,6 +8,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import MFAChallengeModal from "@/components/auth/MFAChallengeModal";
+import BackButton from "@/components/common/BackButton";
+import { Link } from "react-router-dom";
 
 const GoogleIcon = () => (
   <svg viewBox="0 0 24 24" width="18" height="18" xmlns="http://www.w3.org/2000/svg">
@@ -275,12 +277,12 @@ export default function AuthPage() {
         <div className="absolute bottom-[-20%] left-[-10%] w-[600px] h-[600px] bg-[var(--color-brand-secondary)]/20 rounded-full blur-[120px]" />
 
         <div className="relative z-10">
-          <div className="flex items-center gap-3 mb-12">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[var(--color-brand-primary)] to-[var(--color-brand-secondary)] flex items-center justify-center font-bold text-lg shadow-glow-primary">
+          <Link to="/" className="inline-flex items-center gap-3 mb-12 hover:opacity-80 transition-opacity group">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[var(--color-brand-primary)] to-[var(--color-brand-secondary)] flex items-center justify-center font-bold text-lg shadow-glow-primary group-hover:scale-105 transition-transform">
               B
             </div>
             <span className="text-2xl font-bold font-display tracking-tight">Bevisly</span>
-          </div>
+          </Link>
 
           <div className="max-w-md">
             <h2 className="text-4xl md:text-5xl font-bold font-display mb-6 leading-tight">
@@ -315,14 +317,18 @@ export default function AuthPage() {
 
       {/* ── RIGHT SIDE: Form ───────────────────────────── */}
       <div className="flex items-center justify-center p-6 sm:p-12 relative">
+        <div className="absolute left-4 top-4">
+          <BackButton to="/" label="Back to Website" variant="ghost" />
+        </div>
+
         <div className="w-full max-w-md space-y-8">
 
-          <div className="lg:hidden flex items-center gap-2 mb-8">
+          <Link to="/" className="lg:hidden flex items-center gap-2 mb-8">
             <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[var(--color-brand-primary)] to-[var(--color-brand-secondary)] flex items-center justify-center text-white font-bold">
               B
             </div>
             <span className="text-xl font-bold font-display text-[var(--color-text)]">Bevisly</span>
-          </div>
+          </Link>
 
           <div className="text-center lg:text-left">
             <h1 className="text-3xl font-bold font-display text-[var(--color-text)] tracking-tight mb-2">
