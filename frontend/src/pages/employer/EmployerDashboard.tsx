@@ -310,14 +310,14 @@ export default function EmployerDashboard() {
               />
 
               {/* ── Hero Section ────────────────────────────── */}
-              <div className="relative group overflow-hidden rounded-3xl p-8 lg:p-10 border border-[var(--color-border)] bg-[var(--color-surface)] shadow-2xl mb-8">
+              <div className="relative group overflow-hidden rounded-2xl md:rounded-3xl p-6 md:p-8 lg:p-10 border border-[var(--color-border)] bg-[var(--color-surface)] shadow-2xl mb-8">
                 {/* Background Gradient/Mesh */}
                 <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-gradient-to-br from-[var(--color-brand-primary)]/10 to-[var(--color-brand-secondary)]/10 rounded-full blur-[100px] -z-10 translate-x-1/3 -translate-y-1/3" />
 
                 <div className="relative z-10">
                   <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                     <div>
-                      <h1 className="text-3xl md:text-4xl font-bold font-display text-[var(--color-text)] mb-2">
+                      <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold font-display text-[var(--color-text)] mb-2">
                         Welcome back, <span className="text-transparent bg-clip-text bg-gradient-to-r from-[var(--color-brand-primary)] to-[var(--color-brand-secondary)] capitalize">{user?.full_name || user?.company_name || "Employer"}</span>
                       </h1>
                       <p className="text-[var(--color-text-muted)] text-lg max-w-xl">
@@ -382,7 +382,7 @@ export default function EmployerDashboard() {
                     <h2 className="text-xl font-bold font-display text-[var(--color-text)]">Active Jobs</h2>
                 </div>
                 {jobs.length === 0 ? (
-                    <div className="text-center p-12 border border-dashed border-[var(--color-border)] rounded-2xl bg-[var(--color-surface)] shadow-sm">
+                    <div className="text-center p-8 md:p-12 border border-dashed border-[var(--color-border)] rounded-2xl bg-[var(--color-surface)] shadow-sm">
                         <div className="w-16 h-16 mx-auto bg-[var(--color-brand-primary)]/10 text-[var(--color-brand-primary)] rounded-full flex items-center justify-center mb-4">
                             <Briefcase size={32} />
                         </div>

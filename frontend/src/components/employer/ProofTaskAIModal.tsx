@@ -3,6 +3,7 @@ import { X, Sparkles, Loader2, Check, AlertCircle, RefreshCw } from "lucide-reac
 import ReactMarkdown from "react-markdown";
 import DOMPurify from "dompurify";
 import toast from "react-hot-toast";
+import AILoadingState from "../common/AILoadingState";
 
 interface ProofTaskAIModalProps {
   isOpen: boolean;
@@ -53,7 +54,7 @@ export default function ProofTaskAIModal({
       const controller = new AbortController();
       const timeoutId = setTimeout(() => {
         controller.abort();
-      }, 20000); // 20s timeout
+      }, 120000); // Increased timeout to 120s
       
       const response = await fetch(`${SUPABASE_URL}/functions/v1/generate-proof-task`, {
         method: 'POST',
@@ -125,16 +126,7 @@ export default function ProofTaskAIModal({
           
           {/* Loading State */}
           {isGenerating && (
-            <div className="flex flex-col items-center justify-center py-12 space-y-4 text-center">
-              <div className="relative">
-                <div className="absolute inset-0 bg-purple-500/20 blur-xl rounded-full"></div>
-                <Loader2 className="w-12 h-12 text-[var(--color-brand-primary)] animate-spin relative z-10" />
-              </div>
-              <div>
-                 <p className="text-lg font-medium text-[var(--color-text)]">Generating Challenge...</p>
-                 <p className="text-sm text-[var(--color-text-muted)]">Analyzing job description matching "{jobTitle}"</p>
-              </div>
-            </div>
+            <AILoadingState />
           )}
 
           {/* Error State */}

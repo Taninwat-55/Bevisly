@@ -70,7 +70,7 @@ export default function CandidateDashboard() {
           </div>
 
           {/* Stats Row within Hero */}
-          <div className="grid grid-cols-3 gap-4 mt-8 md:mt-12 max-w-2xl">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-8 md:mt-12 max-w-2xl">
             <div className="glass-panel bg-white/50 dark:bg-black/20 p-4 rounded-2xl border border-[var(--color-border)]/50 backdrop-blur-md">
               <div className="flex items-center gap-3 mb-1">
                 <div className="p-2 rounded-lg bg-emerald-500/10 text-emerald-500">
@@ -125,16 +125,16 @@ export default function CandidateDashboard() {
         ) : (
           <div className="grid md:grid-cols-3 gap-6">
             {jobs.length === 0 ? (
-              <div className="col-span-3 text-center p-12 border border-dashed border-[var(--color-border)] rounded-2xl bg-[var(--color-surface)] shadow-sm">
+              <div className="col-span-full text-center p-8 md:p-12 border border-dashed border-[var(--color-border)] rounded-2xl bg-[var(--color-surface)] shadow-sm">
                  <div className="w-16 h-16 mx-auto bg-[var(--color-brand-primary)]/10 text-[var(--color-brand-primary)] rounded-full flex items-center justify-center mb-4">
                      <Briefcase size={32} />
                  </div>
-                 <h3 className="text-xl font-bold text-[var(--color-text)] mb-2">No recommended roles right now</h3>
+                 <h3 className="text-xl font-bold text-[var(--color-text)] mb-2">Your next opportunity awaits!</h3>
                  <p className="text-[var(--color-text-muted)] max-w-md mx-auto mb-6">
-                     Complete your first proof task to start getting matched with companies.
+                     No roles to show yet — browse open positions and complete a proof task to get matched with top companies.
                  </p>
                  <Button onClick={() => window.location.href = '/candidate/jobs'} size="lg" className="shadow-glow-primary bg-[var(--color-brand-primary)] text-white hover:bg-blue-700">
-                     Browse All Jobs
+                     Go Find Your First Role →
                  </Button>
               </div>
             ) : (

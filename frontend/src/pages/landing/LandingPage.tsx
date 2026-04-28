@@ -7,6 +7,7 @@ import { useAuth } from "@/hooks/useAuth";
 import type { GeneratedJobListing } from "@/lib/api/ai";
 import { generateJobListing } from "@/lib/api/ai";
 import toast from "react-hot-toast";
+import AILoadingState from "@/components/common/AILoadingState";
 import UserMenu from "@/components/common/UserMenu";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
 import RequestAccessModal from "@/components/common/RequestAccessModal";
@@ -266,20 +267,8 @@ export default function LandingPage() {
                   <div className="flex-1 flex overflow-hidden">
                     {isGenerating ? (
                       /* ── STATE 1: GENERATING (SKELETON) ── */
-                      <div className="flex-1 flex flex-col items-center justify-center p-8 space-y-6 animate-pulse">
-                        <div className="w-16 h-16 rounded-full bg-gradient-to-br from-[var(--color-brand-primary)] to-[var(--color-brand-secondary)] flex items-center justify-center text-white shadow-[0_0_30px_rgba(var(--color-brand-primary),0.3)] animate-bounce">
-                          <CheckCircle size={32} />
-                        </div>
-                        <div className="text-center space-y-2">
-                           <h3 className="text-xl font-bold font-sans text-white">Analyzing Requirements...</h3>
-                           <p className="text-slate-400 font-mono text-sm max-w-sm mx-auto">Gemini AI is extracting the ideal job title, requirements, and building a practical Proof Task.</p>
-                        </div>
-                        
-                        <div className="w-full max-w-md space-y-3 mt-4">
-                           <div className="h-4 w-3/4 bg-slate-800 rounded"></div>
-                           <div className="h-4 w-1/2 bg-slate-800 rounded"></div>
-                           <div className="h-4 w-5/6 bg-slate-800 rounded"></div>
-                        </div>
+                      <div className="flex-1 flex flex-col items-center justify-center p-8 bg-slate-900/50">
+                        <AILoadingState variant="dark" />
                       </div>
                     ) : generatedData ? (
 
@@ -446,8 +435,6 @@ export default function LandingPage() {
             </div>
           </div>
         </section>
-
-
 
         {/* ── FEATURES GRID (Bento) ────────────────────────────── */}
         <section id="features" className="py-24 bg-[var(--color-bg)]">
@@ -688,7 +675,7 @@ export default function LandingPage() {
                       <li className="flex items-center gap-3"><Check size={16} className="text-[var(--color-brand-primary)]" /> <span>Everything in Pro</span></li>
                       <li className="flex items-center gap-3"><Check size={16} className="text-[var(--color-brand-primary)]" /> <span>Multi-seat Team Collaboration</span></li>
                       <li className="flex items-center gap-3"><Check size={16} className="text-[var(--color-brand-primary)]" /> <span>Advanced Cohort Analytics</span></li>
-                      <li className="flex items-center gap-3"><Check size={16} className="text-[var(--color-brand-primary)]" /> <span>Dedicated Success Manager</span></li>
+                      <li className="flex items-center gap-3"><Check size={16} className="text(--color-brand-primary)]" /> <span>Dedicated Success Manager</span></li>
                     </ul>
                   </div>
                 </>

@@ -1,5 +1,6 @@
 // supabase/functions/generate-job-listing/index.ts
-import { createClient } from "npm:@supabase/supabase-js@2";
+import "jsr:@supabase/functions-js/edge-runtime.d.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
     "Access-Control-Allow-Origin": "*",
@@ -99,7 +100,7 @@ Deno.serve(async (req) => {
       }
     `;
 
-        const model = "gemini-1.5-flash"; // Using stable flash model
+        const model = "gemini-2.5-flash"; // Updated from deprecated 1.5-flash
         const TIMEOUT_MS = 115000;
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), TIMEOUT_MS);

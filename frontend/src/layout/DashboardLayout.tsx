@@ -54,7 +54,7 @@ export default function DashboardLayout({ children, showSidebar = true, fullWidt
             <motion.aside
                 initial={false}
                 animate={{ width: isSidebarOpen ? 280 : 80 }}
-                className="fixed inset-y-0 left-0 z-40 flex flex-col glass-panel border-r border-[var(--glass-border)] transition-all duration-300 backdrop-blur-xl"
+                className="fixed inset-y-0 left-0 z-40 hidden md:flex flex-col glass-panel border-r border-[var(--glass-border)] transition-all duration-300 backdrop-blur-xl"
             >
                 {/* Brand */}
                 <Link to="/" className={`h-20 flex items-center ${isSidebarOpen ? "px-8" : "justify-center"} border-b border-[var(--color-border)]/50 hover:bg-[var(--color-surface-hover)] transition-colors`}>
@@ -188,22 +188,22 @@ export default function DashboardLayout({ children, showSidebar = true, fullWidt
                 className="flex-1 flex flex-col transition-all duration-300 min-h-screen"
                 style={{ marginLeft: showSidebar ? (isSidebarOpen ? 280 : 80) : 0 }}
             >
+                {/* Mobile: zero left margin since sidebar is hidden */}
+                <style>{`@media (max-width: 767px) { [style*="margin-left"] { margin-left: 0 !important; } }`}</style>
 
                 {/* Header */}
-                <header className="h-20 glass-panel border-b border-[var(--glass-border)] sticky top-0 z-30 px-8 flex items-center justify-between backdrop-blur-md">
+                <header className="h-16 md:h-20 glass-panel border-b border-[var(--glass-border)] sticky top-0 z-30 px-4 md:px-8 flex items-center justify-between backdrop-blur-md">
                     <div className="flex items-center gap-4">
 
-                        {/* Logo (Visible when sidebar is hidden) */}
-                        {!showSidebar && (
-                            <Link to="/" className="flex items-center gap-2 mr-4">
-                                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[var(--color-brand-primary)] to-[var(--color-brand-secondary)] flex items-center justify-center text-white font-bold text-sm shadow-glow-primary shrink-0">
-                                    B
-                                </div>
-                                <span className="text-lg font-bold font-display text-[var(--color-text)] tracking-tight">
-                                    Bevisly
-                                </span>
-                            </Link>
-                        )}
+                        {/* Logo (Visible on mobile where sidebar is hidden, or when showSidebar is false) */}
+                        <Link to="/" className={`flex items-center gap-2 mr-4 ${showSidebar ? 'md:hidden' : ''}`}>
+                            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[var(--color-brand-primary)] to-[var(--color-brand-secondary)] flex items-center justify-center text-white font-bold text-sm shadow-glow-primary shrink-0">
+                                B
+                            </div>
+                            <span className="text-lg font-bold font-display text-[var(--color-text)] tracking-tight">
+                                Bevisly
+                            </span>
+                        </Link>
 
                         {/* Breadcrumbs (Mock) */}
                         <div className="hidden md:flex items-center gap-2 text-sm text-[var(--color-text-muted)]">
@@ -228,7 +228,7 @@ export default function DashboardLayout({ children, showSidebar = true, fullWidt
                 </header>
 
                 {/* Content Area */}
-                <main className={`flex-1 overflow-x-hidden ${fullWidth ? 'p-0' : 'p-8'}`}>
+                <main className={`flex-1 overflow-x-hidden ${fullWidth ? 'p-0' : 'p-4 md:p-8'}`}>
                     <div className={`animate-fade-in-up ${fullWidth ? 'h-full' : 'max-w-7xl mx-auto'}`}>
                         {children}
                     </div>

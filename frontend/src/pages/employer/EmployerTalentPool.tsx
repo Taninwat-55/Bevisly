@@ -154,9 +154,9 @@ export default function EmployerTalentPool({
   return (
     <div className="space-y-8">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold font-display text-[var(--color-text)] flex items-center gap-3">
+          <h1 className="text-2xl md:text-3xl font-bold font-display text-[var(--color-text)] flex items-center gap-3">
             Talent Pool
             <span className="px-2.5 py-0.5 rounded-full bg-[var(--color-surface)] border border-[var(--color-border)] text-sm font-sans font-medium text-[var(--color-text-muted)]">
               {submissions.length}
@@ -168,7 +168,7 @@ export default function EmployerTalentPool({
 
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
           <Button
             onClick={() => {
               setInviteJobId(jobs[0]?.id || "");
@@ -276,14 +276,20 @@ export default function EmployerTalentPool({
       {/* Main List */}
       <div className="space-y-4">
         {sorted.length === 0 ? (
-          <div className="text-center py-20 bg-[var(--color-surface)] rounded-[var(--radius-card)] border border-dashed border-[var(--color-border)]">
-            <div className="w-16 h-16 bg-[var(--color-bg)] rounded-full flex items-center justify-center mx-auto mb-4">
-              <UserCheck className="text-[var(--color-text-muted)]" size={32} />
+          <div className="text-center py-12 md:py-20 bg-[var(--color-surface)] rounded-[var(--radius-card)] border border-dashed border-[var(--color-border)]">
+            <div className="w-16 h-16 bg-[var(--color-brand-primary)]/10 rounded-full flex items-center justify-center mx-auto mb-4">
+              <UserCheck className="text-[var(--color-brand-primary)]" size={32} />
             </div>
-            <h3 className="text-lg font-medium text-[var(--color-text)]">No candidates found</h3>
-            <p className="text-[var(--color-text-muted)] max-w-sm mx-auto mt-1">
-              Try adjusting your filters or wait for more submissions to arrive.
+            <h3 className="text-xl font-bold text-[var(--color-text)] mb-2">No candidates yet</h3>
+            <p className="text-[var(--color-text-muted)] max-w-sm mx-auto mt-1 mb-6">
+              Once candidates submit proof tasks for your jobs, they’ll appear here. Post a role to start receiving submissions!
             </p>
+            <Button
+              onClick={() => window.location.href = '/employer'}
+              className="shadow-glow-primary"
+            >
+              Go Post a Job →
+            </Button>
           </div>
         ) : (
           sorted.map((s) => {
