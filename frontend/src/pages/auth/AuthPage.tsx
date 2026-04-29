@@ -64,7 +64,9 @@ export default function AuthPage() {
 
   // Redirect if already logged in
   useEffect(() => {
+    console.log("[Auth] user state changed →", user?.role ?? "null", "| authLoading:", authLoading);
     if (!authLoading && user) {
+      console.log("[Auth] Navigating to dashboard for role:", user.role);
       if (user.role === "employer") navigate("/employer");
       else if (user.role === "admin" || user.role === "demo_admin") navigate("/admin");
       else navigate("/candidate");
@@ -155,7 +157,10 @@ export default function AuthPage() {
 
     try {
       setFormLoading(true);
+
+      console.log("[Login] 1. Calling signInWithPassword...");
       const { error } = await supabase.auth.signInWithPassword({ email, password });
+      console.log("[Login] 2. signInWithPassword resolved. error:", error?.message ?? "none");
 
       if (error) {
         setFormError("Invalid email or password. Please try again.");
@@ -164,37 +169,15 @@ export default function AuthPage() {
 
       // Check for MFA
       const aal = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
-      if (aal.error) {
-        throw aal.error;
-      }
-
-      if (aal.data.nextLevel === "aal2" && aal.data.currentLevel === "aal1") {
+      if (!aal.error && aal.data.nextLevel === "aal2" && aal.data.currentLevel === "aal1") {
         setShowMFAChallenge(true);
-        return; // Stop normal execution; wait for MFA challenge success
+        return;
       }
 
-      const { data: sessionData } = await supabase.auth.getSession();
-      const sessionUser = sessionData.session?.user;
-
-      if (sessionUser) {
-        const { data: profile } = await supabase
-          .from("profiles")
-          .select("role")
-          .eq("id", sessionUser.id)
-          .maybeSingle();
-
-        const role = (profile?.role as "candidate" | "employer" | "admin" | "demo_admin") ?? "candidate";
-
-        localStorage.setItem(
-          "bevisly_user",
-          JSON.stringify({ id: sessionUser.id, email: sessionUser.email, role })
-        );
-
-        notify.success("✅ Logged in successfully!", role === "demo_admin" ? "admin" : role);
-        navigate((role === "admin" || role === "demo_admin") ? "/admin" : role === "employer" ? "/employer" : "/candidate");
-      }
-    } catch (err) {
-      console.error(err);
+      console.log("[Login] 3. Auth succeeded. Waiting for AuthProvider to set user...");
+      notify.success("✅ Logged in successfully!");
+    } catch (err: unknown) {
+      console.error("[Login] Unexpected error:", err);
       setFormError("Unexpected error. Please try again later.");
     } finally {
       setFormLoading(false);
@@ -562,12 +545,11 @@ export default function AuthPage() {
         </div>
       </div>
 
-      <MFAChallengeModal 
+      <MFAChallengeModal
         isOpen={showMFAChallenge}
         onSuccess={() => {
           setShowMFAChallenge(false);
-          // Assuming user and role are set properly or redirect handles logic
-          navigate("/dashboard");
+          // Navigation is handled by the useEffect watching user state above.
         }}
         onCancel={async () => {
           setShowMFAChallenge(false);

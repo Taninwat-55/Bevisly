@@ -445,6 +445,154 @@ export async function startProof(job_id: string, proof_task_id?: string) {
   return data.id;
 }
 
+export type FastPassMatch = {
+  submissionId: string;
+  jobTitle: string;
+  proofTaskTitle: string;
+  maxStars: number;
+  submissionLink: string | null;
+  fileUrl: string | null;
+  textResponse: string | null;
+  reflection: string | null;
+  videoUrl: string | null;
+  resumeUrl: string | null;
+  proofTaskId: string | null;
+};
+
+const STOP_WORDS = new Set([
+  "the", "and", "for", "in", "at", "to", "of", "a", "an", "with",
+  "on", "is", "be", "are", "was", "were", "it", "its", "this",
+]);
+
+export async function checkFastPass(
+  currentJobId: string,
+  currentJobTitle: string,
+): Promise<FastPassMatch | null> {
+  const user = (await supabase.auth.getUser()).data.user;
+  if (!user) return null;
+
+  const { data, error } = await supabase
+    .from("submissions")
+    .select(`
+      id,
+      proof_task_id,
+      submission_link,
+      file_url,
+      text_response,
+      reflection,
+      video_url,
+      resume_url,
+      jobs ( id, title ),
+      proof_tasks ( id, title ),
+      feedback ( stars )
+    `)
+    .eq("user_id", user.id)
+    .eq("status", "reviewed")
+    .neq("job_id", currentJobId);
+
+  if (error || !data?.length) return null;
+
+  const currentWords = currentJobTitle
+    .toLowerCase()
+    .split(/\W+/)
+    .filter((w) => w.length > 2 && !STOP_WORDS.has(w));
+
+  if (!currentWords.length) return null;
+
+  let bestMatch: FastPassMatch | null = null;
+  let bestScore = 0;
+
+  for (const sub of data as any[]) {
+    const feedbacks = Array.isArray(sub.feedback)
+      ? sub.feedback
+      : sub.feedback
+        ? [sub.feedback]
+        : [];
+    const maxStars = Math.max(0, ...feedbacks.map((f: any) => f?.stars ?? 0));
+
+    if (maxStars < 4) continue;
+
+    const job = Array.isArray(sub.jobs) ? sub.jobs[0] : sub.jobs;
+    const proofTask = Array.isArray(sub.proof_tasks)
+      ? sub.proof_tasks[0]
+      : sub.proof_tasks;
+
+    if (!job?.title) continue;
+
+    const pastWords = new Set(
+      job.title
+        .toLowerCase()
+        .split(/\W+/)
+        .filter((w: string) => w.length > 2 && !STOP_WORDS.has(w)),
+    );
+
+    const overlap = currentWords.filter((w) => pastWords.has(w)).length;
+    const score = overlap / currentWords.length;
+
+    if (overlap > 0 && score > bestScore) {
+      bestScore = score;
+      bestMatch = {
+        submissionId: sub.id,
+        jobTitle: job.title,
+        proofTaskTitle: proofTask?.title ?? "Proof Task",
+        maxStars,
+        submissionLink: sub.submission_link,
+        fileUrl: sub.file_url,
+        textResponse: sub.text_response,
+        reflection: sub.reflection,
+        videoUrl: sub.video_url ?? null,
+        resumeUrl: sub.resume_url,
+        proofTaskId: sub.proof_task_id,
+      };
+    }
+  }
+
+  return bestMatch;
+}
+
+export async function attachPastProof(
+  pastMatch: FastPassMatch,
+  newJobId: string,
+  newProofTaskId: string | null,
+): Promise<string> {
+  const user = (await supabase.auth.getUser()).data.user;
+  if (!user) throw new Error("Not authenticated");
+
+  const { data: existing } = await supabase
+    .from("submissions")
+    .select("id")
+    .eq("user_id", user.id)
+    .eq("job_id", newJobId)
+    .maybeSingle();
+
+  if (existing) return existing.id;
+
+  const { data, error } = await supabase
+    .from("submissions")
+    .insert([
+      {
+        user_id: user.id,
+        job_id: newJobId,
+        proof_task_id: newProofTaskId ?? pastMatch.proofTaskId,
+        submission_link: pastMatch.submissionLink,
+        file_url: pastMatch.fileUrl,
+        text_response: pastMatch.textResponse,
+        reflection: pastMatch.reflection,
+        video_url: pastMatch.videoUrl,
+        resume_url: pastMatch.resumeUrl,
+        status: "submitted",
+        hiring_stage: "new",
+        started_at: new Date().toISOString(),
+        completed_at: new Date().toISOString(),
+      },
+    ])
+    .select("id")
+    .single();
+
+  if (error) throw error;
+  return data.id;
+}
+
 export async function saveDraft({
   job_id,
   submission_link,

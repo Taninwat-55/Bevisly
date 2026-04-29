@@ -13,10 +13,17 @@ import {
   DollarSign,
   CheckCircle,
   X,
+  Zap,
+  Star,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import type { Job } from "@/types/job";
-import { checkSubmissionStatus } from "@/lib/api/submissions";
+import {
+  checkSubmissionStatus,
+  checkFastPass,
+  attachPastProof,
+  type FastPassMatch,
+} from "@/lib/api/submissions";
 import { Helmet } from "react-helmet-async";
 import DOMPurify from "dompurify";
 import ReactMarkdown from "react-markdown";
@@ -36,6 +43,10 @@ export default function JobDetailPage() {
   const [skipModal, setSkipModal] = useState<boolean>(
     localStorage.getItem("skipProofConfirm") === "true"
   );
+  const [fastPassMatch, setFastPassMatch] = useState<FastPassMatch | null>(null);
+  const [showFastPass, setShowFastPass] = useState(false);
+  const [checkingFastPass, setCheckingFastPass] = useState(false);
+  const [attaching, setAttaching] = useState(false);
 
   /* ─── Fetch job + proof tasks ─────────────────────────────── */
   useEffect(() => {
@@ -81,7 +92,7 @@ export default function JobDetailPage() {
   const proof = job.proof_tasks?.[0];
 
   /* ─── Candidate CTA ─────────────────────────────────────── */
-  const handleCTA = () => {
+  const handleCTA = async () => {
     if (!user) {
       navigate("/auth");
       return;
@@ -97,10 +108,38 @@ export default function JobDetailPage() {
       return;
     }
 
+    // Check for a reusable high-rated past proof
+    setCheckingFastPass(true);
+    try {
+      const match = await checkFastPass(job!.id, job!.title);
+      if (match) {
+        setFastPassMatch(match);
+        setShowFastPass(true);
+        return;
+      }
+    } finally {
+      setCheckingFastPass(false);
+    }
+
     if (skipModal) {
       confirmStartProof();
     } else {
       setShowConfirm(true);
+    }
+  };
+
+  const handleAttachPastProof = async () => {
+    if (!fastPassMatch || !job) return;
+    setAttaching(true);
+    try {
+      await attachPastProof(fastPassMatch, job.id, proof?.id ?? null);
+      setShowFastPass(false);
+      setExistingStatus("submitted");
+      toast.success("⚡ Past proof attached — you're in the employer's review queue!");
+    } catch {
+      toast.error("Failed to attach past proof. Please try again.");
+    } finally {
+      setAttaching(false);
     }
   };
 
@@ -311,14 +350,15 @@ export default function JobDetailPage() {
                 ) : (
                   <button
                     onClick={handleCTA}
-                    disabled={hasApplied}
-                    className={`w-full py-3 rounded-xl font-bold text-sm transition-all transform active:scale-[0.98]
+                    disabled={hasApplied || checkingFastPass}
+                    className={`w-full py-3 rounded-xl font-bold text-sm transition-all transform active:scale-[0.98] flex items-center justify-center gap-2
                                     ${hasApplied
                         ? "bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 cursor-default"
-                        : "bg-[var(--color-brand-primary)] hover:bg-[var(--color-brand-primary-dark)] text-white shadow-lg hover:shadow-brand-primary/25"
+                        : "bg-[var(--color-brand-primary)] hover:bg-[var(--color-brand-primary-dark)] text-white shadow-lg hover:shadow-brand-primary/25 disabled:opacity-70 disabled:cursor-not-allowed"
                       }`}
                   >
-                    {hasApplied ? "✅ Submitted" : "Start Proof Task"}
+                    {checkingFastPass && <Loader2 size={15} className="animate-spin" />}
+                    {hasApplied ? "✅ Submitted" : checkingFastPass ? "Checking..." : "Start Proof Task"}
                   </button>
                 )}
               </div>
@@ -326,6 +366,104 @@ export default function JobDetailPage() {
 
           </div>
         </div>
+
+        {/* Fast-Pass Modal */}
+        <AnimatePresence>
+          {showFastPass && fastPassMatch && (
+            <motion.div
+              className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[100]"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={(e) => e.target === e.currentTarget && setShowFastPass(false)}
+            >
+              <motion.div
+                className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-2xl shadow-2xl p-8 max-w-md w-[90%] relative overflow-hidden"
+                initial={{ scale: 0.92, opacity: 0, y: 20 }}
+                animate={{ scale: 1, opacity: 1, y: 0 }}
+                exit={{ scale: 0.92, opacity: 0, y: 20 }}
+                transition={{ type: "spring", stiffness: 300, damping: 25 }}
+              >
+                {/* Top accent bar */}
+                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-amber-500 via-yellow-300 to-amber-500" />
+                {/* Background glow */}
+                <div className="absolute top-0 right-0 w-56 h-56 bg-amber-400/10 rounded-full blur-3xl pointer-events-none -z-10" />
+
+                {/* Icon */}
+                <div className="w-16 h-16 rounded-2xl bg-amber-400/10 border border-amber-400/20 flex items-center justify-center mx-auto mb-5 text-amber-400">
+                  <Zap size={30} />
+                </div>
+
+                <h2 className="text-xl font-bold text-[var(--color-text)] text-center mb-2">
+                  Fast-Pass Available!
+                </h2>
+                <p className="text-sm text-[var(--color-text-muted)] text-center mb-5 leading-relaxed">
+                  You already have a verified proof for a similar role. Attach it instantly or start fresh.
+                </p>
+
+                {/* Past proof card */}
+                <div className="bg-[var(--color-bg)] border border-amber-400/20 rounded-xl p-4 mb-6">
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="min-w-0">
+                      <p className="text-xs text-[var(--color-text-muted)] mb-1">Verified Proof Task</p>
+                      <p className="text-sm font-semibold text-[var(--color-text)] truncate">
+                        {fastPassMatch.proofTaskTitle}
+                      </p>
+                      <p className="text-xs text-[var(--color-text-muted)] mt-1 truncate">
+                        for {fastPassMatch.jobTitle}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-0.5 shrink-0 pt-0.5">
+                      {Array.from({ length: 5 }).map((_, i) => (
+                        <Star
+                          key={i}
+                          size={14}
+                          className={
+                            i < fastPassMatch.maxStars
+                              ? "text-amber-400 fill-amber-400"
+                              : "text-[var(--color-border)]"
+                          }
+                        />
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => {
+                      setShowFastPass(false);
+                      if (skipModal) confirmStartProof();
+                      else setShowConfirm(true);
+                    }}
+                    className="flex-1 px-4 py-2.5 rounded-xl border border-[var(--color-border)] text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[var(--color-surface-hover)] font-medium text-sm transition-colors"
+                  >
+                    Take New Test
+                  </button>
+                  <button
+                    onClick={handleAttachPastProof}
+                    disabled={attaching}
+                    className="flex-1 px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-bold text-sm transition-colors shadow-lg hover:shadow-amber-400/30 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  >
+                    {attaching ? (
+                      <Loader2 size={15} className="animate-spin" />
+                    ) : (
+                      <Zap size={15} />
+                    )}
+                    {attaching ? "Attaching..." : "Attach Past Proof"}
+                  </button>
+                </div>
+
+                <button
+                  onClick={() => setShowFastPass(false)}
+                  className="absolute top-4 right-4 text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors"
+                >
+                  <X size={20} />
+                </button>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Confirmation Modal */}
         <AnimatePresence>

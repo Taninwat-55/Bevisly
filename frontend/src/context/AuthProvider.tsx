@@ -61,7 +61,7 @@ async function fetchProfileFromDB(userId: string): Promise<{
     .select("company_id")
     .eq("user_id", userId)
     .limit(1)
-    .single();
+    .maybeSingle();
   
   if (membership) {
     companyId = membership.company_id;
@@ -126,18 +126,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   useEffect(() => {
-    // Try cached user first for instant render
+    // Unblock the app immediately — cached user (if any) is good enough for
+    // the first render. initializeAuth then verifies/refreshes in the background.
     const cachedUser = localStorage.getItem("bevisly_user");
     if (cachedUser) {
-      setUser(JSON.parse(cachedUser));
+      try {
+        setUser(JSON.parse(cachedUser));
+      } catch {
+        localStorage.removeItem("bevisly_user");
+      }
     }
+    setLoading(false);
 
-    // Always confirm current Supabase session and fetch profile from DB
+    // Background session verification — never blocks rendering.
     const initializeAuth = async () => {
       try {
         const { data, error } = await supabase.auth.getSession();
         if (error) throw error;
-        
+
         const sessionUser = data.session?.user;
         if (sessionUser) {
           const profile = await fetchProfileFromDB(sessionUser.id);
@@ -160,23 +166,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           setUser(newUser);
           localStorage.setItem("bevisly_user", JSON.stringify(newUser));
         } else {
+          // Supabase confirmed no valid session — clear any stale cached user.
           setUser(null);
           localStorage.removeItem("bevisly_user");
         }
       } catch (err) {
-        console.warn("Auth initialization error:", err);
-        setUser(null);
-        localStorage.removeItem("bevisly_user");
-      } finally {
-        setLoading(false);
+        // Network / transient error — keep cached user rather than logging out.
+        console.warn("Auth background check failed:", err);
       }
     };
 
     initializeAuth();
 
-    // Auth change listener - fetch profile from database
+    // Auth change listener - synchronous callback so Supabase JS v2 does NOT
+    // await it before resolving signInWithPassword. Profile fetch runs in the
+    // background via .then() to avoid blocking the auth handshake.
     const { data: listener } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
+      (event, session) => {
+        console.log("[Auth] onAuthStateChange fired:", event, session?.user?.id ?? "no session");
+
         if (event === "PASSWORD_RECOVERY") {
           window.location.href = "/auth/reset";
           return;
@@ -184,25 +192,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
         const sessionUser = session?.user;
         if (sessionUser) {
-          const profile = await fetchProfileFromDB(sessionUser.id);
-          const newUser: SessionUser = {
-            id: sessionUser.id,
-            email: sessionUser.email!,
-            role: profile.role,
-            full_name: profile.full_name,
-            avatar_url: profile.avatar_url,
-            company_name: profile.company_name,
-            company_id: profile.company_id,
-            credits: profile.credits,
-            subscription_tier: profile.subscription_tier,
-            is_public: profile.is_public,
-            app_metadata: {
-              provider: sessionUser.app_metadata?.provider,
-              providers: sessionUser.app_metadata?.providers,
-            },
-          };
-          setUser(newUser);
-          localStorage.setItem("bevisly_user", JSON.stringify(newUser));
+          fetchProfileFromDB(sessionUser.id).then((profile) => {
+            console.log("[Auth] fetchProfileFromDB done. role:", profile.role);
+            const newUser: SessionUser = {
+              id: sessionUser.id,
+              email: sessionUser.email!,
+              role: profile.role,
+              full_name: profile.full_name,
+              avatar_url: profile.avatar_url,
+              company_name: profile.company_name,
+              company_id: profile.company_id,
+              credits: profile.credits,
+              subscription_tier: profile.subscription_tier,
+              is_public: profile.is_public,
+              app_metadata: {
+                provider: sessionUser.app_metadata?.provider,
+                providers: sessionUser.app_metadata?.providers,
+              },
+            };
+            setUser(newUser);
+            localStorage.setItem("bevisly_user", JSON.stringify(newUser));
+          });
         } else {
           setUser(null);
           localStorage.removeItem("bevisly_user");
