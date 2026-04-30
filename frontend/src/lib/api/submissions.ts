@@ -678,3 +678,168 @@ export async function updateHiringStage(
   if (error) throw error;
   return data;
 }
+
+/**
+ * Send a "Feedback Reward" email to a candidate when they are rejected.
+ * Fire-and-forget — errors are logged silently.
+ * Guarded by `rejection_email_sent` flag to prevent duplicates.
+ */
+export async function sendRejectionFeedbackEmail(
+  submissionId: string
+): Promise<void> {
+  try {
+    // 1. Check if email was already sent
+    const { data: submission, error: subErr } = await supabase
+      .from("submissions")
+      .select(
+        `
+        id,
+        rejection_email_sent,
+        user_id,
+        job_id,
+        feedback ( stars, strengths, improvements ),
+        profiles:user_id ( full_name, email ),
+        jobs:job_id ( title )
+      `
+      )
+      .eq("id", submissionId)
+      .single();
+
+    if (subErr || !submission) {
+      console.warn("[RejectionEmail] Could not fetch submission:", subErr);
+      return;
+    }
+
+    // Already sent — skip
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    if ((submission as any).rejection_email_sent) {
+      console.log("[RejectionEmail] Already sent for submission:", submissionId);
+      return;
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const sub = submission as any;
+
+    // 2. Extract feedback
+    const feedbackArr = Array.isArray(sub.feedback)
+      ? sub.feedback
+      : sub.feedback
+        ? [sub.feedback]
+        : [];
+    if (feedbackArr.length === 0) {
+      console.log("[RejectionEmail] No feedback found — skipping email.");
+      return;
+    }
+
+    const feedback = feedbackArr[0];
+    const strengths = feedback.strengths || "No specific strengths noted.";
+    const improvements =
+      feedback.improvements || "No specific improvements noted.";
+    const stars = feedback.stars ?? "—";
+
+    // 3. Extract candidate info
+    const profile = Array.isArray(sub.profiles)
+      ? sub.profiles[0]
+      : sub.profiles;
+    const candidateEmail = profile?.email;
+    const candidateName = profile?.full_name || "there";
+
+    if (!candidateEmail) {
+      console.warn("[RejectionEmail] No candidate email found — skipping.");
+      return;
+    }
+
+    // 4. Extract job info
+    const job = Array.isArray(sub.jobs) ? sub.jobs[0] : sub.jobs;
+    const jobTitle = job?.title || "this role";
+
+    // 5. Build HTML email
+    const escapeHtml = (str: string) =>
+      str
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+
+    const safeName = escapeHtml(candidateName);
+    const safeTitle = escapeHtml(jobTitle);
+    const safeStrengths = escapeHtml(strengths);
+    const safeImprovements = escapeHtml(improvements);
+
+    const starDisplay = typeof stars === "number"
+      ? "⭐".repeat(Math.round(stars)) + ` (${stars}/5)`
+      : "—";
+
+    const html = `
+      <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden;">
+        <div style="background: linear-gradient(135deg, #6366f1, #3b82f6); padding: 28px 24px; text-align: center;">
+          <h1 style="color: white; margin: 0; font-size: 22px; font-weight: 700;">Your Feedback is Ready 🎁</h1>
+        </div>
+        <div style="padding: 32px 28px; background-color: #ffffff;">
+          <p style="font-size: 16px; color: #1e293b; margin-bottom: 16px;">
+            Hi <strong>${safeName}</strong>,
+          </p>
+          <p style="font-size: 15px; color: #475569; line-height: 1.65;">
+            Thank you for applying to <strong>${safeTitle}</strong>. While the team went in a different direction, we wanted to share your code review feedback to help you build your skills and grow as a developer.
+          </p>
+
+          <div style="margin: 24px 0; padding: 20px; background-color: #f8fafc; border-radius: 10px; border: 1px solid #e2e8f0;">
+            <p style="margin: 0 0 12px 0; font-size: 14px; font-weight: 600; color: #334155;">
+              Rating: ${starDisplay}
+            </p>
+            <div style="margin-bottom: 16px;">
+              <p style="margin: 0 0 6px 0; font-size: 13px; font-weight: 700; color: #16a34a; text-transform: uppercase; letter-spacing: 0.5px;">💪 Strengths</p>
+              <p style="margin: 0; font-size: 14px; color: #475569; line-height: 1.6;">${safeStrengths}</p>
+            </div>
+            <div>
+              <p style="margin: 0 0 6px 0; font-size: 13px; font-weight: 700; color: #2563eb; text-transform: uppercase; letter-spacing: 0.5px;">📈 Areas for Growth</p>
+              <p style="margin: 0; font-size: 14px; color: #475569; line-height: 1.6;">${safeImprovements}</p>
+            </div>
+          </div>
+
+          <div style="text-align: center; margin: 28px 0;">
+            <a href="https://bevisly.com/candidate/proofs"
+               style="background: linear-gradient(135deg, #6366f1, #3b82f6); color: white; padding: 12px 28px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 15px; display: inline-block;">
+               View Your Proof Portfolio
+            </a>
+          </div>
+
+          <p style="font-size: 14px; color: #94a3b8; text-align: center; margin-top: 28px; line-height: 1.5;">
+            Every proof you complete builds your portfolio.<br>
+            Keep going — your skills speak louder than any résumé.
+          </p>
+          <p style="font-size: 13px; color: #cbd5e1; text-align: center; margin-top: 16px;">
+            &mdash; The Bevisly Team
+          </p>
+        </div>
+      </div>
+    `;
+
+    // 6. Send via send-email edge function
+    const { error: emailErr } = await supabase.functions.invoke("send-email", {
+      body: {
+        to: candidateEmail,
+        subject: `Your Code Review Feedback — ${jobTitle}`,
+        html,
+        reply_to: "bevislyapp@gmail.com",
+      },
+    });
+
+    if (emailErr) {
+      console.error("[RejectionEmail] Edge function error:", emailErr);
+      return;
+    }
+
+    // 7. Mark as sent to prevent duplicates
+    await supabase
+      .from("submissions")
+      .update({ rejection_email_sent: true })
+      .eq("id", submissionId);
+
+    console.log(
+      `[RejectionEmail] ✅ Feedback email sent to ${candidateEmail} for "${jobTitle}"`
+    );
+  } catch (err) {
+    console.error("[RejectionEmail] Unexpected error:", err);
+  }
+}

@@ -10,7 +10,7 @@ import {
   rectIntersection,
   type CollisionDetection,
 } from "@dnd-kit/core";
-import { updateHiringStage } from "@/lib/api/submissions";
+import { updateHiringStage, sendRejectionFeedbackEmail } from "@/lib/api/submissions";
 import toast from "react-hot-toast";
 import type { EmployerSubmission, HiringStage } from "@/types";
 import StageColumn from "./StageColumn";
@@ -110,6 +110,13 @@ export default function TalentBoard({
         dragged.employer_notes ?? ""
       );
       toast.success(`Moved to ${destinationStage}`);
+
+      // 📧 Auto-send feedback email when rejected (fire-and-forget)
+      if (destinationStage === "rejected") {
+        sendRejectionFeedbackEmail(activeId).catch((err) =>
+          console.error("[TalentBoard] Rejection email failed:", err)
+        );
+      }
     } catch {
       toast.error("Failed to update stage");
       setSubmissions((prev) =>
