@@ -89,11 +89,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       await supabase.auth.signOut();
       localStorage.removeItem("bevisly_user");
       localStorage.removeItem("overrideRole");
+      localStorage.removeItem("bevisly_last_activity");
       window.location.replace("/");
     } catch (err) {
       console.error("Logout error:", err);
       localStorage.removeItem("bevisly_user");
       localStorage.removeItem("overrideRole");
+      localStorage.removeItem("bevisly_last_activity");
       window.location.replace("/");
     }
   }, []);
@@ -217,6 +219,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           setUser(null);
           localStorage.removeItem("bevisly_user");
           localStorage.removeItem("overrideRole");
+          localStorage.removeItem("bevisly_last_activity");
         }
       }
     );

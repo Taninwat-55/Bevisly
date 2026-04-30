@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
-import { updateHiringStage } from "@/lib/api/mutations";
+import { updateHiringStage } from "@/lib/api/submissions";
 import toast from "react-hot-toast";
 import type { EmployerSubmission } from "@/types";
 

@@ -451,13 +451,25 @@ export default function DashboardLayout({
               </span>
             </Link>
 
-            {/* Breadcrumbs (Mock) */}
+            {/* Breadcrumbs */}
             <div className="hidden md:flex items-center gap-2 text-sm text-[var(--color-text-muted)]">
               <span className="capitalize">{role}</span>
               <ChevronRight size={14} />
-              <span className="font-medium text-[var(--color-text)]">
-                {location.pathname.split("/").pop()?.replace(/-/g, " ") ||
-                  "Dashboard"}
+              <span className="font-medium text-[var(--color-text)] capitalize">
+                {(() => {
+                  const segments = location.pathname.split("/").filter(Boolean);
+                  const last = segments.at(-1) ?? "";
+                  const prev = segments.at(-2) ?? "";
+                  const isUUID = /^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$/i.test(last);
+                  if (isUUID) {
+                    const labels: Record<string, string> = {
+                      job: "Job Details",
+                      proof: "Proof Workspace",
+                    };
+                    return labels[prev] ?? "Details";
+                  }
+                  return last.replace(/-/g, " ") || "Dashboard";
+                })()}
               </span>
             </div>
           </div>

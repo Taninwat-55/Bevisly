@@ -10,7 +10,7 @@ import {
   rectIntersection,
   type CollisionDetection,
 } from "@dnd-kit/core";
-import { updateHiringStage } from "@/lib/api/mutations";
+import { updateHiringStage } from "@/lib/api/submissions";
 import toast from "react-hot-toast";
 import type { EmployerSubmission, HiringStage } from "@/types";
 import StageColumn from "./StageColumn";

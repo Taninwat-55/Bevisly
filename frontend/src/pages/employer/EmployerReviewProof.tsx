@@ -6,8 +6,7 @@ import DOMPurify from "dompurify";
 import { motion } from "framer-motion";
 import { createFeedback } from "@/lib/api/feedback";
 import { suggestFeedback } from "@/lib/api/ai";
-import { updateSubmissionStatus } from "@/lib/api/mutations";
-import { getSubmissionById, getSubmissionsByJob } from "@/lib/api/submissions";
+import { updateSubmissionStatus, getSubmissionById, getSubmissionsByJob } from "@/lib/api/submissions";
 import { useAuth } from "@/hooks/useAuth";
 import type { EmployerSubmission } from "@/types";
 import {

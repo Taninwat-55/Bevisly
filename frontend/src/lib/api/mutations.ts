@@ -79,39 +79,6 @@ export async function updateProofTask(
   return data;
 }
 
-/**
- * Update submission status (e.g., "reviewed", "shortlisted")
- */
-export async function updateSubmissionStatus(
-  submission_id: string,
-  status: string
-) {
-  const { data, error } = await supabase
-    .from("submissions")
-    .update({ status })
-    .eq("id", submission_id)
-    .select()
-    .single();
-
-  if (error) throw error;
-  return data;
-}
-
-export async function updateHiringStage(
-  submission_id: string,
-  hiring_stage: string,
-  employer_notes?: string
-) {
-  const { data, error } = await supabase
-    .from("submissions")
-    .update({ hiring_stage, employer_notes })
-    .eq("id", submission_id)
-    .select()
-    .single();
-
-  if (error) throw error;
-  return data;
-}
 
 /**
  * Toggle job active/closed state

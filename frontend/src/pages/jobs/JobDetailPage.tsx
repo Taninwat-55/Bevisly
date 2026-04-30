@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import { supabase } from "@/lib/supabaseClient";
@@ -27,6 +27,7 @@ import {
 import { Helmet } from "react-helmet-async";
 import DOMPurify from "dompurify";
 import ReactMarkdown from "react-markdown";
+
 /* ─── Component ─────────────────────────────────────────────── */
 export default function JobDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -47,6 +48,8 @@ export default function JobDetailPage() {
   const [showFastPass, setShowFastPass] = useState(false);
   const [checkingFastPass, setCheckingFastPass] = useState(false);
   const [attaching, setAttaching] = useState(false);
+  const [showStickyBar, setShowStickyBar] = useState(false);
+  const ctaRef = useRef<HTMLDivElement>(null);
 
   /* ─── Fetch job + proof tasks ─────────────────────────────── */
   useEffect(() => {
@@ -72,7 +75,19 @@ export default function JobDetailPage() {
     };
     fetchJob();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id]);
+  }, [id, user]);
+
+  /* ─── Sticky bar observer ────────────────────────────────── */
+  useEffect(() => {
+    const el = ctaRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => setShowStickyBar(!entry.isIntersecting),
+      { threshold: 0 }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [job]);
 
   /* ─── Loading & Empty States ─────────────────────────────── */
   if (loading)
@@ -154,7 +169,6 @@ export default function JobDetailPage() {
   };
 
   // Construct Google Jobs Schema (JSON-LD)
-  // This tells Google: "This is a Job Posting"
   const jobSchema = job ? JSON.stringify({
     "@context": "https://schema.org/",
     "@type": "JobPosting",
@@ -204,7 +218,7 @@ export default function JobDetailPage() {
         </Helmet>
       )}
 
-      <div className="max-w-4xl mx-auto px-6 pt-24 pb-8">
+      <div className="max-w-3xl mx-auto px-6 pt-8 pb-32">
         {/* Back Button */}
         <button
           onClick={() => navigate(-1)}
@@ -216,13 +230,12 @@ export default function JobDetailPage() {
           Back
         </button>
 
-        {/* Job Header Card */}
-        <div className="relative glass-panel rounded-3xl p-8 border border-[var(--color-border)] overflow-hidden mb-8 shadow-xl">
+        {/* ── Job Header Card ──────────────────────────────── */}
+        <div className="relative glass-panel rounded-3xl p-8 border border-[var(--color-border)] overflow-hidden mb-6 shadow-xl">
           <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-[var(--color-brand-primary)]/10 to-transparent blur-3xl -z-10" />
-
-          <div className="flex flex-col md:flex-row md:items-start justify-between gap-6">
-            <div>
-              <h1 className="text-3xl md:text-4xl font-bold font-display tracking-tight text-[var(--color-text)] mb-3 bg-clip-text text-transparent bg-gradient-to-r from-[var(--color-text)] to-[var(--color-text-muted)]">
+          <div className="flex items-start justify-between gap-4">
+            <div className="flex-1 min-w-0">
+              <h1 className="text-3xl md:text-4xl font-bold font-display tracking-tight text-[var(--color-text)] mb-3">
                 {job.title}
               </h1>
               <div className="flex items-center gap-2 text-[var(--color-text-muted)]">
@@ -230,8 +243,7 @@ export default function JobDetailPage() {
                 <span>•</span>
                 <span>{job.location || "Remote"}</span>
               </div>
-
-              <div className="flex flex-wrap gap-2 mt-6">
+              <div className="flex flex-wrap gap-2 mt-5">
                 {job.paid && (
                   <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 text-xs font-medium">
                     <DollarSign size={13} /> Paid Role
@@ -249,123 +261,218 @@ export default function JobDetailPage() {
                 )}
               </div>
             </div>
-
-            {/* Proof Badge/Icon */}
             {proof && (
-              <div className="hidden md:flex flex-col items-end">
-                <div className="w-16 h-16 rounded-2xl bg-[var(--color-surface)] border border-[var(--color-border)] flex items-center justify-center shadow-inner">
-                  <Brain size={32} className="text-[var(--color-brand-primary)]" />
-                </div>
-                <span className="text-xs text-[var(--color-text-muted)] mt-2 font-medium">Proof-Based</span>
+              <div className="shrink-0 w-14 h-14 rounded-2xl bg-[var(--color-surface)] border border-[var(--color-border)] flex items-center justify-center shadow-inner">
+                <Brain size={26} className="text-[var(--color-brand-primary)]" />
               </div>
             )}
           </div>
         </div>
 
+        {/* ── Metadata Strip ───────────────────────────────── */}
+        <div className="grid grid-cols-3 divide-x divide-[var(--color-border)] rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)]/50 mb-6 overflow-hidden">
+          <div className="flex flex-col items-center justify-center py-4 px-3 gap-1">
+            <DollarSign size={15} className="text-[var(--color-text-muted)]" />
+            <span className="text-[10px] uppercase text-[var(--color-text-muted)] font-bold tracking-wider">Salary</span>
+            <span className="text-sm font-bold text-[var(--color-text)] text-center leading-tight">
+              {job.show_salary_range && job.salary_min && job.salary_max
+                ? `${job.salary_min.toLocaleString()}–${job.salary_max.toLocaleString()} ${job.payment_currency}`
+                : "Competitive"}
+            </span>
+          </div>
+          <div className="flex flex-col items-center justify-center py-4 px-3 gap-1">
+            <Clock size={15} className="text-[var(--color-text-muted)]" />
+            <span className="text-[10px] uppercase text-[var(--color-text-muted)] font-bold tracking-wider">Deadline</span>
+            <span className="text-sm font-bold text-[var(--color-text)] text-center leading-tight">
+              {job.expires_at ? new Date(job.expires_at).toLocaleDateString() : "No deadline"}
+            </span>
+          </div>
+          <div className="flex flex-col items-center justify-center py-4 px-3 gap-1">
+            <Zap size={15} className="text-emerald-500" />
+            <span className="text-[10px] uppercase text-[var(--color-text-muted)] font-bold tracking-wider">Velocity</span>
+            <span className="text-sm font-bold text-emerald-500 text-center leading-tight">Fast</span>
+          </div>
+        </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Left Column: Content */}
-          <div className="lg:col-span-2 space-y-8">
-
-            {/* Description */}
-            <section>
-              <h3 className="text-lg font-semibold text-[var(--color-text)] mb-4 flex items-center gap-2">
-                <Package size={18} className="text-[var(--color-brand-primary)]" /> About the Role
-              </h3>
-              <div className="prose prose-invert max-w-none text-[var(--color-text-muted)] leading-relaxed text-sm md:text-base">
-                {job.description ? (
-                  <ReactMarkdown>{DOMPurify.sanitize(job.description)}</ReactMarkdown>
+        {/* ── Application CTA Card ─────────────────────────── */}
+        <div ref={ctaRef} className="glass-panel p-6 rounded-3xl border border-[var(--color-border)] bg-[var(--color-surface)] shadow-xl relative overflow-hidden mb-10">
+          <div className="absolute top-0 right-0 w-40 h-40 bg-[var(--color-brand-primary)]/5 blur-3xl -z-10" />
+          {role === "employer" ? (
+            <div className="space-y-3">
+              <button
+                onClick={() => navigate("/employer")}
+                className="w-full py-4 bg-[var(--color-brand-primary)] hover:bg-[var(--color-brand-primary-dark)] text-white font-bold rounded-2xl transition-all shadow-lg"
+              >
+                View Submissions
+              </button>
+              <p className="text-[10px] text-[var(--color-text-muted)] text-center italic">You are viewing this as an employer.</p>
+            </div>
+          ) : (
+            <div className="flex flex-col sm:flex-row items-center gap-4">
+              <div className="flex-1 min-w-0">
+                {hasApplied ? (
+                  <div className="flex items-center gap-2 text-emerald-500 font-bold text-lg">
+                    <CheckCircle size={22} /> Application Submitted
+                  </div>
                 ) : (
-                  "No description provided."
+                  <p className="text-[var(--color-text-muted)] text-sm leading-relaxed">
+                    Ready to prove your skills? Start the proof task to get in the employer's review queue.
+                  </p>
                 )}
+              </div>
+              <div className="flex flex-col gap-2 shrink-0 w-full sm:w-auto">
+                <button
+                  onClick={handleCTA}
+                  disabled={hasApplied || checkingFastPass}
+                  className={`px-8 py-3.5 rounded-2xl font-bold text-base transition-all active:scale-[0.98] shadow-lg flex items-center justify-center gap-2 whitespace-nowrap
+                    ${hasApplied
+                      ? "bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 cursor-default"
+                      : "bg-[var(--color-brand-primary)] hover:bg-[var(--color-brand-primary-dark)] text-white disabled:opacity-70"
+                    }`}
+                >
+                  {checkingFastPass && <Loader2 size={18} className="animate-spin" />}
+                  {hasApplied ? "View Submission" : checkingFastPass ? "Checking..." : "Start Proof Task"}
+                </button>
+                {/* {hasApplied && (
+                  <button
+                    onClick={() => navigate("/candidate/dashboard")}
+                    className="px-8 py-2.5 rounded-xl border border-[var(--color-border)] text-sm font-semibold hover:bg-[var(--color-surface-hover)] transition-colors text-[var(--color-text-muted)]"
+                  >
+                    Back to Dashboard
+                  </button>
+                )} */}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* ── Job Content ──────────────────────────────────── */}
+        <div className="space-y-12">
+
+          {/* About the Role */}
+          <section className="animate-in fade-in slide-in-from-bottom-4 duration-700">
+            <h3 className="text-xl font-bold text-[var(--color-text)] mb-6 flex items-center gap-2">
+              <Package size={22} className="text-[var(--color-brand-primary)]" />
+              About the Role
+            </h3>
+            <div className="prose prose-invert max-w-none text-[var(--color-text-muted)] leading-relaxed text-lg">
+              {job.description ? (
+                <ReactMarkdown>{DOMPurify.sanitize(job.description)}</ReactMarkdown>
+              ) : (
+                "No description provided."
+              )}
+            </div>
+          </section>
+
+          {/* Requirements */}
+          {job.requirements && (
+            <section className="animate-in fade-in slide-in-from-bottom-4 duration-700 delay-100">
+              <h3 className="text-xl font-bold text-[var(--color-text)] mb-6 flex items-center gap-2">
+                <CheckCircle size={22} className="text-[var(--color-brand-primary)]" />
+                Requirements
+              </h3>
+              <div className="border-l-2 border-[var(--color-brand-primary)] pl-6 py-1 space-y-1 prose prose-invert max-w-none text-[var(--color-text-muted)] leading-relaxed text-base [&_ul]:list-disc [&_ul]:pl-4 [&_ul]:space-y-1 [&_li]:marker:text-[var(--color-brand-primary)]">
+                <ReactMarkdown>
+                  {(() => {
+                    const raw = DOMPurify.sanitize(job.requirements);
+                    const lines = raw.split("\n").filter((l) => l.trim());
+                    const alreadyFormatted = lines.some((l) => /^[-*\d]/.test(l.trim()));
+                    return alreadyFormatted
+                      ? raw
+                      : lines.map((l) => `- ${l.trim()}`).join("\n");
+                  })()}
+                </ReactMarkdown>
               </div>
             </section>
+          )}
 
-            {/* Requirements */}
-            {job.requirements && (
-              <section>
-                <h3 className="text-lg font-semibold text-[var(--color-text)] mb-4 flex items-center gap-2">
-                  <CheckCircle size={18} className="text-[var(--color-brand-primary)]" />  Requirements
+          {/* The Challenge */}
+          {proof && (
+            <section className="animate-in fade-in slide-in-from-bottom-4 duration-700 delay-200">
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-xl font-bold text-[var(--color-text)] flex items-center gap-2">
+                  <Shield size={22} className="text-[var(--color-brand-primary)]" />
+                  The Challenge
                 </h3>
-                <div className="prose prose-invert max-w-none text-[var(--color-text-muted)] leading-relaxed text-sm md:text-base bg-[var(--color-surface)]/50 p-6 rounded-2xl border border-[var(--color-border)] border-dashed">
-                  <ReactMarkdown>{DOMPurify.sanitize(job.requirements)}</ReactMarkdown>
+                <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-500 text-[10px] font-bold uppercase tracking-wider">
+                  <Brain size={12} /> Proof-Based
                 </div>
-              </section>
-            )}
-          </div>
-
-          {/* Right Column: Sidebar Actions */}
-          <div className="space-y-6">
-
-            {/* Proof Task Card (The Main CTA) */}
-            {proof && (
-              <div className="sticky top-24 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-2xl shadow-lg p-6 relative overflow-hidden group">
-                {/* Shine effect */}
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full group-hover:animate-shimmer pointer-events-none" />
-
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="p-2 rounded-lg bg-[var(--color-brand-primary)]/10 text-[var(--color-brand-primary)]">
-                    <Shield size={20} />
-                  </div>
-                  <div>
-                    <h3 className="font-bold text-[var(--color-text)]">Proof Task</h3>
-                    <p className="text-xs text-[var(--color-text-muted)]">Show, don't just tell.</p>
-                  </div>
-                </div>
-
-                <div className="space-y-4 mb-6">
-                  <h4 className="font-medium text-[var(--color-text)] text-sm">{proof.title}</h4>
-                  <p className="text-xs text-[var(--color-text-muted)] line-clamp-3">
-                    {proof.description || "Complete this task to prove your skills."}
-                  </p>
-
-                  <div className="space-y-2 pt-2 border-t border-[var(--color-border)]">
-                    <div className="flex justify-between text-xs">
-                      <span className="text-[var(--color-text-muted)]">Est. Time</span>
-                      <span className="font-medium text-[var(--color-text)]">{proof.expected_time || "N/A"}</span>
-                    </div>
-                    <div className="flex justify-between text-xs">
-                      <span className="text-[var(--color-text-muted)]">Format</span>
-                      <span className="font-medium text-[var(--color-text)] capitalize">{proof.submission_format?.replace("_", " ") || "Repo"}</span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Action Buttons */}
-                {role === "employer" ? (
-                  <div className="grid grid-cols-2 gap-3">
-                    <button
-                      onClick={() => navigate(`/employer`)}
-                      className="px-4 py-2.5 bg-[var(--color-surface-hover)] hover:bg-[var(--color-border)] text-[var(--color-text)] text-sm font-medium rounded-xl transition-colors text-center"
-                    >
-                      Edit
-                    </button>
-                    <button
-                      onClick={() => navigate(`/employer`)}
-                      className="px-4 py-2.5 bg-[var(--color-brand-primary)] hover:bg-[var(--color-brand-primary-dark)] text-white text-sm font-medium rounded-xl transition-colors text-center"
-                    >
-                      Submissions
-                    </button>
-                  </div>
-                ) : (
-                  <button
-                    onClick={handleCTA}
-                    disabled={hasApplied || checkingFastPass}
-                    className={`w-full py-3 rounded-xl font-bold text-sm transition-all transform active:scale-[0.98] flex items-center justify-center gap-2
-                                    ${hasApplied
-                        ? "bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 cursor-default"
-                        : "bg-[var(--color-brand-primary)] hover:bg-[var(--color-brand-primary-dark)] text-white shadow-lg hover:shadow-brand-primary/25 disabled:opacity-70 disabled:cursor-not-allowed"
-                      }`}
-                  >
-                    {checkingFastPass && <Loader2 size={15} className="animate-spin" />}
-                    {hasApplied ? "✅ Submitted" : checkingFastPass ? "Checking..." : "Start Proof Task"}
-                  </button>
-                )}
               </div>
-            )}
 
-          </div>
+              <div className="relative group">
+                <div className="absolute -inset-1 bg-gradient-to-r from-[var(--color-brand-primary)]/10 to-purple-500/10 rounded-3xl blur opacity-75 group-hover:opacity-100 transition-opacity" />
+                <div className="relative glass-panel p-8 rounded-3xl border border-[var(--color-border)] bg-[var(--color-surface)] shadow-xl">
+                  <h4 className="text-2xl font-bold text-[var(--color-text)] mb-4">{proof.title}</h4>
+                  <div className="prose prose-invert max-w-none text-[var(--color-text-muted)] leading-relaxed mb-8">
+                    <ReactMarkdown>{DOMPurify.sanitize(proof.description || "No description provided.")}</ReactMarkdown>
+                  </div>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-4 rounded-2xl bg-[var(--color-bg)]/50 border border-[var(--color-border)]">
+                    <div className="flex flex-col items-center justify-center p-3">
+                      <span className="text-[10px] uppercase text-[var(--color-text-muted)] font-bold mb-1">Est. Time</span>
+                      <span className="text-sm font-bold text-[var(--color-text)]">{proof.expected_time || "45m"}</span>
+                    </div>
+                    <div className="flex flex-col items-center justify-center p-3 border-l border-[var(--color-border)]">
+                      <span className="text-[10px] uppercase text-[var(--color-text-muted)] font-bold mb-1">Format</span>
+                      <span className="text-sm font-bold text-[var(--color-text)] capitalize">{proof.submission_format?.replace("_", " ") || "Repository"}</span>
+                    </div>
+                    <div className="flex flex-col items-center justify-center p-3 border-l border-[var(--color-border)]">
+                      <span className="text-[10px] uppercase text-[var(--color-text-muted)] font-bold mb-1">AI Tools</span>
+                      <span className={`text-sm font-bold ${proof.ai_tools_allowed ? "text-emerald-500" : "text-amber-500"}`}>
+                        {proof.ai_tools_allowed ? "Allowed" : "Restricted"}
+                      </span>
+                    </div>
+                    <div className="flex flex-col items-center justify-center p-3 border-l border-[var(--color-border)]">
+                      <span className="text-[10px] uppercase text-[var(--color-text-muted)] font-bold mb-1">Type</span>
+                      <span className="text-sm font-bold text-[var(--color-text)] capitalize">{proof.submission_type || "Project"}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </section>
+          )}
         </div>
+      </div>
+
+      {/* ── Sticky Bottom Action Bar ─────────────────────────── */}
+      <AnimatePresence>
+        {showStickyBar && !showConfirm && !showFastPass && (
+          <motion.div
+            initial={{ y: 80, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: 80, opacity: 0 }}
+            transition={{ type: "spring", stiffness: 380, damping: 32 }}
+            className="fixed bottom-0 inset-x-0 z-40 bg-[var(--color-surface)]/95 backdrop-blur-md border-t border-[var(--color-border)] px-6 py-3 shadow-2xl"
+          >
+            <div className="max-w-3xl mx-auto flex items-center justify-between gap-4">
+              <div className="min-w-0">
+                <p className="text-sm font-bold text-[var(--color-text)] truncate">{job.title}</p>
+                <p className="text-xs text-[var(--color-text-muted)] truncate">{job.company} · {job.location || "Remote"}</p>
+              </div>
+              {role === "employer" ? (
+                <button
+                  onClick={() => navigate("/employer")}
+                  className="shrink-0 px-6 py-2.5 rounded-xl bg-[var(--color-brand-primary)] hover:bg-[var(--color-brand-primary-dark)] text-white font-bold text-sm transition-all"
+                >
+                  View Submissions
+                </button>
+              ) : (
+                <button
+                  onClick={handleCTA}
+                  disabled={hasApplied || checkingFastPass}
+                  className={`shrink-0 px-6 py-2.5 rounded-xl font-bold text-sm transition-all flex items-center gap-2
+                    ${hasApplied
+                      ? "bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 cursor-default"
+                      : "bg-[var(--color-brand-primary)] hover:bg-[var(--color-brand-primary-dark)] text-white disabled:opacity-70"
+                    }`}
+                >
+                  {checkingFastPass && <Loader2 size={15} className="animate-spin" />}
+                  {hasApplied ? <><CheckCircle size={15} /> Submitted</> : checkingFastPass ? "Checking..." : "Start Proof Task"}
+                </button>
+              )}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
         {/* Fast-Pass Modal */}
         <AnimatePresence>
@@ -475,7 +582,7 @@ export default function JobDetailPage() {
               exit={{ opacity: 0 }}
             >
               <motion.div
-                className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-2xl shadow-2xl p-8 max-w-sm w-[90%] text-center relative overflow-hidden"
+                className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-2xl shadow-2xl p-8 max-sm w-[90%] text-center relative overflow-hidden"
                 initial={{ scale: 0.95, opacity: 0, y: 10 }}
                 animate={{ scale: 1, opacity: 1, y: 0 }}
                 exit={{ scale: 0.95, opacity: 0, y: 10 }}
@@ -531,7 +638,6 @@ export default function JobDetailPage() {
             </motion.div>
           )}
         </AnimatePresence>
-      </div>
     </div>
   );
 }

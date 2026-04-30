@@ -36,6 +36,7 @@ export interface Job {
     description?: string | null;
     expected_time?: string | null;
     submission_format?: string | null;
+    submission_type?: string | null;
     ai_tools_allowed?: boolean | null;
     duration_minutes?: number | null;
     attachments?: string[] | null;

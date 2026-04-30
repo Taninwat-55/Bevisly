@@ -2,16 +2,14 @@ import Navbar from "@/components/Navbar";
 import LandingFooter from "@/components/landing/LandingFooter";
 import ScrollToTop from "@/components/common/ScrollToTop";
 import FeedbackButton from "@/components/common/FeedbackButton";
-import { Outlet, useLocation } from "react-router-dom";
+import { Outlet } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import CookieConsent from "@/components/common/CookieConsent";
 
 export default function PublicLayout() {
-  const location = useLocation();
-
   return (
     <div className="min-h-screen flex flex-col bg-[var(--color-bg)] text-[var(--color-text)] transition-colors">
-      {location.pathname !== "/" && <Navbar />}
+      <Navbar />
       <ScrollToTop />
 
       {/* Animated route outlet */}
@@ -22,7 +20,7 @@ export default function PublicLayout() {
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -8 }}
           transition={{ duration: 0.25, ease: "easeOut" }}
-          className={`flex-1 ${location.pathname !== "/" ? "pt-16" : ""}`}
+          className="flex-1 pt-16"
         >
           <Outlet />
         </motion.main>

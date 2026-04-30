@@ -8,8 +8,6 @@ import type { GeneratedJobListing } from "@/lib/api/ai";
 import { generateJobListing } from "@/lib/api/ai";
 import toast from "react-hot-toast";
 import AILoadingState from "@/components/common/AILoadingState";
-import UserMenu from "@/components/common/UserMenu";
-import { ThemeToggle } from "@/components/ui/ThemeToggle";
 import RequestAccessModal from "@/components/common/RequestAccessModal";
 import ContactModal from "@/components/common/ContactModal";
 import ReactMarkdown, { type Components } from "react-markdown";
@@ -132,54 +130,9 @@ export default function LandingPage() {
         <title>Bevisly - Hire Proven Talent</title>
         <script type="application/ld+json">{JSON.stringify(structuredData)}</script>
       </Helmet>
-      {/* ── HEADER ────────────────────────────── */}
-      <header className="fixed top-0 inset-x-0 z-50 transition-all duration-200 bg-[var(--color-bg)]/80 backdrop-blur-md border-b border-[var(--color-border)]">
-        <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-          <button
-            onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-            className="flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity"
-          >
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[var(--color-brand-primary)] to-[var(--color-brand-secondary)] flex items-center justify-center text-white font-bold text-lg">
-              B
-            </div>
-            <span className="text-xl font-bold font-display tracking-tight text-[var(--color-text)]">
-              Bevisly
-            </span>
-          </button>
-
-          <nav className="hidden md:flex items-center gap-8">
-            <a href="#features" className="text-sm font-medium text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors">Features</a>
-            <a href="#employers" className="text-sm font-medium text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors">For Employers</a>
-            <a href="#candidates" className="text-sm font-medium text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors">For Candidates</a>
-            <a href="#pricing" className="text-sm font-medium text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors">Pricing</a>
-          </nav>
-
-          <div className="flex items-center gap-4">
-            <ThemeToggle />
-            {!user ? (
-              <>
-                <Button variant="ghost" size="sm" onClick={() => navigate("/auth")}>
-                  Log in
-                </Button>
-                <Button size="sm" onClick={handleCTA}>
-                  Join Beta
-                </Button>
-              </>
-            ) : (
-              <>
-                <Button size="sm" onClick={handleCTA}>
-                  Dashboard
-                </Button>
-                <UserMenu />
-              </>
-            )}
-          </div>
-        </div>
-      </header>
-
       <main>
         {/* ── HERO SECTION ────────────────────────────── */}
-        <section className="relative pt-32 pb-20 md:pt-48 md:pb-32 overflow-hidden">
+        <section className="relative pt-16 pb-20 md:pt-32 md:pb-32 overflow-hidden">
           {/* Background Elements */}
           <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[500px] bg-[var(--color-brand-primary)]/20 rounded-full blur-[120px] -z-10" />
           <div className="absolute bottom-0 right-0 w-[800px] h-[600px] bg-[var(--color-brand-secondary)]/10 rounded-full blur-[100px] -z-10" />
@@ -499,16 +452,16 @@ export default function LandingPage() {
         </section>
 
         {/* ── PROBLEM / SOLUTION (Dark Contrast) - EMPLOYERS ────────────────────────────── */}
-        <section id="employers" className="py-24 bg-[#0B0C10] text-white relative overflow-hidden">
+        <section id="employers" className="py-24 bg-gray-100 dark:bg-[#0B0C10] text-gray-900 dark:text-white relative overflow-hidden">
           <div className="absolute top-0 left-0 w-full h-full bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-10 pointer-events-none" />
 
           <div className="max-w-7xl mx-auto px-6 relative z-10 grid md:grid-cols-2 gap-16 items-center">
             <div>
-              <div className="inline-block px-3 py-1 rounded-full border border-white/20 bg-white/5 text-sm font-medium text-white/80 mb-6">
+              <div className="inline-block px-3 py-1 rounded-full border border-gray-300 dark:border-white/20 bg-gray-200 dark:bg-white/5 text-sm font-medium text-gray-600 dark:text-white/80 mb-6">
                 The Old Way vs. The New Way
               </div>
               <h2 className="text-4xl md:text-5xl font-bold font-display mb-6">Resumes are broken.<br />We fixed them.</h2>
-              <p className="text-blue-100 text-lg leading-relaxed mb-8">
+              <p className="text-blue-700 dark:text-blue-100 text-lg leading-relaxed mb-8">
                 Traditional hiring relies on self-reported skills and keyword stuffing. Bevisly validates ability through actual work samples.
               </p>
               <Button variant="primary" size="lg" onClick={handleRequestAccess}>
@@ -518,11 +471,11 @@ export default function LandingPage() {
 
             <div className="space-y-4">
               {/* Comparison Item 1 */}
-              <div className="flex items-start gap-4 p-4 rounded-xl bg-white/5 border border-white/10">
+              <div className="flex items-start gap-4 p-4 rounded-xl bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10">
                 <div className="w-8 h-8 rounded-full bg-red-500/20 flex items-center justify-center text-red-500 shrink-0">✕</div>
                 <div>
-                  <h4 className="font-bold text-white">Outdated Resumes</h4>
-                  <p className="text-sm text-gray-400">Static documents that don't reflect current capabilities.</p>
+                  <h4 className="font-bold text-gray-900 dark:text-white">Outdated Resumes</h4>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">Static documents that don't reflect current capabilities.</p>
                 </div>
               </div>
 
@@ -531,17 +484,17 @@ export default function LandingPage() {
                 <div className="absolute inset-0 bg-blue-600/10 animate-pulse" />
                 <div className="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-white shrink-0 relative z-10">✓</div>
                 <div className="relative z-10">
-                  <h4 className="font-bold text-white">Verified Proof Tasks</h4>
-                  <p className="text-sm text-blue-100">Live work samples validated by code execution and peer review.</p>
+                  <h4 className="font-bold text-gray-900 dark:text-white">Verified Proof Tasks</h4>
+                  <p className="text-sm text-blue-700 dark:text-blue-100">Live work samples validated by code execution and peer review.</p>
                 </div>
               </div>
 
               {/* Comparison Item 3 */}
-              <div className="flex items-start gap-4 p-4 rounded-xl bg-white/5 border border-white/10">
+              <div className="flex items-start gap-4 p-4 rounded-xl bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10">
                 <div className="w-8 h-8 rounded-full bg-red-500/20 flex items-center justify-center text-red-500 shrink-0">✕</div>
                 <div>
-                  <h4 className="font-bold text-white">Keyword Filtering</h4>
-                  <p className="text-sm text-gray-400">ATS systems that reject great candidates for missing buzzwords.</p>
+                  <h4 className="font-bold text-gray-900 dark:text-white">Keyword Filtering</h4>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">ATS systems that reject great candidates for missing buzzwords.</p>
                 </div>
               </div>
             </div>
