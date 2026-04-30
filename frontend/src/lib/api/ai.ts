@@ -69,7 +69,9 @@ export async function suggestFeedback(
     rating: number,
     criteria: string,
     submissionContent: string,
-): Promise<{ feedback: string; suggested_rating?: number }> {
+    taskDescription?: string | null,
+    reflection?: string | null,
+): Promise<{ strengths?: string; improvements?: string; suggested_rating?: number }> {
     const { data, error } = await supabase.functions.invoke(
         "suggest-feedback",
         {
@@ -77,6 +79,8 @@ export async function suggestFeedback(
                 rating,
                 criteria,
                 submission_content: submissionContent,
+                task_description: taskDescription ?? null,
+                reflection: reflection ?? null,
             },
         },
     );
@@ -89,7 +93,8 @@ export async function suggestFeedback(
     }
 
     return {
-        feedback: data.feedback,
+        strengths: data.strengths,
+        improvements: data.improvements,
         suggested_rating: data.suggested_rating,
     };
 }

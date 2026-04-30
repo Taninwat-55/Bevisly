@@ -60,7 +60,7 @@ export type EmployerSubmission = {
   text_response?: string | null; // For text answers
   video_url?: string | null;
   reflection: string | null;
-  proof_tasks: { id: string; title: string | null } | null;
+  proof_tasks: { id: string; title: string | null; description?: string | null } | null;
 
   jobs?: { title: string | null; company: string | null } | null;
   feedback?: {

@@ -12,7 +12,7 @@ Deno.serve(async (req) => {
     }
 
     try {
-        const { rating, submission_content, criteria } = await req.json();
+        const { rating, submission_content, criteria, task_description, reflection } = await req.json();
 
         const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY");
         if (!GEMINI_API_KEY) {
@@ -31,27 +31,35 @@ Deno.serve(async (req) => {
         }
 
         const prompt = `
-      Act as an expert Technical Evaluator and Senior Mentor.
-      I need you to review a candidate's submission.
-      
-      Criteria: ${criteria || "General quality"}
-      Submission Content (Snippet): "${
-            submission_content ? submission_content.slice(0, 3000) : "N/A"
-        }"
-      
-      Please evaluate the submission and provide:
-      1. A suggested rating from 1 to 5 (5 being exceptional, 1 being very poor).
-      2. A short paragraph of feedback for the candidate. 
-         - Point out specific strengths or mistakes based on the content.
-         - Keep it constructive, professional, and helpful.
-         - Max 100 words.
+You are an expert Technical Evaluator and Senior Mentor reviewing a candidate's proof task submission.
 
-      Return ONLY a valid JSON object with this exact structure:
-      {
-        "suggested_rating": 4,
-        "feedback": "Your feedback text here..."
-      }
-    `;
+## Task
+Title: ${criteria || "General"}
+${task_description ? `Description: ${task_description.slice(0, 1000)}` : ""}
+
+## Candidate's Submission
+${submission_content ? submission_content.slice(0, 3000) : "N/A"}
+
+${reflection ? `## Candidate's Reflection\n${reflection.slice(0, 1000)}` : ""}
+
+## Your Job
+Evaluate whether the submission fulfills the task requirements. Consider:
+- Does the work match what was asked for in the task description?
+- Quality, depth, and correctness of the submission
+- The candidate's self-awareness shown in their reflection (if provided)
+
+Provide:
+1. A suggested rating from 1 to 5 (5 = exceptional, 1 = very poor)
+2. Strengths: 1–3 specific things the candidate did well (max 60 words)
+3. Areas for Improvement: 1–3 specific, constructive suggestions (max 60 words)
+
+Return ONLY a valid JSON object:
+{
+  "suggested_rating": 4,
+  "strengths": "What the candidate did well...",
+  "improvements": "What could be improved..."
+}
+`;
 
         const model = "gemini-2.5-flash";
         const version = "v1beta";
@@ -71,6 +79,7 @@ Deno.serve(async (req) => {
                         temperature: 0.7,
                         maxOutputTokens: 1024,
                         responseMimeType: "application/json",
+                        thinkingConfig: { thinkingBudget: 0 },
                     },
                 }),
                 signal: controller.signal,
@@ -81,17 +90,22 @@ Deno.serve(async (req) => {
         const data = await response.json();
 
         if (response.ok) {
-            let rawText = data.candidates?.[0]?.content?.parts?.[0]?.text || "{}";
-            
-            // Clean up backticks if model ignored json mime type somehow
-            rawText = rawText.replace(/```json/gi, "").replace(/```/g, "").replace(/^`|`$/g, "");
-            
+            // Skip thinking parts (thought: true) — only take the actual response part
+            const parts: { thought?: boolean; text?: string }[] = data.candidates?.[0]?.content?.parts || [];
+            const responsePart = parts.find((p) => !p.thought && p.text) ?? parts[0];
+            const rawText = responsePart?.text || "";
+
+            console.log("Gemini raw response:", rawText.slice(0, 200));
+
+            const jsonMatch = rawText.match(/\{[\s\S]*\}/);
+
             let parsedData;
             try {
-                parsedData = JSON.parse(rawText);
+                if (!jsonMatch) throw new Error("No JSON object found in response");
+                parsedData = JSON.parse(jsonMatch[0]);
             } catch (e) {
-                console.error("Failed to parse JSON:", rawText);
-                parsedData = { suggested_rating: rating || 3, feedback: "Evaluation completed, but formatting failed. Please review manually." };
+                console.error("Failed to parse AI response:", rawText);
+                parsedData = { suggested_rating: rating || 3, feedback: "AI evaluation failed to produce a result. Please try again." };
             }
 
             return new Response(JSON.stringify(parsedData), {

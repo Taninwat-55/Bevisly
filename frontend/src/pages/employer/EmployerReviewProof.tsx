@@ -78,6 +78,7 @@ interface ScorecardProps {
     isLocked: boolean;
     onSuggestAI: () => void;
     isSuggesting: boolean;
+    canAIEvaluate: boolean;
 }
 
 function Scorecard({
@@ -90,6 +91,7 @@ function Scorecard({
     isLocked,
     onSuggestAI,
     isSuggesting,
+    canAIEvaluate,
 }: ScorecardProps) {
     return (
         <div className="glass-panel rounded-2xl p-6 space-y-6">
@@ -98,15 +100,21 @@ function Scorecard({
                     Your Review
                 </h3>
                 {!isLocked && (
-                    <button
-                        type="button"
-                        onClick={onSuggestAI}
-                        disabled={isSuggesting}
-                        className="flex items-center gap-1.5 text-xs font-medium text-purple-600 hover:text-purple-700 bg-purple-50 hover:bg-purple-100 dark:bg-purple-900/20 px-3 py-1.5 rounded-lg transition-colors"
-                    >
-                        {isSuggesting ? <Loader2 size={12} className="animate-spin" /> : <Sparkles size={12} />}
-                        AI Evaluate
-                    </button>
+                    canAIEvaluate ? (
+                        <button
+                            type="button"
+                            onClick={onSuggestAI}
+                            disabled={isSuggesting}
+                            className="flex items-center gap-1.5 text-xs font-medium text-purple-600 hover:text-purple-700 bg-purple-50 hover:bg-purple-100 dark:bg-purple-900/20 px-3 py-1.5 rounded-lg transition-colors"
+                        >
+                            {isSuggesting ? <Loader2 size={12} className="animate-spin" /> : <Sparkles size={12} />}
+                            AI Evaluate
+                        </button>
+                    ) : (
+                        <span className="text-xs text-[var(--color-text-muted)] italic">
+                            AI evaluation unavailable for links &amp; files
+                        </span>
+                    )
                 )}
             </div>
 
@@ -260,23 +268,24 @@ export default function EmployerReviewProof({ submissionId, onBack, onNavigate }
     const nextCandidate = currentIndex < totalSubmissions - 1 ? submissionsCache.current[currentIndex + 1] : null;
 
     const handleSuggestFeedback = async () => {
+        if (!submission?.text_response) {
+            toast("AI evaluation is only available for text submissions. Please evaluate this submission manually.");
+            return;
+        }
         setSuggestingAI(true);
         const toastId = toast.loading("AI is analyzing submission...");
         try {
             const criteria = submission?.proof_tasks?.title || "General";
-            const content = submission?.text_response || "Checked file/link.";
-            
-            const result = await suggestFeedback(stars || 0, criteria, content);
+            const content = submission?.text_response || submission?.submission_link || "Checked file/link.";
+            const taskDescription = submission?.proof_tasks?.description ?? null;
+            const reflection = submission?.reflection ?? null;
 
-            if (result && result.feedback) {
-                const newStars = result.suggested_rating || stars || 3;
-                setStars(newStars);
-                
-                if (newStars >= 4) {
-                     setStrengths(prev => prev ? prev + "\n" + result.feedback : result.feedback);
-                } else {
-                     setImprovements(prev => prev ? prev + "\n" + result.feedback : result.feedback);
-                }
+            const result = await suggestFeedback(stars || 0, criteria, content, taskDescription, reflection);
+
+            if (result && (result.strengths || result.improvements)) {
+                setStars(result.suggested_rating || stars || 3);
+                if (result.strengths) setStrengths(result.strengths);
+                if (result.improvements) setImprovements(result.improvements);
                 toast.success("AI Evaluation complete! Feel free to edit.", { id: toastId });
             }
         } catch (e: unknown) {
@@ -391,11 +400,12 @@ export default function EmployerReviewProof({ submissionId, onBack, onNavigate }
     }
 
     const hasAnySubmission = displayFile || displayLink || displayText;
+    const canAIEvaluate = !!displayText;
 
     // Get task info for requirements panel
     const taskInfo = submission.proof_tasks ? {
         title: submission.proof_tasks.title,
-        description: null, // Would need to fetch full task details
+        description: submission.proof_tasks.description ?? null,
         expected_time: null,
         submission_type: "link" as const,
         ai_tools_allowed: true,
@@ -667,6 +677,7 @@ export default function EmployerReviewProof({ submissionId, onBack, onNavigate }
                     isLocked={!!isReviewed || user?.role === "demo_admin"}
                     onSuggestAI={handleSuggestFeedback}
                     isSuggesting={suggestingAI}
+                    canAIEvaluate={canAIEvaluate}
                 />
 
                 {/* Action Bar */}
