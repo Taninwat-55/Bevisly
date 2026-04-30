@@ -82,7 +82,23 @@ export default function CandidateFeedbackView() {
 
       {selectedProof && (
         <ProofDetailModal
-          proof={selectedProof}
+          card={{
+            id: selectedProof.id,
+            submission_id: selectedProof.id,
+            user_id: null,
+            job_title: selectedProof.jobs?.title ?? null,
+            task_title: selectedProof.proof_tasks?.title ?? null,
+            company_name: selectedProof.jobs?.company ?? null,
+            username: null,
+            rating: selectedProof.feedback?.[0]?.stars ?? null,
+            comments: selectedProof.feedback?.[0]?.comments ?? null,
+            strengths: selectedProof.feedback?.[0]?.strengths ?? null,
+            improvements: selectedProof.feedback?.[0]?.improvements ?? null,
+            reviewed_at: selectedProof.feedback?.[0]?.created_at ?? selectedProof.created_at ?? null,
+            is_public: false,
+            share_url: null,
+          }}
+          isOpen={true}
           onClose={() => setSelectedProof(null)}
         />
       )}

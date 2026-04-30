@@ -33,11 +33,14 @@
 
 ## 🚀 Roadmap
 
-Bevisly **v0.1.0** (MVP) is live! We are currently working on **v0.2.0**, which
-focuses heavily on Security, Data Integrity, and UX improvements (like
-Slide-over panels).
+Bevisly **v0.1.0** (MVP) is live. The following features are planned for completion before public launch outreach:
 
-👉 **[View the full v0.2.0 Roadmap here](./v0.2.0-roadmap.md)**
+| # | Feature | Description | Status |
+|---|---------|-------------|--------|
+| 1 | **Practice Proofs** | AI-generated practice tasks candidates can attempt immediately after signup — graded by AI, counts toward Leaderboard | Planned |
+| 2 | **Application Status Tracker** | Pizza-tracker style timeline on candidate dashboard showing real-time hiring stage updates from employer Kanban | Planned |
+| 3 | **Verified Skills from Proofs** | AI extracts skills from completed proof tasks and adds them as "Verified Skills" (distinct from self-claimed) on the candidate profile | Planned |
+| 4 | **Stripe Integration** | Subscription checkout, webhook to update plan tier in DB, Stripe Customer Portal for billing management | Planned |
 
 ---
 

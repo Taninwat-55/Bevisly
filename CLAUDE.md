@@ -126,4 +126,42 @@ supabase migration new <migration-name>
 
 ## Current Task
 
-**Setting up the `feedback-reward` Supabase Edge Function** — rewards candidates with points or tokens when employers submit feedback on their proof submission.
+Pre-launch polish pass and feature completion before outreach to startups/organizations.
+
+---
+
+## Pre-Launch Roadmap
+
+Features planned before sending cold emails to employers. Build in this order:
+
+### 1. Practice Proofs (Candidate Cold-Start Fix)
+Candidates currently need an employer invite to prove any skills. Build a library of 5–10 AI-generated "Practice Proof" tasks (e.g. "Build a login form", "Write a marketing email") that any candidate can attempt immediately after signup. AI grades the submission instantly and the score counts toward Leaderboard ranking. Removes the empty-state problem for new candidates and creates immediate engagement.
+- New `practice_tasks` table (generic, not job-specific)
+- AI grading edge function (Gemini) — returns score + written feedback
+- Candidate dashboard entry point: "Practice & Improve"
+
+### 2. Transparent Application Status Tracker (Candidate-Side Kanban)
+Candidates experience a "resume black hole" — they submit and hear nothing. Build a pizza-tracker style timeline on the candidate dashboard showing their active applications: `Submitted → Under Review → Interview → Decision`. When the employer moves a candidate's card on their Talent Board (Kanban), the candidate's tracker updates in real time. Transparency is a key trust differentiator.
+- Read-only view for candidates derived from `submissions.hiring_stage`
+- Real-time updates via Supabase Realtime subscription
+- Visual step indicator component on candidate dashboard
+
+### 3. Verified Skills from Proof Tasks (AI Skill Extraction)
+When a candidate completes a Proof Task involving React, Tailwind, or Supabase, the AI should automatically extract and add those as "Verified Skills" on their profile — visually distinct from self-claimed skills. Separate: **Self-Claimed Skills** (anyone can add) vs **Verified Skills** (earned via a completed Proof Task, marked with a Bevisly checkmark).
+- New `verified_skills` column on `profiles` (or a separate `profile_skills` table with `source: 'self' | 'verified'`)
+- AI extraction step added to the feedback/grading flow
+- UI update on profile and public profile pages to distinguish the two
+
+### 4. Stripe Payment Integration
+Wire up Stripe before sending cold emails — a pricing page with no working checkout undermines credibility. Scope:
+- Stripe Checkout for subscription plans (Free / Pro)
+- Webhook → updates `profiles.subscription_tier` in Supabase on payment
+- "Manage Billing" button → Stripe Customer Portal
+- Gate Pro features behind subscription check
+
+---
+
+## Additional Pre-Launch Checks
+- Full user flow walkthrough for both candidate and employer roles
+- Pricing research: validate plan prices against comparable tools (Workable, Lever, etc.)
+- Onboarding experience: employer first-login guidance (what to do first, how proof tasks work)
