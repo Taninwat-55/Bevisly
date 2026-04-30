@@ -36,6 +36,7 @@ import AdminLayout from "@/layout/AdminLayout";
 // --- Public pages
 import ProfilePage from "@/pages/public/ProfilePage";
 import LeaderboardPage from "@/pages/public/LeaderboardPage";
+import PublicProofView from "@/pages/public/PublicProofView";
 import PublicLayout from "@/layout/PublicLayout";
 import LearnMorePage from "@/pages/public/learn-more/LearnMorePage";
 import AboutPage from "@/pages/shared/AboutPage";
@@ -54,6 +55,7 @@ export const router = createBrowserRouter([
       { path: "/leaderboard", element: <LeaderboardPage /> },
       { path: "/candidate/:id", element: <ProfilePage /> }, // Legacy UUID support
       { path: "/@:username", element: <ProfilePage /> }, // SEO-friendly username URLs
+      { path: "/proof/:id", element: <PublicProofView /> }, // Shareable proof certificate
       { path: "/learn-more", element: <LearnMorePage /> },
       { path: "/privacy", element: <PrivacyPolicy /> },
       { path: "/about", element: <AboutPage /> },

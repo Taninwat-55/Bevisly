@@ -5,11 +5,18 @@ import { useAuth } from "@/hooks/useAuth";
 export type ProofCard = {
   id: string | null;
   submission_id: string | null;
+  user_id: string | null;
   job_title: string | null;
+  task_title: string | null;
+  company_name: string | null;
+  username: string | null;
   rating: number | null;
   comments: string | null;
+  strengths: string | null;
+  improvements: string | null;
   reviewed_at: string | null;
   is_public: boolean;
+  share_url: string | null;
 };
 
 export function useProofs() {
@@ -24,7 +31,7 @@ export function useProofs() {
       const { data: cardData } = await supabase
         .from("proof_cards")
         .select("*")
-        .eq("candidate_name", user.email?.split("@")[0] ?? "")
+        .eq("user_id", user.id)
         .order("reviewed_at", { ascending: false });
 
       const { data: profile } = await supabase

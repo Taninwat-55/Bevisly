@@ -19,7 +19,7 @@ interface PublicProfile extends ProfileLite {
 }
 
 export default function PublicProfilePage() {
-    const { username } = useParams<{ username: string }>();
+    const { username, id } = useParams<{ username?: string; id?: string }>();
     const [profile, setProfile] = useState<PublicProfile | null>(null);
     const [cards, setCards] = useState<ProofCardLite[]>([]);
     const [loading, setLoading] = useState(true);
@@ -27,20 +27,21 @@ export default function PublicProfilePage() {
     const [showAll, setShowAll] = useState(false);
 
     useEffect(() => {
-        if (!username) return;
+        if (!username && !id) return;
 
         const fetchData = async () => {
             try {
                 setLoading(true);
                 setError(null);
 
-                // Look up user by username
-                // Note: username/is_public columns require migration to be run first
-                const { data: prof, error: profErr } = await supabase
+                // Look up by username (SEO route) or by UUID (legacy route)
+                const query = supabase
                     .from("profiles")
-                    .select("id, full_name, credits, email, avatar_url")
-                    .eq("username", username.toLowerCase())
-                    .single();
+                    .select("id, full_name, credits, email, avatar_url");
+
+                const { data: prof, error: profErr } = username
+                    ? await query.eq("username", username.toLowerCase()).single()
+                    : await query.eq("id", id!).single();
 
                 if (profErr || !prof) {
                     setError("not_found");

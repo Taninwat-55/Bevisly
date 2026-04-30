@@ -37,6 +37,7 @@ export default function CandidateProfile() {
   const [github, setGithub] = useState<string>("");
   const [website, setWebsite] = useState<string>("");
 
+  const [username, setUsername] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const [resumeUrl, setResumeUrl] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
@@ -51,7 +52,7 @@ export default function CandidateProfile() {
 
     const { data } = await supabase
       .from("profiles")
-      .select("created_at, full_name, skills, work_status, bio, linkedin_url, github_url, website_url")
+      .select("created_at, full_name, skills, work_status, bio, linkedin_url, github_url, website_url, username")
       .eq("id", user.id)
       .single();
 
@@ -65,6 +66,7 @@ export default function CandidateProfile() {
       setLinkedin(data.linkedin_url || "");
       setGithub(data.github_url || "");
       setWebsite(data.website_url || "");
+      setUsername((data as Record<string, unknown>).username as string | null ?? null);
     }
   }, [user?.id]);
 
@@ -122,7 +124,10 @@ export default function CandidateProfile() {
 
   /* Copy public link */
   const handleCopyLink = () => {
-    navigator.clipboard.writeText(`${window.location.origin}/candidate/${user?.id}`);
+    const url = username
+      ? `${window.location.origin}/@${username}`
+      : `${window.location.origin}/candidate/${user?.id}`;
+    navigator.clipboard.writeText(url);
     setCopied(true);
     toast.success("Profile link copied!");
     setTimeout(() => setCopied(false), 1500);
@@ -295,8 +300,8 @@ export default function CandidateProfile() {
         <div className="space-y-8">
           {/* Skills Card */}
           <div className="glass-panel p-6 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] shadow-sm">
-            <h2 className="heading-md mb-4 flex items-center gap-2">
-              <Code size={18} className="text-purple-500" /> Skills
+            <h2 className="heading-md mb-4 flex items-center gap-2 text-[var(--color-text)] font-semibold">
+              <Code size={18} className="text-purple-400" /> Skills
             </h2>
             <div className="flex flex-wrap gap-2">
               {skills.length > 0 ? (
@@ -319,8 +324,8 @@ export default function CandidateProfile() {
 
           {/* Resume Card */}
           <div className="glass-panel p-6 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] shadow-sm">
-            <h2 className="heading-md mb-4 flex items-center gap-2">
-              <FileText size={18} className="text-orange-500" /> Resume
+            <h2 className="heading-md mb-4 flex items-center gap-2 text-[var(--color-text)] font-semibold">
+              <FileText size={18} className="text-orange-400" /> Resume
             </h2>
 
             {resumeUrl ? (
@@ -369,8 +374,8 @@ export default function CandidateProfile() {
 
         {/* ── Right Column: Proofs ────────────────────────────── */}
         <div className="lg:col-span-2">
-          <h2 className="heading-md mb-6 flex items-center gap-2">
-            <Award size={20} className="text-amber-500" /> Verified Proofs Vault
+          <h2 className="heading-md mb-6 flex items-center gap-2 text-[var(--color-text)] font-semibold">
+            <Award size={20} className="text-amber-400" /> Verified Proofs Vault
           </h2>
 
           {/* Using the existing grid component but wrapped nicely */}
