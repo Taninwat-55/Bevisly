@@ -1,6 +1,7 @@
 import { useState } from "react";
 import CandidateOverview from "./CandidateOverview";
 import CandidateProfile from "./CandidateProfile";
+import ProfileProgress from "@/components/profile/ProfileProgress";
 import { Briefcase, User } from "lucide-react";
 
 export default function CandidateUnifiedDashboard() {
@@ -33,6 +34,9 @@ export default function CandidateUnifiedDashboard() {
           My Profile
         </button>
       </div>
+
+      {/* ── Profile Progress Widget ────────────────── */}
+      <ProfileProgress onNavigateToProfile={() => setActiveTab("profile")} />
 
       {/* ── Content Area ────────────────────────────── */}
       <div className="animate-fade-in max-w-5xl mx-auto mt-6">
