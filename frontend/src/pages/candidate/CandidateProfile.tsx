@@ -5,8 +5,8 @@ import { useCandidateStats } from "@/hooks/useCandidateStats";
 import ProofCardsGrid from "@/components/proofs/ProofCardsGrid";
 import toast from "react-hot-toast";
 import { Button } from "@/components/ui/Button";
-import { 
-  Pencil, 
+import {
+  Pencil,
   Copy,
   CheckCircle,
   UploadCloud,
@@ -19,7 +19,8 @@ import {
   Code,
   Linkedin,
   Github,
-  Globe
+  Globe,
+  Languages
 } from "lucide-react";
 import { uploadResume, getProfileResume } from "@/lib/api/profiles";
 import EditProfileModal from "@/components/profile/EditProfileModal";
@@ -31,6 +32,7 @@ export default function CandidateProfile() {
   const [joined, setJoined] = useState<string>("");
   const [fullName, setFullName] = useState<string>("");
   const [skills, setSkills] = useState<string[]>([]);
+  const [languages, setLanguages] = useState<string[]>([]);
   const [workStatus, setWorkStatus] = useState<string>("open");
   const [bio, setBio] = useState<string>("");
   const [linkedin, setLinkedin] = useState<string>("");
@@ -52,7 +54,7 @@ export default function CandidateProfile() {
 
     const { data } = await supabase
       .from("profiles")
-      .select("created_at, full_name, skills, work_status, bio, linkedin_url, github_url, website_url, username")
+      .select("created_at, full_name, skills, languages, work_status, bio, linkedin_url, github_url, website_url, username")
       .eq("id", user.id)
       .single();
 
@@ -61,6 +63,7 @@ export default function CandidateProfile() {
         setJoined(new Date(data.created_at).toLocaleDateString(undefined, { month: 'long', year: 'numeric' }));
       setFullName(data.full_name || "");
       setSkills(data.skills || []);
+      setLanguages((data as Record<string, unknown>).languages as string[] || []);
       setWorkStatus(data.work_status || "open");
       setBio(data.bio || "");
       setLinkedin(data.linkedin_url || "");
@@ -317,8 +320,28 @@ export default function CandidateProfile() {
                   <p className="text-sm text-[var(--color-text-muted)]">No skills added yet.</p>
               )}
             </div>
+
+            {(languages.length > 0) && (
+              <>
+                <div className="mt-5 mb-3 flex items-center gap-2">
+                  <Languages size={15} className="text-emerald-500" />
+                  <span className="text-xs font-semibold uppercase tracking-wider text-[var(--color-text-muted)]">Languages</span>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {languages.map((lang) => (
+                    <div
+                      key={lang}
+                      className="px-3 py-1.5 rounded-lg text-sm font-medium border flex items-center gap-2 bg-emerald-50 dark:bg-emerald-900/20 border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-300"
+                    >
+                      {lang}
+                    </div>
+                  ))}
+                </div>
+              </>
+            )}
+
             <Button variant="ghost" size="sm" className="w-full mt-4 text-[var(--color-text-muted)]" onClick={() => setIsEditModalOpen(true)}>
-              + Add / Edit Skills
+              + Add / Edit Skills & Languages
             </Button>
           </div>
 
@@ -392,6 +415,7 @@ export default function CandidateProfile() {
         currentName={fullName}
         currentAvatarUrl={user?.avatar_url || null}
         currentSkills={skills}
+        currentLanguages={languages}
         currentWorkStatus={workStatus}
         currentBio={bio}
         currentLinkedin={linkedin}

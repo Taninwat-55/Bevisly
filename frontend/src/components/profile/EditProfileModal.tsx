@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { Dialog, DialogPanel, DialogTitle, Transition, TransitionChild } from "@headlessui/react";
 import { Fragment } from "react";
-import { X, Camera, Loader2, Plus, Briefcase, Code, Link as LinkIcon, Linkedin, Github, Globe } from "lucide-react";
+import { X, Camera, Loader2, Plus, Briefcase, Code, Link as LinkIcon, Linkedin, Github, Globe, Languages } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { supabase } from "@/lib/supabaseClient";
 import { updateProfileData } from "@/lib/api/profiles";
@@ -14,6 +14,7 @@ interface EditProfileModalProps {
   currentName: string;
   currentAvatarUrl: string | null;
   currentSkills?: string[];
+  currentLanguages?: string[];
   currentWorkStatus?: string;
   currentBio?: string;
   currentLinkedin?: string;
@@ -28,6 +29,7 @@ export default function EditProfileModal({
   currentName,
   currentAvatarUrl,
   currentSkills = [],
+  currentLanguages = [],
   currentWorkStatus = "open",
   currentBio = "",
   currentLinkedin = "",
@@ -39,6 +41,7 @@ export default function EditProfileModal({
   const [name, setName] = useState(currentName);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(currentAvatarUrl);
   const [skills, setSkills] = useState<string[]>(currentSkills);
+  const [languages, setLanguages] = useState<string[]>(currentLanguages);
   const [workStatus, setWorkStatus] = useState(currentWorkStatus);
   const [bio, setBio] = useState(currentBio);
   const [linkedin, setLinkedin] = useState(currentLinkedin);
@@ -46,6 +49,7 @@ export default function EditProfileModal({
   const [website, setWebsite] = useState(currentWebsite);
   
   const [newSkill, setNewSkill] = useState("");
+  const [newLanguage, setNewLanguage] = useState("");
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
   
@@ -54,7 +58,8 @@ export default function EditProfileModal({
   useEffect(() => {
     setName(currentName);
     setAvatarUrl(currentAvatarUrl);
-    setSkills(currentSkills || []); 
+    setSkills(currentSkills || []);
+    setLanguages(currentLanguages || []);
     setWorkStatus(currentWorkStatus || "open");
     setBio(currentBio || "");
     setLinkedin(currentLinkedin || "");
@@ -128,6 +133,21 @@ export default function EditProfileModal({
     setSkills(skills.filter(s => s !== skillToRemove));
   };
 
+  const handleAddLanguage = () => {
+    const trimmed = newLanguage.trim();
+    if (!trimmed) return;
+    if (languages.includes(trimmed)) {
+      toast.error("Language already added");
+      return;
+    }
+    setLanguages([...languages, trimmed]);
+    setNewLanguage("");
+  };
+
+  const handleRemoveLanguage = (lang: string) => {
+    setLanguages(languages.filter(l => l !== lang));
+  };
+
   const handleSave = async () => {
     if (!user) return;
     setSaving(true);
@@ -136,6 +156,7 @@ export default function EditProfileModal({
         full_name: name,
         avatar_url: avatarUrl,
         skills: skills,
+        languages: languages,
         work_status: workStatus,
         bio: bio,
         linkedin_url: linkedin,
@@ -341,15 +362,15 @@ export default function EditProfileModal({
                             <Plus size={16} />
                         </Button>
                     </div>
-                    
+
                     <div className="flex flex-wrap gap-2">
                         {skills.map((skill) => (
-                            <span 
-                                key={skill} 
+                            <span
+                                key={skill}
                                 className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 text-sm border border-blue-100 dark:border-blue-800"
                             >
                                 {skill}
-                                <button 
+                                <button
                                     onClick={() => handleRemoveSkill(skill)}
                                     className="hover:text-red-500 transition-colors ml-1"
                                 >
@@ -359,6 +380,47 @@ export default function EditProfileModal({
                         ))}
                         {skills.length === 0 && (
                             <p className="text-sm text-[var(--color-text-muted)] italic">No skills added yet.</p>
+                        )}
+                    </div>
+                  </div>
+
+                  {/* Languages */}
+                  <div>
+                    <label className="block text-sm font-medium text-[var(--color-text)] mb-2 flex items-center gap-2">
+                        <Languages size={16} className="text-[var(--color-text-muted)]" />
+                        Languages
+                    </label>
+                    <div className="flex gap-2 mb-3">
+                        <input
+                            type="text"
+                            value={newLanguage}
+                            onChange={(e) => setNewLanguage(e.target.value)}
+                            onKeyDown={(e) => e.key === 'Enter' && handleAddLanguage()}
+                            placeholder="Add a language (e.g. Thai, English)"
+                            className="flex-1 px-4 py-2 rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)] text-[var(--color-text)] focus:ring-2 focus:ring-emerald-500 outline-none text-sm"
+                        />
+                        <Button size="sm" onClick={handleAddLanguage} disabled={!newLanguage.trim()}>
+                            <Plus size={16} />
+                        </Button>
+                    </div>
+
+                    <div className="flex flex-wrap gap-2">
+                        {languages.map((lang) => (
+                            <span
+                                key={lang}
+                                className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-300 text-sm border border-emerald-100 dark:border-emerald-800"
+                            >
+                                {lang}
+                                <button
+                                    onClick={() => handleRemoveLanguage(lang)}
+                                    className="hover:text-red-500 transition-colors ml-1"
+                                >
+                                    <X size={12} />
+                                </button>
+                            </span>
+                        ))}
+                        {languages.length === 0 && (
+                            <p className="text-sm text-[var(--color-text-muted)] italic">No languages added yet.</p>
                         )}
                     </div>
                   </div>

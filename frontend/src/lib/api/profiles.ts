@@ -64,6 +64,7 @@ export async function updateProfileData(
     company_name?: string;
     avatar_url?: string | null;
     skills?: string[];
+    languages?: string[];
     work_status?: string;
     bio?: string;
     linkedin_url?: string;
