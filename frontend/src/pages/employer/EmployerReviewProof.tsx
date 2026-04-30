@@ -408,7 +408,7 @@ export default function EmployerReviewProof({ submissionId, onBack, onNavigate }
             className="min-h-screen bg-[var(--color-bg)] px-4 md:px-8 py-6 md:py-10"
         >
             {/* Header */}
-            <header className="max-w-7xl mx-auto mb-6">
+            <header className="max-w-3xl mx-auto mb-6">
                 <button
                     onClick={() => {
                         if (onBack) onBack();
@@ -467,220 +467,210 @@ export default function EmployerReviewProof({ submissionId, onBack, onNavigate }
                 </div>
             </header>
 
-            {/* Main Content - Side by Side Layout */}
-            <main className="max-w-7xl mx-auto">
-                <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+            {/* Main Content - Single Column Layout */}
+            <main className="max-w-3xl mx-auto space-y-6">
 
-                    {/* LEFT: Task Requirements (2 cols) */}
-                    <aside className="lg:col-span-2">
-                        <TaskRequirementsPanel task={taskInfo} />
-                    </aside>
+                {/* Task Requirements */}
+                <TaskRequirementsPanel task={taskInfo} />
 
-                    {/* RIGHT: Candidate Submission (3 cols) */}
-                    <div className="lg:col-span-3 space-y-6">
-
-                        {/* Candidate Info Bar */}
-                        <div className="glass-panel rounded-2xl p-4 flex items-center justify-between">
-                            <div className="flex items-center gap-3">
-                                <div className="w-10 h-10 rounded-full bg-[var(--color-candidate)]/10 flex items-center justify-center text-[var(--color-candidate-dark)]">
-                                    <User size={20} />
-                                </div>
-                                <div>
-                                    <p className="font-medium text-[var(--color-text)]">
-                                        {submission.profiles?.full_name || "Anonymous"}
-                                    </p>
-                                    <p className="text-xs text-[var(--color-text-muted)]">
-                                        {submission.profiles?.email}
-                                    </p>
-                                </div>
-                            </div>
-
-                            <div className="flex items-center gap-2">
-                                <Link
-                                    to={`/candidate/${submission.user_id}`}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="p-2 rounded-lg hover:bg-[var(--color-bg)] text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-all"
-                                    title="View Profile"
-                                >
-                                    <ExternalLink size={18} />
-                                </Link>
-                                {submission.resume_url && (
-                                    <a
-                                        href={submission.resume_url}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="p-2 rounded-lg hover:bg-[var(--color-bg)] text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-all"
-                                        title="View Resume"
-                                    >
-                                        <FileText size={18} />
-                                    </a>
-                                )}
-                            </div>
+                {/* Candidate Info Bar */}
+                <div className="glass-panel rounded-2xl p-4 flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-full bg-[var(--color-candidate)]/10 flex items-center justify-center text-[var(--color-candidate-dark)]">
+                            <User size={20} />
                         </div>
-
-                        {/* Submission Content */}
-                        <div className="glass-panel rounded-2xl p-6 space-y-5">
-                            <h3 className="text-xs font-bold uppercase tracking-wider text-[var(--color-employer)] dark:text-blue-400 mb-4">
-                                Candidate Submission
-                            </h3>
-
-                            {/* Video Section */}
-                            {submission.video_url && (
-                                <div className="space-y-2">
-                                    <div className="flex items-center gap-2 text-indigo-600 dark:text-indigo-400 text-sm font-medium">
-                                        <Video size={16} />
-                                        Video Walkthrough
-                                    </div>
-                                    {getVideoEmbed(submission.video_url) || (
-                                        <a
-                                            href={submission.video_url}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="flex items-center justify-between p-3 bg-[var(--color-bg)] border border-[var(--color-border)] rounded-xl hover:bg-[var(--color-bg-hover)] transition group"
-                                        >
-                                            <span className="text-sm text-[var(--color-text)] underline decoration-dotted truncate max-w-[300px]">
-                                                {submission.video_url}
-                                            </span>
-                                            <ExternalLink size={14} className="text-[var(--color-text-muted)] group-hover:text-[var(--color-text)]" />
-                                        </a>
-                                    )}
-                                </div>
-                            )}
-
-                            {/* File Block */}
-                            {displayFile && (
-                                <div className="flex items-center gap-4 p-4 bg-[var(--color-bg)] border border-[var(--color-border)] rounded-xl">
-                                    <div className="p-3 bg-[var(--color-surface)] rounded-xl border border-[var(--color-border)] text-[var(--color-candidate)]">
-                                        <FileText size={24} />
-                                    </div>
-                                    <div className="flex-1">
-                                        <p className="text-sm font-medium text-[var(--color-text)]">Uploaded File</p>
-                                        <p className="text-xs text-[var(--color-text-muted)]">Click to download</p>
-                                    </div>
-                                    <a
-                                        href={displayFile}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="flex items-center gap-2 px-4 py-2 bg-[var(--color-employer)] text-white rounded-xl hover:brightness-110 text-sm font-medium transition"
-                                    >
-                                        <Download size={16} />
-                                        Download
-                                    </a>
-                                </div>
-                            )}
-
-                            {/* Link Block */}
-                            {displayLink && (
-                                <div className="flex items-center gap-4 p-4 bg-[var(--color-bg)] border border-[var(--color-border)] rounded-xl">
-                                    <div className="p-3 bg-[var(--color-surface)] rounded-xl border border-[var(--color-border)] text-[var(--color-candidate)]">
-                                        <ExternalLink size={24} />
-                                    </div>
-                                    <div className="flex-1 min-w-0">
-                                        <p className="text-sm font-medium text-[var(--color-text)]">External Link</p>
-                                        <a
-                                            href={displayLink}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="text-xs text-[var(--color-employer-dark)] hover:underline truncate block"
-                                        >
-                                            {displayLink}
-                                        </a>
-                                    </div>
-                                    <a
-                                        href={displayLink}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="flex items-center gap-2 px-4 py-2 border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text)] rounded-xl hover:bg-[var(--color-bg)] text-sm font-medium transition"
-                                    >
-                                        Open <ArrowRight size={14} />
-                                    </a>
-                                </div>
-                            )}
-
-                            {/* Text Block */}
-                            {displayText && (
-                                <div className="p-4 bg-[var(--color-bg)] border border-[var(--color-border)] rounded-xl">
-                                    <div className="flex items-center gap-2 mb-2 text-[var(--color-candidate)]">
-                                        <AlignLeft size={16} />
-                                        <span className="text-xs font-bold uppercase">Text Response</span>
-                                    </div>
-                                    <div className="prose prose-sm dark:prose-invert max-w-none text-[var(--color-text)]">
-                                        <ReactMarkdown>{DOMPurify.sanitize(displayText)}</ReactMarkdown>
-                                    </div>
-                                </div>
-                            )}
-
-                            {/* Empty State */}
-                            {!hasAnySubmission && !submission.video_url && (
-                                <div className="p-8 text-center border border-dashed border-[var(--color-border)] rounded-xl text-slate-500 dark:text-slate-400">
-                                    No submission content found. Check reflections below.
-                                </div>
-                            )}
+                        <div>
+                            <p className="font-medium text-[var(--color-text)]">
+                                {submission.profiles?.full_name || "Anonymous"}
+                            </p>
+                            <p className="text-xs text-[var(--color-text-muted)]">
+                                {submission.profiles?.email}
+                            </p>
                         </div>
+                    </div>
 
-                        {/* Resume / CV Panel */}
-                        {(submission.resume_url || submission.profiles?.resume_url) && (
-                            <div className="glass-panel p-6 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] shadow-sm">
-                                <h3 className="text-xs font-bold uppercase tracking-wider text-[var(--color-employer)] dark:text-blue-400 mb-4 flex items-center gap-2">
-                                <FileText size={16} /> Candidate Resume / CV
-                                </h3>
-                                
-                                <div className="flex items-center justify-between p-4 bg-[var(--color-bg)] rounded-xl border border-[var(--color-border)]">
-                                    <div className="flex items-center gap-3">
-                                        <div className="w-10 h-10 rounded-lg bg-orange-100 dark:bg-orange-900/20 flex items-center justify-center text-orange-600">
-                                            <FileText size={20} />
-                                        </div>
-                                        <div>
-                                            <p className="font-medium text-[var(--color-text)]">{submission.profiles?.full_name}'s Resume</p>
-                                            <p className="text-xs text-[var(--color-text-muted)]">Available for review</p>
-                                        </div>
-                                    </div>
-                                    <a
-                                        href={submission.resume_url || submission.profiles?.resume_url || undefined}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="flex items-center gap-2 px-4 py-2 border border-[var(--color-border)] bg-[var(--color-surface)] hover:bg-[var(--color-bg)] rounded-xl text-sm font-semibold text-slate-800 dark:text-slate-200 transition"
-                                    >
-                                        <Download size={16} /> Download Open
-                                    </a>
-                                </div>
-                            </div>
-                        )}
-
-                        {/* Reflection */}
-                        {submission.reflection && (
-                            <div className="glass-panel rounded-2xl p-6">
-                                <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-3">
-                                    Candidate Reflection
-                                </h3>
-                                <div className="relative p-4 bg-[var(--color-bg)] border border-[var(--color-border)] rounded-xl">
-                                    <Quote size={20} className="absolute top-4 left-4 text-[var(--color-border)] opacity-50" />
-                                    <div className="pl-8 prose prose-sm dark:prose-invert max-w-none text-[var(--color-text)]">
-                                        <ReactMarkdown>{DOMPurify.sanitize(submission.reflection)}</ReactMarkdown>
-                                    </div>
-                                </div>
-                            </div>
+                    <div className="flex items-center gap-2">
+                        <Link
+                            to={`/candidate/${submission.user_id}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="p-2 rounded-lg hover:bg-[var(--color-bg)] text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-all"
+                            title="View Profile"
+                        >
+                            <ExternalLink size={18} />
+                        </Link>
+                        {submission.resume_url && (
+                            <a
+                                href={submission.resume_url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="p-2 rounded-lg hover:bg-[var(--color-bg)] text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-all"
+                                title="View Resume"
+                            >
+                                <FileText size={18} />
+                            </a>
                         )}
                     </div>
                 </div>
 
-                <div className="mt-8">
-                    <Scorecard
-                        stars={stars}
-                        setStars={setStars}
-                        strengths={strengths}
-                        setStrengths={setStrengths}
-                        improvements={improvements}
-                        setImprovements={setImprovements}
-                        isLocked={!!isReviewed || user?.role === "demo_admin"}
-                        onSuggestAI={handleSuggestFeedback}
-                        isSuggesting={suggestingAI}
-                    />
+                {/* Submission Content */}
+                <div className="glass-panel rounded-2xl p-6 space-y-5">
+                    <h3 className="text-xs font-bold uppercase tracking-wider text-[var(--color-employer)] dark:text-blue-400 mb-4">
+                        Candidate Submission
+                    </h3>
+
+                    {/* Video Section */}
+                    {submission.video_url && (
+                        <div className="space-y-2">
+                            <div className="flex items-center gap-2 text-indigo-600 dark:text-indigo-400 text-sm font-medium">
+                                <Video size={16} />
+                                Video Walkthrough
+                            </div>
+                            {getVideoEmbed(submission.video_url) || (
+                                <a
+                                    href={submission.video_url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="flex items-center justify-between p-3 bg-[var(--color-bg)] border border-[var(--color-border)] rounded-xl hover:bg-[var(--color-bg-hover)] transition group"
+                                >
+                                    <span className="text-sm text-[var(--color-text)] underline decoration-dotted truncate max-w-[300px]">
+                                        {submission.video_url}
+                                    </span>
+                                    <ExternalLink size={14} className="text-[var(--color-text-muted)] group-hover:text-[var(--color-text)]" />
+                                </a>
+                            )}
+                        </div>
+                    )}
+
+                    {/* File Block */}
+                    {displayFile && (
+                        <div className="flex items-center gap-4 p-4 bg-[var(--color-bg)] border border-[var(--color-border)] rounded-xl">
+                            <div className="p-3 bg-[var(--color-surface)] rounded-xl border border-[var(--color-border)] text-[var(--color-candidate)]">
+                                <FileText size={24} />
+                            </div>
+                            <div className="flex-1">
+                                <p className="text-sm font-medium text-[var(--color-text)]">Uploaded File</p>
+                                <p className="text-xs text-[var(--color-text-muted)]">Click to download</p>
+                            </div>
+                            <a
+                                href={displayFile}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="flex items-center gap-2 px-4 py-2 bg-[var(--color-employer)] text-white rounded-xl hover:brightness-110 text-sm font-medium transition"
+                            >
+                                <Download size={16} />
+                                Download
+                            </a>
+                        </div>
+                    )}
+
+                    {/* Link Block */}
+                    {displayLink && (
+                        <div className="flex items-center gap-4 p-4 bg-[var(--color-bg)] border border-[var(--color-border)] rounded-xl">
+                            <div className="p-3 bg-[var(--color-surface)] rounded-xl border border-[var(--color-border)] text-[var(--color-candidate)]">
+                                <ExternalLink size={24} />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                                <p className="text-sm font-medium text-[var(--color-text)]">External Link</p>
+                                <a
+                                    href={displayLink}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-xs text-[var(--color-employer-dark)] hover:underline truncate block"
+                                >
+                                    {displayLink}
+                                </a>
+                            </div>
+                            <a
+                                href={displayLink}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="flex items-center gap-2 px-4 py-2 border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text)] rounded-xl hover:bg-[var(--color-bg)] text-sm font-medium transition"
+                            >
+                                Open <ArrowRight size={14} />
+                            </a>
+                        </div>
+                    )}
+
+                    {/* Text Block */}
+                    {displayText && (
+                        <div className="p-4 bg-[var(--color-bg)] border border-[var(--color-border)] rounded-xl overflow-hidden">
+                            <div className="flex items-center gap-2 mb-2 text-[var(--color-candidate)]">
+                                <AlignLeft size={16} />
+                                <span className="text-xs font-bold uppercase">Text Response</span>
+                            </div>
+                            <div className="prose prose-sm dark:prose-invert max-w-none text-[var(--color-text)] break-words [&_pre]:whitespace-pre-wrap [&_pre]:break-words [&_code]:break-words">
+                                <ReactMarkdown>{DOMPurify.sanitize(displayText)}</ReactMarkdown>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Empty State */}
+                    {!hasAnySubmission && !submission.video_url && (
+                        <div className="p-8 text-center border border-dashed border-[var(--color-border)] rounded-xl text-slate-500 dark:text-slate-400">
+                            No submission content found. Check reflections below.
+                        </div>
+                    )}
                 </div>
 
+                {/* Resume / CV Panel */}
+                {(submission.resume_url || submission.profiles?.resume_url) && (
+                    <div className="glass-panel p-6 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] shadow-sm">
+                        <h3 className="text-xs font-bold uppercase tracking-wider text-[var(--color-employer)] dark:text-blue-400 mb-4 flex items-center gap-2">
+                            <FileText size={16} /> Candidate Resume / CV
+                        </h3>
+                        <div className="flex items-center justify-between p-4 bg-[var(--color-bg)] rounded-xl border border-[var(--color-border)]">
+                            <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 rounded-lg bg-orange-100 dark:bg-orange-900/20 flex items-center justify-center text-orange-600">
+                                    <FileText size={20} />
+                                </div>
+                                <div>
+                                    <p className="font-medium text-[var(--color-text)]">{submission.profiles?.full_name}'s Resume</p>
+                                    <p className="text-xs text-[var(--color-text-muted)]">Available for review</p>
+                                </div>
+                            </div>
+                            <a
+                                href={submission.resume_url || submission.profiles?.resume_url || undefined}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="flex items-center gap-2 px-4 py-2 border border-[var(--color-border)] bg-[var(--color-surface)] hover:bg-[var(--color-bg)] rounded-xl text-sm font-semibold text-slate-800 dark:text-slate-200 transition"
+                            >
+                                <Download size={16} /> Download
+                            </a>
+                        </div>
+                    </div>
+                )}
+
+                {/* Reflection */}
+                {submission.reflection && (
+                    <div className="glass-panel rounded-2xl p-6">
+                        <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-3">
+                            Candidate Reflection
+                        </h3>
+                        <div className="relative p-4 bg-[var(--color-bg)] border border-[var(--color-border)] rounded-xl">
+                            <Quote size={20} className="absolute top-4 left-4 text-[var(--color-border)] opacity-50" />
+                            <div className="pl-8 prose prose-sm dark:prose-invert max-w-none text-[var(--color-text)]">
+                                <ReactMarkdown>{DOMPurify.sanitize(submission.reflection)}</ReactMarkdown>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* Scorecard */}
+                <Scorecard
+                    stars={stars}
+                    setStars={setStars}
+                    strengths={strengths}
+                    setStrengths={setStrengths}
+                    improvements={improvements}
+                    setImprovements={setImprovements}
+                    isLocked={!!isReviewed || user?.role === "demo_admin"}
+                    onSuggestAI={handleSuggestFeedback}
+                    isSuggesting={suggestingAI}
+                />
+
                 {/* Action Bar */}
-                <div className="mt-6 flex items-center justify-between p-4 glass-panel rounded-2xl">
+                <div className="flex items-center justify-between p-4 glass-panel rounded-2xl">
                     <button
                         onClick={() => prevCandidate && navigate(`/employer/review/${prevCandidate.id}`)}
                         disabled={!prevCandidate}
