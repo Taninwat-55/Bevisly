@@ -397,13 +397,17 @@ export default function CandidateProfile() {
 
         {/* ── Right Column: Proofs ────────────────────────────── */}
         <div className="lg:col-span-2">
-          <h2 className="heading-md mb-6 flex items-center gap-2 text-[var(--color-text)] font-semibold">
-            <Award size={20} className="text-amber-400" /> Verified Proofs Vault
-          </h2>
+          <div className="mb-6">
+            <h2 className="heading-md flex items-center gap-2 text-[var(--color-text)] font-semibold">
+              <Award size={20} className="text-amber-400" /> Verified Proofs Vault
+            </h2>
+            <p className="text-sm text-[var(--color-text-muted)] mt-1">
+              Employer-verified proof of your capabilities — make proofs public to share with recruiters.
+            </p>
+          </div>
 
-          {/* Using the existing grid component but wrapped nicely */}
           <div className="bg-[var(--color-surface)]/50 rounded-2xl">
-            <ProofCardsGrid allowTogglePublic={true} />
+            <ProofCardsGrid allowTogglePublic={true} username={username} />
           </div>
         </div>
 

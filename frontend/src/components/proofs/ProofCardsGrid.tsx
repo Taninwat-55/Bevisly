@@ -1,16 +1,32 @@
 import { useState } from "react";
 import { useProofs } from "@/hooks/useProofs";
-import { ChevronDown, ChevronUp, Globe, Lock, Share2, Star, BadgeCheck } from "lucide-react";
+import {
+  ChevronDown,
+  ChevronUp,
+  Globe,
+  Lock,
+  Share2,
+  Star,
+  BadgeCheck,
+  Building2,
+} from "lucide-react";
 import toast from "react-hot-toast";
+import ProofDetailModal from "@/components/proofs/ProofDetailModal";
+import type { ProofCard } from "@/hooks/useProofs";
 
 interface ProofCardsGridProps {
   allowTogglePublic?: boolean;
+  username?: string | null;
 }
 
-export default function ProofCardsGrid({ allowTogglePublic = false }: ProofCardsGridProps) {
+export default function ProofCardsGrid({
+  allowTogglePublic = false,
+  username,
+}: ProofCardsGridProps) {
   const { cards, loading, toggleProofPublic } = useProofs();
   const [showAll, setShowAll] = useState(false);
   const [toggling, setToggling] = useState<Record<string, boolean>>({});
+  const [selectedCard, setSelectedCard] = useState<ProofCard | null>(null);
 
   if (loading)
     return (
@@ -36,19 +52,19 @@ export default function ProofCardsGrid({ allowTogglePublic = false }: ProofCards
 
   const handleToggle = async (submissionId: string | null, currentStatus: boolean) => {
     if (!submissionId) return;
-    setToggling(prev => ({ ...prev, [submissionId]: true }));
+    setToggling((prev) => ({ ...prev, [submissionId]: true }));
     const result = await toggleProofPublic(submissionId, currentStatus);
     if (result.success) {
       toast.success(`Proof is now ${result.is_public ? "public" : "private"}`);
     } else {
       toast.error("Failed to update visibility");
     }
-    setToggling(prev => ({ ...prev, [submissionId]: false }));
+    setToggling((prev) => ({ ...prev, [submissionId]: false }));
   };
 
   return (
     <>
-      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid sm:grid-cols-2 gap-4">
         {visibleCards.map((card) => {
           const key = card.id ?? card.submission_id ?? Math.random();
           const sid = card.submission_id;
@@ -58,21 +74,20 @@ export default function ProofCardsGrid({ allowTogglePublic = false }: ProofCards
               key={key}
               className="group relative p-px rounded-2xl transition-all duration-300"
               style={{
-                background: "linear-gradient(135deg, rgba(139,92,246,0.35) 0%, rgba(30,30,40,0) 50%, rgba(59,130,246,0.25) 100%)",
+                background:
+                  "linear-gradient(135deg, rgba(139,92,246,0.35) 0%, rgba(30,30,40,0) 50%, rgba(59,130,246,0.25) 100%)",
               }}
             >
-              {/* Hover glow intensifier */}
               <div
                 className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
                 style={{
-                  background: "linear-gradient(135deg, rgba(139,92,246,0.55) 0%, rgba(30,30,40,0) 50%, rgba(59,130,246,0.45) 100%)",
+                  background:
+                    "linear-gradient(135deg, rgba(139,92,246,0.65) 0%, rgba(30,30,40,0) 50%, rgba(59,130,246,0.55) 100%)",
                 }}
               />
 
-              {/* Card surface */}
               <div className="relative rounded-[calc(1rem-1px)] bg-[var(--color-surface)] flex flex-col h-full overflow-hidden">
 
-                {/* Verified header strip */}
                 <div className="flex items-center justify-between px-4 pt-4 pb-3 border-b border-white/5">
                   <div className="flex items-center gap-1.5">
                     <BadgeCheck size={13} className="text-violet-400 shrink-0" />
@@ -83,43 +98,45 @@ export default function ProofCardsGrid({ allowTogglePublic = false }: ProofCards
                   {card.reviewed_at && (
                     <span className="text-[10px] text-[var(--color-text-muted)] tabular-nums">
                       {new Date(card.reviewed_at).toLocaleDateString("en-US", {
-                        month: "short", day: "numeric", year: "numeric",
+                        month: "short",
+                        day: "numeric",
+                        year: "numeric",
                       })}
                     </span>
                   )}
                 </div>
 
-                {/* Main content */}
-                <div className="flex-1 px-4 py-3 flex flex-col gap-2.5">
-                  {/* Job title + company */}
+                <button
+                  className="flex-1 px-5 py-4 flex flex-col gap-2.5 text-left cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500/50 focus-visible:ring-inset"
+                  onClick={() => setSelectedCard(card)}
+                >
                   <div>
-                    <h3 className="font-semibold text-[var(--color-text)] text-sm leading-snug">
-                      {card.job_title}
-                    </h3>
                     {card.company_name && (
-                      <p className="text-xs text-[var(--color-text-muted)] mt-0.5">
+                      <p className="text-[11px] text-[var(--color-text-muted)] flex items-center gap-1 mb-0.5">
+                        <Building2 size={11} className="shrink-0" />
                         {card.company_name}
                       </p>
                     )}
+                    <h3 className="text-base font-bold text-[var(--color-text)] leading-tight">
+                      {card.job_title}
+                    </h3>
                   </div>
 
-                  {/* Task pill */}
                   {card.task_title && (
-                    <div className="inline-flex items-center self-start max-w-full px-2 py-1 rounded-md bg-violet-500/10 border border-violet-500/20">
-                      <span className="text-[10px] font-medium text-violet-300 truncate">
+                    <div className="inline-flex items-center self-start px-2.5 py-1 rounded-md bg-violet-500/10 border border-violet-500/20">
+                      <span className="text-[10px] font-medium text-violet-300 text-wrap">
                         {card.task_title}
                       </span>
                     </div>
                   )}
 
-                  {/* Star rating */}
                   {card.rating != null && (
                     <div className="flex items-center gap-1.5">
                       <div className="flex items-center gap-0.5">
                         {[1, 2, 3, 4, 5].map((n) => (
                           <Star
                             key={n}
-                            size={13}
+                            size={14}
                             className={
                               n <= Math.round(card.rating!)
                                 ? "fill-amber-400 text-amber-400"
@@ -128,14 +145,13 @@ export default function ProofCardsGrid({ allowTogglePublic = false }: ProofCards
                           />
                         ))}
                       </div>
-                      <span className="text-xs font-semibold text-amber-400">
+                      <span className="text-xs font-bold text-amber-400">
                         {card.rating.toFixed(1)}
                       </span>
                       <span className="text-[10px] text-[var(--color-text-muted)]">/ 5</span>
                     </div>
                   )}
 
-                  {/* Feedback quote */}
                   {card.comments && (
                     <div className="relative">
                       <span className="absolute -top-1 -left-0.5 text-2xl leading-none text-violet-500/30 font-serif select-none">
@@ -146,17 +162,27 @@ export default function ProofCardsGrid({ allowTogglePublic = false }: ProofCards
                       </p>
                     </div>
                   )}
-                </div>
 
-                {/* Footer toggle */}
+                  <span className="mt-auto pt-1 text-[11px] font-medium text-violet-400 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center gap-1">
+                    View details →
+                  </span>
+                </button>
+
                 {allowTogglePublic && sid && (
                   <div className="px-4 pb-4">
                     <div className="pt-3 border-t border-white/5 flex items-center justify-between gap-2">
-                      <span className="flex items-center gap-1.5 text-xs font-medium text-[var(--color-text-muted)]">
-                        {card.is_public
-                          ? <Globe size={12} className="text-emerald-400" />
-                          : <Lock size={12} className="opacity-50" />}
-                        {card.is_public ? "Public" : "Private"}
+                      <span className="flex items-center gap-1.5 text-xs font-medium">
+                        {card.is_public ? (
+                          <>
+                            <Globe size={12} className="text-emerald-400 shrink-0" />
+                            <span className="text-emerald-400">Live on profile</span>
+                          </>
+                        ) : (
+                          <>
+                            <Lock size={12} className="text-[var(--color-text-muted)] opacity-50 shrink-0" />
+                            <span className="text-[var(--color-text-muted)]">Private</span>
+                          </>
+                        )}
                       </span>
 
                       <div className="flex items-center gap-2.5">
@@ -170,7 +196,6 @@ export default function ProofCardsGrid({ allowTogglePublic = false }: ProofCards
                           </button>
                         )}
 
-                        {/* Toggle switch */}
                         <button
                           onClick={() => handleToggle(sid, card.is_public)}
                           disabled={toggling[sid]}
@@ -206,13 +231,24 @@ export default function ProofCardsGrid({ allowTogglePublic = false }: ProofCards
             className="flex items-center gap-1 text-sm text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition"
           >
             {showAll ? (
-              <><ChevronUp size={14} /> Collapse</>
+              <>
+                <ChevronUp size={14} /> Collapse
+              </>
             ) : (
-              <><ChevronDown size={14} /> View All ({cards.length})</>
+              <>
+                <ChevronDown size={14} /> View All ({cards.length})
+              </>
             )}
           </button>
         </div>
       )}
+
+      <ProofDetailModal
+        card={selectedCard}
+        isOpen={!!selectedCard}
+        onClose={() => setSelectedCard(null)}
+        username={username}
+      />
     </>
   );
 }

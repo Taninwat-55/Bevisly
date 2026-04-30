@@ -1,146 +1,208 @@
-import { X, Star, CheckCircle, AlertCircle, MessageSquare, ExternalLink, Calendar } from "lucide-react";
-import type { CandidateFeedbackEntry } from "@/types/candidate";
+import { Fragment } from "react";
+import { Dialog, Transition } from "@headlessui/react";
+import { X, Star, CheckCircle, ArrowRight, Globe, Lock } from "lucide-react";
+import type { ProofCard } from "@/hooks/useProofs";
 
 interface ProofDetailModalProps {
-  proof: CandidateFeedbackEntry;
+  card: ProofCard | null;
+  isOpen: boolean;
   onClose: () => void;
+  username?: string | null;
 }
 
-export default function ProofDetailModal({ proof, onClose }: ProofDetailModalProps) {
-  const fb = proof.feedback?.[0];
-  const reviewed = proof.status === "reviewed" && fb;
+export default function ProofDetailModal({ card, isOpen, onClose, username }: ProofDetailModalProps) {
+  if (!card) return null;
+
+  const strengthLines = card.strengths
+    ? card.strengths.split("\n").filter((l) => l.trim())
+    : [];
+  const improvementLines = card.improvements
+    ? card.improvements.split("\n").filter((l) => l.trim())
+    : [];
 
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
-      <div
-        className="glass-panel w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-2xl shadow-2xl border border-[var(--glass-border)] relative animate-in zoom-in-50 duration-300"
-        onClick={(e) => e.stopPropagation()}
-      >
-        {/* Header */}
-        <div className="sticky top-0 z-10 glass-panel border-b border-[var(--color-border)] px-6 py-4 flex items-start justify-between backdrop-blur-xl">
-          <div>
-            <h2 className="text-xl font-bold font-display text-[var(--color-text)] mb-1">
-              {proof.proof_tasks?.title || "Proof Task"}
-            </h2>
-            <div className="flex items-center gap-2 text-sm text-[var(--color-text-muted)]">
-              <span className="font-medium">{proof.jobs?.company}</span>
-              <span>•</span>
-              <span>{proof.jobs?.title}</span>
-            </div>
-          </div>
-          <button
-            onClick={onClose}
-            className="p-2 rounded-full hover:bg-[var(--color-surface-hover)] text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors"
-          >
-            <X size={20} />
-          </button>
-        </div>
+    <Transition appear show={isOpen} as={Fragment}>
+      <Dialog as="div" className="relative z-50" onClose={onClose}>
+        <Transition.Child
+          as={Fragment}
+          enter="ease-out duration-300"
+          enterFrom="opacity-0"
+          enterTo="opacity-100"
+          leave="ease-in duration-200"
+          leaveFrom="opacity-100"
+          leaveTo="opacity-0"
+        >
+          <div className="fixed inset-0 bg-black/70 backdrop-blur-sm" />
+        </Transition.Child>
 
-        <div className="p-6 space-y-8">
-          {/* Status Section */}
-          {reviewed ? (
-            <div className="grid md:grid-cols-2 gap-6">
-              {/* Rating Card */}
-              <div className="bg-[var(--color-surface)] p-6 rounded-xl border border-[var(--color-border)] flex flex-col items-center justify-center text-center">
-                <span className="text-sm font-medium text-[var(--color-text-muted)] uppercase tracking-wider mb-2">Overall Rating</span>
-                <div className="flex items-center gap-1 mb-2">
-                  {Array.from({ length: 5 }).map((_, i) => (
-                    <Star
-                      key={i}
-                      size={28}
-                      className={i < (fb.stars || 0) ? "text-yellow-400 fill-yellow-400" : "text-[var(--color-border)]"}
-                    />
-                  ))}
-                </div>
-                <div className="text-3xl font-bold text-[var(--color-text)] font-display">{fb.stars}<span className="text-lg text-[var(--color-text-muted)] font-sans font-normal">/5</span></div>
-              </div>
+        <div className="fixed inset-0 overflow-y-auto">
+          <div className="flex min-h-full items-center justify-center p-4">
+            <Transition.Child
+              as={Fragment}
+              enter="ease-out duration-300"
+              enterFrom="opacity-0 scale-95"
+              enterTo="opacity-100 scale-100"
+              leave="ease-in duration-200"
+              leaveFrom="opacity-100 scale-100"
+              leaveTo="opacity-0 scale-95"
+            >
+              <Dialog.Panel className="w-full max-w-2xl transform overflow-hidden rounded-2xl bg-[var(--color-surface)] border border-[var(--color-border)] shadow-2xl transition-all">
 
-              {/* Summary Card */}
-              <div className="bg-[var(--color-surface)] p-6 rounded-xl border border-[var(--color-border)] flex flex-col justify-center">
-                <div className="space-y-4">
+                <div
+                  className="h-1.5 w-full"
+                  style={{ background: "linear-gradient(90deg, #7c3aed, #3b82f6)" }}
+                />
+
+                <div className="sticky top-0 z-10 flex items-start justify-between px-6 py-5 border-b border-[var(--color-border)] bg-[var(--color-surface)]">
                   <div>
-                    <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400 mb-1 font-semibold text-sm">
-                      <CheckCircle size={16} /> Strengths
-                    </div>
-                    <p className="text-sm text-[var(--color-text)] leading-relaxed pl-6">
-                      {fb.strengths || "No specific strengths noted."}
-                    </p>
+                    <Dialog.Title className="text-xl font-bold text-[var(--color-text)] leading-tight">
+                      {card.job_title || "Proof Details"}
+                    </Dialog.Title>
+                    {card.company_name && (
+                      <p className="text-sm text-[var(--color-text-muted)] mt-0.5">
+                        {card.company_name}
+                      </p>
+                    )}
                   </div>
-                  <div>
-                    <div className="flex items-center gap-2 text-amber-600 dark:text-amber-400 mb-1 font-semibold text-sm">
-                      <AlertCircle size={16} /> Areas for Improvement
+                  <button
+                    onClick={onClose}
+                    className="ml-4 p-2 rounded-full hover:bg-[var(--color-bg)] text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors shrink-0"
+                  >
+                    <X size={20} />
+                  </button>
+                </div>
+
+                <div className="p-6 space-y-6 overflow-y-auto max-h-[calc(90vh-10rem)]">
+
+                  {card.rating != null && (
+                    <div className="flex flex-col items-center justify-center py-6 bg-[var(--color-bg)] rounded-xl border border-[var(--color-border)]">
+                      <p className="text-xs font-semibold uppercase tracking-widest text-[var(--color-text-muted)] mb-3">
+                        Overall Rating
+                      </p>
+                      <div className="flex items-center gap-1 mb-2">
+                        {[1, 2, 3, 4, 5].map((n) => (
+                          <Star
+                            key={n}
+                            size={28}
+                            className={
+                              n <= Math.round(card.rating!)
+                                ? "fill-amber-400 text-amber-400"
+                                : "fill-white/10 text-white/10"
+                            }
+                          />
+                        ))}
+                      </div>
+                      <div className="flex items-baseline gap-1 mt-1">
+                        <span className="text-3xl font-bold text-amber-400">
+                          {card.rating.toFixed(1)}
+                        </span>
+                        <span className="text-base text-[var(--color-text-muted)]">/ 5</span>
+                      </div>
                     </div>
-                    <p className="text-sm text-[var(--color-text)] leading-relaxed pl-6">
-                      {fb.improvements || "No specific improvements noted."}
-                    </p>
+                  )}
+
+                  {card.task_title && (
+                    <div>
+                      <p className="text-xs font-semibold uppercase tracking-widest text-[var(--color-text-muted)] mb-2">
+                        Task Completed
+                      </p>
+                      <span className="inline-flex items-center px-3 py-1.5 rounded-full bg-violet-500/15 border border-violet-500/25 text-sm font-medium text-violet-300">
+                        {card.task_title}
+                      </span>
+                    </div>
+                  )}
+
+                  {card.comments && (
+                    <div>
+                      <p className="text-xs font-semibold uppercase tracking-widest text-[var(--color-text-muted)] mb-3">
+                        Employer Feedback
+                      </p>
+                      <blockquote className="pl-4 py-3 pr-4 rounded-r-xl bg-violet-500/8 border-l-4 border-violet-500/50 text-sm text-[var(--color-text)] leading-relaxed">
+                        {card.comments}
+                      </blockquote>
+                    </div>
+                  )}
+
+                  {strengthLines.length > 0 && (
+                    <div className="p-4 rounded-xl bg-emerald-500/8 border border-emerald-500/20">
+                      <p className="text-xs font-semibold uppercase tracking-widest text-emerald-400 mb-3 flex items-center gap-1.5">
+                        <CheckCircle size={13} /> Strengths
+                      </p>
+                      <ul className="space-y-1.5">
+                        {strengthLines.map((line, i) => (
+                          <li key={i} className="flex items-start gap-2 text-sm text-[var(--color-text)]">
+                            <CheckCircle size={14} className="text-emerald-400 mt-0.5 shrink-0" />
+                            {line}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
+                  {improvementLines.length > 0 && (
+                    <div className="p-4 rounded-xl bg-amber-500/8 border border-amber-500/20">
+                      <p className="text-xs font-semibold uppercase tracking-widest text-amber-400 mb-3 flex items-center gap-1.5">
+                        <ArrowRight size={13} /> Areas for Improvement
+                      </p>
+                      <ul className="space-y-1.5">
+                        {improvementLines.map((line, i) => (
+                          <li key={i} className="flex items-start gap-2 text-sm text-[var(--color-text)]">
+                            <ArrowRight size={14} className="text-amber-400 mt-0.5 shrink-0" />
+                            {line}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
+                  <div className="pt-4 border-t border-[var(--color-border)] flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                    <div className="flex items-center gap-4 text-xs text-[var(--color-text-muted)]">
+                      {card.reviewed_at && (
+                        <span>
+                          Reviewed{" "}
+                          {new Date(card.reviewed_at).toLocaleDateString("en-US", {
+                            month: "long",
+                            day: "numeric",
+                            year: "numeric",
+                          })}
+                        </span>
+                      )}
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      {card.is_public ? (
+                        <>
+                          <Globe size={13} className="text-emerald-400 shrink-0" />
+                          <span className="text-xs text-emerald-400 font-medium">
+                            This proof is visible on your public profile
+                          </span>
+                          {username && (
+                            <a
+                              href={`/@${username}`}
+                              className="text-xs text-violet-400 hover:text-violet-300 underline underline-offset-2 transition-colors ml-1"
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            >
+                              View on Public Profile
+                            </a>
+                          )}
+                        </>
+                      ) : (
+                        <>
+                          <Lock size={13} className="text-[var(--color-text-muted)] shrink-0" />
+                          <span className="text-xs text-[var(--color-text-muted)]">
+                            Only you can see this proof.
+                          </span>
+                        </>
+                      )}
+                    </div>
                   </div>
                 </div>
-              </div>
-            </div>
-          ) : (
-            <div className="flex flex-col items-center justify-center py-12 px-4 bg-[var(--color-surface)] rounded-xl border border-dashed border-[var(--color-border)] text-center">
-              <div className="w-16 h-16 rounded-full bg-amber-100 dark:bg-amber-900/20 flex items-center justify-center text-amber-500 mb-4 animate-pulse">
-                <MessageSquare size={32} />
-              </div>
-              <h3 className="text-lg font-bold text-[var(--color-text)] mb-2">Review in Progress</h3>
-              <p className="text-[var(--color-text-muted)] max-w-sm">
-                The employer has received your submission and is currently reviewing it. You will be notified once feedback is available.
-              </p>
-            </div>
-          )}
-
-          {/* Detailed Feedback & Comments */}
-          {reviewed && fb.comments && (
-            <div className="bg-[var(--color-surface)] p-6 rounded-xl border border-[var(--color-border)]">
-              <h3 className="text-sm font-bold text-[var(--color-text)] uppercase tracking-wider mb-3 flex items-center gap-2">
-                <MessageSquare size={16} /> Additional Comments
-              </h3>
-              <p className="text-[var(--color-text)] leading-loose text-sm whitespace-pre-wrap">
-                {fb.comments}
-              </p>
-            </div>
-          )}
-
-          {/* Helper Info */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Your Submission Link */}
-            <div className="p-4 rounded-xl bg-[var(--color-bg)] border border-[var(--color-border)]">
-              <span className="text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider block mb-2">Submission</span>
-              {proof.submission_link ? (
-                <a
-                  href={proof.submission_link}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-2 text-sm text-[var(--color-brand-primary)] hover:underline font-medium"
-                >
-                  View your work <ExternalLink size={14} />
-                </a>
-              ) : (
-                <span className="text-sm text-[var(--color-text-muted)] italic">No link provided</span>
-              )}
-            </div>
-
-            {/* Metadata */}
-            <div className="p-4 rounded-xl bg-[var(--color-bg)] border border-[var(--color-border)]">
-              <span className="text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider block mb-2">Details</span>
-              <div className="flex items-center gap-2 text-sm text-[var(--color-text-muted)]">
-                <Calendar size={14} />
-                Submitted on {new Date(proof.created_at ?? "").toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })}
-              </div>
-            </div>
+              </Dialog.Panel>
+            </Transition.Child>
           </div>
-
-          {/* Candidate Reflection */}
-          {proof.reflection && (
-            <div className="pt-6 border-t border-[var(--color-border)]">
-              <h3 className="text-sm font-bold text-[var(--color-text)] mb-2">Your Reflection</h3>
-              <p className="text-sm text-[var(--color-text-muted)] leading-relaxed italic border-l-2 border-[var(--color-border)] pl-4">
-                "{proof.reflection}"
-              </p>
-            </div>
-          )}
         </div>
-      </div>
-    </div>
+      </Dialog>
+    </Transition>
   );
 }
