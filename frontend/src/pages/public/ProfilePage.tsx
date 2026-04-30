@@ -2,6 +2,7 @@ import { useParams, Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { supabase } from "@/lib/supabaseClient";
+import { useAuth } from "@/hooks/useAuth";
 import {
     Copy, Loader2, Star, BadgeCheck, Briefcase,
     Lock, UserX
@@ -20,6 +21,7 @@ interface PublicProfile extends ProfileLite {
 
 export default function PublicProfilePage() {
     const { username, id } = useParams<{ username?: string; id?: string }>();
+    const { user } = useAuth();
     const [profile, setProfile] = useState<PublicProfile | null>(null);
     const [cards, setCards] = useState<ProofCardLite[]>([]);
     const [loading, setLoading] = useState(true);
@@ -308,8 +310,8 @@ export default function PublicProfilePage() {
                         )}
                     </section>
 
-                    {/* LinkedIn Share CTA */}
-                    {cards.length > 0 && (
+                    {/* LinkedIn Share CTA — only visible to the profile owner */}
+                    {cards.length > 0 && user?.id === profile?.id && (
                         <section className="mt-8">
                             <ShareToLinkedIn
                                 taskTitle={cards[0]?.job_title || "Proof Task"}

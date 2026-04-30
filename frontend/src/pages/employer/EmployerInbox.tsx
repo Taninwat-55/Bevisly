@@ -4,11 +4,11 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { getEmployerSubmissionsWithFeedback } from "@/lib/api";
 import type { EmployerSubmission } from "@/types";
-import { 
-    Inbox, 
-    ArrowRight, 
-    Clock, 
-    User, 
+import {
+    Inbox,
+    ArrowRight,
+    Clock,
+    User,
     Briefcase,
     CheckCircle2,
     Search,
@@ -17,6 +17,7 @@ import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { motion, AnimatePresence } from "framer-motion";
 import EmployerReviewProof from "./EmployerReviewProof";
+import CandidateProfileDrawer from "@/components/employer/CandidateProfileDrawer";
 import toast from "react-hot-toast";
 
 export default function EmployerInbox() {
@@ -25,6 +26,7 @@ export default function EmployerInbox() {
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState("");
     const [selectedSubmissionId, setSelectedSubmissionId] = useState<string | null>(null);
+    const [profileUserId, setProfileUserId] = useState<string | null>(null);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -113,18 +115,25 @@ export default function EmployerInbox() {
                                 <Card className="p-0 overflow-hidden hover:border-[var(--color-brand-primary)]/50 transition-all duration-300 group shadow-sm hover:shadow-xl hover:shadow-[var(--color-brand-primary)]/5">
                                     <div className="flex flex-col md:flex-row md:items-center p-5 md:p-6 gap-6">
                                         {/* Avatar/Initial */}
-                                        <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-700 flex items-center justify-center border border-[var(--color-border)] shrink-0 group-hover:scale-105 transition-transform duration-300">
+                                        <button
+                                            onClick={() => setProfileUserId(submission.user_id)}
+                                            title="View candidate profile"
+                                            className="w-14 h-14 rounded-2xl bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-700 flex items-center justify-center border border-[var(--color-border)] shrink-0 group-hover:scale-105 transition-transform duration-300 hover:ring-2 hover:ring-[var(--color-brand-primary)]/50 cursor-pointer"
+                                        >
                                             <span className="text-xl font-bold text-[var(--color-text)]">
                                                 {submission.profiles?.full_name?.[0].toUpperCase() || <User size={24} />}
                                             </span>
-                                        </div>
+                                        </button>
 
                                         {/* Info */}
                                         <div className="flex-1 min-w-0 space-y-1">
                                             <div className="flex items-center gap-2">
-                                                <h3 className="font-bold text-lg text-[var(--color-text)] truncate">
+                                                <button
+                                                    onClick={() => setProfileUserId(submission.user_id)}
+                                                    className="font-bold text-lg text-[var(--color-text)] truncate hover:text-[var(--color-brand-primary)] transition-colors cursor-pointer"
+                                                >
                                                     {submission.profiles?.full_name || "Anonymous Candidate"}
-                                                </h3>
+                                                </button>
                                                 <span className="hidden sm:inline-block w-1 h-1 rounded-full bg-[var(--color-border)]" />
                                                 <span className="hidden sm:inline-block text-xs font-medium text-[var(--color-text-muted)]">
                                                     {submission.profiles?.email}
@@ -188,6 +197,11 @@ export default function EmployerInbox() {
                     )}
                 </AnimatePresence>
             </div>
+
+            <CandidateProfileDrawer
+                userId={profileUserId}
+                onClose={() => setProfileUserId(null)}
+            />
 
             {/* Review Slide-Over Panel */}
             {createPortal(

@@ -15,6 +15,7 @@ import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { motion, AnimatePresence } from "framer-motion";
 import EmployerReviewProof from "./EmployerReviewProof";
+import CandidateProfileDrawer from "@/components/employer/CandidateProfileDrawer";
 import toast from "react-hot-toast";
 
 export default function EmployerAllCandidates() {
@@ -23,6 +24,7 @@ export default function EmployerAllCandidates() {
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState("");
     const [selectedSubmissionId, setSelectedSubmissionId] = useState<string | null>(null);
+    const [profileUserId, setProfileUserId] = useState<string | null>(null);
 
     useEffect(() => {
         if (!user?.id) return;
@@ -120,15 +122,19 @@ export default function EmployerAllCandidates() {
                                 filteredCandidates.map((submission) => (
                                     <tr key={submission.id} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/80 transition-colors group">
                                         <td className="px-6 py-4">
-                                            <div className="flex items-center gap-3">
-                                                <div className="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center border border-[var(--color-border)] shrink-0 group-hover:scale-110 transition-transform">
+                                            <button
+                                                onClick={() => setProfileUserId(submission.user_id)}
+                                                title="View candidate profile"
+                                                className="flex items-center gap-3 text-left hover:opacity-80 transition-opacity"
+                                            >
+                                                <div className="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center border border-[var(--color-border)] shrink-0 group-hover:scale-110 transition-transform hover:ring-2 hover:ring-[var(--color-brand-primary)]/50">
                                                     <User size={18} className="text-slate-500" />
                                                 </div>
                                                 <div>
-                                                    <p className="font-bold text-[var(--color-text)] leading-tight">{submission.profiles?.full_name || "Anonymous"}</p>
+                                                    <p className="font-bold text-[var(--color-text)] leading-tight hover:text-[var(--color-brand-primary)] transition-colors">{submission.profiles?.full_name || "Anonymous"}</p>
                                                     <p className="text-xs text-[var(--color-text-muted)]">{submission.profiles?.email}</p>
                                                 </div>
-                                            </div>
+                                            </button>
                                         </td>
                                         <td className="px-6 py-4">
                                             <div className="flex items-center gap-2">
@@ -190,6 +196,11 @@ export default function EmployerAllCandidates() {
                     </table>
                 </div>
             </Card>
+
+            <CandidateProfileDrawer
+                userId={profileUserId}
+                onClose={() => setProfileUserId(null)}
+            />
 
             {/* Review Slide-Over */}
             <AnimatePresence>
