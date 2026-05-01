@@ -26,6 +26,12 @@ export interface Job {
   company_id?: string | null;
   company_logo?: string | null;
 
+  // Joined fields
+  contact_person?: {
+    full_name: string | null;
+    email: string | null;
+  } | null;
+
   // Timestamps
   created_at?: string | null;
   updated_at?: string | null;

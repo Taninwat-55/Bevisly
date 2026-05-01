@@ -17,6 +17,8 @@ import {
   Star,
   Briefcase,
   Globe,
+  User,
+  Mail,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import type { Job } from "@/types/job";
@@ -63,7 +65,11 @@ export default function JobDetailPage() {
       setLoading(true);
       const { data, error } = await supabase
         .from("jobs")
-        .select("*, proof_tasks(*)")
+        .select(`
+          *,
+          proof_tasks(*),
+          contact_person:profiles!employer_id(full_name, email)
+        `)
         .eq("id", id)
         .single();
 
@@ -429,16 +435,35 @@ export default function JobDetailPage() {
                     <p className="text-[var(--color-text)] leading-relaxed">{companyProfile.culture}</p>
                   </div>
                 )}
-                {companyProfile.website_url && (
-                  <a
-                    href={companyProfile.website_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 text-sm text-[var(--color-brand-primary)] hover:underline font-medium"
-                  >
-                    <Globe size={14} /> Visit company website
-                  </a>
-                )}
+                <div className="flex flex-wrap gap-4 pt-2">
+                  {companyProfile.website_url && (
+                    <a
+                      href={companyProfile.website_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 text-sm text-[var(--color-brand-primary)] hover:underline font-medium"
+                    >
+                      <Globe size={14} /> Visit company website
+                    </a>
+                  )}
+                  {job.contact_person && (
+                    <div className="flex items-center gap-4 text-sm text-[var(--color-text-muted)] border-l border-[var(--color-border)] pl-4">
+                      <div className="flex items-center gap-2">
+                        <User size={14} className="text-[var(--color-brand-primary)]" />
+                        <span>{job.contact_person.full_name || "Contact Person"}</span>
+                      </div>
+                      {job.contact_person.email && (
+                        <a
+                          href={`mailto:${job.contact_person.email}`}
+                          className="flex items-center gap-2 hover:text-[var(--color-brand-primary)] transition-colors"
+                        >
+                          <Mail size={14} className="text-[var(--color-brand-primary)]" />
+                          <span>{job.contact_person.email}</span>
+                        </a>
+                      )}
+                    </div>
+                  )}
+                </div>
               </div>
             </section>
           )}
