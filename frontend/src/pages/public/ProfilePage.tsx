@@ -5,7 +5,7 @@ import { supabase } from "@/lib/supabaseClient";
 import { useAuth } from "@/hooks/useAuth";
 import {
     Copy, Loader2, Star, BadgeCheck, Briefcase,
-    Lock, UserX
+    Lock, UserX, Code
 } from "lucide-react";
 import toast from "react-hot-toast";
 import type { ProfileLite, ProofCardLite } from "@/types/shared";
@@ -17,6 +17,7 @@ interface PublicProfile extends ProfileLite {
     username?: string | null;
     is_public?: boolean;
     email?: string | null;
+    skills?: string[] | null;
 }
 
 export default function PublicProfilePage() {
@@ -24,6 +25,7 @@ export default function PublicProfilePage() {
     const { user } = useAuth();
     const [profile, setProfile] = useState<PublicProfile | null>(null);
     const [cards, setCards] = useState<ProofCardLite[]>([]);
+    const [verifiedSkills, setVerifiedSkills] = useState<string[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<"not_found" | "private" | null>(null);
     const [showAll, setShowAll] = useState(false);
@@ -39,7 +41,7 @@ export default function PublicProfilePage() {
                 // Look up by username (SEO route) or by UUID (legacy route)
                 const query = supabase
                     .from("profiles")
-                    .select("id, full_name, credits, email, avatar_url");
+                    .select("id, full_name, credits, email, avatar_url, skills, is_public, username");
 
                 const { data: prof, error: profErr } = username
                     ? await query.eq("username", username.toLowerCase()).single()
@@ -62,8 +64,20 @@ export default function PublicProfilePage() {
 
                 setProfile(profileData);
 
-                // Fetch proofs
-                const { data: rpcTimeline } = await supabase.rpc("get_recent_activity", { user_id: prof.id });
+                // Fetch proofs and verified skills
+                const [{ data: rpcTimeline }, { data: submissions }] = await Promise.all([
+                    supabase.rpc("get_recent_activity", { user_id: prof.id }),
+                    supabase
+                        .from("submissions")
+                        .select(`
+                            id,
+                            status,
+                            feedback ( stars ),
+                            jobs ( required_skills )
+                        `)
+                        .eq("user_id", prof.id)
+                        .eq("status", "reviewed")
+                ]);
 
                 if (rpcTimeline && Array.isArray(rpcTimeline) && rpcTimeline.length > 0) {
                     setCards(rpcTimeline);
@@ -77,6 +91,20 @@ export default function PublicProfilePage() {
                         .limit(10);
                     setCards(fallbackProofs ?? []);
                 }
+
+                // Process verified skills
+                if (submissions) {
+                    const verified = new Set<string>();
+                    submissions.forEach((s: any) => {
+                        const feedbackArr = Array.isArray(s.feedback) ? s.feedback : [s.feedback];
+                        const maxStars = Math.max(0, ...feedbackArr.map((f: any) => f?.stars ?? 0));
+                        
+                        if (maxStars >= 4 && s.jobs?.required_skills) {
+                            s.jobs.required_skills.forEach((skill: string) => verified.add(skill.toLowerCase()));
+                        }
+                    });
+                    setVerifiedSkills(Array.from(verified));
+                }
             } catch (err) {
                 console.error("Error fetching profile:", err);
                 setError("not_found");
@@ -86,7 +114,7 @@ export default function PublicProfilePage() {
         };
 
         fetchData();
-    }, [username]);
+    }, [username, id]);
 
     // Loading state
     if (loading) {
@@ -250,6 +278,41 @@ export default function PublicProfilePage() {
                             </div>
                         </div>
                     </div>
+
+                    {/* Skills Section */}
+                    {profile.skills && profile.skills.length > 0 && (
+                        <div className="mt-8 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-2xl p-6 shadow-sm">
+                            <h2 className="text-sm font-bold uppercase tracking-wider text-[var(--color-text-muted)] mb-4 flex items-center gap-2">
+                                <Code size={16} /> Skills & Expertise
+                            </h2>
+                            <div className="flex flex-wrap gap-2">
+                                {profile.skills.map((skill) => {
+                                    const isVerified = verifiedSkills.includes(skill.toLowerCase());
+                                    return (
+                                        <div
+                                            key={skill}
+                                            className={`px-3 py-1.5 rounded-lg text-sm font-medium border flex items-center gap-2 transition-all shadow-sm
+                                                ${isVerified
+                                                    ? "bg-amber-50 dark:bg-amber-900/20 border-amber-300/50 dark:border-amber-700/50 text-amber-700 dark:text-amber-300 ring-1 ring-amber-400/20"
+                                                    : "bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-300"
+                                                }`}
+                                            title={isVerified ? "Skill verified via Bevisly Proof Task" : undefined}
+                                        >
+                                            {isVerified && <BadgeCheck size={14} className="text-amber-500" fill="currentColor" />}
+                                            {skill}
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                            
+                            {verifiedSkills.length > 0 && (
+                                <p className="mt-4 text-[10px] text-[var(--color-text-muted)] flex items-center gap-1.5 px-1 italic">
+                                    <BadgeCheck size={12} className="text-amber-500" />
+                                    Verified skills are earned via 4+ star Proof Tasks
+                                </p>
+                            )}
+                        </div>
+                    )}
 
                     {/* Verified Proofs Grid */}
                     <section className="mt-10">

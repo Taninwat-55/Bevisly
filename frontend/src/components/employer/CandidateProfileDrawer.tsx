@@ -46,16 +46,18 @@ interface CandidateProfileDrawerProps {
 export default function CandidateProfileDrawer({ userId, onClose }: CandidateProfileDrawerProps) {
   const [profile, setProfile] = useState<CandidateProfile | null>(null);
   const [proofs, setProofs] = useState<PublicProof[]>([]);
+  const [verifiedSkills, setVerifiedSkills] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (!userId) return;
     setProfile(null);
     setProofs([]);
+    setVerifiedSkills([]);
     setLoading(true);
 
     const fetch = async () => {
-      const [{ data: profileData }, { data: proofData }] = await Promise.all([
+      const [{ data: profileData }, { data: proofData }, { data: submissions }] = await Promise.all([
         supabase
           .from("profiles")
           .select("full_name, bio, skills, languages, work_status, avatar_url, username, linkedin_url, github_url, website_url")
@@ -68,10 +70,35 @@ export default function CandidateProfileDrawer({ userId, onClose }: CandidatePro
           .eq("is_public", true)
           .order("reviewed_at", { ascending: false })
           .limit(4),
+        supabase
+          .from("submissions")
+          .select(`
+            id,
+            status,
+            feedback ( stars ),
+            jobs ( required_skills )
+          `)
+          .eq("user_id", userId)
+          .eq("status", "reviewed")
       ]);
 
       setProfile(profileData as CandidateProfile | null);
       setProofs((proofData as PublicProof[]) ?? []);
+
+      // Process verified skills
+      if (submissions) {
+        const verified = new Set<string>();
+        submissions.forEach((s: any) => {
+          const feedbackArr = Array.isArray(s.feedback) ? s.feedback : [s.feedback];
+          const maxStars = Math.max(0, ...feedbackArr.map((f: any) => f?.stars ?? 0));
+          
+          if (maxStars >= 4 && s.jobs?.required_skills) {
+            s.jobs.required_skills.forEach((skill: string) => verified.add(skill.toLowerCase()));
+          }
+        });
+        setVerifiedSkills(Array.from(verified));
+      }
+
       setLoading(false);
     };
 
@@ -211,12 +238,30 @@ export default function CandidateProfileDrawer({ userId, onClose }: CandidatePro
                             <span className="text-[10px] font-bold uppercase tracking-widest text-[var(--color-text-muted)]">Skills</span>
                           </div>
                           <div className="flex flex-wrap gap-1.5">
-                            {profile.skills.map((s) => (
-                              <span key={s} className="px-2.5 py-1 rounded-lg text-xs font-medium bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-300">
-                                {s}
-                              </span>
-                            ))}
+                            {profile.skills.map((s) => {
+                              const isVerified = verifiedSkills.includes(s.toLowerCase());
+                              return (
+                                <span
+                                  key={s}
+                                  className={`px-2.5 py-1 rounded-lg text-xs font-medium border flex items-center gap-1.5 transition-all
+                                    ${isVerified
+                                      ? "bg-amber-50 dark:bg-amber-900/20 border-amber-300/50 dark:border-amber-700/50 text-amber-700 dark:text-amber-300 ring-1 ring-amber-400/20"
+                                      : "bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-300"
+                                    }`}
+                                  title={isVerified ? "Skill verified via Bevisly Proof Task" : undefined}
+                                >
+                                  {isVerified && <BadgeCheck size={12} className="text-amber-500" fill="currentColor" />}
+                                  {s}
+                                </span>
+                              );
+                            })}
                           </div>
+                          {verifiedSkills.length > 0 && (
+                            <p className="mt-2 text-[9px] text-[var(--color-text-muted)] flex items-center gap-1 italic px-0.5">
+                              <BadgeCheck size={10} className="text-amber-500" />
+                              Verified skills earned via 4+ star Proof Tasks
+                            </p>
+                          )}
                         </div>
                       )}
                       {profile.languages && profile.languages.length > 0 && (

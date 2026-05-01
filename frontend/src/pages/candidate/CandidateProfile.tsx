@@ -16,6 +16,7 @@ import {
   Award,
   Download,
   ShieldCheck,
+  BadgeCheck,
   Code,
   Linkedin,
   Github,
@@ -46,30 +47,58 @@ export default function CandidateProfile() {
   const [resumeUpdatedAt, setResumeUpdatedAt] = useState<string | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   
+  const [verifiedSkills, setVerifiedSkills] = useState<string[]>([]);
+  
   const resumeInputRef = useRef<HTMLInputElement>(null);
 
   /* Fetch profile info */
   const fetchProfile = useCallback(async () => {
     if (!user?.id) return;
 
-    const { data } = await supabase
+    // 1. Fetch profile basic info
+    const { data: profileData } = await supabase
       .from("profiles")
       .select("created_at, full_name, skills, languages, work_status, bio, linkedin_url, github_url, website_url, username")
       .eq("id", user.id)
       .single();
 
-    if (data) {
-      if (data.created_at)
-        setJoined(new Date(data.created_at).toLocaleDateString(undefined, { month: 'long', year: 'numeric' }));
-      setFullName(data.full_name || "");
-      setSkills(data.skills || []);
-      setLanguages((data as Record<string, unknown>).languages as string[] || []);
-      setWorkStatus(data.work_status || "open");
-      setBio(data.bio || "");
-      setLinkedin(data.linkedin_url || "");
-      setGithub(data.github_url || "");
-      setWebsite(data.website_url || "");
-      setUsername((data as Record<string, unknown>).username as string | null ?? null);
+    if (profileData) {
+      if (profileData.created_at)
+        setJoined(new Date(profileData.created_at).toLocaleDateString(undefined, { month: 'long', year: 'numeric' }));
+      setFullName(profileData.full_name || "");
+      setSkills(profileData.skills || []);
+      setLanguages((profileData as Record<string, unknown>).languages as string[] || []);
+      setWorkStatus(profileData.work_status || "open");
+      setBio(profileData.bio || "");
+      setLinkedin(profileData.linkedin_url || "");
+      setGithub(profileData.github_url || "");
+      setWebsite(profileData.website_url || "");
+      setUsername((profileData as Record<string, unknown>).username as string | null ?? null);
+    }
+
+    // 2. Fetch verified skills (from high-rated proofs)
+    const { data: submissions } = await supabase
+      .from("submissions")
+      .select(`
+        id,
+        status,
+        feedback ( stars ),
+        jobs ( required_skills )
+      `)
+      .eq("user_id", user.id)
+      .eq("status", "reviewed");
+
+    if (submissions) {
+      const verified = new Set<string>();
+      submissions.forEach((s: any) => {
+        const feedbackArr = Array.isArray(s.feedback) ? s.feedback : [s.feedback];
+        const maxStars = Math.max(0, ...feedbackArr.map((f: any) => f?.stars ?? 0));
+        
+        if (maxStars >= 4 && s.jobs?.required_skills) {
+          s.jobs.required_skills.forEach((skill: string) => verified.add(skill.toLowerCase()));
+        }
+      });
+      setVerifiedSkills(Array.from(verified));
     }
   }, [user?.id]);
 
@@ -308,18 +337,34 @@ export default function CandidateProfile() {
             </h2>
             <div className="flex flex-wrap gap-2">
               {skills.length > 0 ? (
-                  skills.map((skill) => (
+                skills.map((skill) => {
+                  const isVerified = verifiedSkills.includes(skill.toLowerCase());
+                  return (
                     <div
                       key={skill}
-                      className="px-3 py-1.5 rounded-lg text-sm font-medium border flex items-center gap-2 bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-300"
+                      className={`px-3 py-1.5 rounded-lg text-sm font-medium border flex items-center gap-2 transition-all shadow-sm
+                        ${isVerified
+                          ? "bg-amber-50 dark:bg-amber-900/20 border-amber-300/50 dark:border-amber-700/50 text-amber-700 dark:text-amber-300 ring-1 ring-amber-400/20"
+                          : "bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-300"
+                        }`}
+                      title={isVerified ? "Skill verified via Bevisly Proof Task" : undefined}
                     >
+                      {isVerified && <BadgeCheck size={14} className="text-amber-500" fill="currentColor" />}
                       {skill}
                     </div>
-                  ))
+                  );
+                })
               ) : (
-                  <p className="text-sm text-[var(--color-text-muted)]">No skills added yet.</p>
+                <p className="text-sm text-[var(--color-text-muted)]">No skills added yet.</p>
               )}
             </div>
+
+            {verifiedSkills.length > 0 && (
+              <p className="mt-3 text-[10px] text-[var(--color-text-muted)] flex items-center gap-1.5 px-1 italic">
+                <BadgeCheck size={12} className="text-amber-500" />
+                Verified skills are earned via 4+ star Proof Tasks
+              </p>
+            )}
 
             {(languages.length > 0) && (
               <>
