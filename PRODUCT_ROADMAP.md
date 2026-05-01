@@ -320,6 +320,22 @@ One-click background check from the candidate's profile page. Partner with an ex
 
 ---
 
+### 18. Featured Jobs (Paid Promotion)
+**Status:** 🔴
+
+An additional revenue stream beyond subscriptions. Employers pay to have their job listing featured prominently on the landing page and at the top of the job browse page — giving them more visibility and faster applicant flow.
+
+**Implementation:**
+- Dedicated "Featured Jobs" section on the landing page showcasing 3–6 highlighted listings with a richer card design (company logo, badge, highlighted border)
+- Employers purchase a featured slot via Stripe (one-time or weekly/monthly fee — separate from subscription)
+- `jobs` table gets a `featured: boolean` and `featured_until: timestamp` column; featured status expires automatically
+- Featured badge shown on job cards sitewide while active
+- Admin dashboard control to manually feature jobs if needed (for early partners / negotiations)
+
+**Why it works:** Employers who are actively hiring are willing to pay for faster results. This also incentivizes platform quality — featured employers want to look credible, so they'll fill out their profile and Responsibility Score properly.
+
+---
+
 ## 💡 Ideas Backlog (Unfiltered)
 
 Ideas captured but not yet scoped or prioritized. Nothing here is committed.
