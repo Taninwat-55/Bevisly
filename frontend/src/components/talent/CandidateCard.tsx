@@ -4,7 +4,7 @@ import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { ExternalLink, GripVertical, User, Mail, Star, FileText, MoreHorizontal } from "lucide-react";
 import toast from "react-hot-toast";
-import { updateHiringStage } from "@/lib/api/submissions";
+import { updateHiringStage, sendRejectionFeedbackEmail } from "@/lib/api/submissions";
 import type { EmployerSubmission, HiringStage } from "@/types";
 import NotesModal from "./NotesModal";
 import { useNavigate } from "react-router-dom";
@@ -89,6 +89,19 @@ function InnerCard({
       await updateHiringStage(id, stage, employer_notes ?? "");
       onUpdateSubmission?.(id, { hiring_stage: stage });
       toast.success(`Moved to ${stage}`);
+      
+      // 📧 Auto-send feedback email when rejected
+      if (stage === "rejected") {
+        toast.promise(sendRejectionFeedbackEmail(id), {
+          loading: "Sending rejection email...",
+          success: () => {
+            onUpdateSubmission?.(id, { rejection_email_sent: true });
+            return "Rejection email sent ✓";
+          },
+          error: "Failed to send rejection email",
+        });
+      }
+      
       setOpen(false);
     } catch {
       toast.error("Failed to move candidate");
@@ -177,7 +190,12 @@ function InnerCard({
           {getRelativeTime(created_at)}
         </span>
 
-        <div className="flex items-center gap-0.5">
+        <div className="flex items-center gap-1.5">
+          {submission.rejection_email_sent && (
+            <span className="flex items-center gap-1 text-[10px] font-bold text-emerald-600 bg-emerald-50 dark:bg-emerald-950/30 px-1.5 py-0.5 rounded border border-emerald-200/50">
+              <Mail size={10} /> Email sent
+            </span>
+          )}
           <button
             onPointerDown={(e) => e.stopPropagation()}
             onClick={(e) => { e.stopPropagation(); setShowNotes(true); }}

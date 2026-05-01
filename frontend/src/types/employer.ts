@@ -82,6 +82,8 @@ export type EmployerSubmission = {
     email: string | null;
     resume_url?: string | null;
   } | null;
+
+  rejection_email_sent?: boolean | null;
 };
 
 // Used on EmployerHome.tsx for recent submissions section

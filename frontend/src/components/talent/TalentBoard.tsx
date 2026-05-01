@@ -111,11 +111,16 @@ export default function TalentBoard({
       );
       toast.success(`Moved to ${destinationStage}`);
 
-      // 📧 Auto-send feedback email when rejected (fire-and-forget)
+      // 📧 Auto-send feedback email when rejected
       if (destinationStage === "rejected") {
-        sendRejectionFeedbackEmail(activeId).catch((err) =>
-          console.error("[TalentBoard] Rejection email failed:", err)
-        );
+        toast.promise(sendRejectionFeedbackEmail(activeId), {
+          loading: "Sending rejection email...",
+          success: () => {
+            handleUpdateSubmission(activeId, { rejection_email_sent: true });
+            return "Rejection email sent ✓";
+          },
+          error: "Failed to send rejection email",
+        });
       }
     } catch {
       toast.error("Failed to update stage");
