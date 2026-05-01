@@ -15,6 +15,8 @@ import {
   X,
   Zap,
   Star,
+  Briefcase,
+  Globe,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import type { Job } from "@/types/job";
@@ -27,6 +29,8 @@ import {
 import { Helmet } from "react-helmet-async";
 import DOMPurify from "dompurify";
 import ReactMarkdown from "react-markdown";
+import { getCompanyProfile } from "@/lib/api/companies";
+import type { Company } from "@/types/company";
 
 /* ─── Component ─────────────────────────────────────────────── */
 export default function JobDetailPage() {
@@ -49,6 +53,7 @@ export default function JobDetailPage() {
   const [checkingFastPass, setCheckingFastPass] = useState(false);
   const [attaching, setAttaching] = useState(false);
   const [showStickyBar, setShowStickyBar] = useState(false);
+  const [companyProfile, setCompanyProfile] = useState<Company | null>(null);
   const ctaRef = useRef<HTMLDivElement>(null);
 
   /* ─── Fetch job + proof tasks ─────────────────────────────── */
@@ -63,7 +68,13 @@ export default function JobDetailPage() {
         .single();
 
       if (error) toast.error(error.message);
-      else setJob(data as Job);
+      else {
+        setJob(data as Job);
+        // Fetch company profile for About section
+        if ((data as Job).company_id) {
+          getCompanyProfile((data as Job).company_id!).then(setCompanyProfile).catch(() => {});
+        }
+      }
 
       // Check active submission
       if (user) {
@@ -245,13 +256,17 @@ export default function JobDetailPage() {
               </div>
               <div className="flex flex-wrap gap-2 mt-5">
                 {job.paid && (
-                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 text-xs font-medium">
-                    <DollarSign size={13} /> Paid Role
-                  </span>
-                )}
-                {job.show_salary_range && job.salary_min && job.salary_max && (
                   <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[var(--color-surface)] border border-[var(--color-border)] text-[var(--color-text-muted)] text-xs font-medium">
-                    💰 {job.salary_min.toLocaleString()} – {job.salary_max.toLocaleString()} {job.payment_currency}
+                    💰 {(() => {
+                      const periodLabel = job.pay_period === 'yearly' ? '/yr' : job.pay_period === 'hourly' ? '/hr' : '/mo';
+                      if (job.salary_min && job.salary_max) {
+                        return `${job.salary_min.toLocaleString()} – ${job.salary_max.toLocaleString()} ${job.payment_currency}${periodLabel}`;
+                      }
+                      if (job.payment_amount) {
+                        return `${job.payment_amount.toLocaleString()} ${job.payment_currency}${periodLabel}`;
+                      }
+                      return "Competitive";
+                    })()}
                   </span>
                 )}
                 {job.expires_at && (
@@ -275,9 +290,11 @@ export default function JobDetailPage() {
             <DollarSign size={15} className="text-[var(--color-text-muted)]" />
             <span className="text-[10px] uppercase text-[var(--color-text-muted)] font-bold tracking-wider">Salary</span>
             <span className="text-sm font-bold text-[var(--color-text)] text-center leading-tight">
-              {job.show_salary_range && job.salary_min && job.salary_max
-                ? `${job.salary_min.toLocaleString()}–${job.salary_max.toLocaleString()} ${job.payment_currency}`
-                : "Competitive"}
+              {job.salary_min && job.salary_max
+                ? `${job.salary_min.toLocaleString()}–${job.salary_max.toLocaleString()} ${job.payment_currency}${job.pay_period === 'yearly' ? '/yr' : '/mo'}`
+                : job.payment_amount
+                  ? `${job.payment_amount.toLocaleString()} ${job.payment_currency}${job.pay_period === 'yearly' ? '/yr' : '/mo'}`
+                  : "Competitive"}
             </span>
           </div>
           <div className="flex flex-col items-center justify-center py-4 px-3 gap-1">
@@ -288,9 +305,9 @@ export default function JobDetailPage() {
             </span>
           </div>
           <div className="flex flex-col items-center justify-center py-4 px-3 gap-1">
-            <Zap size={15} className="text-emerald-500" />
-            <span className="text-[10px] uppercase text-[var(--color-text-muted)] font-bold tracking-wider">Velocity</span>
-            <span className="text-sm font-bold text-emerald-500 text-center leading-tight">Fast</span>
+            <Briefcase size={15} className="text-[var(--color-text-muted)]" />
+            <span className="text-[10px] uppercase text-[var(--color-text-muted)] font-bold tracking-wider">Job Type</span>
+            <span className="text-sm font-bold text-[var(--color-text)] text-center leading-tight">{job.job_type || "Full-time"}</span>
           </div>
         </div>
 
@@ -316,7 +333,7 @@ export default function JobDetailPage() {
                   </div>
                 ) : (
                   <p className="text-[var(--color-text-muted)] text-sm leading-relaxed">
-                    This is a 30-minute proof task. Your submission goes directly to the employer for review — no ATS, no keyword filter.
+                    This is a {proof?.expected_time || "30-minute"} proof task. Your submission goes directly to the employer for review — no ATS, no keyword filter.
                   </p>
                 )}
               </div>
@@ -386,6 +403,47 @@ export default function JobDetailPage() {
             </section>
           )}
 
+          {/* About the Company */}
+          {companyProfile && (companyProfile.description || companyProfile.mission || companyProfile.culture) && (
+            <section className="animate-in fade-in slide-in-from-bottom-4 duration-700 delay-150">
+              <h3 className="text-xl font-bold text-[var(--color-text)] mb-6 flex items-center gap-2">
+                <Briefcase size={22} className="text-[var(--color-brand-primary)]" />
+                About {job.company || "the Company"}
+              </h3>
+              <div className="space-y-6">
+                {companyProfile.description && (
+                  <div>
+                    <div className="prose prose-invert max-w-none text-[var(--color-text-muted)] leading-relaxed text-base">
+                      <ReactMarkdown>{DOMPurify.sanitize(companyProfile.description)}</ReactMarkdown>
+                    </div>
+                  </div>
+                )}
+                {companyProfile.mission && (
+                  <div className="p-5 rounded-2xl bg-[var(--color-surface)]/50 border border-[var(--color-border)]">
+                    <h4 className="text-xs font-bold uppercase tracking-wider text-[var(--color-text-muted)] mb-2">Our Mission</h4>
+                    <p className="text-[var(--color-text)] leading-relaxed">{companyProfile.mission}</p>
+                  </div>
+                )}
+                {companyProfile.culture && (
+                  <div className="p-5 rounded-2xl bg-[var(--color-surface)]/50 border border-[var(--color-border)]">
+                    <h4 className="text-xs font-bold uppercase tracking-wider text-[var(--color-text-muted)] mb-2">Culture & Values</h4>
+                    <p className="text-[var(--color-text)] leading-relaxed">{companyProfile.culture}</p>
+                  </div>
+                )}
+                {companyProfile.website_url && (
+                  <a
+                    href={companyProfile.website_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 text-sm text-[var(--color-brand-primary)] hover:underline font-medium"
+                  >
+                    <Globe size={14} /> Visit company website
+                  </a>
+                )}
+              </div>
+            </section>
+          )}
+
           {/* The Challenge */}
           {proof && (
             <section className="animate-in fade-in slide-in-from-bottom-4 duration-700 delay-200">
@@ -409,21 +467,21 @@ export default function JobDetailPage() {
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-4 rounded-2xl bg-[var(--color-bg)]/50 border border-[var(--color-border)]">
                     <div className="flex flex-col items-center justify-center p-3">
                       <span className="text-[10px] uppercase text-[var(--color-text-muted)] font-bold mb-1">Est. Time</span>
-                      <span className="text-sm font-bold text-[var(--color-text)]">{proof.expected_time || "45m"}</span>
+                      <span className="text-sm font-bold text-[var(--color-text)]">{proof.expected_time || "TBD"}</span>
                     </div>
                     <div className="flex flex-col items-center justify-center p-3 border-l border-[var(--color-border)]">
                       <span className="text-[10px] uppercase text-[var(--color-text-muted)] font-bold mb-1">Format</span>
-                      <span className="text-sm font-bold text-[var(--color-text)] capitalize">{proof.submission_format?.replace("_", " ") || "Repository"}</span>
+                      <span className="text-sm font-bold text-[var(--color-text)] capitalize">{proof.submission_format?.replace("_", " ") || "TBD"}</span>
                     </div>
                     <div className="flex flex-col items-center justify-center p-3 border-l border-[var(--color-border)]">
                       <span className="text-[10px] uppercase text-[var(--color-text-muted)] font-bold mb-1">AI Tools</span>
                       <span className={`text-sm font-bold ${proof.ai_tools_allowed ? "text-emerald-500" : "text-amber-500"}`}>
-                        {proof.ai_tools_allowed ? "Allowed" : "Restricted"}
+                        {proof.ai_tools_allowed !== null ? (proof.ai_tools_allowed ? "Allowed" : "Restricted") : "TBD"}
                       </span>
                     </div>
                     <div className="flex flex-col items-center justify-center p-3 border-l border-[var(--color-border)]">
                       <span className="text-[10px] uppercase text-[var(--color-text-muted)] font-bold mb-1">Type</span>
-                      <span className="text-sm font-bold text-[var(--color-text)] capitalize">{proof.submission_type || "Project"}</span>
+                      <span className="text-sm font-bold text-[var(--color-text)] capitalize">{proof.submission_type || "TBD"}</span>
                     </div>
                   </div>
                 </div>

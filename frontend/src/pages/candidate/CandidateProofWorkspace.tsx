@@ -309,7 +309,7 @@ export default function CandidateProofWorkspace() {
                     Implementation Notes / Reflection
                   </label>
                   <textarea
-                    className="w-full h-32 bg-[#252526] border border-[#3e3e42] rounded p-3 text-sm text-slate-300 focus:border-blue-500 outline-none resize-none font-mono"
+                    className="w-full h-48 bg-[#252526] border border-[#3e3e42] rounded p-3 text-sm text-slate-300 focus:border-blue-500 outline-none resize-y font-mono"
                     placeholder="// Describe your approach, trade-offs, and design decisions..."
                     value={reflection}
                     onChange={(e) => setReflection(e.target.value)}

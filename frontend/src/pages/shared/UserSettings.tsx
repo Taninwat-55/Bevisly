@@ -7,6 +7,7 @@ import MFASettings from "@/components/auth/MFASettings";
 import toast from "react-hot-toast";
 import { supabase } from "@/lib/supabaseClient";
 import { updateProfileData, downloadUserData } from "@/lib/api/profiles";
+import { updateCompanyProfile } from "@/lib/api/companies";
 import { useNavigate } from "react-router-dom";
 import {
   User, Building2, Bell, Shield,
@@ -39,6 +40,12 @@ export default function UserSettings() {
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // Company Profile State (employer-only)
+  const [companyDescription, setCompanyDescription] = useState("");
+  const [companyMission, setCompanyMission] = useState("");
+  const [companyCulture, setCompanyCulture] = useState("");
+  const [companyWebsite, setCompanyWebsite] = useState("");
+
   // Prefs State
   const [emailNotif, setEmailNotif] = useState(true);
   const [marketingEmails, setMarketingEmails] = useState(false);
@@ -65,6 +72,16 @@ export default function UserSettings() {
       setAvatarUrl(user.avatar_url || null);
     }
   }, [user]);
+
+  // Sync company profile fields from company context
+  useEffect(() => {
+    if (currentCompanyRecord) {
+      setCompanyDescription(currentCompanyRecord.description || "");
+      setCompanyMission(currentCompanyRecord.mission || "");
+      setCompanyCulture(currentCompanyRecord.culture || "");
+      setCompanyWebsite(currentCompanyRecord.website_url || "");
+    }
+  }, [currentCompanyRecord]);
 
   const handleAvatarUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -146,6 +163,13 @@ export default function UserSettings() {
         const companyId = currentCompanyRecord?.id || await getCurrentCompanyId();
         if (companyId) {
           await updateCompanyName(companyId, company);
+          // Save company profile fields
+          await updateCompanyProfile(companyId, {
+            description: companyDescription || null,
+            mission: companyMission || null,
+            culture: companyCulture || null,
+            website_url: companyWebsite || null,
+          });
           await refreshCompany(); // Update global context immediately
         }
       }
@@ -429,6 +453,59 @@ export default function UserSettings() {
                             className="w-full px-4 py-2.5 rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)] text-[var(--color-text)] focus:ring-2 focus:ring-blue-500 outline-none transition-all"
                           />
                         </div>
+                      )}
+
+                      {isEmployer && (
+                        <>
+                          <div className="pt-4 border-t border-[var(--color-border)]">
+                            <h3 className="text-sm font-bold text-[var(--color-text)] mb-1">Company Profile</h3>
+                            <p className="text-xs text-[var(--color-text-muted)] mb-4">These details appear on all your job posts automatically.</p>
+                          </div>
+
+                          <div>
+                            <label className="block text-sm font-medium text-[var(--color-text)] mb-2">About the Company</label>
+                            <textarea
+                              value={companyDescription}
+                              onChange={(e) => setCompanyDescription(e.target.value)}
+                              placeholder="Tell candidates what your company does, what makes it unique..."
+                              rows={4}
+                              className="w-full px-4 py-2.5 rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)] text-[var(--color-text)] focus:ring-2 focus:ring-blue-500 outline-none transition-all resize-y"
+                            />
+                          </div>
+
+                          <div>
+                            <label className="block text-sm font-medium text-[var(--color-text)] mb-2">Mission Statement</label>
+                            <textarea
+                              value={companyMission}
+                              onChange={(e) => setCompanyMission(e.target.value)}
+                              placeholder="What is your company's mission or purpose?"
+                              rows={2}
+                              className="w-full px-4 py-2.5 rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)] text-[var(--color-text)] focus:ring-2 focus:ring-blue-500 outline-none transition-all resize-y"
+                            />
+                          </div>
+
+                          <div>
+                            <label className="block text-sm font-medium text-[var(--color-text)] mb-2">Culture & Values</label>
+                            <textarea
+                              value={companyCulture}
+                              onChange={(e) => setCompanyCulture(e.target.value)}
+                              placeholder="Describe your team culture, work environment, and core values..."
+                              rows={3}
+                              className="w-full px-4 py-2.5 rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)] text-[var(--color-text)] focus:ring-2 focus:ring-blue-500 outline-none transition-all resize-y"
+                            />
+                          </div>
+
+                          <div>
+                            <label className="block text-sm font-medium text-[var(--color-text)] mb-2">Company Website</label>
+                            <input
+                              type="url"
+                              value={companyWebsite}
+                              onChange={(e) => setCompanyWebsite(e.target.value)}
+                              placeholder="https://yourcompany.com"
+                              className="w-full px-4 py-2.5 rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)] text-[var(--color-text)] focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                            />
+                          </div>
+                        </>
                       )}
 
                       <div className="pt-6">

@@ -11,6 +11,11 @@ export type Company = {
   logo_url: string | null;
   owner_id: string | null;
   created_at: string | null;
+  // Company Profile (set once in settings, shown on job posts)
+  description?: string | null;
+  mission?: string | null;
+  culture?: string | null;
+  website_url?: string | null;
   // Pricing & Usage
   subscription_tier?: "free" | "pro_saas";
   active_jobs_count?: number;

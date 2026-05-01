@@ -16,7 +16,8 @@ import {
   XCircle,
   Briefcase,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Heart
 } from "lucide-react";
 import toast from "react-hot-toast";
 
@@ -63,6 +64,7 @@ export default function JobListingPage() {
     paid: false,
     aiAllowed: false,
     short: false,
+    savedOnly: false,
   });
 
   const [companies, setCompanies] = useState<string[]>([]);
@@ -222,17 +224,22 @@ export default function JobListingPage() {
           )
           : true;
 
+      const savedMatch = filters.savedOnly
+        ? savedJobIds.includes(job.id)
+        : true;
+
       return (
         textMatch &&
         paidMatch &&
         aiMatch &&
         shortMatch &&
+        savedMatch &&
         locationMatch &&
         companyMatch &&
         categoryMatch
       );
     });
-  }, [jobs, debouncedQuery, filters, locations, companies, categories]);
+  }, [jobs, debouncedQuery, filters, locations, companies, categories, savedJobIds]);
 
   /* ─── Pagination Logic (Computed) ─────────────────────────────── */
   const totalPages = Math.ceil(filteredJobs.length / ITEMS_PER_PAGE);
@@ -260,7 +267,7 @@ export default function JobListingPage() {
   };
 
   const handleClearAll = () => {
-    setFilters({ paid: false, aiAllowed: false, short: false });
+    setFilters({ paid: false, aiAllowed: false, short: false, savedOnly: false });
     setQuery("");
     setCompanies([]);
     setLocations([]);
@@ -320,7 +327,7 @@ export default function JobListingPage() {
             <p className="text-blue-100 max-w-xl text-lg">
               {role === "employer"
                 ? "Track performance and manage proof-based roles."
-                : "Every role includes a 30-minute proof task. Submit real work. Skip the CV black hole."}
+                : "Every role includes a practical proof task. Submit real work. Skip the CV black hole."}
             </p>
           </div>
 
@@ -349,7 +356,7 @@ export default function JobListingPage() {
                   placeholder="Search roles, companies, or specific technologies..."
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
-                  className="w-full pl-12 pr-4 py-3.5 text-base rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)] focus:outline-none focus:ring-2 focus:ring-[var(--color-candidate)]/20 transition-all font-medium"
+                  className="w-full pl-12 pr-4 py-3.5 text-base rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)] focus:outline-none focus:ring-2 focus:ring-[var(--color-candidate)]/20 transition-all font-medium placeholder:text-[var(--color-text-muted)] placeholder:opacity-70"
                 />
               </div>
 
@@ -364,6 +371,11 @@ export default function JobListingPage() {
                   <button onClick={() => setFilters((f) => ({ ...f, paid: !f.paid }))} className={`px-4 py-2 rounded-full border transition-all font-medium flex items-center gap-2 ${filters.paid ? "bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 border-emerald-200" : "border-[var(--color-border)] text-[var(--color-text-muted)] hover:bg-[var(--color-surface-hover)]"}`}>💰 Paid Opportunities</button>
                   <button onClick={() => setFilters((f) => ({ ...f, short: !f.short }))} className={`px-4 py-2 rounded-full border transition-all font-medium flex items-center gap-2 ${filters.short ? "bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 border-blue-200" : "border-[var(--color-border)] text-[var(--color-text-muted)] hover:bg-[var(--color-surface-hover)]"}`}>⏱ Under 30 mins</button>
                   <button onClick={() => setFilters((f) => ({ ...f, aiAllowed: !f.aiAllowed }))} className={`px-4 py-2 rounded-full border transition-all font-medium flex items-center gap-2 ${filters.aiAllowed ? "bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400 border-purple-200" : "border-[var(--color-border)] text-[var(--color-text-muted)] hover:bg-[var(--color-surface-hover)]"}`}>🤖 AI Tools Allowed</button>
+                  {user && (
+                    <button onClick={() => setFilters((f) => ({ ...f, savedOnly: !f.savedOnly }))} className={`px-4 py-2 rounded-full border transition-all font-medium flex items-center gap-2 ${filters.savedOnly ? "bg-rose-100 dark:bg-rose-900/30 text-rose-700 dark:text-rose-400 border-rose-200" : "border-[var(--color-border)] text-[var(--color-text-muted)] hover:bg-[var(--color-surface-hover)]"}`}>
+                      <Heart size={14} className={filters.savedOnly ? "fill-current" : ""} /> Saved Jobs{savedJobIds.length > 0 ? ` (${savedJobIds.length})` : ""}
+                    </button>
+                  )}
                 </div>
                 {(!!query || Object.values(filters).some(Boolean) || companies.length > 0 || locations.length > 0 || categories.length > 0) && (
                   <button onClick={handleClearAll} className="flex items-center gap-1 text-[var(--color-text-muted)] hover:text-[var(--color-error)] transition mt-2 font-medium px-2 py-1 hover:bg-red-50 dark:hover:bg-red-900/10 rounded-lg"><XCircle size={16} /> Clear Filters</button>

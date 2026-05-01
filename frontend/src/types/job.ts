@@ -23,6 +23,7 @@ export interface Job {
   department?: string | null;
   work_mode?: string | null;
   employer_id?: string;
+  company_id?: string | null;
   company_logo?: string | null;
 
   // Timestamps

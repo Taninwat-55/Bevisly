@@ -241,7 +241,9 @@ export async function createJobWithTasks(
         pay_period: values.pay_period ?? "monthly",
         employer_id: user.id,
         company_id: companyId,
-        expires_at: values.expires_at ?? null,
+        expires_at: values.application_deadline
+          ? new Date(values.application_deadline).toISOString()
+          : values.expires_at ?? null,
         is_public: true,
         job_type: values.job_type ?? null,
         department: values.department ?? null,
@@ -302,6 +304,9 @@ export async function updateJobWithTasks(
       job_type: values.job_type ?? null,
       department: values.department ?? null,
       work_mode: values.work_mode ?? null,
+      expires_at: values.application_deadline
+        ? new Date(values.application_deadline).toISOString()
+        : values.expires_at ?? null,
       updated_at: new Date().toISOString(),
     })
     .eq("id", job_id);

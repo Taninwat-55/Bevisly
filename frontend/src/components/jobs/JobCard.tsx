@@ -37,10 +37,14 @@ export default function JobCard({ job, compact = false, isSaved, onToggleSave }:
     // Format salary
     const formatSalary = () => {
         if (!job.paid) return "Unpaid / Equity";
-        if (job.show_salary_range && job.salary_min && job.salary_max) {
-            return `${job.payment_currency} ${job.salary_min.toLocaleString()} - ${job.salary_max.toLocaleString()}`;
+        const periodLabel = job.pay_period === 'yearly' ? '/yr' : job.pay_period === 'hourly' ? '/hr' : '/mo';
+        if (job.salary_min && job.salary_max) {
+            return `${job.payment_currency} ${job.salary_min.toLocaleString()} - ${job.salary_max.toLocaleString()}${periodLabel}`;
         }
-        return `${job.payment_currency} ${job.payment_amount?.toLocaleString() || "TBD"}`;
+        if (job.payment_amount) {
+            return `${job.payment_currency} ${job.payment_amount.toLocaleString()}${periodLabel}`;
+        }
+        return "Competitive";
     };
 
     const tasksCount = job.proof_tasks?.length || 0;

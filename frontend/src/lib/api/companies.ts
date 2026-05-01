@@ -45,6 +45,10 @@ export async function getCurrentCompany(): Promise<Company | null> {
     logo_url: company.logo_url,
     owner_id: company.owner_id,
     created_at: company.created_at,
+    description: company.description ?? null,
+    mission: company.mission ?? null,
+    culture: company.culture ?? null,
+    website_url: company.website_url ?? null,
     subscription_tier: profile?.subscription_tier,
     active_jobs_count: profile?.active_jobs_count,
     monthly_job_posts_count: profile?.monthly_job_posts_count,
@@ -184,6 +188,50 @@ export async function updateCompanyName(companyId: string, name: string): Promis
     .from("profiles")
     .update({ company_name: name })
     .eq("id", user.id);
+}
+
+/**
+ * Update company profile fields (about, mission, culture, website)
+ */
+export async function updateCompanyProfile(
+  companyId: string,
+  fields: { description?: string | null; mission?: string | null; culture?: string | null; website_url?: string | null }
+): Promise<void> {
+  const user = (await supabase.auth.getUser()).data.user;
+  if (!user) throw new Error("Not authenticated");
+
+  const { error } = await supabase
+    .from("companies")
+    .update({ ...fields, updated_at: new Date().toISOString() })
+    .eq("id", companyId);
+
+  if (error) throw error;
+}
+
+/**
+ * Get company profile by company_id (public — used on job detail pages)
+ */
+export async function getCompanyProfile(companyId: string): Promise<Company | null> {
+  const { data, error } = await supabase
+    .from("companies")
+    .select("id, name, slug, logo_url, description, mission, culture, website_url")
+    .eq("id", companyId)
+    .single();
+
+  if (error || !data) return null;
+
+  return {
+    id: data.id,
+    name: data.name,
+    slug: data.slug,
+    logo_url: data.logo_url,
+    owner_id: null,
+    created_at: null,
+    description: data.description ?? null,
+    mission: data.mission ?? null,
+    culture: data.culture ?? null,
+    website_url: data.website_url ?? null,
+  };
 }
 
 /**

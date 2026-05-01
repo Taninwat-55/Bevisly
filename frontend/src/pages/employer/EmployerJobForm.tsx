@@ -298,7 +298,7 @@ export default function EmployerJobForm({
               </div>
 
               {values.paid && (
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-5 animate-fade-in">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-5 animate-fade-in">
                   <div className="space-y-1.5 col-span-2 md:col-span-1">
                     <label className="text-sm font-medium text-[var(--color-text)]">Currency</label>
                     <select
@@ -316,8 +316,20 @@ export default function EmployerJobForm({
                     </select>
                   </div>
 
+                  <div className="space-y-1.5 col-span-2 md:col-span-1">
+                    <label className="text-sm font-medium text-[var(--color-text)]">Display As</label>
+                    <select
+                      className="w-full h-10 px-3 rounded-[var(--radius-input)] border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text)] text-sm"
+                      value={values.pay_period ?? "monthly"}
+                      onChange={(e) => handleChange("pay_period", e.target.value)}
+                    >
+                      <option value="monthly">Monthly</option>
+                      <option value="yearly">Annual</option>
+                    </select>
+                  </div>
+
                   <Input
-                    label="Min Salary (Annual)"
+                    label={`Min Salary (${values.pay_period === 'yearly' ? 'Annual' : 'Monthly'})`}
                     type="number"
                     placeholder="e.g. 50000"
                     value={values.salary_min ?? ""}
@@ -325,7 +337,7 @@ export default function EmployerJobForm({
                   />
 
                   <Input
-                    label="Max Salary (Annual)"
+                    label={`Max Salary (${values.pay_period === 'yearly' ? 'Annual' : 'Monthly'})`}
                     type="number"
                     placeholder="e.g. 80000"
                     value={values.salary_max ?? ""}
