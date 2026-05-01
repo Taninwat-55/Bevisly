@@ -37,6 +37,12 @@ const stageStyles: Record<
     border: "border-cyan-200 dark:border-cyan-800",
     countBg: "bg-cyan-100 text-cyan-700 dark:bg-cyan-900/50 dark:text-cyan-300",
   },
+  offer_sent: {
+    bg: "bg-violet-50/50 dark:bg-violet-950/20",
+    accent: "bg-violet-500",
+    border: "border-violet-200 dark:border-violet-800",
+    countBg: "bg-violet-100 text-violet-700 dark:bg-violet-900/50 dark:text-violet-300",
+  },
   hold: {
     bg: "bg-slate-50/50 dark:bg-slate-900/20",
     accent: "bg-slate-400",

@@ -2,7 +2,7 @@ import { useEffect, useState, useMemo } from "react";
 import { getAllUsers, updateUserRole, addCredits } from "@/lib/api/admin";
 import toast from "react-hot-toast";
 import type { BevislyUser } from "@/types/admin";
-import { ArrowDownUp, Search, User, MoreHorizontal, Shield, Briefcase, GraduationCap, PlusCircle, Coins, Eye } from "lucide-react";
+import { ArrowDownUp, Search, User, MoreHorizontal, Shield, Briefcase, GraduationCap, PlusCircle, Coins, Eye, Users } from "lucide-react";
 import { motion } from "framer-motion";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -38,10 +38,10 @@ export default function AdminUsers() {
 
   const handleChangeRole = async (id: string, newRole: BevislyUser["role"]) => {
     if (isDemoAdmin) {
-    toast.error("Demo accounts cannot change user roles.");
-    return;
-  }
-  setUpdating(id);
+      toast.error("Demo accounts cannot change user roles.");
+      return;
+    }
+    setUpdating(id);
     try {
       await updateUserRole(id, newRole);
       toast.success(`✅ Role updated to ${newRole}`);
@@ -61,10 +61,10 @@ export default function AdminUsers() {
 
   const handleAddCredits = async (id: string, amount: number) => {
     if (isDemoAdmin) {
-    toast.error("Demo accounts cannot add credits.");
-    return;
-  }
-  if (!confirm(`Add ${amount} credits to this user?`)) return;
+      toast.error("Demo accounts cannot add credits.");
+      return;
+    }
+    if (!confirm(`Add ${amount} credits to this user?`)) return;
     setUpdating(id);
     try {
       const newBal = await addCredits(id, amount);
@@ -99,14 +99,6 @@ export default function AdminUsers() {
 
   useEffect(() => setPage(1), [searchTerm, roleFilter, perPage]);
 
-  if (loading)
-    return (
-      <div className="min-h-screen flex flex-col items-center justify-center text-[var(--color-text-muted)] gap-4">
-        <div className="w-8 h-8 rounded-full border-2 border-[var(--color-brand-primary)] border-t-transparent animate-spin" />
-        <p>Loading user directory...</p>
-      </div>
-    );
-
   /* ─────────────── Helper: Role Badge ─────────────── */
   const RoleBadge = ({ role }: { role: string }) => {
     if (role === 'admin') {
@@ -137,212 +129,251 @@ export default function AdminUsers() {
     );
   };
 
-  /* ─────────────── Render ─────────────── */
-  return (
-    <div className="min-h-screen bg-[var(--color-bg)] text-[var(--color-text)] px-6 md:px-10 py-12 transition-colors font-sans">
+  if (loading)
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center text-[var(--color-text-muted)] gap-4">
+        <div className="w-12 h-12 rounded-full border-4 border-indigo-500 border-t-transparent animate-spin" />
+        <p className="font-bold uppercase tracking-widest text-xs animate-pulse">Scanning community directory...</p>
+      </div>
+    );
 
-      {/* Header */}
-      <header className="mb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <div>
-          <h1 className="text-3xl font-bold font-display text-[var(--color-text)] mb-2">User Directory</h1>
-          <p className="text-[var(--color-text-muted)]">Manage platform access and user roles.</p>
-        </div>
-        <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-xl p-1 shadow-sm">
-              <div className="px-4 py-2 rounded-lg bg-[var(--color-bg)] text-xs font-medium text-[var(--color-text-muted)]">
-                Total: <span className="text-[var(--color-text)] font-bold ml-1">{users.length}</span>
-              </div>
+  return (
+    <div className="min-h-screen bg-[var(--color-bg)] transition-colors pb-20">
+
+      {/* ── Fancy Banner / Header ── */}
+      <div className="relative pt-12 pb-24 px-8 bg-gradient-to-br from-slate-900 via-slate-800 to-indigo-900 text-white shadow-2xl overflow-hidden rounded-b-[3rem] md:rounded-b-[4rem]">
+        <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 mix-blend-overlay" />
+        <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-indigo-500/10 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/3 pointer-events-none" />
+        
+        <div className="relative z-10 max-w-6xl mx-auto">
+          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+            <div>
+              <motion.div
+                initial={{ scale: 0.8, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-indigo-300 text-[10px] font-bold uppercase tracking-widest mb-6"
+              >
+                <Users size={12} />
+                User Administration
+              </motion.div>
+              
+              <h1 className="text-4xl md:text-5xl font-bold font-display tracking-tight mb-4">
+                User Directory
+              </h1>
+              <p className="text-slate-300 max-w-2xl text-lg leading-relaxed">
+                Manage platform access, audit user roles, and distribute system credits. 
+                Keep the community balanced and secure.
+              </p>
             </div>
-            
-            {!isDemoAdmin && (
-              <button
-                  onClick={() => {
+
+            <div className="flex items-center gap-3">
+              <div className="px-5 py-3 rounded-2xl bg-white/5 backdrop-blur-xl border border-white/10 flex items-center gap-4 shadow-2xl">
+                <div className="text-center">
+                  <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest leading-none mb-1">Total</p>
+                  <p className="text-lg font-bold text-white">{users.length}</p>
+                </div>
+                <div className="w-px h-8 bg-white/10" />
+                {!isDemoAdmin && (
+                  <button
+                    onClick={() => {
                       const email = prompt("Enter email verification to invite:");
                       if (email) {
-                           const link = `${window.location.origin}/auth?invite=${btoa(email)}`;
-                           navigator.clipboard.writeText(link);
-                           toast.success(`Invite link for ${email} copied to clipboard!`);
+                        const link = `${window.location.origin}/auth?invite=${btoa(email)}`;
+                        navigator.clipboard.writeText(link);
+                        toast.success(`Invite link for ${email} copied to clipboard!`);
                       }
-                  }}
-                  className="flex items-center gap-2 px-4 py-2 bg-[var(--color-brand-primary)] text-white rounded-xl text-sm font-medium hover:brightness-110 transition shadow-glow-primary"
-              >
-                  <PlusCircle size={18} />
-                  <span>Invite User</span>
-              </button>
-            )}
-        </div>
-      </header>
-
-      {/* Controls Bar */}
-      <div className="glass-panel p-4 rounded-xl border border-[var(--color-border)] mb-6 flex flex-col md:flex-row gap-4 items-center justify-between">
-
-        {/* Search */}
-        <div className="relative w-full md:w-96">
-          <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)]" />
-          <input
-            type="text"
-            placeholder="Search users by email..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full bg-[var(--color-bg)] border border-[var(--color-border)] rounded-lg pl-10 pr-4 py-2.5 text-sm focus:ring-2 focus:ring-[var(--color-brand-primary)]/20 focus:border-[var(--color-brand-primary)] outline-none transition-all"
-          />
-        </div>
-
-        {/* Filters */}
-        <div className="flex items-center gap-3 w-full md:w-auto overflow-x-auto pb-2 md:pb-0">
-          <select
-            value={roleFilter}
-            onChange={(e) => setRoleFilter(e.target.value as "all" | BevislyUser["role"])}
-            className="bg-[var(--color-bg)] border border-[var(--color-border)] rounded-lg px-4 py-2.5 text-sm outline-none focus:border-[var(--color-brand-primary)] cursor-pointer"
-          >
-            <option value="all">All Roles</option>
-            <option value="candidate">Candidates</option>
-            <option value="employer">Employers</option>
-            <option value="admin">Admins</option>
-            <option value="demo_admin">Demo Admins</option>
-          </select>
-
-          <button
-            onClick={() => setSortOrder(prev => prev === 'newest' ? 'oldest' : 'newest')}
-            className="flex items-center gap-2 px-4 py-2.5 bg-[var(--color-bg)] border border-[var(--color-border)] rounded-lg text-sm hover:bg-[var(--color-surface-hover)] transition"
-          >
-            <ArrowDownUp size={16} className="text-[var(--color-text-muted)]" />
-            {sortOrder === 'newest' ? 'Newest' : 'Oldest'}
-          </button>
+                    }}
+                    className="flex items-center gap-2 px-4 py-2 bg-[var(--color-brand-primary)] text-white rounded-xl text-sm font-bold hover:brightness-110 transition shadow-glow-primary"
+                  >
+                    <PlusCircle size={18} />
+                    <span>Invite</span>
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* Data Grid */}
-      <motion.div
-        initial={{ opacity: 0, y: 8 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="glass-panel border border-[var(--color-border)] rounded-2xl overflow-hidden shadow-sm"
-      >
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm text-left">
-            <thead>
-              <tr className="bg-[var(--color-bg)] border-b border-[var(--color-border)]">
-                <th className="py-4 px-6 font-semibold text-[var(--color-text-muted)] uppercase text-xs tracking-wider">User</th>
-                <th className="py-4 px-6 font-semibold text-[var(--color-text-muted)] uppercase text-xs tracking-wider">Current Role</th>
-                <th className="py-4 px-6 font-semibold text-[var(--color-text-muted)] uppercase text-xs tracking-wider">Credits</th>
-                <th className="py-4 px-6 font-semibold text-[var(--color-text-muted)] uppercase text-xs tracking-wider">Joined Date</th>
-                <th className="py-4 px-6 font-semibold text-[var(--color-text-muted)] uppercase text-xs tracking-wider text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-[var(--color-border)]/50">
-              {paginated.length > 0 ? (
-                paginated.map((u) => (
-                  <tr key={u.id} className="group hover:bg-[var(--color-bg)]/50 transition-colors">
-                    <td className="py-4 px-6">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500 dark:text-slate-400 font-bold border border-[var(--color-border)]">
-                          {u.email[0].toUpperCase()}
-                        </div>
-                        <div>
-                          <p className="font-medium text-[var(--color-text)]">{u.email}</p>
-                          <p className="text-xs text-[var(--color-text-muted)]">ID: {u.id.slice(0, 8)}...</p>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="py-4 px-6">
-                      <RoleBadge role={u.role} />
-                    </td>
-                    <td className="py-4 px-6">
-                      <div className="flex items-center gap-2">
-                        <div className="flex items-center gap-1 font-mono text-sm bg-[var(--color-surface)] border border-[var(--color-border)] px-2 py-1 rounded">
-                          <Coins size={12} className="text-amber-500" />
-                          {u.credits ?? 0}
-                        </div>
-                        {!isDemoAdmin && (
-                          <button
-                            onClick={() => handleAddCredits(u.id, 10)}
-                            disabled={updating === u.id}
-                            className="text-[var(--color-brand-primary)] hover:bg-[var(--color-brand-primary)]/10 p-1 rounded transition-colors"
-                            title="Add 10 Credits"
-                          >
-                            <PlusCircle size={16} />
-                          </button>
-                        )}
-                      </div>
-                    </td>
-                    <td className="py-4 px-6 text-[var(--color-text-muted)] font-medium">
-                      {new Date(u.created_at).toLocaleDateString(undefined, {
-                        year: 'numeric',
-                        month: 'short',
-                        day: 'numeric'
-                      })}
-                    </td>
-                    <td className="py-4 px-6 text-right">
-                      {isDemoAdmin ? (
-                        <RoleBadge role={u.role} />
-                      ) : (
-                        <div className="relative inline-block">
-                          <select
-                            value={u.role}
-                            disabled={updating === u.id}
-                            onChange={(e) => handleChangeRole(u.id, e.target.value as BevislyUser["role"])}
-                            className={`
-                                 appearance-none bg-transparent pl-3 pr-8 py-1.5 rounded-lg border border-[var(--color-border)] text-xs font-medium cursor-pointer
-                                 hover:border-[var(--color-brand-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--color-brand-primary)]/20 transition-all
-                                 ${updating === u.id ? 'opacity-50 pointer-events-none' : ''}
-                              `}
-                          >
-                            <option value="candidate">Candidate</option>
-                            <option value="employer">Employer</option>
-                            <option value="admin">Admin</option>
-                            <option value="demo_admin">Demo Admin</option>
-                          </select>
-                          <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-[var(--color-text-muted)]">
-                            <MoreHorizontal size={14} />
-                          </div>
-                        </div>
-                      )}
-                    </td>
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan={4} className="py-12 text-center text-[var(--color-text-muted)]">
-                    <div className="flex flex-col items-center gap-2">
-                      <User size={32} className="opacity-20" />
-                      <p>No users found matching your search.</p>
-                    </div>
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+      <div className="max-w-6xl mx-auto px-6 -mt-12 relative z-20 space-y-8">
+        
+        {/* Controls Bar */}
+        <div className="glass-panel p-4 rounded-[1.5rem] border border-[var(--color-border)] bg-white/50 dark:bg-slate-900/50 backdrop-blur-md shadow-xl flex flex-col md:flex-row gap-4 items-center justify-between">
+          {/* Search */}
+          <div className="relative w-full md:w-96">
+            <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)]" />
+            <input
+              type="text"
+              placeholder="Search by email..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full bg-[var(--color-bg)]/50 border border-[var(--color-border)] rounded-xl pl-11 pr-4 py-3 text-sm focus:ring-4 focus:ring-[var(--color-brand-primary)]/10 focus:border-[var(--color-brand-primary)] outline-none transition-all font-medium"
+            />
+          </div>
+
+          {/* Filters */}
+          <div className="flex items-center gap-3 w-full md:w-auto overflow-x-auto">
+            <div className="flex items-center gap-2 p-1 bg-[var(--color-bg)]/50 border border-[var(--color-border)] rounded-xl">
+              <select
+                value={roleFilter}
+                onChange={(e) => setRoleFilter(e.target.value as any)}
+                className="bg-transparent border-0 rounded-lg px-4 py-2 text-sm font-bold outline-none focus:ring-0 cursor-pointer text-[var(--color-text)]"
+              >
+                <option value="all">All Roles</option>
+                <option value="candidate">Candidates</option>
+                <option value="employer">Employers</option>
+                <option value="admin">Admins</option>
+                <option value="demo_admin">Demo Admins</option>
+              </select>
+            </div>
+
+            <button
+              onClick={() => setSortOrder(prev => prev === 'newest' ? 'oldest' : 'newest')}
+              className="flex items-center gap-2 px-5 py-3 bg-[var(--color-bg)]/50 border border-[var(--color-border)] rounded-xl text-sm font-bold hover:bg-[var(--color-surface-hover)] transition-all shadow-sm group"
+            >
+              <ArrowDownUp size={16} className="text-[var(--color-brand-primary)] group-hover:rotate-180 transition-transform" />
+              {sortOrder === 'newest' ? 'Newest First' : 'Oldest First'}
+            </button>
+          </div>
         </div>
 
-        {/* Pagination Footer */}
-        {filteredUsers.length > 0 && (
-          <div className="border-t border-[var(--color-border)] p-4 flex flex-col md:flex-row items-center justify-between gap-4 bg-[var(--color-bg)]/30">
-            <div className="text-xs text-[var(--color-text-muted)]">
-              Showing <span className="font-medium text-[var(--color-text)]">{(page - 1) * perPage + 1}</span> to <span className="font-medium text-[var(--color-text)]">{Math.min(page * perPage, filteredUsers.length)}</span> of {filteredUsers.length} results
-            </div>
-
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => setPage(p => Math.max(1, p - 1))}
-                disabled={page === 1}
-                className="px-3 py-1.5 rounded-md border border-[var(--color-border)] text-xs font-medium hover:bg-[var(--color-surface)] disabled:opacity-50 disabled:hover:bg-transparent transition"
-              >
-                Previous
-              </button>
-              <div className="text-xs font-medium text-[var(--color-text)]">
-                Page {page} of {totalPages || 1}
-              </div>
-              <button
-                onClick={() => setPage(p => Math.min(totalPages, p + 1))}
-                disabled={page >= totalPages}
-                className="px-3 py-1.5 rounded-md border border-[var(--color-border)] text-xs font-medium hover:bg-[var(--color-surface)] disabled:opacity-50 disabled:hover:bg-transparent transition"
-              >
-                Next
-              </button>
-            </div>
+        {/* Data Grid */}
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="glass-panel border border-[var(--color-border)] rounded-[2rem] overflow-hidden shadow-2xl bg-white/30 dark:bg-slate-900/30 backdrop-blur-sm"
+        >
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm text-left">
+              <thead>
+                <tr className="bg-[var(--color-bg)]/50 border-b border-[var(--color-border)]">
+                  <th className="py-5 px-8 font-bold text-[var(--color-text-muted)] uppercase text-[10px] tracking-widest">Identity</th>
+                  <th className="py-5 px-6 font-bold text-[var(--color-text-muted)] uppercase text-[10px] tracking-widest">Privileges</th>
+                  <th className="py-5 px-6 font-bold text-[var(--color-text-muted)] uppercase text-[10px] tracking-widest">Wallet</th>
+                  <th className="py-5 px-6 font-bold text-[var(--color-text-muted)] uppercase text-[10px] tracking-widest">Onboarded</th>
+                  <th className="py-5 px-8 font-bold text-[var(--color-text-muted)] uppercase text-[10px] tracking-widest text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-[var(--color-border)]/30">
+                {paginated.length > 0 ? (
+                  paginated.map((u) => (
+                    <tr key={u.id} className="group hover:bg-[var(--color-brand-primary)]/5 transition-all">
+                      <td className="py-5 px-8">
+                        <div className="flex items-center gap-4">
+                          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-700 flex items-center justify-center text-slate-500 dark:text-slate-400 font-black border border-[var(--color-border)] shadow-sm group-hover:scale-105 transition-transform">
+                            {u.email[0].toUpperCase()}
+                          </div>
+                          <div className="min-w-0">
+                            <p className="font-bold text-[var(--color-text)] truncate">{u.email}</p>
+                            <p className="text-[10px] font-mono text-[var(--color-text-muted)] uppercase tracking-tighter">ID: {u.id.slice(0, 12)}</p>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="py-5 px-6">
+                        <RoleBadge role={u.role} />
+                      </td>
+                      <td className="py-5 px-6">
+                        <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-2 font-mono text-sm font-bold bg-[var(--color-surface)]/80 border border-[var(--color-border)] px-3 py-1.5 rounded-xl shadow-inner">
+                            <Coins size={14} className="text-amber-500" />
+                            {u.credits ?? 0}
+                          </div>
+                          {!isDemoAdmin && (
+                            <button
+                              onClick={() => handleAddCredits(u.id, 10)}
+                              disabled={updating === u.id}
+                              className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-[var(--color-brand-primary)] hover:text-white text-[var(--color-brand-primary)] transition-all border border-transparent hover:border-[var(--color-brand-primary)]/20"
+                              title="Add 10 Credits"
+                            >
+                              <PlusCircle size={18} />
+                            </button>
+                          )}
+                        </div>
+                      </td>
+                      <td className="py-5 px-6">
+                        <p className="text-xs font-bold text-[var(--color-text)]">
+                          {new Date(u.created_at).toLocaleDateString(undefined, {
+                            year: 'numeric',
+                            month: 'short',
+                            day: 'numeric'
+                          })}
+                        </p>
+                        <p className="text-[10px] text-[var(--color-text-muted)] uppercase font-bold tracking-tighter mt-0.5">Verified Account</p>
+                      </td>
+                      <td className="py-5 px-8 text-right">
+                        {isDemoAdmin ? (
+                          <div className="opacity-50 grayscale"><RoleBadge role={u.role} /></div>
+                        ) : (
+                          <div className="relative inline-block">
+                            <select
+                              value={u.role}
+                              disabled={updating === u.id}
+                              onChange={(e) => handleChangeRole(u.id, e.target.value as any)}
+                              className={`
+                                   appearance-none bg-[var(--color-bg)]/50 pl-4 pr-10 py-2 rounded-xl border border-[var(--color-border)] text-xs font-bold cursor-pointer
+                                   hover:border-[var(--color-brand-primary)] focus:outline-none focus:ring-4 focus:ring-[var(--color-brand-primary)]/10 transition-all
+                                   ${updating === u.id ? 'opacity-50 pointer-events-none' : ''}
+                                `}
+                            >
+                              <option value="candidate">Candidate</option>
+                              <option value="employer">Employer</option>
+                              <option value="admin">Admin</option>
+                              <option value="demo_admin">Demo Admin</option>
+                            </select>
+                            <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-[var(--color-brand-primary)]">
+                              <MoreHorizontal size={16} />
+                            </div>
+                          </div>
+                        )}
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan={5} className="py-20 text-center text-[var(--color-text-muted)]">
+                      <div className="flex flex-col items-center gap-4">
+                        <div className="w-16 h-16 rounded-full bg-[var(--color-surface)] flex items-center justify-center opacity-20">
+                          <User size={32} />
+                        </div>
+                        <p className="font-bold">No matches found in the directory.</p>
+                      </div>
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
           </div>
-        )}
-      </motion.div>
+
+          {/* Pagination Footer */}
+          {filteredUsers.length > 0 && (
+            <div className="border-t border-[var(--color-border)] p-6 flex flex-col md:flex-row items-center justify-between gap-6 bg-[var(--color-bg)]/30 backdrop-blur-md">
+              <div className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-widest">
+                Showing <span className="text-[var(--color-text)]">{(page - 1) * perPage + 1}</span> - <span className="text-[var(--color-text)]">{Math.min(page * perPage, filteredUsers.length)}</span> of {filteredUsers.length} Users
+              </div>
+
+              <div className="flex items-center gap-4">
+                <button
+                  onClick={() => setPage(p => Math.max(1, p - 1))}
+                  disabled={page === 1}
+                  className="px-4 py-2 rounded-xl border border-[var(--color-border)] text-xs font-bold hover:bg-white dark:hover:bg-slate-800 disabled:opacity-30 disabled:cursor-not-allowed transition-all shadow-sm"
+                >
+                  Previous
+                </button>
+                <div className="text-xs font-bold text-[var(--color-text)] bg-[var(--color-brand-primary)]/10 px-3 py-1.5 rounded-lg border border-[var(--color-brand-primary)]/20">
+                  {page} / {totalPages || 1}
+                </div>
+                <button
+                  onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                  disabled={page >= totalPages}
+                  className="px-4 py-2 rounded-xl border border-[var(--color-border)] text-xs font-bold hover:bg-white dark:hover:bg-slate-800 disabled:opacity-30 disabled:cursor-not-allowed transition-all shadow-sm"
+                >
+                  Next
+                </button>
+              </div>
+            </div>
+          )}
+        </motion.div>
+      </div>
     </div>
   );
 }

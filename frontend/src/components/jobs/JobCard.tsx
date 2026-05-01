@@ -93,9 +93,17 @@ export default function JobCard({ job, compact = false, isSaved, onToggleSave }:
                     >
                         {job.title}
                     </h3>
-                    <p className="text-sm text-[var(--color-text-muted)] font-medium mt-1 truncate">
-                        {job.company}
-                    </p>
+                    <div className="flex items-center gap-1.5 mt-1 flex-wrap">
+                        <p className="text-sm text-[var(--color-text-muted)] font-medium truncate">
+                            {job.company}
+                        </p>
+                        {job.employer_verified && (
+                            <span title="Verified Employer" className="inline-flex items-center gap-0.5 text-xs font-medium text-blue-600 dark:text-blue-400">
+                                <ShieldCheck size={13} className="text-blue-500" />
+                                Verified
+                            </span>
+                        )}
+                    </div>
                 </div>
             </div>
 

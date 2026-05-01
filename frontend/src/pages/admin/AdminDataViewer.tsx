@@ -69,187 +69,230 @@ export default function AdminDataViewer() {
   const paginatedRows = sortedRows.slice(0, perPage);
 
   return (
-    <div className="min-h-screen bg-[var(--color-bg)] text-[var(--color-text)] px-6 md:px-10 py-12 transition-colors">
-      {/* Header */}
-      <header className="mb-8 flex flex-col gap-2">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <h1 className="heading-lg flex items-center gap-2">
-            <Database size={22} /> Data Viewer
-          </h1>
+    <div className="min-h-screen bg-[var(--color-bg)] transition-colors pb-20">
 
-          <div className="flex flex-wrap items-center gap-3">
-            <select
-              value={table}
-              onChange={(e) => setTable(e.target.value)}
-              className="border border-[var(--color-border)] rounded-[var(--radius-button)] px-3 py-2 text-sm bg-[var(--color-surface)]"
-            >
-              <option value="profiles">profiles</option>
-              <option value="jobs">jobs</option>
-              <option value="submissions">submissions</option>
-              <option value="feedback">feedback</option>
-            </select>
-
-            <div className="relative">
-              <Search
-                size={14}
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)]"
-              />
-              <input
-                type="text"
-                placeholder="Search..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="border border-[var(--color-border)] rounded-[var(--radius-button)] pl-8 pr-3 py-2 text-sm bg-[var(--color-surface)] focus:ring-1 focus:ring-[var(--color-candidate)] focus:outline-none"
-              />
+      {/* ── Fancy Banner / Header ── */}
+      <div className="relative pt-12 pb-24 px-8 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-950 text-white shadow-2xl overflow-hidden rounded-b-[3rem] md:rounded-b-[4rem]">
+        <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 mix-blend-overlay" />
+        <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-slate-500/5 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/3 pointer-events-none" />
+        
+        <div className="relative z-10 max-w-6xl mx-auto">
+          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+            <div>
+              <motion.div
+                initial={{ scale: 0.8, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-slate-300 text-[10px] font-bold uppercase tracking-widest mb-6"
+              >
+                <Database size={12} />
+                Schema Inspector
+              </motion.div>
+              
+              <h1 className="text-4xl md:text-5xl font-bold font-display tracking-tight mb-4">
+                Data Viewer
+              </h1>
+              <p className="text-slate-400 max-w-2xl text-lg leading-relaxed">
+                Direct read-only access to the Supabase core tables. Audit raw records, 
+                verify schema integrity, and monitor low-level data structures.
+              </p>
             </div>
 
+            <div className="flex items-center gap-3">
+               <div className="px-5 py-3 rounded-2xl bg-white/5 backdrop-blur-xl border border-white/10 flex items-center gap-4 shadow-2xl">
+                <div className="text-center">
+                  <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest leading-none mb-1">Source</p>
+                  <p className="text-lg font-mono font-bold text-emerald-400">Postgres</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="max-w-6xl mx-auto px-6 -mt-12 relative z-20 space-y-8">
+        
+        {/* Controls Bar */}
+        <div className="glass-panel p-4 rounded-[1.5rem] border border-[var(--color-border)] bg-white/50 dark:bg-slate-900/50 backdrop-blur-md shadow-xl flex flex-col xl:flex-row gap-4 items-center justify-between">
+          
+          <div className="flex flex-wrap items-center gap-3 w-full xl:w-auto">
+            {/* Table Selector */}
+            <div className="flex items-center gap-2 p-1 bg-[var(--color-bg)]/50 border border-[var(--color-border)] rounded-xl">
+              <select
+                value={table}
+                onChange={(e) => setTable(e.target.value)}
+                className="bg-transparent border-0 rounded-lg px-4 py-2 text-sm font-bold outline-none focus:ring-0 cursor-pointer text-[var(--color-text)]"
+              >
+                <option value="profiles">profiles</option>
+                <option value="jobs">jobs</option>
+                <option value="submissions">submissions</option>
+                <option value="feedback">feedback</option>
+              </select>
+            </div>
+
+            {/* Search */}
+            <div className="relative w-full md:w-80">
+              <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)]" />
+              <input
+                type="text"
+                placeholder="Global search..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full bg-[var(--color-bg)]/50 border border-[var(--color-border)] rounded-xl pl-11 pr-4 py-3 text-sm focus:ring-4 focus:ring-[var(--color-brand-primary)]/10 focus:border-[var(--color-brand-primary)] outline-none transition-all font-medium"
+              />
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3 w-full xl:w-auto">
             <button
-              onClick={() =>
-                setSortOrder((prev) => (prev === "desc" ? "asc" : "desc"))
-              }
-              className="flex items-center gap-1.5 border border-[var(--color-border)] rounded-[var(--radius-button)] px-3 py-2 text-sm bg-[var(--color-surface)] hover:bg-[var(--color-bg-hover)] transition"
+              onClick={() => setSortOrder(prev => prev === 'desc' ? 'asc' : 'desc')}
+              className="flex items-center gap-2 px-5 py-3 bg-[var(--color-bg)]/50 border border-[var(--color-border)] rounded-xl text-sm font-bold hover:bg-[var(--color-surface-hover)] transition-all shadow-sm group"
             >
-              <ArrowDownUp size={14} />
-              {sortOrder === "desc" ? "Newest" : "Oldest"}
+              <ArrowDownUp size={16} className="text-[var(--color-brand-primary)] group-hover:rotate-180 transition-transform" />
+              {sortOrder === 'desc' ? 'Newest' : 'Oldest'}
             </button>
 
             <button
               onClick={loadData}
-              className="flex items-center gap-1.5 border border-[var(--color-border)] rounded-[var(--radius-button)] px-3 py-2 text-sm bg-[var(--color-employer)] text-white hover:brightness-110 transition"
+              className="flex items-center gap-2 px-5 py-3 bg-emerald-500 text-white rounded-xl text-sm font-bold hover:brightness-110 transition-all shadow-glow-green"
             >
-              <RefreshCw size={14} /> Refresh
+              <RefreshCw size={16} className={loading ? "animate-spin" : ""} />
+              Refresh
             </button>
           </div>
         </div>
-        <p className="body-base text-[var(--color-text-muted)]">
-          Inspect Supabase tables in read-only mode.
-        </p>
-      </header>
 
-      {/* Table */}
-      <motion.div
-        initial={{ opacity: 0, y: 8 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-card)] shadow-[var(--shadow-soft)] overflow-auto"
-      >
-        {loading ? (
-          <p className="p-8 text-[var(--color-text-muted)]">Loading data…</p>
-        ) : data.rows.length > 0 ? (
-          <table className="w-full text-sm">
-            <thead className="bg-[color-mix(in srgb,var(--color-candidate)10%,var(--color-surface))] border-b border-[var(--color-border)] sticky top-0 z-10">
-              <tr>
-                {data.columns.map((col) => (
-                  <th
-                    key={col}
-                    className="py-2 px-4 font-medium text-left text-[var(--color-text)]"
-                  >
-                    {col}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {paginatedRows.map((row, i) => (
-                <tr
-                  key={i}
-                  className={`border-b border-[var(--color-border)] ${i % 2 === 0
-                      ? "bg-[color-mix(in srgb,var(--color-bg)90%,transparent)]"
-                      : ""
-                    } hover:bg-[var(--color-bg-hover)] transition`}
-                >
-                  {data.columns.map((col) => (
-                    <td
-                      key={col}
-                      className="py-2 px-4 text-[var(--color-text-muted)] max-w-[280px] truncate"
-                      title={String(row[col] ?? "—")}
-                    >
-                      {String(row[col] ?? "—")}
-                    </td>
-                  ))}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        ) : (
-          <p className="p-8 text-[var(--color-text-muted)]">No data found.</p>
-        )}
-      </motion.div>
-
-      {/* Pagination */}
-      {!loading && data.rows.length > 0 && (
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 mt-6 text-sm">
-          <span className="text-[var(--color-text-muted)]">
-            Showing {(page - 1) * perPage + 1}–
-            {Math.min(page * perPage, filteredRows.length)} of{" "}
-            {filteredRows.length} rows
-          </span>
-
-          <div className="flex items-center gap-3">
-            {/* Prev */}
-            <button
-              onClick={() => setPage((p) => Math.max(1, p - 1))}
-              disabled={page === 1}
-              className="px-3 py-1 border border-[var(--color-border)] rounded disabled:opacity-40 hover:bg-[var(--color-bg-hover)] transition"
-            >
-              Prev
-            </button>
-
-            <span>Page {page}</span>
-
-            {/* Next */}
-            <button
-              onClick={() => {
-                // Only move forward if more results exist
-                const totalShown = page * perPage;
-                if (totalShown < filteredRows.length) {
-                  setPage((p) => p + 1);
-                }
-              }}
-              disabled={page * perPage >= filteredRows.length}
-              className="px-3 py-1 border border-[var(--color-border)] rounded disabled:opacity-40 hover:bg-[var(--color-bg-hover)] transition"
-            >
-              Next
-            </button>
-
-            {/* Rows per page */}
-            <select
-              value={perPage}
-              onChange={(e) => {
-                setPerPage(Number(e.target.value));
-                setPage(1); // Reset to first page
-              }}
-              className="border border-[var(--color-border)] rounded px-2 py-1 bg-[var(--color-surface)]"
-            >
-              <option value={10}>10 / page</option>
-              <option value={25}>25 / page</option>
-              <option value={50}>50 / page</option>
-            </select>
-          </div>
-        </div>
-      )}
-
-      {/* Schema */}
-      {schema.length > 0 && (
+        {/* Data Grid */}
         <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="mt-4 text-xs bg-[var(--color-bg-hover)] border border-[var(--color-border)] rounded-[var(--radius-card)] p-4 overflow-x-auto"
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="glass-panel border border-[var(--color-border)] rounded-[2.5rem] overflow-hidden shadow-2xl bg-white/30 dark:bg-slate-900/30 backdrop-blur-sm"
         >
-          <p className="font-medium text-[var(--color-text)] mb-2">
-            Columns &amp; Types
-          </p>
-          <div className="flex flex-wrap gap-x-4 gap-y-1">
-            {schema.map((col) => (
-              <span key={col.column_name}>
-                <strong className="text-[var(--color-text)]">
-                  {col.column_name}
-                </strong>
-                : <span className="italic">{col.data_type}</span>
-              </span>
-            ))}
-          </div>
+          {loading ? (
+            <div className="flex flex-col items-center justify-center py-32 gap-4">
+              <div className="w-12 h-12 rounded-full border-4 border-slate-400 border-t-transparent animate-spin" />
+              <p className="font-bold text-[var(--color-text-muted)] uppercase tracking-widest text-xs">Querying database...</p>
+            </div>
+          ) : data.rows.length > 0 ? (
+            <div className="overflow-x-auto">
+              <table className="w-full text-[13px] text-left">
+                <thead>
+                  <tr className="bg-[var(--color-bg)]/50 border-b border-[var(--color-border)]">
+                    {data.columns.map((col) => (
+                      <th
+                        key={col}
+                        className="py-5 px-6 font-bold text-[var(--color-text-muted)] uppercase text-[10px] tracking-widest whitespace-nowrap"
+                      >
+                        {col}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-[var(--color-border)]/30">
+                  {paginatedRows.map((row, i) => (
+                    <tr
+                      key={i}
+                      className="group hover:bg-[var(--color-brand-primary)]/5 transition-all"
+                    >
+                      {data.columns.map((col) => (
+                        <td
+                          key={col}
+                          className="py-4 px-6 text-[var(--color-text)] font-mono text-[11px] max-w-[280px] truncate"
+                          title={String(row[col] ?? "—")}
+                        >
+                          {row[col] === null ? (
+                            <span className="opacity-30 italic">NULL</span>
+                          ) : (
+                            String(row[col])
+                          )}
+                        </td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <div className="flex flex-col items-center justify-center py-32 text-center">
+              <div className="w-20 h-20 rounded-full bg-[var(--color-surface)] flex items-center justify-center opacity-20 mb-6">
+                <Database size={40} />
+              </div>
+              <p className="font-bold text-[var(--color-text-muted)]">No records found in this table.</p>
+            </div>
+          )}
+
+          {/* Footer */}
+          {!loading && data.rows.length > 0 && (
+            <div className="border-t border-[var(--color-border)] p-6 flex flex-col md:flex-row items-center justify-between gap-6 bg-[var(--color-bg)]/30 backdrop-blur-md">
+              <div className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-widest">
+                Showing <span className="text-[var(--color-text)]">{(page - 1) * perPage + 1}</span> - <span className="text-[var(--color-text)]">{Math.min(page * perPage, filteredRows.length)}</span> of {filteredRows.length} Records
+              </div>
+
+              <div className="flex items-center gap-4">
+                <button
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                  disabled={page === 1}
+                  className="px-4 py-2 rounded-xl border border-[var(--color-border)] text-xs font-bold hover:bg-white dark:hover:bg-slate-800 disabled:opacity-30 disabled:cursor-not-allowed transition-all shadow-sm"
+                >
+                  Previous
+                </button>
+                <div className="text-xs font-bold text-[var(--color-text)] bg-slate-500/10 px-3 py-1.5 rounded-lg border border-slate-500/20">
+                  Page {page}
+                </div>
+                <button
+                  onClick={() => {
+                    if (page * perPage < filteredRows.length) {
+                      setPage((p) => p + 1);
+                    }
+                  }}
+                  disabled={page * perPage >= filteredRows.length}
+                  className="px-4 py-2 rounded-xl border border-[var(--color-border)] text-xs font-bold hover:bg-white dark:hover:bg-slate-800 disabled:opacity-30 disabled:cursor-not-allowed transition-all shadow-sm"
+                >
+                  Next
+                </button>
+
+                <select
+                  value={perPage}
+                  onChange={(e) => {
+                    setPerPage(Number(e.target.value));
+                    setPage(1);
+                  }}
+                  className="bg-[var(--color-bg)] border border-[var(--color-border)] rounded-xl px-3 py-2 text-xs font-bold outline-none focus:border-[var(--color-brand-primary)] cursor-pointer"
+                >
+                  <option value={10}>10 per page</option>
+                  <option value={25}>25 per page</option>
+                  <option value={50}>50 per page</option>
+                </select>
+              </div>
+            </div>
+          )}
         </motion.div>
-      )}
+
+        {/* Schema Info */}
+        {schema.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="p-8 rounded-[2.5rem] bg-slate-900/5 dark:bg-white/5 border border-[var(--color-border)] backdrop-blur-sm"
+          >
+            <h3 className="text-sm font-black uppercase tracking-widest text-[var(--color-text)] mb-6 flex items-center gap-2">
+              <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+              Table Schema Metadata
+            </h3>
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+              {schema.map((col) => (
+                <div key={col.column_name} className="p-3 rounded-2xl bg-white/50 dark:bg-black/20 border border-[var(--color-border)] shadow-sm">
+                  <p className="text-[10px] font-black text-[var(--color-brand-primary)] uppercase tracking-tighter mb-1 truncate" title={col.column_name}>
+                    {col.column_name}
+                  </p>
+                  <p className="text-[9px] font-mono font-bold text-[var(--color-text-muted)] uppercase opacity-60">
+                    {col.data_type}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </motion.div>
+        )}
+      </div>
     </div>
   );
 }

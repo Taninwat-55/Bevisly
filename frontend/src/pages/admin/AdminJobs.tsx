@@ -2,7 +2,7 @@ import { useEffect, useState, useMemo } from "react";
 import { getAllJobs, toggleFeaturedJob } from "@/lib/api/admin";
 import type { AdminJob } from "@/types/admin";
 import toast from "react-hot-toast";
-import { ArrowDownUp, Search, Star, Building, MapPin, Clock, FlaskConical } from "lucide-react";
+import { ArrowDownUp, Search, Star, Building, MapPin, Clock, FlaskConical, Briefcase } from "lucide-react";
 import { motion } from "framer-motion";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -94,209 +94,258 @@ export default function AdminJobs() {
     );
 
   return (
-    <div className="min-h-screen bg-[var(--color-bg)] text-[var(--color-text)] px-6 md:px-10 py-12 transition-colors font-sans">
+    <div className="min-h-screen bg-[var(--color-bg)] transition-colors pb-20">
 
-      {/* Header */}
-      <header className="mb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <div>
-          <h1 className="text-3xl font-bold font-display text-[var(--color-text)] mb-2">Job Listings</h1>
-          <p className="text-[var(--color-text-muted)]">Monitor job posts, feature roles, and status.</p>
-        </div>
-        <div className="flex items-center gap-2 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-xl p-1 shadow-sm">
-          <div className="px-4 py-2 rounded-lg bg-[var(--color-bg)] text-xs font-medium text-[var(--color-text-muted)]">
-            Active: <span className="text-[var(--color-text)] font-bold ml-1">{jobs.filter(j => j.status === 'open').length}</span>
+      {/* ── Fancy Banner / Header ── */}
+      <div className="relative pt-12 pb-24 px-8 bg-gradient-to-br from-slate-900 via-blue-900 to-slate-800 text-white shadow-2xl overflow-hidden rounded-b-[3rem] md:rounded-b-[4rem]">
+        <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 mix-blend-overlay" />
+        <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-blue-500/10 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/3 pointer-events-none" />
+        
+        <div className="relative z-10 max-w-6xl mx-auto">
+          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+            <div>
+              <motion.div
+                initial={{ scale: 0.8, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-blue-300 text-[10px] font-bold uppercase tracking-widest mb-6"
+              >
+                <Briefcase size={12} />
+                Job Oversight
+              </motion.div>
+              
+              <h1 className="text-4xl md:text-5xl font-bold font-display tracking-tight mb-4">
+                Listings Portal
+              </h1>
+              <p className="text-slate-300 max-w-2xl text-lg leading-relaxed">
+                Monitor active opportunities, feature high-impact roles, and maintain the quality 
+                of the Bevisly marketplace.
+              </p>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <div className="px-5 py-3 rounded-2xl bg-white/5 backdrop-blur-xl border border-white/10 flex items-center gap-4 shadow-2xl">
+                <div className="text-center">
+                  <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest leading-none mb-1">Open</p>
+                  <p className="text-lg font-bold text-white">{jobs.filter(j => j.status === 'open').length}</p>
+                </div>
+                <div className="w-px h-8 bg-white/10" />
+                <div className="text-center">
+                  <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest leading-none mb-1">Featured</p>
+                  <p className="text-lg font-bold text-yellow-400">{jobs.filter(j => j.featured).length}</p>
+                </div>
+              </div>
+            </div>
           </div>
-        </div>
-      </header>
-
-
-      {/* Controls Bar */}
-      <div className="glass-panel p-4 rounded-xl border border-[var(--color-border)] mb-6 flex flex-col xl:flex-row gap-4 items-center justify-between">
-
-        {/* Search */}
-        <div className="relative w-full xl:w-96">
-          <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)]" />
-          <input
-            type="text"
-            placeholder="Search jobs, companies..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full bg-[var(--color-bg)] border border-[var(--color-border)] rounded-lg pl-10 pr-4 py-2.5 text-sm focus:ring-2 focus:ring-[var(--color-brand-primary)]/20 focus:border-[var(--color-brand-primary)] outline-none transition-all"
-          />
-        </div>
-
-        {/* Filters */}
-        <div className="flex flex-wrap items-center gap-3 w-full xl:w-auto">
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value as typeof statusFilter)}
-            className="bg-[var(--color-bg)] border border-[var(--color-border)] rounded-lg px-4 py-2.5 text-sm outline-none focus:border-[var(--color-brand-primary)] cursor-pointer"
-          >
-            <option value="all">All Statuses</option>
-            <option value="open">Open</option>
-            <option value="closed">Closed</option>
-          </select>
-
-          <select
-            value={employerFilter}
-            onChange={(e) => setEmployerFilter(e.target.value)}
-            className="bg-[var(--color-bg)] border border-[var(--color-border)] rounded-lg px-4 py-2.5 text-sm outline-none focus:border-[var(--color-brand-primary)] cursor-pointer max-w-[200px]"
-          >
-            <option value="all">All Employers</option>
-            {uniqueEmployers.map(e => <option key={e} value={e}>{e}</option>)}
-          </select>
-
-          <button
-            onClick={() => setSortOrder(prev => prev === 'newest' ? 'oldest' : 'newest')}
-            className="flex items-center gap-2 px-4 py-2.5 bg-[var(--color-bg)] border border-[var(--color-border)] rounded-lg text-sm hover:bg-[var(--color-surface-hover)] transition"
-          >
-            <ArrowDownUp size={16} className="text-[var(--color-text-muted)]" />
-            {sortOrder === 'newest' ? 'Newest' : 'Oldest'}
-          </button>
-
-          <button
-            onClick={() => setDemoFilter(prev => !prev)}
-            className={`flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition border ${
-              demoFilter
-                ? 'bg-amber-500/10 border-amber-500/30 text-amber-600 dark:text-amber-400'
-                : 'bg-[var(--color-bg)] border-[var(--color-border)] text-[var(--color-text-muted)] hover:bg-[var(--color-surface-hover)]'
-            }`}
-          >
-            <FlaskConical size={16} />
-            Demo Only
-          </button>
         </div>
       </div>
 
-      {/* Table */}
-      <motion.div
-        initial={{ opacity: 0, y: 8 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="glass-panel border border-[var(--color-border)] rounded-2xl overflow-hidden shadow-sm"
-      >
-        <table className="w-full text-sm text-left">
-          <thead>
-            <tr className="bg-[var(--color-bg)] border-b border-[var(--color-border)]">
-              <th className="py-4 px-6 font-semibold text-[var(--color-text-muted)] uppercase text-xs tracking-wider">Job Details</th>
-              <th className="py-4 px-6 font-semibold text-[var(--color-text-muted)] uppercase text-xs tracking-wider">Status</th>
-              <th className="py-4 px-6 font-semibold text-[var(--color-text-muted)] uppercase text-xs tracking-wider text-center">Featured</th>
-              <th className="py-4 px-6 font-semibold text-[var(--color-text-muted)] uppercase text-xs tracking-wider text-right">Date</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-[var(--color-border)]/50">
-            {paginated.length ? (
-              paginated.map((j) => (
-                <tr key={j.id} className="group hover:bg-[var(--color-bg)]/50 transition-colors">
-                  <td className="py-4 px-6">
-                    <div className="flex flex-col gap-1">
-                      <div className="flex items-center gap-2">
-                        <span className="font-bold text-[var(--color-text)] text-base">{j.title}</span>
-                        {j.employer_email === 'demo@bevisly.com' && (
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 text-[10px] font-bold border border-amber-500/20 uppercase tracking-wider">
-                            <FlaskConical size={10} /> Demo
-                          </span>
-                        )}
-                      </div>
-                      <div className="flex items-center gap-3 text-xs text-[var(--color-text-muted)]">
-                        <span className="flex items-center gap-1"><Building size={12} /> {j.company || 'Unknown Company'}</span>
-                        <span className="flex items-center gap-1"><MapPin size={12} /> {j.location || 'Remote'}</span>
-                      </div>
-                      <div className="mt-1 text-xs text-[var(--color-brand-primary)] opacity-80">{j.employer_email}</div>
-                    </div>
-                  </td>
-
-                  <td className="py-4 px-6">
-                    <span
-                      className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-semibold border ${j.status === "open"
-                        ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/20"
-                        : "bg-slate-200 text-slate-600 border-slate-300 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700"
-                        }`}
-                    >
-                      <div className={`w-1.5 h-1.5 rounded-full ${j.status === 'open' ? 'bg-emerald-500 animate-pulse' : 'bg-slate-400'}`} />
-                      {j.status.toUpperCase()}
-                    </span>
-                  </td>
-
-                  <td className="py-4 px-6 text-center">
-                    {isDemoAdmin ? (
-                      <div
-                        className={`
-                            w-8 h-8 rounded-lg inline-flex items-center justify-center
-                            ${j.featured ? 'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/40 dark:text-yellow-400' : 'bg-[var(--color-bg)]/50 text-[var(--color-text-muted)]'}
-                         `}
-                        title="Featured toggle disabled in demo mode"
-                      >
-                        <Star size={16} fill={j.featured ? "currentColor" : "none"} />
-                      </div>
-                    ) : (
-                      <button
-                        onClick={async () => {
-                          try {
-                            await toggleFeaturedJob(j.id, !j.featured);
-                            toast.success(j.featured ? "Removed from featured" : "Added to featured ⭐");
-                            setJobs((prev) => prev.map((job) => job.id === j.id ? { ...job, featured: !j.featured } : job));
-                          } catch (err) {
-                            console.error(err);
-                            toast.error("Failed to update status");
-                          }
-                        }}
-                        className={`
-                            w-8 h-8 rounded-lg inline-flex items-center justify-center transition-all
-                            ${j.featured ? 'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/40 dark:text-yellow-400' : 'bg-[var(--color-bg)]/50 text-[var(--color-text-muted)] hover:bg-[var(--color-bg-hover)]'}
-                         `}
-                        title="Toggle Featured"
-                      >
-                        <Star size={16} fill={j.featured ? "currentColor" : "none"} />
-                      </button>
-                    )}
-                  </td>
-
-                  <td className="py-4 px-6 text-right">
-                    <div className="flex flex-col items-end gap-1 text-xs text-[var(--color-text-muted)]">
-                      <span className="flex items-center gap-1">
-                        <Clock size={12} />
-                        {new Date(j.created_at).toLocaleDateString()}
-                      </span>
-                    </div>
-                  </td>
-                </tr>
-              ))
-            ) : (
-              <tr>
-                <td colSpan={4} className="py-12 text-center text-[var(--color-text-muted)]">
-                  No jobs found.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-
-        {/* Pagination */}
-        {filteredJobs.length > 0 && (
-          <div className="border-t border-[var(--color-border)] p-4 flex flex-col md:flex-row items-center justify-between gap-4 bg-[var(--color-bg)]/30">
-            <div className="text-xs text-[var(--color-text-muted)]">
-              Showing <span className="font-medium text-[var(--color-text)]">{(page - 1) * perPage + 1}</span> to <span className="font-medium text-[var(--color-text)]">{Math.min(page * perPage, filteredJobs.length)}</span> of {filteredJobs.length} jobs
-            </div>
-
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => setPage(p => Math.max(1, p - 1))}
-                disabled={page === 1}
-                className="px-3 py-1.5 rounded-md border border-[var(--color-border)] text-xs font-medium hover:bg-[var(--color-surface)] disabled:opacity-50 disabled:hover:bg-transparent transition"
-              >
-                Previous
-              </button>
-              <button
-                onClick={() => setPage(p => Math.min(totalPages, p + 1))}
-                disabled={page >= totalPages}
-                className="px-3 py-1.5 rounded-md border border-[var(--color-border)] text-xs font-medium hover:bg-[var(--color-surface)] disabled:opacity-50 disabled:hover:bg-transparent transition"
-              >
-                Next
-              </button>
-            </div>
+      <div className="max-w-6xl mx-auto px-6 -mt-12 relative z-20 space-y-8">
+        
+        {/* Controls Bar */}
+        <div className="glass-panel p-4 rounded-[1.5rem] border border-[var(--color-border)] bg-white/50 dark:bg-slate-900/50 backdrop-blur-md shadow-xl flex flex-col xl:flex-row gap-4 items-center justify-between">
+          
+          {/* Search */}
+          <div className="relative w-full xl:w-96">
+            <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)]" />
+            <input
+              type="text"
+              placeholder="Search jobs, companies..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full bg-[var(--color-bg)]/50 border border-[var(--color-border)] rounded-xl pl-11 pr-4 py-3 text-sm focus:ring-4 focus:ring-[var(--color-brand-primary)]/10 focus:border-[var(--color-brand-primary)] outline-none transition-all font-medium"
+            />
           </div>
-        )}
-      </motion.div>
+
+          {/* Filters */}
+          <div className="flex flex-wrap items-center gap-3 w-full xl:w-auto">
+            <div className="flex items-center gap-2 p-1 bg-[var(--color-bg)]/50 border border-[var(--color-border)] rounded-xl">
+              <select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value as any)}
+                className="bg-transparent border-0 rounded-lg px-4 py-2 text-sm font-bold outline-none focus:ring-0 cursor-pointer text-[var(--color-text)]"
+              >
+                <option value="all">All Status</option>
+                <option value="open">Open</option>
+                <option value="closed">Closed</option>
+              </select>
+            </div>
+
+            <div className="flex items-center gap-2 p-1 bg-[var(--color-bg)]/50 border border-[var(--color-border)] rounded-xl">
+              <select
+                value={employerFilter}
+                onChange={(e) => setEmployerFilter(e.target.value)}
+                className="bg-transparent border-0 rounded-lg px-4 py-2 text-sm font-bold outline-none focus:ring-0 cursor-pointer text-[var(--color-text)] max-w-[160px]"
+              >
+                <option value="all">All Employers</option>
+                {uniqueEmployers.map(e => <option key={e} value={e}>{e}</option>)}
+              </select>
+            </div>
+
+            <button
+              onClick={() => setSortOrder(prev => prev === 'newest' ? 'oldest' : 'newest')}
+              className="flex items-center gap-2 px-5 py-3 bg-[var(--color-bg)]/50 border border-[var(--color-border)] rounded-xl text-sm font-bold hover:bg-[var(--color-surface-hover)] transition-all shadow-sm group"
+            >
+              <ArrowDownUp size={16} className="text-[var(--color-brand-primary)] group-hover:rotate-180 transition-transform" />
+              {sortOrder === 'newest' ? 'Newest' : 'Oldest'}
+            </button>
+
+            <button
+              onClick={() => setDemoFilter(prev => !prev)}
+              className={`flex items-center gap-2 px-5 py-3 rounded-xl text-sm font-bold transition-all border ${
+                demoFilter
+                  ? 'bg-amber-500/10 border-amber-500/30 text-amber-600 dark:text-amber-400 shadow-inner'
+                  : 'bg-[var(--color-bg)]/50 border-[var(--color-border)] text-[var(--color-text-muted)] hover:bg-[var(--color-surface-hover)]'
+              }`}
+            >
+              <FlaskConical size={16} className={demoFilter ? "animate-bounce" : ""} />
+              Demo Data
+            </button>
+          </div>
+        </div>
+
+        {/* Table */}
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="glass-panel border border-[var(--color-border)] rounded-[2rem] overflow-hidden shadow-2xl bg-white/30 dark:bg-slate-900/30 backdrop-blur-sm"
+        >
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm text-left">
+              <thead>
+                <tr className="bg-[var(--color-bg)]/50 border-b border-[var(--color-border)]">
+                  <th className="py-5 px-8 font-bold text-[var(--color-text-muted)] uppercase text-[10px] tracking-widest">Opportunity</th>
+                  <th className="py-5 px-6 font-bold text-[var(--color-text-muted)] uppercase text-[10px] tracking-widest">Status</th>
+                  <th className="py-5 px-6 font-bold text-[var(--color-text-muted)] uppercase text-[10px] tracking-widest text-center">Featured</th>
+                  <th className="py-5 px-8 font-bold text-[var(--color-text-muted)] uppercase text-[10px] tracking-widest text-right">Published</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-[var(--color-border)]/30">
+                {paginated.length ? (
+                  paginated.map((j) => (
+                    <tr key={j.id} className="group hover:bg-[var(--color-brand-primary)]/5 transition-all">
+                      <td className="py-6 px-8">
+                        <div className="flex flex-col gap-1.5">
+                          <div className="flex items-center gap-2">
+                            <span className="font-bold text-[var(--color-text)] text-lg group-hover:text-[var(--color-brand-primary)] transition-colors">{j.title}</span>
+                            {j.employer_email === 'demo@bevisly.com' && (
+                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400 text-[9px] font-black border border-amber-500/20 uppercase tracking-widest">
+                                <FlaskConical size={10} /> Demo
+                              </span>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-4 text-xs font-bold text-[var(--color-text-muted)]">
+                            <span className="flex items-center gap-1.5"><Building size={14} className="text-blue-500/60" /> {j.company || 'Private Employer'}</span>
+                            <span className="flex items-center gap-1.5"><MapPin size={14} className="text-red-500/60" /> {j.location || 'Remote'}</span>
+                          </div>
+                          <div className="text-[10px] font-mono text-[var(--color-brand-primary)]/70 uppercase tracking-tighter mt-1">{j.employer_email}</div>
+                        </div>
+                      </td>
+
+                      <td className="py-6 px-6">
+                        <span
+                          className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border shadow-sm ${j.status === "open"
+                            ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/20"
+                            : "bg-slate-100 text-slate-500 border-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700"
+                            }`}
+                        >
+                          <div className={`w-2 h-2 rounded-full ${j.status === 'open' ? 'bg-emerald-500 animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.5)]' : 'bg-slate-400'}`} />
+                          {j.status.toUpperCase()}
+                        </span>
+                      </td>
+
+                      <td className="py-6 px-6 text-center">
+                        {isDemoAdmin ? (
+                          <div
+                            className={`
+                                w-10 h-10 rounded-xl inline-flex items-center justify-center border shadow-inner transition-all
+                                ${j.featured 
+                                  ? 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20 shadow-yellow-500/10' 
+                                  : 'bg-[var(--color-bg)]/50 text-[var(--color-text-muted)] border-transparent'}
+                             `}
+                          >
+                            <Star size={18} fill={j.featured ? "currentColor" : "none"} />
+                          </div>
+                        ) : (
+                          <button
+                            onClick={async () => {
+                              try {
+                                await toggleFeaturedJob(j.id, !j.featured);
+                                toast.success(j.featured ? "Removed from featured" : "Added to featured ⭐");
+                                setJobs((prev) => prev.map((job) => job.id === j.id ? { ...job, featured: !j.featured } : job));
+                              } catch (err) {
+                                console.error(err);
+                                toast.error("Failed to update status");
+                              }
+                            }}
+                            className={`
+                                w-10 h-10 rounded-xl inline-flex items-center justify-center transition-all border
+                                ${j.featured 
+                                  ? 'bg-yellow-400 text-white border-yellow-400 shadow-glow-orange scale-110' 
+                                  : 'bg-[var(--color-bg)]/50 text-[var(--color-text-muted)] border-[var(--color-border)] hover:border-yellow-400 hover:text-yellow-500'}
+                             `}
+                          >
+                            <Star size={18} fill={j.featured ? "currentColor" : "none"} />
+                          </button>
+                        )}
+                      </td>
+
+                      <td className="py-6 px-8 text-right">
+                        <div className="flex flex-col items-end gap-1">
+                          <span className="flex items-center gap-1.5 text-xs font-bold text-[var(--color-text)]">
+                            <Clock size={14} className="text-[var(--color-text-muted)]" />
+                            {new Date(j.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
+                          </span>
+                          <span className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-tighter">System Verified</span>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan={4} className="py-24 text-center">
+                      <div className="flex flex-col items-center gap-4">
+                        <div className="w-16 h-16 rounded-full bg-[var(--color-surface)] flex items-center justify-center opacity-20">
+                          <Briefcase size={32} />
+                        </div>
+                        <p className="font-bold text-[var(--color-text-muted)]">No jobs found in the database.</p>
+                      </div>
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Pagination */}
+          {filteredJobs.length > 0 && (
+            <div className="border-t border-[var(--color-border)] p-6 flex flex-col md:flex-row items-center justify-between gap-6 bg-[var(--color-bg)]/30 backdrop-blur-md">
+              <div className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-widest">
+                Displaying <span className="text-[var(--color-text)]">{(page - 1) * perPage + 1}</span> - <span className="text-[var(--color-text)]">{Math.min(page * perPage, filteredJobs.length)}</span> of {filteredJobs.length} Positions
+              </div>
+
+              <div className="flex items-center gap-4">
+                <button
+                  onClick={() => setPage(p => Math.max(1, p - 1))}
+                  disabled={page === 1}
+                  className="px-4 py-2 rounded-xl border border-[var(--color-border)] text-xs font-bold hover:bg-white dark:hover:bg-slate-800 disabled:opacity-30 disabled:cursor-not-allowed transition-all shadow-sm"
+                >
+                  Previous
+                </button>
+                <div className="text-xs font-bold text-[var(--color-text)] bg-blue-500/10 px-3 py-1.5 rounded-lg border border-blue-500/20">
+                  {page} / {totalPages || 1}
+                </div>
+                <button
+                  onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                  disabled={page >= totalPages}
+                  className="px-4 py-2 rounded-xl border border-[var(--color-border)] text-xs font-bold hover:bg-white dark:hover:bg-slate-800 disabled:opacity-30 disabled:cursor-not-allowed transition-all shadow-sm"
+                >
+                  Next
+                </button>
+              </div>
+            </div>
+          )}
+        </motion.div>
+      </div>
     </div>
   );
 }

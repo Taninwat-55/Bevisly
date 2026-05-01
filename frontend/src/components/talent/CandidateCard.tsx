@@ -4,7 +4,7 @@ import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { ExternalLink, GripVertical, User, Mail, Star, FileText, MoreHorizontal } from "lucide-react";
 import toast from "react-hot-toast";
-import { updateHiringStage, sendRejectionFeedbackEmail } from "@/lib/api/submissions";
+import { updateHiringStage, sendRejectionFeedbackEmail, sendOfferEmail } from "@/lib/api/submissions";
 import type { EmployerSubmission, HiringStage } from "@/types";
 import NotesModal from "./NotesModal";
 import { useNavigate } from "react-router-dom";
@@ -13,6 +13,7 @@ const STAGES: { key: HiringStage; label: string; emoji: string }[] = [
   { key: "new", label: "New", emoji: "🆕" },
   { key: "shortlisted", label: "Shortlisted", emoji: "⭐" },
   { key: "interview", label: "Interview", emoji: "💬" },
+  { key: "offer_sent", label: "Offer Sent", emoji: "📨" },
   { key: "hold", label: "On Hold", emoji: "⏸" },
   { key: "hired", label: "Hired", emoji: "🎉" },
   { key: "rejected", label: "Rejected", emoji: "❌" },
@@ -90,7 +91,6 @@ function InnerCard({
       onUpdateSubmission?.(id, { hiring_stage: stage });
       toast.success(`Moved to ${stage}`);
       
-      // 📧 Auto-send feedback email when rejected
       if (stage === "rejected") {
         toast.promise(sendRejectionFeedbackEmail(id), {
           loading: "Sending rejection email...",
@@ -101,7 +101,18 @@ function InnerCard({
           error: "Failed to send rejection email",
         });
       }
-      
+
+      if (stage === "offer_sent") {
+        toast.promise(sendOfferEmail(id), {
+          loading: "Sending offer email...",
+          success: () => {
+            onUpdateSubmission?.(id, { offer_email_sent: true });
+            return "Offer email sent ✓";
+          },
+          error: "Failed to send offer email",
+        });
+      }
+
       setOpen(false);
     } catch {
       toast.error("Failed to move candidate");
@@ -191,7 +202,7 @@ function InnerCard({
         </span>
 
         <div className="flex items-center gap-1.5">
-          {submission.rejection_email_sent && (
+          {(submission.rejection_email_sent || submission.offer_email_sent) && (
             <span className="flex items-center gap-1 text-[10px] font-bold text-emerald-600 bg-emerald-50 dark:bg-emerald-950/30 px-1.5 py-0.5 rounded border border-emerald-200/50">
               <Mail size={10} /> Email sent
             </span>

@@ -132,28 +132,44 @@ Pre-launch polish pass and feature completion before outreach to startups/organi
 
 ## Pre-Launch Roadmap
 
-Features planned before sending cold emails to employers. Build in this order:
+Features planned before sending cold emails to employers. ✅ = shipped, ⬜ = pending.
 
-### 1. Practice Proofs (Candidate Cold-Start Fix)
-Candidates currently need an employer invite to prove any skills. Build a library of 5–10 AI-generated "Practice Proof" tasks (e.g. "Build a login form", "Write a marketing email") that any candidate can attempt immediately after signup. AI grades the submission instantly and the score counts toward Leaderboard ranking. Removes the empty-state problem for new candidates and creates immediate engagement.
+### ✅ Verified Skills from Proof Tasks (AI Skill Extraction)
+Skills from proof tasks rated ≥4★ are automatically extracted from `required_skills` and shown as Verified Skills on candidate profiles — visually distinct from self-claimed skills. Both candidate profile and public `/@:username` profile display the distinction.
+
+### ✅ Send Offer (Employer Flow Completion)
+Employers can currently move candidates to "Hired" but have no formal offer action. Add:
+- `offer_sent` hiring stage between Interview and Hired
+- Auto-send offer email to candidate on stage move (via `send-email` edge function)
+- `offer_email_sent` flag on submissions to prevent duplicates
+- Migration: `20260501010000_add_offer_email_sent_to_submissions.sql`
+
+### ✅ Verified Employer Badge (Candidate Trust Signal)
+Candidates see no trust indicator for employers. Add:
+- `is_verified` boolean on `profiles` table (default false, admin-settable)
+- Verified badge (✓) on `JobCard` and `JobDetailPage`
+- Migration: `20260501020000_add_is_verified_to_profiles.sql`
+
+### ✅ Application Status Tracker (Candidate-Side Pipeline View)
+Candidates experience a "resume black hole" — they submit and hear nothing. Build a visual step timeline on the candidate overview showing each active application's current stage: `Applied → Under Review → Shortlisted → Interview → Offer → Decision`. Derived from `submissions.hiring_stage` in real time.
+- `getCandidateApplications()` API function returning submissions + `hiring_stage` + job/company info
+- `ApplicationStatusTracker` component replacing the placeholder in `CandidateOverview.tsx`
+- Stage mapping: new/submitted → Under Review, shortlisted → Shortlisted, interview → Interview, offer_sent → Offer, hired/rejected → Decision
+
+### ⬜ Kanban Board → Sidebar (Navigation Improvement)
+Kanban stays job-scoped (no change to the board itself). Move the entry point to the sidebar:
+- Add "Talent Board" link in employer sidebar → `/employer/talent-board`
+- New page: job picker grid, click a job to open its existing Kanban
+- Removes the 2-click buried path through the dashboard
+
+### ⬜ Practice Proofs (Candidate Cold-Start Fix)
+Candidates currently need an employer invite to prove any skills. Build a library of 5–10 AI-generated "Practice Proof" tasks (e.g. "Build a login form", "Write a marketing email") that any candidate can attempt immediately after signup. AI grades the submission instantly and the score counts toward Leaderboard ranking.
 - New `practice_tasks` table (generic, not job-specific)
 - AI grading edge function (Gemini) — returns score + written feedback
 - Candidate dashboard entry point: "Practice & Improve"
 
-### 2. Transparent Application Status Tracker (Candidate-Side Kanban)
-Candidates experience a "resume black hole" — they submit and hear nothing. Build a pizza-tracker style timeline on the candidate dashboard showing their active applications: `Submitted → Under Review → Interview → Decision`. When the employer moves a candidate's card on their Talent Board (Kanban), the candidate's tracker updates in real time. Transparency is a key trust differentiator.
-- Read-only view for candidates derived from `submissions.hiring_stage`
-- Real-time updates via Supabase Realtime subscription
-- Visual step indicator component on candidate dashboard
-
-### 3. Verified Skills from Proof Tasks (AI Skill Extraction)
-When a candidate completes a Proof Task involving React, Tailwind, or Supabase, the AI should automatically extract and add those as "Verified Skills" on their profile — visually distinct from self-claimed skills. Separate: **Self-Claimed Skills** (anyone can add) vs **Verified Skills** (earned via a completed Proof Task, marked with a Bevisly checkmark).
-- New `verified_skills` column on `profiles` (or a separate `profile_skills` table with `source: 'self' | 'verified'`)
-- AI extraction step added to the feedback/grading flow
-- UI update on profile and public profile pages to distinguish the two
-
-### 4. Stripe Payment Integration
-Wire up Stripe before sending cold emails — a pricing page with no working checkout undermines credibility. Scope:
+### ⬜ Stripe Payment Integration
+Wire up Stripe before sending cold emails — a pricing page with no working checkout undermines credibility.
 - Stripe Checkout for subscription plans (Free / Pro)
 - Webhook → updates `profiles.subscription_tier` in Supabase on payment
 - "Manage Billing" button → Stripe Customer Portal

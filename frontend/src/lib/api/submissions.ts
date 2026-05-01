@@ -859,3 +859,147 @@ export async function sendRejectionFeedbackEmail(
     console.error("[RejectionEmail] Unexpected error:", err);
   }
 }
+
+export async function sendOfferEmail(submissionId: string): Promise<void> {
+  try {
+    const { data: submission, error: subErr } = await supabase
+      .from("submissions")
+      .select(
+        `
+        id,
+        offer_email_sent,
+        user_id,
+        job_id,
+        profiles:user_id ( full_name, email ),
+        jobs:job_id ( title, company )
+      `
+      )
+      .eq("id", submissionId)
+      .single();
+
+    if (subErr || !submission) {
+      console.warn("[OfferEmail] Could not fetch submission:", subErr);
+      return;
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    if ((submission as any).offer_email_sent) {
+      console.log("[OfferEmail] Already sent for submission:", submissionId);
+      return;
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const sub = submission as any;
+
+    const profile = Array.isArray(sub.profiles) ? sub.profiles[0] : sub.profiles;
+    const candidateEmail = profile?.email;
+    const candidateName = profile?.full_name || "there";
+
+    if (!candidateEmail) {
+      console.warn("[OfferEmail] No candidate email found — skipping.");
+      return;
+    }
+
+    const job = Array.isArray(sub.jobs) ? sub.jobs[0] : sub.jobs;
+    const jobTitle = job?.title || "this role";
+    const companyName = job?.company || "the company";
+
+    const escapeHtml = (str: string) =>
+      str
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+
+    const safeName = escapeHtml(candidateName);
+    const safeTitle = escapeHtml(jobTitle);
+    const safeCompany = escapeHtml(companyName);
+
+    const html = `
+      <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden;">
+        <div style="background: linear-gradient(135deg, #10b981, #3b82f6); padding: 28px 24px; text-align: center;">
+          <h1 style="color: white; margin: 0; font-size: 22px; font-weight: 700;">You've Got an Offer! 🎉</h1>
+        </div>
+        <div style="padding: 32px 28px; background-color: #ffffff;">
+          <p style="font-size: 16px; color: #1e293b; margin-bottom: 16px;">
+            Hi <strong>${safeName}</strong>,
+          </p>
+          <p style="font-size: 15px; color: #475569; line-height: 1.65;">
+            Congratulations! <strong>${safeCompany}</strong> has reviewed your proof submission for
+            <strong>${safeTitle}</strong> and would like to extend you an offer. You've been selected
+            for the role — the team will be in touch with you shortly to discuss next steps.
+          </p>
+
+          <div style="margin: 24px 0; padding: 20px; background-color: #f0fdf4; border-radius: 10px; border: 1px solid #bbf7d0;">
+            <p style="margin: 0; font-size: 14px; font-weight: 600; color: #15803d;">
+              Role: ${safeTitle}
+            </p>
+            <p style="margin: 8px 0 0; font-size: 14px; color: #166534;">
+              Company: ${safeCompany}
+            </p>
+          </div>
+
+          <p style="font-size: 15px; color: #475569; line-height: 1.65;">
+            Keep an eye on your inbox for further details. If you have any questions in the meantime,
+            don't hesitate to reach out.
+          </p>
+
+          <div style="text-align: center; margin: 28px 0;">
+            <a href="https://bevisly.com/candidate/proofs"
+               style="background: linear-gradient(135deg, #10b981, #3b82f6); color: white; padding: 12px 28px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 15px; display: inline-block;">
+               View Your Proof Portfolio
+            </a>
+          </div>
+
+          <p style="font-size: 13px; color: #cbd5e1; text-align: center; margin-top: 16px;">
+            &mdash; The Bevisly Team
+          </p>
+        </div>
+      </div>
+    `;
+
+    const { error: emailErr } = await supabase.functions.invoke("send-email", {
+      body: {
+        to: candidateEmail,
+        subject: `You've received an offer from ${companyName} 🎉`,
+        html,
+        reply_to: "bevislyapp@gmail.com",
+      },
+    });
+
+    if (emailErr) {
+      console.error("[OfferEmail] Edge function error:", emailErr);
+      return;
+    }
+
+    await supabase
+      .from("submissions")
+      .update({ offer_email_sent: true })
+      .eq("id", submissionId);
+
+    console.log(`[OfferEmail] Offer email sent to ${candidateEmail} for "${jobTitle}"`);
+  } catch (err) {
+    console.error("[OfferEmail] Unexpected error:", err);
+  }
+}
+
+export async function getCandidateApplications(userId: string) {
+  const { data, error } = await supabase
+    .from("submissions")
+    .select(`
+      id,
+      created_at,
+      hiring_stage,
+      status,
+      jobs:job_id ( id, title, company )
+    `)
+    .eq("user_id", userId)
+    .order("created_at", { ascending: false })
+    .limit(10);
+  if (error) throw error;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return (data ?? []).map((s: any) => ({
+    ...s,
+    jobs: Array.isArray(s.jobs) ? s.jobs[0] : s.jobs,
+  }));
+}

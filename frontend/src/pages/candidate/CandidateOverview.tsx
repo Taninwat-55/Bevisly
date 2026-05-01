@@ -2,8 +2,10 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useCandidateStats } from "@/hooks/useCandidateStats";
 import { getAllJobs } from "@/lib/api/jobs";
+import { getCandidateApplications } from "@/lib/api/submissions";
 import type { CandidateJob } from "@/types";
 import JobCard from "@/components/jobs/JobCard";
+import ApplicationStatusTracker from "@/components/candidate/ApplicationStatusTracker";
 import { Link } from "react-router-dom";
 import {
   Trophy,
@@ -20,12 +22,14 @@ export default function CandidateDashboard() {
   const { proofsCompleted, avgScore, jobsApplied, credits } = useCandidateStats();
   const [jobs, setJobs] = useState<CandidateJob[]>([]);
   const [loadingJobs, setLoadingJobs] = useState(true);
+  const [applications, setApplications] = useState<Awaited<ReturnType<typeof getCandidateApplications>>>([]);
+  const [loadingApplications, setLoadingApplications] = useState(true);
 
   useEffect(() => {
     const fetchJobs = async () => {
       try {
         const data = await getAllJobs();
-        setJobs(data.slice(0, 3)); // Top 3 recommended
+        setJobs(data.slice(0, 3));
       } catch (error) {
         console.error("Failed to fetch jobs", error);
       } finally {
@@ -34,6 +38,14 @@ export default function CandidateDashboard() {
     };
     fetchJobs();
   }, []);
+
+  useEffect(() => {
+    if (!user?.id) return;
+    getCandidateApplications(user.id)
+      .then(setApplications)
+      .catch(() => {})
+      .finally(() => setLoadingApplications(false));
+  }, [user?.id]);
 
   const displayName = user?.email?.split("@")[0] || "Candidate";
 
@@ -146,8 +158,30 @@ export default function CandidateDashboard() {
         )}
       </div>
 
-      {/* ── Recent Applications (Placeholder) ────────────────────────────── */}
-      {/* We can expand this later if we have an API for applications */}
+      {/* ── Your Applications ────────────────────────────── */}
+      {(loadingApplications || applications.length > 0) && (
+        <div>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-2xl font-bold font-display text-[var(--color-text)] flex items-center gap-2">
+              <TrendingUp className="text-[var(--color-brand-primary)]" size={24} />
+              Your Applications
+            </h2>
+            <Link to="/candidate/proofs" className="text-sm font-medium text-[var(--color-text-muted)] hover:text-[var(--color-brand-primary)] flex items-center gap-1 transition-colors">
+              View All <ArrowRight size={16} />
+            </Link>
+          </div>
+
+          {loadingApplications ? (
+            <div className="space-y-3">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="h-14 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)] animate-pulse" />
+              ))}
+            </div>
+          ) : (
+            <ApplicationStatusTracker applications={applications} />
+          )}
+        </div>
+      )}
 
     </div>
   );

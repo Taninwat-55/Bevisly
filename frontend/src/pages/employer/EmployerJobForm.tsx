@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import { createJobWithTasks } from "@/lib/api/jobs";
@@ -64,8 +64,14 @@ export default function EmployerJobForm({
 
 
   
+  // Sync company name into form state once the async hook resolves
+  useEffect(() => {
+    if (companyName && !values.company) {
+      setValues((prev) => ({ ...prev, company: companyName }));
+    }
+  }, [companyName]);
+
   const [loading, setLoading] = useState(false);
-  // const [generatingAI, setGeneratingAI] = useState(false); // REMOVED
   // Handlers
   const handleChange = (field: string, value: unknown) => {
     setValues((prev) => ({ ...prev, [field]: value }));

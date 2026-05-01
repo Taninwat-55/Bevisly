@@ -10,6 +10,7 @@ import {
   Package,
   Brain,
   Shield,
+  ShieldCheck,
   DollarSign,
   CheckCircle,
   X,
@@ -68,14 +69,21 @@ export default function JobDetailPage() {
         .select(`
           *,
           proof_tasks(*),
-          contact_person:profiles!employer_id(full_name, email)
+          contact_person:profiles!employer_id(full_name, email),
+          employer:profiles!jobs_employer_id_fkey(is_verified)
         `)
         .eq("id", id)
         .single();
 
       if (error) toast.error(error.message);
       else {
-        setJob(data as Job);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const raw = data as any;
+        const jobData: Job = {
+          ...raw,
+          employer_verified: raw.employer?.is_verified ?? false,
+        };
+        setJob(jobData);
         // Fetch company profile for About section
         if ((data as Job).company_id) {
           getCompanyProfile((data as Job).company_id!).then(setCompanyProfile).catch(() => {});
@@ -256,6 +264,12 @@ export default function JobDetailPage() {
               </h1>
               <div className="flex items-center gap-2 text-[var(--color-text-muted)]">
                 <span className="font-semibold text-[var(--color-brand-primary)]">{job.company || "Company"}</span>
+                {job.employer_verified && (
+                  <span title="Verified Employer" className="inline-flex items-center gap-0.5 text-xs font-medium text-blue-600 dark:text-blue-400">
+                    <ShieldCheck size={13} className="text-blue-500" />
+                    Verified
+                  </span>
+                )}
                 <span>•</span>
                 <span>{job.location || "Remote"}</span>
               </div>

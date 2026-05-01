@@ -1,7 +1,6 @@
 import { useEffect, useState, useMemo } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import {
-  Loader2,
   MessageCircle,
   Mail,
   Clock,
@@ -84,190 +83,208 @@ export default function AdminFeedbackMessages() {
 
   /* ─────────────────────────────── UI ─────────────────────────────── */
   return (
-    <div className="min-h-screen bg-[var(--color-bg)] text-[var(--color-text)] px-6 md:px-10 py-12 transition-colors">
-      {/* Header */}
-      <header className="mb-8 flex flex-col gap-2">
-        <h1 className="heading-lg flex items-center gap-2">
-          💬 Platform Feedback
-        </h1>
-        <p className="body-base text-[var(--color-text-muted)] max-w-2xl">
-          User-submitted feedback — including bug reports, suggestions, and
-          questions — collected from the in-app floating button.
-        </p>
-      </header>
+    <div className="min-h-screen bg-[var(--color-bg)] transition-colors pb-20">
 
-      {/* Summary */}
-      {!loading && summary.total > 0 && (
-        <motion.div
-          initial={{ opacity: 0, y: 6 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="flex flex-wrap items-center gap-4 mb-6 text-sm"
-        >
-          <div className="flex items-center gap-2 text-[var(--color-text-muted)]">
-            <BarChart2 size={16} />
-            <span>
-              <b className="text-[var(--color-text)]">{summary.total}</b> total
-              feedbacks
-            </span>
-          </div>
-
-          <div className="flex gap-2 flex-wrap">
-            {[
-              { key: "bug", label: "🐞", bg: "red" },
-              { key: "suggestion", label: "💡", bg: "yellow" },
-              { key: "question", label: "❓", bg: "blue" },
-              { key: "general", label: "💬", bg: "gray" },
-            ].map(({ key, label, bg }) => (
-              <button
-                key={key}
-                onClick={() =>
-                  setCategoryFilter(categoryFilter === key ? "all" : key)
-                }
-                className={`text-xs px-2 py-1 rounded-full font-medium cursor-pointer 
-                bg-${bg}-100 text-${bg}-800 dark:bg-${bg}-950/40 dark:text-${bg}-300
-                ${
-                  categoryFilter === key
-                    ? "ring-2 ring-[var(--color-candidate-dark)]"
-                    : ""
-                }`}
+      {/* ── Fancy Banner / Header ── */}
+      <div className="relative pt-12 pb-24 px-8 bg-gradient-to-br from-slate-900 via-teal-900 to-slate-800 text-white shadow-2xl overflow-hidden rounded-b-[3rem] md:rounded-b-[4rem]">
+        <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 mix-blend-overlay" />
+        <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-teal-500/10 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/3 pointer-events-none" />
+        
+        <div className="relative z-10 max-w-6xl mx-auto">
+          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+            <div>
+              <motion.div
+                initial={{ scale: 0.8, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-teal-300 text-[10px] font-bold uppercase tracking-widest mb-6"
               >
-                {label} {summary[key as keyof typeof summary]}
+                <MessageCircle size={12} />
+                User Sentiment
+              </motion.div>
+              
+              <h1 className="text-4xl md:text-5xl font-bold font-display tracking-tight mb-4">
+                Platform Feedback
+              </h1>
+              <p className="text-slate-300 max-w-2xl text-lg leading-relaxed">
+                Review direct feedback from the community. Track bugs, evaluate suggestions, 
+                and respond to user inquiries to improve the Bevisly experience.
+              </p>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <div className="px-5 py-3 rounded-2xl bg-white/5 backdrop-blur-xl border border-white/10 flex items-center gap-4 shadow-2xl">
+                <div className="text-center">
+                  <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest leading-none mb-1">Total</p>
+                  <p className="text-lg font-bold text-white">{messages.length}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="max-w-6xl mx-auto px-6 -mt-12 relative z-20 space-y-8">
+        
+        {/* Summary Category Cards */}
+        {!loading && summary.total > 0 && (
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {[
+              { key: "bug", label: "Bugs", icon: "🐞", color: "red", count: summary.bug },
+              { key: "suggestion", label: "Ideas", icon: "💡", color: "yellow", count: summary.suggestion },
+              { key: "question", label: "Queries", icon: "❓", color: "blue", count: summary.question },
+              { key: "general", label: "General", icon: "💬", color: "emerald", count: summary.general },
+            ].map((cat) => (
+              <button
+                key={cat.key}
+                onClick={() => setCategoryFilter(categoryFilter === cat.key ? "all" : cat.key)}
+                className={`
+                  relative group p-4 rounded-3xl border transition-all text-left overflow-hidden
+                  ${categoryFilter === cat.key 
+                    ? `bg-${cat.color}-500/10 border-${cat.color}-500 shadow-lg ring-2 ring-${cat.color}-500/20` 
+                    : 'bg-white/50 dark:bg-slate-900/50 border-[var(--color-border)] backdrop-blur-md hover:border-[var(--color-brand-primary)]/50'}
+                `}
+              >
+                <div className="relative z-10 flex flex-col gap-1">
+                  <span className="text-2xl mb-1">{cat.icon}</span>
+                  <span className={`text-[10px] font-black uppercase tracking-widest ${categoryFilter === cat.key ? `text-${cat.color}-600 dark:text-${cat.color}-400` : 'text-[var(--color-text-muted)]'}`}>
+                    {cat.label}
+                  </span>
+                  <span className="text-2xl font-black text-[var(--color-text)]">
+                    {cat.count}
+                  </span>
+                </div>
+                <div className={`absolute -right-2 -bottom-2 w-16 h-16 rounded-full blur-2xl opacity-10 bg-${cat.color}-500 group-hover:scale-150 transition-transform`} />
               </button>
             ))}
           </div>
-        </motion.div>
-      )}
+        )}
 
-      {/* Filters */}
-      <div className="flex flex-wrap items-center gap-3 mb-6">
-        <div className="relative flex-1 min-w-[240px]">
-          <Search
-            size={16}
-            className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)]"
-          />
-          <input
-            type="text"
-            placeholder="Search messages or emails..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full border border-[var(--color-border)] rounded-[var(--radius-button)] pl-8 pr-3 py-2 text-sm bg-[var(--color-surface)] focus:ring-1 focus:ring-[var(--color-candidate)]"
-          />
+        {/* Controls Bar */}
+        <div className="glass-panel p-4 rounded-[1.5rem] border border-[var(--color-border)] bg-white/50 dark:bg-slate-900/50 backdrop-blur-md shadow-xl flex flex-col md:flex-row gap-4 items-center justify-between">
+          
+          {/* Search */}
+          <div className="relative w-full md:w-96">
+            <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)]" />
+            <input
+              type="text"
+              placeholder="Search messages or emails..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full bg-[var(--color-bg)]/50 border border-[var(--color-border)] rounded-xl pl-11 pr-4 py-3 text-sm focus:ring-4 focus:ring-[var(--color-brand-primary)]/10 focus:border-[var(--color-brand-primary)] outline-none transition-all font-medium"
+            />
+          </div>
+
+          {/* Sort */}
+          <button
+            onClick={() => setSortOrder(prev => prev === 'newest' ? 'oldest' : 'newest')}
+            className="flex items-center gap-2 px-5 py-3 bg-[var(--color-bg)]/50 border border-[var(--color-border)] rounded-xl text-sm font-bold hover:bg-[var(--color-surface-hover)] transition-all shadow-sm group"
+          >
+            <ArrowDownUp size={16} className="text-[var(--color-brand-primary)] group-hover:rotate-180 transition-transform" />
+            {sortOrder === 'newest' ? 'Newest' : 'Oldest'}
+          </button>
         </div>
 
-        <button
-          onClick={() =>
-            setSortOrder(sortOrder === "newest" ? "oldest" : "newest")
-          }
-          className="flex items-center gap-1.5 border border-[var(--color-border)] rounded-[var(--radius-button)] px-3 py-2 text-sm bg-[var(--color-surface)] hover:bg-[var(--color-bg-hover)] transition"
-        >
-          <ArrowDownUp size={14} />
-          {sortOrder === "newest" ? "Newest First" : "Oldest First"}
-        </button>
+        {/* Loading State */}
+        {loading && (
+          <div className="flex flex-col items-center justify-center py-24 gap-4">
+            <div className="w-12 h-12 rounded-full border-4 border-teal-500 border-t-transparent animate-spin shadow-glow-blue" />
+            <p className="font-bold text-[var(--color-text-muted)] animate-pulse uppercase tracking-widest text-xs">Accessing feedback vault...</p>
+          </div>
+        )}
+
+        {/* Data Grid */}
+        {!loading && filteredMessages.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="glass-panel border border-[var(--color-border)] rounded-[2.5rem] overflow-hidden shadow-2xl bg-white/30 dark:bg-slate-900/30 backdrop-blur-sm"
+          >
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm text-left">
+                <thead>
+                  <tr className="bg-[var(--color-bg)]/50 border-b border-[var(--color-border)]">
+                    <th className="py-5 px-8 font-bold text-[var(--color-text-muted)] uppercase text-[10px] tracking-widest">Classification</th>
+                    <th className="py-5 px-6 font-bold text-[var(--color-text-muted)] uppercase text-[10px] tracking-widest">Message Content</th>
+                    <th className="py-5 px-6 font-bold text-[var(--color-text-muted)] uppercase text-[10px] tracking-widest">User / Origin</th>
+                    <th className="py-5 px-8 font-bold text-[var(--color-text-muted)] uppercase text-[10px] tracking-widest text-right">Timestamp</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-[var(--color-border)]/30">
+                  {filteredMessages.map((m) => (
+                    <tr key={m.id} className="group hover:bg-[var(--color-brand-primary)]/5 transition-all">
+                      <td className="py-6 px-8">
+                        <span className={`
+                          inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-sm border
+                          ${m.category === "bug"
+                            ? "bg-red-500/10 text-red-600 border-red-500/20"
+                            : m.category === "suggestion"
+                            ? "bg-yellow-500/10 text-yellow-700 dark:text-yellow-400 border-yellow-500/20"
+                            : m.category === "question"
+                            ? "bg-blue-500/10 text-blue-600 border-blue-500/20"
+                            : "bg-slate-500/10 text-slate-600 border-slate-500/20"}
+                        `}>
+                          <div className={`w-1.5 h-1.5 rounded-full ${
+                            m.category === 'bug' ? 'bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.5)]' : 
+                            m.category === 'suggestion' ? 'bg-yellow-500' : 
+                            m.category === 'question' ? 'bg-blue-500' : 'bg-slate-400'
+                          }`} />
+                          {m.category}
+                        </span>
+                      </td>
+                      <td className="py-6 px-6">
+                        <p className="text-sm text-[var(--color-text)] font-medium leading-relaxed max-w-md">
+                          {m.message}
+                        </p>
+                      </td>
+                      <td className="py-6 px-6">
+                        <div className="flex flex-col gap-1.5">
+                          <div className="flex items-center gap-2 text-xs font-bold text-[var(--color-text)]">
+                            <Mail size={14} className="text-teal-500/60" />
+                            <span className="truncate max-w-[180px]">{m.profiles?.email || "Anonymous contributor"}</span>
+                          </div>
+                          <div className="flex items-center gap-2 text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-tighter">
+                            <BarChart2 size={12} className="text-slate-400" />
+                            On: {m.page || "Global Interface"}
+                          </div>
+                        </div>
+                      </td>
+                      <td className="py-6 px-8 text-right">
+                        <div className="flex flex-col items-end gap-1">
+                           <span className="flex items-center gap-1.5 text-xs font-bold text-[var(--color-text)]">
+                            <Clock size={14} className="text-[var(--color-text-muted)]" />
+                            {m.created_at ? new Date(m.created_at).toLocaleDateString() : "Pending"}
+                          </span>
+                          <span className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-tighter">
+                             {m.created_at ? new Date(m.created_at).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' }) : ""}
+                          </span>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </motion.div>
+        )}
+
+        {/* Empty State */}
+        {!loading && filteredMessages.length === 0 && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="flex flex-col items-center justify-center py-32 text-center"
+          >
+            <div className="w-20 h-20 rounded-full bg-[var(--color-surface)] flex items-center justify-center opacity-20 mb-6">
+              <MessageCircle size={40} />
+            </div>
+            <h3 className="text-xl font-bold text-[var(--color-text)] mb-2">Silence is Golden</h3>
+            <p className="text-[var(--color-text-muted)] max-w-sm font-medium">
+              No feedback messages found matching your criteria. This usually means the system 
+              is running smoothly or filters are too restrictive.
+            </p>
+          </motion.div>
+        )}
       </div>
-
-      {/* Loading */}
-      {loading && (
-        <div className="flex flex-col items-center justify-center py-20 text-[var(--color-text-muted)]">
-          <Loader2 size={24} className="animate-spin mb-2" />
-          Loading feedback messages…
-        </div>
-      )}
-
-      {/* Table */}
-      {!loading && filteredMessages.length > 0 && (
-        <motion.div
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-card)] shadow-[var(--shadow-soft)] overflow-hidden transition-colors"
-        >
-          <table className="w-full text-sm text-left">
-            <thead className="bg-[color-mix(in srgb,var(--color-employer)10%,var(--color-surface))] border-b border-[var(--color-border)] sticky top-0 z-10">
-              <tr>
-                <th className="py-3 px-4 font-medium">Category</th>
-                <th className="py-3 px-4 font-medium">Message</th>
-                <th className="py-3 px-4 font-medium">User</th>
-                <th className="py-3 px-4 font-medium">Page</th>
-                <th className="py-3 px-4 font-medium">Date</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredMessages.map((m, i) => (
-                <tr
-                  key={m.id}
-                  className={`border-b border-[var(--color-border)] ${
-                    i % 2 === 0
-                      ? "bg-[color-mix(in srgb,var(--color-bg)95%,transparent)]"
-                      : ""
-                  } hover:bg-[var(--color-bg-hover)] transition`}
-                >
-                  <td className="py-3 px-4">
-                    <button
-                      onClick={() =>
-                        setCategoryFilter(
-                          categoryFilter === m.category
-                            ? "all"
-                            : m.category ?? "all"
-                        )
-                      }
-                      className={`text-xs px-2 py-1 rounded-full font-medium cursor-pointer ${
-                        m.category === "bug"
-                          ? "bg-red-100 text-red-700 dark:bg-red-950/40 dark:text-red-300"
-                          : m.category === "suggestion"
-                          ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-950/40 dark:text-yellow-300"
-                          : m.category === "question"
-                          ? "bg-blue-100 text-blue-800 dark:bg-blue-950/40 dark:text-blue-300"
-                          : "bg-gray-100 text-gray-700 dark:bg-gray-900 dark:text-gray-300"
-                      } ${
-                        categoryFilter === m.category
-                          ? "ring-2 ring-[var(--color-candidate-dark)]"
-                          : ""
-                      }`}
-                    >
-                      {m.category}
-                    </button>
-                  </td>
-                  <td className="py-3 px-4 text-[var(--color-text)] max-w-md truncate">
-                    {m.message}
-                  </td>
-                  <td className="py-3 px-4 text-[var(--color-text-muted)]">
-                    <div className="flex items-center gap-2">
-                      <Mail size={14} />
-                      {m.profiles?.email || "Anonymous"}
-                    </div>
-                  </td>
-                  <td className="py-3 px-4 text-[var(--color-text-muted)]">
-                    {m.page || "—"}
-                  </td>
-                  <td className="py-3 px-4 text-[var(--color-text-muted)] whitespace-nowrap">
-                    <div className="flex items-center gap-1">
-                      <Clock size={14} />
-                      {m.created_at
-                        ? new Date(m.created_at).toLocaleString()
-                        : "—"}
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </motion.div>
-      )}
-
-      {/* Empty */}
-      {!loading && filteredMessages.length === 0 && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="flex flex-col items-center justify-center py-20 text-center text-[var(--color-text-muted)]"
-        >
-          <MessageCircle size={28} className="mb-3 opacity-60" />
-          <p className="text-base font-medium">No feedback found.</p>
-          <p className="text-sm max-w-sm">
-            Try adjusting your filters or check again later once users submit
-            more feedback.
-          </p>
-        </motion.div>
-      )}
     </div>
   );
 }

@@ -10,7 +10,7 @@ import {
   rectIntersection,
   type CollisionDetection,
 } from "@dnd-kit/core";
-import { updateHiringStage, sendRejectionFeedbackEmail } from "@/lib/api/submissions";
+import { updateHiringStage, sendRejectionFeedbackEmail, sendOfferEmail } from "@/lib/api/submissions";
 import toast from "react-hot-toast";
 import type { EmployerSubmission, HiringStage } from "@/types";
 import StageColumn from "./StageColumn";
@@ -21,6 +21,7 @@ const STAGES: { key: HiringStage; label: string; emoji: string }[] = [
   { key: "new", label: "New", emoji: "🆕" },
   { key: "shortlisted", label: "Shortlisted", emoji: "⭐" },
   { key: "interview", label: "Interview", emoji: "💬" },
+  { key: "offer_sent", label: "Offer Sent", emoji: "📨" },
   { key: "hold", label: "On Hold", emoji: "⏸" },
   { key: "hired", label: "Hired", emoji: "🎉" },
   { key: "rejected", label: "Rejected", emoji: "❌" },
@@ -61,6 +62,7 @@ export default function TalentBoard({
       new: [],
       shortlisted: [],
       interview: [],
+      offer_sent: [],
       hold: [],
       hired: [],
       rejected: [],
@@ -111,7 +113,6 @@ export default function TalentBoard({
       );
       toast.success(`Moved to ${destinationStage}`);
 
-      // 📧 Auto-send feedback email when rejected
       if (destinationStage === "rejected") {
         toast.promise(sendRejectionFeedbackEmail(activeId), {
           loading: "Sending rejection email...",
@@ -120,6 +121,17 @@ export default function TalentBoard({
             return "Rejection email sent ✓";
           },
           error: "Failed to send rejection email",
+        });
+      }
+
+      if (destinationStage === "offer_sent") {
+        toast.promise(sendOfferEmail(activeId), {
+          loading: "Sending offer email...",
+          success: () => {
+            handleUpdateSubmission(activeId, { offer_email_sent: true });
+            return "Offer email sent ✓";
+          },
+          error: "Failed to send offer email",
         });
       }
     } catch {
