@@ -13,6 +13,9 @@ export default function FeedbackButton() {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
 
+  // 🔒 Safeguard: Only show feedback button to authenticated users
+  if (!user) return null;
+
   const categories = [
     { id: "general", label: "General", icon: <MessageCircle size={14} />, color: "text-blue-500" },
     { id: "bug", label: "Bug Report", icon: <Bug size={14} />, color: "text-red-500" },

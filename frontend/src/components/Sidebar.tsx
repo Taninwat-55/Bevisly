@@ -12,7 +12,8 @@ import {
   House,
   ChevronLeft,
   ChevronRight,
-  LogOut
+  LogOut,
+  MessageCircle
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -69,6 +70,11 @@ export default function Sidebar({ role }: SidebarProps) {
             to: "/admin/jobs",
             label: "Jobs Overview",
             icon: <Briefcase size={17} />,
+          },
+          {
+            to: "/admin/feedback-messages",
+            label: "Platform Feedback",
+            icon: <MessageCircle size={17} />,
           },
         ]
         : [

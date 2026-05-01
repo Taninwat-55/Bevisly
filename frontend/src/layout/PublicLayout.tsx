@@ -1,7 +1,6 @@
 import Navbar from "@/components/Navbar";
 import LandingFooter from "@/components/landing/LandingFooter";
 import ScrollToTop from "@/components/common/ScrollToTop";
-import FeedbackButton from "@/components/common/FeedbackButton";
 import { Outlet } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import CookieConsent from "@/components/common/CookieConsent";
@@ -28,7 +27,6 @@ export default function PublicLayout() {
 
       <CookieConsent />
       <LandingFooter />
-      <FeedbackButton />
     </div>
   );
 }

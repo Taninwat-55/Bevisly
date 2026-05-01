@@ -1,6 +1,7 @@
 import Sidebar from "@/components/Sidebar";
 import { Outlet } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
+import FeedbackButton from "@/components/common/FeedbackButton";
 
 export default function AdminLayout() {
   return (
@@ -24,6 +25,7 @@ export default function AdminLayout() {
           </motion.main>
         </AnimatePresence>
       </div>
+      <FeedbackButton />
     </div>
   );
 }

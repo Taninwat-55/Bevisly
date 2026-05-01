@@ -24,6 +24,7 @@ import { ThemeToggle } from "@/components/ui/ThemeToggle";
 import { getEmployerJobs, getEmployerSubmissionsWithFeedback } from "@/lib/api";
 import type { EmployerJob, EmployerSubmission } from "@/types";
 import ContactModal from "@/components/common/ContactModal";
+import FeedbackButton from "@/components/common/FeedbackButton";
 
 interface DashboardLayoutProps {
   children: ReactNode;
@@ -507,6 +508,7 @@ export default function DashboardLayout({
         isOpen={isContactOpen}
         onClose={() => setIsContactOpen(false)}
       />
+      <FeedbackButton />
     </div>
   );
 }
