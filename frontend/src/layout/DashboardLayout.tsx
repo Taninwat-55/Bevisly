@@ -89,7 +89,15 @@ export default function DashboardLayout({
     navigate("/");
   };
 
-  const links =
+  interface NavItem {
+    label: string;
+    path: string;
+    icon: any;
+    badge?: number;
+    featured?: boolean;
+  }
+
+  const links: NavItem[] =
     role === "employer"
       ? [
           { label: "Dashboard", path: "/employer", icon: LayoutDashboard },
@@ -298,7 +306,7 @@ export default function DashboardLayout({
             {links.map((link) => {
               const isActive = location.pathname === link.path;
               const Icon = link.icon;
-              const isFeatured = (link as { featured?: boolean }).featured;
+              const isFeatured = link.featured;
 
               return (
                 <Link
