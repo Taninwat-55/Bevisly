@@ -6,19 +6,21 @@ import { getCandidateApplications } from "@/lib/api/submissions";
 import type { CandidateJob } from "@/types";
 import JobCard from "@/components/jobs/JobCard";
 import ApplicationStatusTracker from "@/components/candidate/ApplicationStatusTracker";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
   Trophy,
   Target,
   Briefcase,
   TrendingUp,
-  ArrowRight
+  ArrowRight,
+  Zap,
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import WelcomeBanner from "@/components/common/WelcomeBanner";
 
 export default function CandidateDashboard() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const { proofsCompleted, avgScore, jobsApplied, credits } = useCandidateStats();
   const [jobs, setJobs] = useState<CandidateJob[]>([]);
   const [loadingJobs, setLoadingJobs] = useState(true);
@@ -57,6 +59,25 @@ export default function CandidateDashboard() {
         role="candidate"
         userName={displayName}
       />
+
+      {/* ── Practice & Improve Banner ────────────────────────────── */}
+      <div className="flex items-center justify-between gap-4 rounded-2xl border border-[var(--color-brand-primary)]/30 bg-[var(--color-brand-primary)]/5 px-6 py-4">
+        <div className="flex items-center gap-3">
+          <div className="p-2 rounded-lg bg-[var(--color-brand-primary)]/15 text-[var(--color-brand-primary)]">
+            <Zap size={18} />
+          </div>
+          <div>
+            <p className="text-sm font-semibold text-[var(--color-text)]">Practice & Improve</p>
+            <p className="text-xs text-[var(--color-text-muted)]">Complete AI-graded challenges and earn credits instantly</p>
+          </div>
+        </div>
+        <button
+          onClick={() => navigate("/candidate/practice")}
+          className="shrink-0 px-4 py-2 rounded-xl bg-[var(--color-brand-primary)] text-white text-sm font-semibold hover:bg-[var(--color-brand-primary)]/90 transition-colors whitespace-nowrap"
+        >
+          Start Practicing →
+        </button>
+      </div>
 
       {/* ── Hero Section ────────────────────────────── */}
       <div className="relative group overflow-hidden rounded-3xl p-8 lg:p-10 border border-[var(--color-border)] bg-[var(--color-surface)] shadow-2xl">

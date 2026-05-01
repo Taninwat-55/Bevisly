@@ -13,6 +13,8 @@ import CandidateLayout from "@/layout/CandidateLayout";
 import CandidateUnifiedDashboard from "@/pages/candidate/CandidateUnifiedDashboard";
 import CandidateProofWorkspace from "@/pages/candidate/CandidateProofWorkspace";
 import CandidateFeedbackView from "@/pages/candidate/CandidateFeedbackView";
+import PracticeTasksPage from "@/pages/candidate/PracticeTasksPage";
+import PracticeWorkspace from "@/pages/candidate/PracticeWorkspace";
 
 // --- Employer pages
 
@@ -85,6 +87,8 @@ export const router = createBrowserRouter([
           { path: "job/:id", element: <JobDetailPage /> },
           { path: "proof/:id", element: <CandidateProofWorkspace /> },
           { path: "proofs", element: <CandidateFeedbackView /> },
+          { path: "practice", element: <PracticeTasksPage /> },
+          { path: "practice/:id", element: <PracticeWorkspace /> },
           { path: "settings", element: <UserSettings /> },
         ],
       },

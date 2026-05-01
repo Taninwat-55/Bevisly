@@ -15,6 +15,7 @@ import {
   LogOut,
   MessageCircle,
   Database,
+  Zap,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -87,6 +88,11 @@ export default function Sidebar({ role }: SidebarProps) {
             to: "/candidate/proofs",
             label: "My Proofs",
             icon: <FileText size={17} />,
+          },
+          {
+            to: "/candidate/practice",
+            label: "Practice",
+            icon: <Zap size={17} />,
           },
         ];
 

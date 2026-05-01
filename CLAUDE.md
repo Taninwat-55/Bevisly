@@ -162,7 +162,7 @@ Kanban stays job-scoped (no change to the board itself). Move the entry point to
 - New page: job picker grid, click a job to open its existing Kanban
 - Removes the 2-click buried path through the dashboard
 
-### ⬜ Practice Proofs (Candidate Cold-Start Fix)
+### ✅ Practice Proofs (Candidate Cold-Start Fix)
 Candidates currently need an employer invite to prove any skills. Build a library of 5–10 AI-generated "Practice Proof" tasks (e.g. "Build a login form", "Write a marketing email") that any candidate can attempt immediately after signup. AI grades the submission instantly and the score counts toward Leaderboard ranking.
 - New `practice_tasks` table (generic, not job-specific)
 - AI grading edge function (Gemini) — returns score + written feedback
