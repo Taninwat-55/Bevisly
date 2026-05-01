@@ -45,7 +45,6 @@ export function useProofs() {
       setLoading(false);
     };
     load();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.id]);
 
   const toggleProofPublic = async (submissionId: string, currentStatus: boolean) => {

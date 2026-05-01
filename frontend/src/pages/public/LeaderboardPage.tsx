@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/lib/supabaseClient";
-import { Loader2, Trophy, Medal, Crown, Star, ArrowLeft } from "lucide-react";
+import { Loader2, Trophy, Medal, Star } from "lucide-react";
 import BackButton from "@/components/common/BackButton";
 import { motion } from "framer-motion";
 
@@ -81,7 +81,6 @@ export default function PublicLeaderboard() {
           {topThree.map((user, index) => {
             const isFirst = index === 0;
             const isSecond = index === 1;
-            const isThird = index === 2;
             
             return (
               <motion.div

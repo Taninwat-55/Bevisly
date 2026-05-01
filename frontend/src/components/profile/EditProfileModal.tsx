@@ -65,7 +65,7 @@ export default function EditProfileModal({
     setLinkedin(currentLinkedin || "");
     setGithub(currentGithub || "");
     setWebsite(currentWebsite || "");
-  }, [currentName, currentAvatarUrl, currentSkills, currentWorkStatus, currentBio, currentLinkedin, currentGithub, currentWebsite, isOpen]);
+  }, [currentName, currentAvatarUrl, currentSkills, currentLanguages, currentWorkStatus, currentBio, currentLinkedin, currentGithub, currentWebsite, isOpen]);
 
   const handleAvatarUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];

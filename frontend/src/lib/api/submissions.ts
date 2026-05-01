@@ -504,13 +504,27 @@ export async function checkFastPass(
   let bestMatch: FastPassMatch | null = null;
   let bestScore = 0;
 
-  for (const sub of data as any[]) {
+  interface SubmissionWithDetails {
+    id: string;
+    proof_task_id: string | null;
+    submission_link: string | null;
+    file_url: string | null;
+    text_response: string | null;
+    reflection: string | null;
+    video_url: string | null;
+    resume_url: string | null;
+    jobs: { id: string; title: string } | { id: string; title: string }[] | null;
+    proof_tasks: { id: string; title: string } | { id: string; title: string }[] | null;
+    feedback: { stars: number } | { stars: number }[] | null;
+  }
+
+  for (const sub of (data as unknown as SubmissionWithDetails[])) {
     const feedbacks = Array.isArray(sub.feedback)
       ? sub.feedback
       : sub.feedback
         ? [sub.feedback]
         : [];
-    const maxStars = Math.max(0, ...feedbacks.map((f: any) => f?.stars ?? 0));
+    const maxStars = Math.max(0, ...feedbacks.map((f) => f?.stars ?? 0));
 
     if (maxStars < 4) continue;
 
