@@ -10,24 +10,15 @@ type RouteLink = { label: string; to: string; href?: never };
 type AnchorLink = { label: string; href: string; to?: never };
 type NavLink = RouteLink | AnchorLink;
 
-const landingPillLinks: NavLink[] = [
-  { label: "For Candidates", to: "/learn-more?mode=candidate" },
-  { label: "For Employers", to: "/learn-more?mode=employer" },
-  { label: "Pricing", href: "#pricing" },
-];
-
-const publicLinks: RouteLink[] = [
+const navLinks: NavLink[] = [
+  { label: "Candidates", to: "/learn-more?mode=candidate" },
+  { label: "Employers", to: "/learn-more?mode=employer" },
   { label: "Jobs", to: "/jobs" },
   { label: "About", to: "/about" },
-];
-
-const mobileLinks: NavLink[] = [
-  { label: "For Candidates", to: "/learn-more?mode=candidate" },
-  { label: "For Employers", to: "/learn-more?mode=employer" },
   { label: "Pricing", href: "/#pricing" },
-  { label: "Jobs", to: "/jobs" },
-  { label: "About", to: "/about" },
 ];
+
+const mobileLinks: NavLink[] = navLinks;
 
 export default function Navbar() {
   const navigate = useNavigate();
@@ -110,57 +101,38 @@ export default function Navbar() {
 
           {/* ─── Center: Nav ─── */}
           <nav className="hidden md:flex justify-center items-center">
-            {isLanding ? (
-              /* ── Floating Pill ── */
-              <div
-                className={`flex items-center gap-1 px-2 py-1.5 rounded-full bg-[var(--color-surface)]/80 backdrop-blur-md border transition-all duration-300 ${
-                  scrolled
-                    ? "border-[var(--color-border)] shadow-md"
-                    : "border-[var(--color-border)]/60 shadow-sm"
-                }`}
-              >
-                {landingPillLinks.map((link) =>
-                  link.href !== undefined ? (
-                    <a
-                      key={link.label}
-                      href={link.href}
-                      className="px-4 py-2 rounded-full text-sm font-medium text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[var(--color-brand-primary)]/10 transition-all duration-200"
-                    >
-                      {link.label}
-                    </a>
-                  ) : (
-                    <Link
-                      key={link.label}
-                      to={link.to}
-                      className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
-                        isActiveRoute(link.to)
-                          ? "bg-[var(--color-brand-primary)]/15 text-[var(--color-brand-primary)]"
-                          : "text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[var(--color-brand-primary)]/10"
-                      }`}
-                    >
-                      {link.label}
-                    </Link>
-                  )
-                )}
-              </div>
-            ) : (
-              /* ── Plain links (public pages) ── */
-              <div className="flex items-center gap-8">
-                {publicLinks.map(({ label, to }) => (
+            {/* ── Floating Pill ── */}
+            <div
+              className={`flex items-center gap-1 px-2 py-1.5 rounded-full bg-[var(--color-surface)]/80 backdrop-blur-md border transition-all duration-300 ${
+                scrolled
+                  ? "border-[var(--color-border)] shadow-md"
+                  : "border-[var(--color-border)]/60 shadow-sm"
+              }`}
+            >
+              {navLinks.map((link) =>
+                link.href !== undefined ? (
+                  <a
+                    key={link.label}
+                    href={link.href}
+                    className="px-4 py-2 rounded-full text-sm font-medium text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[var(--color-brand-primary)]/10 transition-all duration-200"
+                  >
+                    {link.label}
+                  </a>
+                ) : (
                   <Link
-                    key={to}
-                    to={to}
-                    className={`text-sm font-medium transition-colors duration-200 ${
-                      location.pathname === to
-                        ? "text-[var(--color-brand-primary)]"
-                        : "text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
+                    key={link.label}
+                    to={link.to}
+                    className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
+                      isActiveRoute(link.to)
+                        ? "bg-[var(--color-brand-primary)]/15 text-[var(--color-brand-primary)]"
+                        : "text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[var(--color-brand-primary)]/10"
                     }`}
                   >
-                    {label}
+                    {link.label}
                   </Link>
-                ))}
-              </div>
-            )}
+                )
+              )}
+            </div>
           </nav>
 
           {/* ─── Right: Theme + Auth ─── */}
