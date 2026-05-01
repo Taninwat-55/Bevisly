@@ -1,6 +1,6 @@
 import { useEffect, useState, useMemo } from "react";
 import { createPortal } from "react-dom";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import toast from "react-hot-toast";
 import {
   getEmployerJobs,
@@ -44,10 +44,10 @@ import WelcomeBanner from "@/components/common/WelcomeBanner";
 import SuccessCelebration from "@/components/common/SuccessCelebration";
 import type { ProofTask } from "@/types";
 import { AnimatePresence, motion } from "framer-motion";
+import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 
 export default function EmployerDashboard() {
   const { user } = useAuth();
-  const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
 
   // Data State
@@ -62,6 +62,8 @@ export default function EmployerDashboard() {
   const [selectedJobId, setSelectedJobId] = useState<string | null>(null);
   const [selectedSubmissionId, setSelectedSubmissionId] = useState<string | null>(null);
   const [showJobActions, setShowJobActions] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [isEditingJob, setIsEditingJob] = useState(false);
   const [editJobData, setEditJobData] = useState<Partial<EmployerJob & { proof_tasks: ProofTask[] }> | null>(null);
   const [editJobLoading, setEditJobLoading] = useState(false);
@@ -121,7 +123,8 @@ export default function EmployerDashboard() {
   };
 
   const handleDeleteJob = async () => {
-    if (!selectedJobId || !confirm("Are you sure you want to delete this job? This cannot be undone.")) return;
+    if (!selectedJobId) return;
+    setIsDeleting(true);
     try {
         await withTimeout(
           deleteJob(selectedJobId),
@@ -133,10 +136,13 @@ export default function EmployerDashboard() {
         setJobs(jobs.filter(j => j.id !== selectedJobId));
         setSelectedJobId(null);
         setActiveView("overview");
+        setConfirmDelete(false);
     } catch (error: unknown) {
         toast.dismiss("timeout-warning");
         console.error(error);
         toast.error(getErrorMessage(error, "Failed to delete job"));
+    } finally {
+        setIsDeleting(false);
     }
   };
 
@@ -293,14 +299,14 @@ export default function EmployerDashboard() {
                                     <Archive size={14} /> Close Job
                                 </button>
                                 <button
-                                    onClick={() => navigate(`/jobs/${selectedJobId}`)}
+                                    onClick={() => window.open(`/jobs/${selectedJobId}`, '_blank')}
                                     className="w-full text-left px-4 py-2.5 text-sm hover:bg-[var(--color-surface-hover)] flex items-center gap-2 text-[var(--color-text)] transition-colors"
                                 >
                                     <Users size={14} /> View Public Page
                                 </button>
                                 <div className="h-px bg-[var(--color-border)] my-1" />
                                 <button
-                                    onClick={handleDeleteJob}
+                                    onClick={() => { setShowJobActions(false); setConfirmDelete(true); }}
                                     className="w-full text-left px-4 py-2.5 text-sm hover:bg-red-50 dark:hover:bg-red-900/10 text-red-500 flex items-center gap-2 transition-colors"
                                 >
                                     <Trash2 size={14} /> Delete Job
@@ -624,20 +630,7 @@ export default function EmployerDashboard() {
                       variant="ghost"
                       size="sm"
                       className="text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/10"
-                      onClick={async () => {
-                        if (!selectedJobId || !confirm("Are you sure you want to delete this job?")) return;
-                        try {
-                          await deleteJob(selectedJobId);
-                          toast.success("Job deleted");
-                          setJobs(jobs.filter(j => j.id !== selectedJobId));
-                          setSelectedJobId(null);
-                          setActiveView("overview");
-                          setIsEditingJob(false);
-                          setEditJobData(null);
-                        } catch {
-                          toast.error("Failed to delete job");
-                        }
-                      }}
+                      onClick={() => { setIsEditingJob(false); setConfirmDelete(true); }}
                     >
                       Delete Job
                     </Button>
@@ -721,6 +714,19 @@ export default function EmployerDashboard() {
         </AnimatePresence>,
         document.body
       )}
+
+      {/* Delete Job Confirmation */}
+      <ConfirmDialog
+        open={confirmDelete}
+        title="Delete this job?"
+        message="This will permanently remove the job listing and all associated candidate submissions. This cannot be undone."
+        confirmLabel="Delete Job"
+        cancelLabel="Keep It"
+        variant="danger"
+        isLoading={isDeleting}
+        onConfirm={handleDeleteJob}
+        onCancel={() => setConfirmDelete(false)}
+      />
 
       {/* Success Celebration Overlay */}
       <SuccessCelebration
