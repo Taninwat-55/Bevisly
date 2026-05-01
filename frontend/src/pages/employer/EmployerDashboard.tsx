@@ -370,7 +370,7 @@ export default function EmployerDashboard() {
                           setIsPostingJob(true);
                         }}
                         size="lg"
-                        className="bg-gradient-to-br from-indigo-600 to-blue-500 hover:from-indigo-500 hover:to-blue-400 border-0 text-white font-bold"
+                        className="bg-gradient-to-br from-[var(--color-brand-primary)] to-blue-400 hover:from-blue-500 hover:to-blue-300 border-0 text-white font-bold"
                         leftIcon={<Plus size={18} strokeWidth={3} />}
                       >
                         Post a Job
@@ -436,7 +436,7 @@ export default function EmployerDashboard() {
                                 setIsPostingJob(true);
                             }}
                             size="lg"
-                            className="bg-gradient-to-br from-indigo-600 to-blue-500 hover:from-indigo-500 hover:to-blue-400 border-0 text-white font-bold"
+                            className="bg-gradient-to-br from-[var(--color-brand-primary)] to-blue-400 hover:from-blue-500 hover:to-blue-300 border-0 text-white font-bold"
                             leftIcon={<Plus size={18} strokeWidth={3} />}
                         >
                             Post Your First Role
@@ -509,7 +509,7 @@ export default function EmployerDashboard() {
                         onClick={() => setPostJobCreationMode("ai")}
                         className="group relative flex items-start gap-5 p-6 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] hover:border-[var(--color-brand-primary)] hover:shadow-xl hover:shadow-[var(--color-brand-primary)]/5 transition-all text-left"
                       >
-                        <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-indigo-600 to-blue-500 flex items-center justify-center text-white shrink-0 shadow-lg group-hover:scale-110 transition-transform">
+                        <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-[var(--color-brand-primary)] to-blue-400 flex items-center justify-center text-white shrink-0 shadow-lg group-hover:scale-110 transition-transform">
                           <Sparkles size={28} />
                         </div>
                         <div className="flex-1 min-w-0">

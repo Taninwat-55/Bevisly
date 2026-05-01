@@ -64,7 +64,7 @@ export default function EmployerJobIntentForm({
        </div>
 
        <div className="text-center mb-6">
-          <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-gradient-to-br from-purple-500 to-blue-600 shadow-lg shadow-purple-500/30 mb-4 group">
+          <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-gradient-to-br from-[var(--color-brand-primary)] to-blue-400 shadow-lg shadow-blue-500/30 mb-4 group">
             <Sparkles className="w-6 h-6 text-white group-hover:scale-110 transition-transform duration-500" />
           </div>
           <h2 className="text-2xl font-bold text-white mb-1 font-display">Let AI build your job post</h2>
@@ -79,7 +79,7 @@ export default function EmployerJobIntentForm({
               value={rawInput}
               onChange={(e) => setRawInput(e.target.value)}
               placeholder="e.g. We need a Senior React dev who knows Tailwind and Supabase. Looking for 5+ years experience. Need them to lead the frontend rewrite."
-              className="w-full h-40 min-h-[120px] p-4 text-sm bg-white/5 border border-white/10 rounded-xl text-white placeholder:text-white/20 focus:border-purple-500/50 focus:ring-1 focus:ring-purple-500/50 focus:outline-none resize-y"
+              className="w-full h-40 min-h-[120px] p-4 text-sm bg-white/5 border border-white/10 rounded-xl text-white placeholder:text-white/20 focus:border-[var(--color-brand-primary)]/50 focus:ring-1 focus:ring-[var(--color-brand-primary)]/50 focus:outline-none resize-y"
               autoFocus
             />
           </div>
@@ -87,7 +87,7 @@ export default function EmployerJobIntentForm({
           <Button
             type="submit"
             disabled={isGenerating}
-            className="w-full h-12 text-base font-semibold bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 shadow-xl shadow-purple-500/25 border-0"
+            className="w-full h-12 text-base font-semibold bg-gradient-to-r from-[var(--color-brand-primary)] to-blue-400 hover:from-blue-500 hover:to-blue-300 shadow-xl shadow-blue-500/25 border-0"
           >
             {isGenerating ? (
               <>
