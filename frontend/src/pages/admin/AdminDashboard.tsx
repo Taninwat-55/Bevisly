@@ -45,7 +45,6 @@ export default function AdminDashboard() {
   }, []);
 
   const handleOverride = (role: "candidate" | "employer" | "admin") => {
-    // For demo_admin, reset back to demo_admin instead of full admin
     const actualRole = role === "admin" && isDemoAdmin ? "demo_admin" : role;
     setOverride?.(actualRole);
     toast.success(`🔁 Viewing as ${role}`);
@@ -53,210 +52,152 @@ export default function AdminDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-[var(--color-bg)] transition-colors pb-20">
-      
-      {/* ── Fancy Banner / Header ── */}
-      <div className="relative pt-12 pb-24 px-8 bg-gradient-to-br from-slate-900 via-slate-800 to-blue-900 text-white shadow-2xl overflow-hidden rounded-b-[3rem] md:rounded-b-[4rem]">
-        <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 mix-blend-overlay" />
-        <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-blue-500/10 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/3 pointer-events-none" />
-        <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-indigo-500/10 rounded-full blur-[100px] translate-y-1/2 -translate-x-1/4 pointer-events-none" />
+    <div className="space-y-8 pb-12">
 
-        <div className="relative z-10 max-w-6xl mx-auto">
-          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
-            <div>
-              <motion.div
-                initial={{ scale: 0.8, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-blue-300 text-[10px] font-bold uppercase tracking-widest mb-6"
-              >
-                <ShieldCheck size={12} />
-                Root Terminal
-              </motion.div>
-              
-              <h1 className="text-4xl md:text-5xl font-bold font-display tracking-tight mb-4">
-                Admin Control
-              </h1>
-              <p className="text-slate-300 max-w-2xl text-lg leading-relaxed">
-                System overview, user management, and security portal. 
-                Maintain the integrity of the Bevisly ecosystem.
-              </p>
-            </div>
+      {/* ── Header ── */}
+      <div className="relative overflow-hidden rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-8 shadow-[var(--shadow-soft)]">
+        <div className="absolute top-0 right-0 w-72 h-72 bg-[var(--color-brand-primary)]/5 rounded-full blur-[80px] -translate-y-1/3 translate-x-1/4 pointer-events-none" />
+        <div className="absolute bottom-0 left-0 w-48 h-48 bg-[var(--color-brand-primary)]/3 rounded-full blur-[60px] translate-y-1/3 -translate-x-1/4 pointer-events-none" />
 
-            <div className="flex items-center gap-3">
-              <div className="px-5 py-3 rounded-2xl bg-white/5 backdrop-blur-xl border border-white/10 flex items-center gap-3 shadow-2xl">
-                <div className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_10px_rgba(52,211,153,0.5)]" />
-                <span className="text-sm font-bold tracking-wide">System Operational</span>
-              </div>
+        <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+          <div>
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[var(--color-brand-primary)]/10 border border-[var(--color-brand-primary)]/20 text-[var(--color-brand-primary)] text-[10px] font-bold uppercase tracking-widest mb-4">
+              <ShieldCheck size={11} />
+              Root Terminal
             </div>
+            <h1 className="text-3xl md:text-4xl font-bold font-display tracking-tight text-[var(--color-text)] mb-2">
+              Admin Control
+            </h1>
+            <p className="text-[var(--color-text-muted)] max-w-xl text-sm leading-relaxed">
+              System overview, user management, and security portal.
+              Maintain the integrity of the Bevisly ecosystem.
+            </p>
+          </div>
+
+          <div className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
+            <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+            <span className="text-sm font-semibold text-emerald-600 dark:text-emerald-400">System Operational</span>
           </div>
         </div>
       </div>
 
-      <div className="max-w-6xl mx-auto px-6 -mt-12 relative z-20 space-y-12">
-        
-        {/* Demo Mode Banner */}
-        {isDemoAdmin && (
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="p-5 rounded-2xl bg-amber-500/10 backdrop-blur-md border border-amber-500/30 text-amber-700 dark:text-amber-300 flex items-start gap-4 shadow-xl"
-          >
-            <div className="w-10 h-10 rounded-xl bg-amber-500/20 flex items-center justify-center shrink-0">
-              <ShieldCheck size={20} className="text-amber-500" />
-            </div>
+      {/* Demo Mode Banner */}
+      {isDemoAdmin && (
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-700 dark:text-amber-300 flex items-start gap-3"
+        >
+          <div className="w-8 h-8 rounded-lg bg-amber-500/20 flex items-center justify-center shrink-0 mt-0.5">
+            <ShieldCheck size={16} className="text-amber-500" />
+          </div>
+          <div>
+            <p className="font-semibold text-sm">Demo Mode — Read-Only Access</p>
+            <p className="text-xs opacity-80 mt-0.5 leading-relaxed">Write actions (editing roles, credits, featured jobs) are disabled.</p>
+          </div>
+        </motion.div>
+      )}
+
+      {/* ── Stats ── */}
+      <section>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-base font-semibold text-[var(--color-text)] flex items-center gap-2">
+            <Activity size={16} className="text-[var(--color-brand-primary)]" />
+            System Metrics
+          </h2>
+          <span className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-widest">Real-time</span>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <StatCard label="Total Users" value={stats.total_users} icon={Users} color="blue" trend="+12% growth" />
+          <StatCard label="Active Jobs" value={stats.total_jobs} icon={Briefcase} color="orange" trend="+5 today" />
+          <StatCard label="Submissions" value={stats.total_submissions} icon={FileSpreadsheet} color="purple" info="Across all roles" />
+          <StatCard label="Satisfaction" value={stats.avg_feedback_score} icon={ShieldCheck} color="emerald" info="Avg candidate rating" />
+        </div>
+      </section>
+
+      {/* ── Management Tools ── */}
+      <section>
+        <h2 className="text-base font-semibold text-[var(--color-text)] mb-4">Management Tools</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <ToolTile onClick={() => navigate("/admin/users")} icon={Users} label="User Directory" description="Manage access, update roles, and audit profiles." color="blue" />
+          <ToolTile onClick={() => navigate("/admin/jobs")} icon={Briefcase} label="Job Oversight" description="Monitor listings, feature roles, and manage moderation." color="orange" />
+          <ToolTile onClick={() => navigate("/admin/data-viewer")} icon={Database} label="Raw Data Terminal" description="Direct database access for auditing and debugging." color="slate" />
+        </div>
+      </section>
+
+      {/* ── Perspective Switcher ── */}
+      <section>
+        <div className="relative glass-panel p-6 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] overflow-hidden">
+          <div className="absolute top-0 right-0 w-48 h-48 bg-[var(--color-brand-primary)]/5 rounded-full blur-[60px] -translate-y-1/3 translate-x-1/4 pointer-events-none" />
+
+          <div className="relative z-10 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
             <div>
-              <p className="font-bold text-sm">Demo Mode — Read-Only Access</p>
-              <p className="text-xs opacity-80 mt-1 leading-relaxed">You can explore all views and switch perspectives, but write actions (editing roles, credits, featured jobs) are disabled.</p>
+              <h3 className="text-base font-semibold text-[var(--color-text)] mb-1 flex items-center gap-2">
+                <RefreshCcw size={16} className="text-[var(--color-brand-primary)]" />
+                Perspective Testing
+              </h3>
+              <p className="text-sm text-[var(--color-text-muted)] leading-relaxed max-w-md">
+                Switch your session to experience the platform as a candidate or employer. Useful for verifying flows and permissions.
+              </p>
             </div>
-          </motion.div>
-        )}
 
-        {/* ── Stats Section ── */}
-        <section>
-          <div className="flex items-center justify-between mb-6 px-2">
-            <h2 className="text-xl font-bold font-display text-[var(--color-text)] flex items-center gap-2">
-              <Activity size={20} className="text-[var(--color-brand-primary)]" />
-              System Metrics
-            </h2>
-            <span className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-widest">Real-time update</span>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            <StatCard 
-              label="Total Users" 
-              value={stats.total_users} 
-              icon={Users} 
-              color="blue" 
-              trend="+12% growth"
-            />
-            <StatCard 
-              label="Active Jobs" 
-              value={stats.total_jobs} 
-              icon={Briefcase} 
-              color="orange" 
-              trend="+5 today"
-            />
-            <StatCard 
-              label="Submissions" 
-              value={stats.total_submissions} 
-              icon={FileSpreadsheet} 
-              color="purple" 
-              info="Across all roles"
-            />
-            <StatCard 
-              label="Satisfaction" 
-              value={stats.avg_feedback_score} 
-              icon={ShieldCheck} 
-              color="emerald" 
-              info="Avg candidate rating"
-            />
-          </div>
-        </section>
-
-        {/* ── Tools Section ── */}
-        <section>
-          <h2 className="text-xl font-bold font-display text-[var(--color-text)] mb-6 px-2">Management Tools</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            <ToolTile 
-              onClick={() => navigate("/admin/users")}
-              icon={Users}
-              label="User Directory"
-              description="Manage user access, update roles, and audit profile activity."
-              color="blue"
-            />
-            <ToolTile 
-              onClick={() => navigate("/admin/jobs")}
-              icon={Briefcase}
-              label="Job Oversight"
-              description="Monitor active listings, feature roles, and manage moderation."
-              color="orange"
-            />
-            <ToolTile 
-              onClick={() => navigate("/admin/data-viewer")}
-              icon={Database}
-              label="Raw Data Terminal"
-              description="Direct database access for deep auditing and system debugging."
-              color="slate"
-            />
-          </div>
-        </section>
-
-        {/* ── Perspective Switcher ── */}
-        <section>
-          <div className="relative glass-panel p-8 rounded-[2.5rem] border border-[var(--color-border)] bg-[var(--color-surface)]/50 backdrop-blur-xl shadow-2xl overflow-hidden group">
-            <div className="absolute top-0 right-0 w-64 h-64 bg-[var(--color-brand-primary)]/5 rounded-full blur-[80px] -translate-y-1/2 translate-x-1/3 group-hover:bg-[var(--color-brand-primary)]/10 transition-colors" />
-            
-            <div className="relative z-10 flex flex-col lg:flex-row items-center justify-between gap-8">
-              <div className="max-w-xl text-center lg:text-left">
-                <h3 className="text-2xl font-bold font-display text-[var(--color-text)] mb-3 flex items-center justify-center lg:justify-start gap-3">
-                  <RefreshCcw size={24} className="text-[var(--color-brand-primary)]" />
-                  Perspective Testing
-                </h3>
-                <p className="text-[var(--color-text-muted)] text-base leading-relaxed">
-                  Switch your session view to experience the platform exactly as a candidate or employer would. 
-                  Perfect for verifying permission logic and user flows.
-                </p>
-              </div>
-
-              <div className="flex flex-wrap justify-center gap-4 w-full lg:w-auto">
-                <button
-                  onClick={() => handleOverride("candidate")}
-                  className="px-6 py-4 rounded-2xl bg-[var(--color-bg)] border border-[var(--color-border)] text-[var(--color-text)] font-bold hover:border-[var(--color-brand-primary)] hover:bg-[var(--color-brand-primary)]/5 transition-all shadow-sm flex items-center gap-3"
-                >
-                  <UserCircle2 size={20} className="text-blue-500" /> 
-                  <span>As Candidate</span>
-                </button>
-                <button
-                  onClick={() => handleOverride("employer")}
-                  className="px-6 py-4 rounded-2xl bg-[var(--color-bg)] border border-[var(--color-border)] text-[var(--color-text)] font-bold hover:border-[var(--color-brand-primary)] hover:bg-[var(--color-brand-primary)]/5 transition-all shadow-sm flex items-center gap-3"
-                >
-                  <UserCheck size={20} className="text-orange-500" /> 
-                  <span>As Employer</span>
-                </button>
-                <button
-                  onClick={() => handleOverride("admin")}
-                  className="px-8 py-4 rounded-2xl bg-[var(--color-brand-primary)] text-white font-bold hover:brightness-110 transition-all shadow-glow-primary flex items-center gap-3"
-                >
-                  <ShieldCheck size={20} /> 
-                  <span>Reset View</span>
-                </button>
-              </div>
+            <div className="flex flex-wrap gap-3">
+              <button
+                onClick={() => handleOverride("candidate")}
+                className="px-4 py-2.5 rounded-xl bg-[var(--color-bg)] border border-[var(--color-border)] text-[var(--color-text)] text-sm font-semibold hover:border-[var(--color-brand-primary)] hover:bg-[var(--color-brand-primary)]/5 transition-all flex items-center gap-2"
+              >
+                <UserCircle2 size={16} className="text-blue-500" />
+                As Candidate
+              </button>
+              <button
+                onClick={() => handleOverride("employer")}
+                className="px-4 py-2.5 rounded-xl bg-[var(--color-bg)] border border-[var(--color-border)] text-[var(--color-text)] text-sm font-semibold hover:border-[var(--color-brand-primary)] hover:bg-[var(--color-brand-primary)]/5 transition-all flex items-center gap-2"
+              >
+                <UserCheck size={16} className="text-orange-500" />
+                As Employer
+              </button>
+              <button
+                onClick={() => handleOverride("admin")}
+                className="px-4 py-2.5 rounded-xl bg-[var(--color-brand-primary)] text-white text-sm font-semibold hover:brightness-110 transition-all flex items-center gap-2"
+              >
+                <ShieldCheck size={16} />
+                Reset View
+              </button>
             </div>
           </div>
-        </section>
-      </div>
+        </div>
+      </section>
     </div>
   );
 }
 
-/* ── Helper Components ── */
-
 function StatCard({ label, value, icon: Icon, color, trend, info }: any) {
   const colorMap: any = {
-    blue: "text-blue-500 bg-blue-500/10 border-blue-500/20",
-    orange: "text-orange-500 bg-orange-500/10 border-orange-500/20",
-    purple: "text-purple-500 bg-purple-500/10 border-purple-500/20",
-    emerald: "text-emerald-500 bg-emerald-500/10 border-emerald-500/20",
+    blue: "text-blue-500 bg-blue-500/10",
+    orange: "text-orange-500 bg-orange-500/10",
+    purple: "text-purple-500 bg-purple-500/10",
+    emerald: "text-emerald-500 bg-emerald-500/10",
   };
 
   return (
     <motion.div
-      whileHover={{ y: -4 }}
-      className="glass-panel p-6 rounded-[2rem] border border-[var(--color-border)] bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm relative overflow-hidden"
+      whileHover={{ y: -2 }}
+      className="p-5 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] shadow-[var(--shadow-soft)]"
     >
-      <div className={`w-12 h-12 rounded-2xl flex items-center justify-center mb-6 ${colorMap[color]}`}>
-        <Icon size={24} />
+      <div className={`w-10 h-10 rounded-xl flex items-center justify-center mb-4 ${colorMap[color]}`}>
+        <Icon size={20} />
       </div>
       <p className="text-xs font-bold text-[var(--color-text-muted)] uppercase tracking-widest mb-1">{label}</p>
-      <h3 className="text-4xl font-bold font-display text-[var(--color-text)] mb-3">{value}</h3>
+      <h3 className="text-3xl font-bold font-display text-[var(--color-text)] mb-2">{value}</h3>
       {trend && (
-        <div className="flex items-center gap-1.5 text-[10px] font-bold text-emerald-500 uppercase tracking-tighter">
-          <Activity size={12} />
+        <div className="flex items-center gap-1 text-[10px] font-bold text-emerald-500 uppercase tracking-tight">
+          <Activity size={10} />
           {trend}
         </div>
       )}
       {info && (
-        <p className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-tighter">{info}</p>
+        <p className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-tight">{info}</p>
       )}
     </motion.div>
   );
@@ -266,20 +207,20 @@ function ToolTile({ onClick, icon: Icon, label, description, color }: any) {
   const colorMap: any = {
     blue: "text-blue-500 bg-blue-500/10",
     orange: "text-orange-500 bg-orange-500/10",
-    slate: "text-slate-500 bg-slate-500/10",
+    slate: "text-[var(--color-text-muted)] bg-[var(--color-bg)]",
   };
 
   return (
     <motion.div
       onClick={onClick}
-      whileHover={{ scale: 1.02, y: -4 }}
-      className="group cursor-pointer glass-panel p-8 rounded-[2.5rem] border border-[var(--color-border)] bg-white/30 dark:bg-slate-900/30 backdrop-blur-sm hover:border-[var(--color-brand-primary)]/30 transition-all shadow-lg"
+      whileHover={{ y: -2 }}
+      className="group cursor-pointer p-6 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] hover:border-[var(--color-brand-primary)]/40 hover:shadow-[var(--shadow-soft)] transition-all"
     >
-      <div className={`w-14 h-14 rounded-2xl flex items-center justify-center mb-6 transition-transform group-hover:scale-110 ${colorMap[color]}`}>
-        <Icon size={28} />
+      <div className={`w-11 h-11 rounded-xl flex items-center justify-center mb-4 transition-transform group-hover:scale-105 ${colorMap[color]}`}>
+        <Icon size={22} />
       </div>
-      <h3 className="text-xl font-bold text-[var(--color-text)] mb-2 group-hover:text-[var(--color-brand-primary)] transition-colors">{label}</h3>
-      <p className="text-sm text-[var(--color-text-muted)] leading-relaxed">{description}</p>
+      <h3 className="text-sm font-semibold text-[var(--color-text)] mb-1 group-hover:text-[var(--color-brand-primary)] transition-colors">{label}</h3>
+      <p className="text-xs text-[var(--color-text-muted)] leading-relaxed">{description}</p>
     </motion.div>
   );
 }

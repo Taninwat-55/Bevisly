@@ -100,6 +100,7 @@ export type Profile = {
   resume_url?: string | null;
   resume_updated_at?: string | null;
   is_public?: boolean;
+  is_verified?: boolean | null;
   username?: string | null;
   skills?: string[] | null;
   work_status?: string | null;

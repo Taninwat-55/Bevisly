@@ -1,8 +1,8 @@
 import { useEffect, useState, useMemo } from "react";
-import { getAllUsers, updateUserRole, addCredits } from "@/lib/api/admin";
+import { getAllUsers, updateUserRole, addCredits, setUserVerified } from "@/lib/api/admin";
 import toast from "react-hot-toast";
 import type { BevislyUser } from "@/types/admin";
-import { ArrowDownUp, Search, User, MoreHorizontal, Shield, Briefcase, GraduationCap, PlusCircle, Coins, Eye, Users } from "lucide-react";
+import { ArrowDownUp, Search, User, MoreHorizontal, Shield, ShieldCheck, Briefcase, GraduationCap, PlusCircle, Coins, Eye, Users } from "lucide-react";
 import { motion } from "framer-motion";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -76,6 +76,19 @@ export default function AdminUsers() {
       toast.error("Failed to add credits");
     } finally {
       setUpdating(null);
+    }
+  };
+
+  const handleToggleVerified = async (id: string, current: boolean) => {
+    const next = !current;
+    try {
+      await setUserVerified(id, next);
+      setUsers((prev) =>
+        prev.map((u) => (u.id === id ? { ...u, is_verified: next } : u))
+      );
+      toast.success(next ? "Employer verified ✓" : "Verification removed");
+    } catch {
+      toast.error("Failed to update verification");
     }
   };
 
@@ -304,6 +317,20 @@ export default function AdminUsers() {
                         {isDemoAdmin ? (
                           <div className="opacity-50 grayscale"><RoleBadge role={u.role} /></div>
                         ) : (
+                          <div className="flex items-center justify-end gap-2">
+                          {u.role === "employer" && (
+                            <button
+                              onClick={() => handleToggleVerified(u.id, u.is_verified ?? false)}
+                              title={u.is_verified ? "Remove verification" : "Verify employer"}
+                              className={`p-1.5 rounded-md transition-colors ${
+                                u.is_verified
+                                  ? "text-blue-600 bg-blue-500/10 hover:bg-blue-500/20"
+                                  : "text-[var(--color-text-muted)] hover:text-blue-600 hover:bg-blue-500/10"
+                              }`}
+                            >
+                              {u.is_verified ? <ShieldCheck size={16} /> : <Shield size={16} />}
+                            </button>
+                          )}
                           <div className="relative inline-block">
                             <select
                               value={u.role}
@@ -323,6 +350,7 @@ export default function AdminUsers() {
                             <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-[var(--color-brand-primary)]">
                               <MoreHorizontal size={16} />
                             </div>
+                          </div>
                           </div>
                         )}
                       </td>

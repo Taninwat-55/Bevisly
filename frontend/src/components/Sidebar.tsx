@@ -13,7 +13,8 @@ import {
   ChevronLeft,
   ChevronRight,
   LogOut,
-  MessageCircle
+  MessageCircle,
+  Database,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -32,7 +33,7 @@ export default function Sidebar({ role }: SidebarProps) {
   const accentColorMap = {
     candidate: "var(--color-candidate-dark)",
     employer: "var(--color-employer-dark)",
-    admin: "#71717A", // subtle gray for admin
+    admin: "var(--color-brand-primary)",
   } as const;
   const accentColor = accentColorMap[resolvedRole];
 
@@ -66,16 +67,9 @@ export default function Sidebar({ role }: SidebarProps) {
         ? [
           { to: "/admin", label: "Dashboard", icon: <Shield size={17} /> },
           { to: "/admin/users", label: "Users", icon: <Users size={17} /> },
-          {
-            to: "/admin/jobs",
-            label: "Jobs Overview",
-            icon: <Briefcase size={17} />,
-          },
-          {
-            to: "/admin/feedback-messages",
-            label: "Platform Feedback",
-            icon: <MessageCircle size={17} />,
-          },
+          { to: "/admin/jobs", label: "Jobs Overview", icon: <Briefcase size={17} /> },
+          { to: "/admin/feedback-messages", label: "Platform Feedback", icon: <MessageCircle size={17} /> },
+          { to: "/admin/data-viewer", label: "Data Viewer", icon: <Database size={17} /> },
         ]
         : [
           { to: "/candidate", label: "Overview", icon: <House size={17} /> },
@@ -105,12 +99,12 @@ export default function Sidebar({ role }: SidebarProps) {
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3 border-b border-[var(--color-border)]">
         {!collapsed && (
-          <span className="font-semibold text-[var(--color-text)] whitespace-nowrap select-none">
+          <span className="font-semibold text-[var(--color-text)] whitespace-nowrap select-none flex items-center gap-2">
             {resolvedRole === "candidate"
               ? "🎓 Candidate"
               : resolvedRole === "employer"
                 ? "🏢 Employer"
-                : "🧩 Admin"}
+                : <><Shield size={15} className="text-[var(--color-brand-primary)]" /> Admin</>}
           </span>
         )}
         <button

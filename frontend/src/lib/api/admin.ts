@@ -10,7 +10,7 @@ import type {
 export async function getAllUsers(): Promise<BevislyUser[]> {
   const { data, error } = await supabase
     .from("profiles") 
-    .select("id, email, role, created_at, credits")
+    .select("id, email, role, created_at, credits, is_verified")
     .order("created_at", { ascending: false });
 
   if (error) throw error;
@@ -22,6 +22,7 @@ export async function getAllUsers(): Promise<BevislyUser[]> {
       role: (u.role as BevislyUser["role"]) || "candidate",
       created_at: u.created_at ?? new Date().toISOString(),
       credits: u.credits ?? 0,
+      is_verified: u.is_verified ?? false,
     })) ?? []
   );
 }
@@ -121,6 +122,14 @@ export async function toggleFeaturedJob(jobId: string, newState: boolean) {
 }
 
 // Add credits to a user (Admin only)
+export async function setUserVerified(userId: string, verified: boolean): Promise<void> {
+  const { error } = await supabase
+    .from("profiles")
+    .update({ is_verified: verified })
+    .eq("id", userId);
+  if (error) throw error;
+}
+
 export async function addCredits(userId: string, amount: number) {
   // First get current credits
   const { data: profile, error: fetchError } = await supabase

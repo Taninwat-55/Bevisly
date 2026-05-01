@@ -11,7 +11,8 @@ export interface BevislyUser {
   email: string;
   role: "candidate" | "employer" | "admin" | "demo_admin";
   created_at: string;
-  credits?: number; // Added for Credit Management
+  credits?: number;
+  is_verified?: boolean;
 }
 
 export interface AdminJob {
