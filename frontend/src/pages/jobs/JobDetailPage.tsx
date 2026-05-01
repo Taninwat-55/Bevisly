@@ -316,7 +316,7 @@ export default function JobDetailPage() {
                   </div>
                 ) : (
                   <p className="text-[var(--color-text-muted)] text-sm leading-relaxed">
-                    Ready to prove your skills? Start the proof task to get in the employer's review queue.
+                    This is a 30-minute proof task. Your submission goes directly to the employer for review — no ATS, no keyword filter.
                   </p>
                 )}
               </div>
@@ -595,7 +595,7 @@ export default function JobDetailPage() {
 
                 <h2 className="text-xl font-bold text-[var(--color-text)] mb-2">Ready to Prove It?</h2>
                 <p className="text-sm text-[var(--color-text-muted)] mb-8 leading-relaxed">
-                  You're starting the proof task for <strong>{job.title}</strong>. This is your chance to shine!
+                  You're starting the proof task for <strong>{job.title}</strong>. ~30 minutes. Your work will be reviewed by the employer and added to your proof portfolio regardless of outcome.
                 </p>
 
                 <label className="flex items-center justify-center gap-2 text-xs text-[var(--color-text-muted)] mb-6 cursor-pointer select-none hover:text-[var(--color-text)] transition-colors">

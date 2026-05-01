@@ -6,24 +6,24 @@ export default function CandidateGuide() {
   const steps = [
     {
       icon: Briefcase,
-      title: "1. Apply",
-      text: "Pick a role and complete a short, real-world proof task instead of sending a CV.",
+      title: "1. Find a Role (or Practice)",
+      text: "Browse proof-based junior roles — or complete a practice proof task to start building your portfolio before you even apply.",
     },
     {
       icon: CheckCircle2,
-      title: "2. Prove",
-      text: "Submit your work — employers review what you can actually do, not what you claim.",
+      title: "2. Complete the Proof Task",
+      text: "30 minutes. Real work. Submit your deliverable — no cover letter, no keyword stuffing.",
     },
     {
       icon: Award,
-      title: "3. Earn Proof",
-      text: "Receive verified feedback, earn credits, and strengthen your public proof profile.",
+      title: "3. Earn a Permanent Credential",
+      text: "Employer-reviewed feedback gets added to your public proof profile. It lives there forever. Share it with anyone.",
     },
   ];
 
   return (
     <>
-      <h2 className="heading-md mb-6 text-center">How Candidates Use Bevisly</h2>
+      <h2 className="heading-md mb-6 text-center">Build a proof portfolio that speaks for itself</h2>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
         {steps.map(({ icon: Icon, title, text }) => (
           <div
@@ -48,7 +48,7 @@ export default function CandidateGuide() {
           to="/jobs"
           className="text-[var(--color-candidate-dark)] font-medium hover:underline"
         >
-          Browse Proof Tasks →
+          Browse Junior Roles & Proof Tasks →
         </Link>
       </div>
     </>

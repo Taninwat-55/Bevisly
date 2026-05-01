@@ -49,11 +49,10 @@ export default function PublicLeaderboard() {
       {/* Header */}
       <header className="text-center mb-8">
         <h1 className="heading-lg mb-2 flex items-center justify-center gap-2">
-          <Trophy className="text-[var(--color-candidate)]" /> Top Proof Earners
+          <Trophy className="text-[var(--color-candidate)]" /> Most Verified Proof Submissions
         </h1>
         <p className="text-[var(--color-text-muted)]">
-          Celebrate the candidates who’ve earned the most proof credits through
-          verified tasks.
+          Ranked by employer-verified proof completions. Every entry on this list got here by completing real work, reviewed by a real employer.
         </p>
       </header>
 

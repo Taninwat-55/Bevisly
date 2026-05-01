@@ -58,18 +58,18 @@ export default function LandingPage() {
         "mainEntity": [
           {
             "@type": "Question",
-            "name": "How is Bevisly different from a resume?",
+            "name": "How does proof-first hiring work for junior talent?",
             "acceptedAnswer": {
               "@type": "Answer",
-              "text": "Bevisly verifies actual skills through code and design tasks, whereas resumes are just self-reported claims. We provide improved trust for employers and a fair chance for candidates."
+              "text": "You post a role and Bevisly generates a short proof task — typically 30 minutes. Junior candidates complete the task and submit their work. You review real deliverables and shortlist based on actual skill, not years of experience."
             }
           },
           {
             "@type": "Question",
-            "name": "Do I need an invitation to join?",
+            "name": "How quickly can I start reviewing candidates?",
             "acceptedAnswer": {
               "@type": "Answer",
-              "text": "Candidates can join freely and start verifying skills immediately. Employers currently need an invitation code to post jobs during our closed beta."
+              "text": "Most employers have their first proof task live within 15 minutes of signing up. Candidate submissions typically arrive within 24–48 hours of posting."
             }
           },
           {
@@ -77,7 +77,7 @@ export default function LandingPage() {
             "name": "Is Bevisly free for candidates?",
             "acceptedAnswer": {
               "@type": "Answer",
-              "text": "Yes, candidates can create a profile and display verified badges for free. We also offer a Pro tier for enhanced visibility."
+              "text": "Yes, always. Complete proof tasks, build your verified portfolio, and keep your credentials forever — at no cost. Candidates should never pay to prove themselves."
             }
           }
         ]
@@ -127,7 +127,7 @@ export default function LandingPage() {
   return (
     <div className="bg-[var(--color-bg)] min-h-screen font-sans selection:bg-[var(--color-brand-primary)] selection:text-white">
       <Helmet>
-        <title>Bevisly - Hire Proven Talent</title>
+        <title>Bevisly — Proof-First Hiring for Junior Talent</title>
         <script type="application/ld+json">{JSON.stringify(structuredData)}</script>
       </Helmet>
       <main>
@@ -141,23 +141,24 @@ export default function LandingPage() {
           <div className="max-w-7xl mx-auto px-6 relative z-10">
             <div className="text-center max-w-4xl mx-auto mb-12">
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[var(--color-surface)] border border-[var(--color-border)] shadow-sm mb-8 animate-fade-in-up">
-                <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
+                <span className="w-2 h-2 rounded-full bg-[var(--color-brand-primary)] animate-pulse" />
                 <span className="text-sm font-medium text-[var(--color-text-muted)]">
-                  Invitation-Only Beta Now Live
+                  Now hiring junior talent for top Nordic companies
                 </span>
               </div>
 
               <h1 className="text-5xl md:text-7xl font-bold font-display tracking-tight text-[var(--color-text)] mb-6 leading-[1.1] animate-fade-in-up" style={{ animationDelay: "0.1s" }}>
-                Prove your skills. <br />
+                The{" "}
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-[var(--color-brand-primary)] to-[var(--color-brand-secondary)]">
-                  Get hired.
-                </span> <br />
-                Keep the proof forever.
+                  proof-first
+                </span>{" "}
+                platform <br />
+                for hiring junior talent.
               </h1>
 
               <p className="text-xl text-[var(--color-text-muted)] mb-10 max-w-2xl mx-auto leading-relaxed animate-fade-in-up" style={{ animationDelay: "0.2s" }}>
-                Bevisly replaces outdated CVs with verified proof of work.
-                Currently in private beta for select partners.
+                Candidates prove skills with 30-minute tasks.
+                Employers review real work, not CVs.
               </p>
 
               <div className="max-w-2xl mx-auto relative animate-fade-in-up" style={{ animationDelay: "0.3s" }}>
@@ -171,7 +172,7 @@ export default function LandingPage() {
                      value={rawInput}
                      onChange={(e) => setRawInput(e.target.value)}
                      disabled={isGenerating}
-                     placeholder="e.g. Need a Senior React Developer..." 
+                     placeholder="e.g. Junior Frontend Developer for 3-month contract..."
                      className="w-full bg-transparent border-none py-5 pl-14 md:pl-16 pr-32 md:pr-48 text-lg md:text-xl text-[var(--color-text)] outline-none placeholder:text-[var(--color-text-muted)] disabled:opacity-50"
                   />
                   <button 
@@ -194,7 +195,7 @@ export default function LandingPage() {
                 </form>
                 <div className="flex items-center justify-center gap-4 mt-6">
                   <p className="text-sm font-medium text-[var(--color-text-muted)]">
-                    Enter a job description to instantly generate a skill proof task.
+                    Describe the role. AI writes the proof task. Free to try — no account needed.
                   </p>
                 </div>
               </div>
@@ -293,7 +294,7 @@ export default function LandingPage() {
                         {/* CTA - Bottom Right */}
                         <div className="absolute bottom-4 right-4 z-30">
                             <Button size="md" className="shadow-glow-primary shadow-lg" onClick={() => navigate('/auth?tab=signup&role=employer')}>
-                                Post this Job for Free <ArrowRight className="ml-2 w-4 h-4" />
+                                Post This Role &amp; Find Junior Talent <ArrowRight className="ml-2 w-4 h-4" />
                             </Button>
                         </div>
                       </div>
@@ -394,11 +395,11 @@ export default function LandingPage() {
           <div className="max-w-7xl mx-auto px-6">
             <div className="text-center mb-16">
               <h2 className="text-3xl md:text-5xl font-bold font-display text-[var(--color-text)] mb-4">
-                Everything you need to <br />
-                <span className="text-[var(--color-brand-primary)]">hire with confidence</span>
+                From job post to shortlist <br />
+                <span className="text-[var(--color-brand-primary)]">in under 10 minutes</span>
               </h2>
               <p className="text-[var(--color-text-muted)] text-lg max-w-2xl mx-auto">
-                Move beyond the resume. Our platform gives you the tools to verify real skills in a fraction of the time.
+                The full proof-first pipeline: AI generates the task, candidates submit real work, you review what matters.
               </p>
             </div>
 
@@ -409,9 +410,9 @@ export default function LandingPage() {
                   <div className="w-12 h-12 rounded-xl bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 mb-6">
                     <CheckCircle />
                   </div>
-                  <h3 className="text-2xl font-bold font-display text-[var(--color-text)] mb-2">Automated Verification</h3>
+                  <h3 className="text-2xl font-bold font-display text-[var(--color-text)] mb-2">AI Writes the Proof Task</h3>
                   <p className="text-[var(--color-text-muted)] max-w-sm">
-                    Our system automatically validates code submissions, design files, and other proof tasks so you don't have to manually check every detail.
+                    Describe the role in plain English. Bevisly's AI generates a job-relevant 30-minute task, ready to send to candidates. No task design experience needed.
                   </p>
                 </div>
                 {/* Abstract Line Decoration */}
@@ -424,9 +425,9 @@ export default function LandingPage() {
                   <div className="w-12 h-12 rounded-xl bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center text-orange-600 mb-6">
                     <Play />
                   </div>
-                  <h3 className="text-2xl font-bold font-display text-[var(--color-text)] mb-2">Video Explainers</h3>
+                  <h3 className="text-2xl font-bold font-display text-[var(--color-text)] mb-2">Review Real Work, Not Resumes</h3>
                   <p className="text-[var(--color-text-muted)]">
-                    Candidates record short Loom-style videos explaining their thought process. See how they communicate complex ideas before you interview.
+                    Candidates submit actual deliverables — code, designs, writing, analysis. You review what they built, guided by AI-assisted scoring. Humans decide. AI helps.
                   </p>
                 </div>
                 <div className="absolute inset-x-0 bottom-0 h-48 bg-gradient-to-t from-[var(--color-brand-secondary)]/10 to-transparent" />
@@ -434,9 +435,9 @@ export default function LandingPage() {
 
               {/* Feature 3: Standard Box */}
               <div className="glass-panel p-8 rounded-2xl group hover:-translate-y-1 transition-all duration-300">
-                <h3 className="text-xl font-bold font-display text-[var(--color-text)] mb-2">Anti-Cheating</h3>
+                <h3 className="text-xl font-bold font-display text-[var(--color-text)] mb-2">Employer-Reviewed, AI-Assisted</h3>
                 <p className="text-[var(--color-text-muted)] text-sm">
-                  Smart detection algorithms flag suspicious activity and AI-generated copy-paste responses.
+                  Transparent scoring. You see the rubric, the AI notes, and the raw submission. No black boxes — every decision rests with your team.
                 </p>
               </div>
 
@@ -458,14 +459,14 @@ export default function LandingPage() {
           <div className="max-w-7xl mx-auto px-6 relative z-10 grid md:grid-cols-2 gap-16 items-center">
             <div>
               <div className="inline-block px-3 py-1 rounded-full border border-gray-300 dark:border-white/20 bg-gray-200 dark:bg-white/5 text-sm font-medium text-gray-600 dark:text-white/80 mb-6">
-                The Old Way vs. The New Way
+                For Employers
               </div>
-              <h2 className="text-4xl md:text-5xl font-bold font-display mb-6">Resumes are broken.<br />We fixed them.</h2>
+              <h2 className="text-4xl md:text-5xl font-bold font-display mb-6">Stop screening CVs.<br />Start reviewing proof.</h2>
               <p className="text-blue-700 dark:text-blue-100 text-lg leading-relaxed mb-8">
-                Traditional hiring relies on self-reported skills and keyword stuffing. Bevisly validates ability through actual work samples.
+                Junior roles get flooded with applications. Bevisly cuts through by replacing the CV with a 30-minute proof task. AI writes it for you. Review submissions in 10 minutes.
               </p>
-              <Button variant="primary" size="lg" onClick={handleRequestAccess}>
-                Request Beta Access
+              <Button variant="primary" size="lg" onClick={() => navigate('/auth?tab=signup&role=employer')}>
+                Post Your First Role
               </Button>
             </div>
 
@@ -474,8 +475,8 @@ export default function LandingPage() {
               <div className="flex items-start gap-4 p-4 rounded-xl bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10">
                 <div className="w-8 h-8 rounded-full bg-red-500/20 flex items-center justify-center text-red-500 shrink-0">✕</div>
                 <div>
-                  <h4 className="font-bold text-gray-900 dark:text-white">Outdated Resumes</h4>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">Static documents that don't reflect current capabilities.</p>
+                  <h4 className="font-bold text-gray-900 dark:text-white">CV Screening</h4>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">Hundreds of applications with identical buzzwords. No signal on who can actually do the work.</p>
                 </div>
               </div>
 
@@ -484,8 +485,8 @@ export default function LandingPage() {
                 <div className="absolute inset-0 bg-blue-600/10 animate-pulse" />
                 <div className="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-white shrink-0 relative z-10">✓</div>
                 <div className="relative z-10">
-                  <h4 className="font-bold text-gray-900 dark:text-white">Verified Proof Tasks</h4>
-                  <p className="text-sm text-blue-700 dark:text-blue-100">Live work samples validated by code execution and peer review.</p>
+                  <h4 className="font-bold text-gray-900 dark:text-white">Proof-First Review</h4>
+                  <p className="text-sm text-blue-700 dark:text-blue-100">Candidates submit a 30-minute task. You review real deliverables. Shortlist the top 3 in a single afternoon.</p>
                 </div>
               </div>
 
@@ -494,7 +495,7 @@ export default function LandingPage() {
                 <div className="w-8 h-8 rounded-full bg-red-500/20 flex items-center justify-center text-red-500 shrink-0">✕</div>
                 <div>
                   <h4 className="font-bold text-gray-900 dark:text-white">Keyword Filtering</h4>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">ATS systems that reject great candidates for missing buzzwords.</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">ATS systems that reject strong junior candidates for lacking the right phrasing.</p>
                 </div>
               </div>
             </div>
@@ -507,32 +508,86 @@ export default function LandingPage() {
           <div className="max-w-7xl mx-auto px-6">
             <div className="text-center mb-16">
               <div className="inline-block px-3 py-1 rounded-full bg-[var(--color-candidate)]/10 text-[var(--color-candidate)] text-sm font-medium mb-4">
-                For Candidates
+                For Junior Talent
               </div>
               <h2 className="text-3xl md:text-5xl font-bold font-display text-[var(--color-text)] mb-4">
-                Don't let your resume <br />
-                <span className="text-[var(--color-candidate)]">hold you back</span>
+                Your skills deserve more <br />
+                <span className="text-[var(--color-candidate)]">than a resume.</span>
               </h2>
               <p className="text-[var(--color-text-muted)] text-lg max-w-2xl mx-auto">
-                Skip the ATS black hole. Prove your worth with real-world tasks and get fast-tracked to final interviews.
+                Build a proof portfolio before you even apply. 30-minute tasks, verified feedback, credentials that live forever on your public profile.
               </p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               <div className="p-6 rounded-2xl bg-[var(--color-surface)] border border-[var(--color-border)] hover:border-[var(--color-candidate)]/50 transition-colors">
                 <div className="w-12 h-12 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 mb-4 font-bold text-xl">1</div>
-                <h3 className="text-xl font-bold mb-2">Find a Role</h3>
-                <p className="text-[var(--color-text-muted)]">Browse jobs that match your skills, not just your job history.</p>
+                <h3 className="text-xl font-bold mb-2">Find a Role (or Practice)</h3>
+                <p className="text-[var(--color-text-muted)]">Browse proof-based junior roles — or complete a practice proof task to start building your portfolio before you even apply.</p>
               </div>
               <div className="p-6 rounded-2xl bg-[var(--color-surface)] border border-[var(--color-border)] hover:border-[var(--color-candidate)]/50 transition-colors">
                 <div className="w-12 h-12 rounded-full bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center text-purple-600 mb-4 font-bold text-xl">2</div>
-                <h3 className="text-xl font-bold mb-2">Complete the Task</h3>
-                <p className="text-[var(--color-text-muted)]">Showcase your coding, design, or writing skills in a real-world scenario.</p>
+                <h3 className="text-xl font-bold mb-2">Complete the Proof Task</h3>
+                <p className="text-[var(--color-text-muted)]">30 minutes. Real work. Submit your deliverable — no cover letter, no keyword stuffing.</p>
               </div>
               <div className="p-6 rounded-2xl bg-[var(--color-surface)] border border-[var(--color-border)] hover:border-[var(--color-candidate)]/50 transition-colors">
                 <div className="w-12 h-12 rounded-full bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center text-emerald-600 mb-4 font-bold text-xl">3</div>
-                <h3 className="text-xl font-bold mb-2">Get Hired</h3>
-                <p className="text-[var(--color-text-muted)]">Top performers get interviewed directly. No resume screening.</p>
+                <h3 className="text-xl font-bold mb-2">Earn a Verified Credential</h3>
+                <p className="text-[var(--color-text-muted)]">Employer-reviewed feedback added to your proof portfolio. Reuse it. Share it. Keep it forever.</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ── PRACTICE PROOFS SECTION ────────────────────────────── */}
+        <section className="py-24 bg-[var(--color-surface)] border-t border-[var(--color-border)]">
+          <div className="max-w-4xl mx-auto px-6 text-center">
+            <div className="inline-block px-3 py-1 rounded-full bg-[var(--color-brand-primary)]/10 text-[var(--color-brand-primary)] text-sm font-medium mb-6">
+              Practice Proofs — No Application Required
+            </div>
+            <h2 className="text-3xl md:text-5xl font-bold font-display text-[var(--color-text)] mb-6">
+              Build your proof portfolio <br />
+              <span className="text-[var(--color-brand-primary)]">before you apply.</span>
+            </h2>
+            <p className="text-[var(--color-text-muted)] text-lg max-w-2xl mx-auto mb-8">
+              Don't wait for the right job posting. Browse open proof tasks, complete them on your own time, and build a verified portfolio. When your ideal role appears, your proof is already waiting.
+            </p>
+            <Button size="lg" onClick={() => navigate('/jobs')}>
+              Browse Proof Tasks <ArrowRight className="ml-2 w-5 h-5" />
+            </Button>
+            <p className="mt-4 text-sm text-[var(--color-text-muted)]">
+              Junior candidates use Practice Proofs to stand out before their first job application.
+            </p>
+          </div>
+        </section>
+
+        {/* ── TRANSPARENT SCORING SECTION ────────────────────────────── */}
+        <section className="py-24 bg-[var(--color-bg)] border-t border-[var(--color-border)]">
+          <div className="max-w-7xl mx-auto px-6">
+            <div className="text-center mb-16">
+              <div className="inline-block px-3 py-1 rounded-full bg-[var(--color-brand-primary)]/10 text-[var(--color-brand-primary)] text-sm font-medium mb-6">
+                Employer-Reviewed, AI-Assisted
+              </div>
+              <h2 className="text-3xl md:text-5xl font-bold font-display text-[var(--color-text)] mb-4">
+                Transparent scoring. <br />
+                <span className="text-[var(--color-brand-primary)]">Humans decide.</span>
+              </h2>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              <div className="p-8 rounded-2xl bg-[var(--color-surface)] border border-[var(--color-border)] hover:border-[var(--color-brand-primary)]/30 transition-colors">
+                <div className="w-12 h-12 rounded-xl bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 mb-6 font-bold text-xl">1</div>
+                <h3 className="text-xl font-bold font-display text-[var(--color-text)] mb-3">You define what good looks like</h3>
+                <p className="text-[var(--color-text-muted)]">Set a rubric when posting the role. AI uses your criteria to evaluate each submission consistently.</p>
+              </div>
+              <div className="p-8 rounded-2xl bg-[var(--color-surface)] border border-[var(--color-border)] hover:border-[var(--color-brand-primary)]/30 transition-colors">
+                <div className="w-12 h-12 rounded-xl bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center text-purple-600 mb-6 font-bold text-xl">2</div>
+                <h3 className="text-xl font-bold font-display text-[var(--color-text)] mb-3">AI highlights what matters</h3>
+                <p className="text-[var(--color-text-muted)]">Surfaces notable moments in each submission — what they did well, what they skipped. No black boxes.</p>
+              </div>
+              <div className="p-8 rounded-2xl bg-[var(--color-surface)] border border-[var(--color-border)] hover:border-[var(--color-brand-primary)]/30 transition-colors">
+                <div className="w-12 h-12 rounded-xl bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center text-emerald-600 mb-6 font-bold text-xl">3</div>
+                <h3 className="text-xl font-bold font-display text-[var(--color-text)] mb-3">You make every decision</h3>
+                <p className="text-[var(--color-text-muted)]">No automated rejections. Shortlist who you want. Every candidate gets clear feedback either way.</p>
               </div>
             </div>
           </div>
@@ -690,21 +745,21 @@ export default function LandingPage() {
             </h2>
             <div className="space-y-8">
               <div>
-                <h3 className="text-xl font-semibold text-[var(--color-text)] mb-2">How is Bevisly different from a resume?</h3>
+                <h3 className="text-xl font-semibold text-[var(--color-text)] mb-2">How does proof-first hiring work for junior talent?</h3>
                 <p className="text-[var(--color-text-muted)] leading-relaxed">
-                  Bevisly verifies actual skills through code and design tasks, whereas resumes are just self-reported claims. We provide improved trust for employers and a fair chance for candidates.
+                  You post a role and Bevisly generates a short proof task — typically 30 minutes. Junior candidates complete the task and submit their work. You review real deliverables and shortlist based on actual skill, not years of experience.
                 </p>
               </div>
               <div>
-                <h3 className="text-xl font-semibold text-[var(--color-text)] mb-2">Do I need an invitation to join?</h3>
+                <h3 className="text-xl font-semibold text-[var(--color-text)] mb-2">How quickly can I start reviewing candidates?</h3>
                 <p className="text-[var(--color-text-muted)] leading-relaxed">
-                  Candidates can join freely and start verifying skills immediately. Employers currently need an invitation code to post jobs during our closed beta.
+                  Most employers have their first proof task live within 15 minutes of signing up. Candidate submissions typically arrive within 24–48 hours of posting.
                 </p>
               </div>
               <div>
                 <h3 className="text-xl font-semibold text-[var(--color-text)] mb-2">Is Bevisly free for candidates?</h3>
                 <p className="text-[var(--color-text-muted)] leading-relaxed">
-                   Yes, candidates can create a profile and display verified badges for free. We also offer a Pro tier for enhanced visibility.
+                  Yes, always. Complete proof tasks, build your verified portfolio, and keep your credentials forever — at no cost. Candidates should never pay to prove themselves.
                 </p>
               </div>
             </div>
@@ -716,21 +771,24 @@ export default function LandingPage() {
 
           <div className="max-w-4xl mx-auto px-6 text-center relative z-10">
             <h2 className="text-4xl md:text-6xl font-bold font-display text-[var(--color-text)] mb-6 tracking-tight">
-              Ready to hire <br />
-              <span className="text-[var(--color-brand-primary)]">proven talent?</span>
+              Ready to hire your next <br />
+              <span className="text-[var(--color-brand-primary)]">junior with confidence?</span>
             </h2>
             <p className="text-xl text-[var(--color-text-muted)] mb-10 max-w-2xl mx-auto">
-              Join forward-thinking companies building their teams with verified proof, not just promises.
+              Post a role in 5 minutes. AI generates the proof task. Review real work from junior candidates who can actually do the job.
             </p>
 
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-              <Button size="lg" className="h-16 px-10 text-xl rounded-2xl shadow-glow-primary hover:scale-105 transition-transform" onClick={handleCTA}>
-                Enter Invitation Code
+              <Button size="lg" className="h-16 px-10 text-xl rounded-2xl shadow-glow-primary hover:scale-105 transition-transform" onClick={() => navigate('/auth?tab=signup&role=employer')}>
+                Post Your First Role
+              </Button>
+              <Button variant="outline" size="lg" className="h-16 px-10 text-xl rounded-2xl" onClick={() => navigate('/jobs')}>
+                Browse Proof Tasks
               </Button>
             </div>
 
             <p className="mt-6 text-sm text-[var(--color-text-muted)]">
-              Beta access is currently limited. <button onClick={() => setIsContactOpen(true)} className="underline hover:text-[var(--color-brand-primary)]">Contact us</button> for enterprise inquiries.
+              Free to start. No invitation code needed.
             </p>
           </div>
         </section>

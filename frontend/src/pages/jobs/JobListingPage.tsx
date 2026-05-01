@@ -315,12 +315,12 @@ export default function JobListingPage() {
           <div>
             <BackButton to="/" className="mb-6" variant="glass" label="Back to Dashboard" />
             <h1 className="text-4xl font-bold font-display leading-tight mb-2">
-              {role === "employer" ? "Manage Your Listings" : "Discover Your Next Challenge"}
+              {role === "employer" ? "Manage Your Listings" : "Find Junior Roles with Proof Tasks"}
             </h1>
             <p className="text-blue-100 max-w-xl text-lg">
               {role === "employer"
                 ? "Track performance and manage proof-based roles."
-                : "Showcase your real skills through verified proof tasks. No resumed needed."}
+                : "Every role includes a 30-minute proof task. Submit real work. Skip the CV black hole."}
             </p>
           </div>
 
