@@ -715,7 +715,7 @@ export async function sendRejectionFeedbackEmail(
         job_id,
         feedback ( stars, strengths, improvements ),
         profiles:user_id ( full_name, email ),
-        jobs:job_id ( title )
+        jobs:job_id ( title, employer_id, employer:employer_id ( email ) )
       `
       )
       .eq("id", submissionId)
@@ -768,6 +768,7 @@ export async function sendRejectionFeedbackEmail(
     // 4. Extract job info
     const job = Array.isArray(sub.jobs) ? sub.jobs[0] : sub.jobs;
     const jobTitle = job?.title || "this role";
+    const employerEmail = (Array.isArray(job?.employer) ? job.employer[0] : job?.employer)?.email || null;
 
     // 5. Build HTML email
     const escapeHtml = (str: string) =>
@@ -837,7 +838,7 @@ export async function sendRejectionFeedbackEmail(
         to: candidateEmail,
         subject: `Your Code Review Feedback — ${jobTitle}`,
         html,
-        reply_to: "bevislyapp@gmail.com",
+        reply_to: employerEmail || "bevislyapp@gmail.com",
       },
     });
 
@@ -871,7 +872,7 @@ export async function sendOfferEmail(submissionId: string): Promise<void> {
         user_id,
         job_id,
         profiles:user_id ( full_name, email ),
-        jobs:job_id ( title, company )
+        jobs:job_id ( title, company, employer_id, employer:employer_id ( email ) )
       `
       )
       .eq("id", submissionId)
@@ -903,6 +904,7 @@ export async function sendOfferEmail(submissionId: string): Promise<void> {
     const job = Array.isArray(sub.jobs) ? sub.jobs[0] : sub.jobs;
     const jobTitle = job?.title || "this role";
     const companyName = job?.company || "the company";
+    const offerReplyTo = (Array.isArray(job?.employer) ? job.employer[0] : job?.employer)?.email || "bevislyapp@gmail.com";
 
     const escapeHtml = (str: string) =>
       str
@@ -963,7 +965,7 @@ export async function sendOfferEmail(submissionId: string): Promise<void> {
         to: candidateEmail,
         subject: `You've received an offer from ${companyName} 🎉`,
         html,
-        reply_to: "bevislyapp@gmail.com",
+        reply_to: offerReplyTo,
       },
     });
 

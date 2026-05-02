@@ -4,6 +4,16 @@ All notable features and changes to Bevis MVP are recorded here in plain languag
 
 ---
 
+## 2026-05-02 — Sprint #1: Bevisly Score + Featured Proofs (Complete)
+
+### Bevisly Score (Candidate Signal System)
+A unified score (0–100) calculated from proof task ratings, practice proof grades, and submission quality. Displayed prominently on candidate profiles and the leaderboard to give employers a fast signal of overall competency. Score updates automatically as new ratings come in.
+
+### Featured Proofs (Portfolio Highlights)
+Candidates can pin up to 3 of their best proof submissions as "Featured Proofs" on their public profile. Only proofs with a completed submission are eligible. Featured proofs appear at the top of the profile with star ratings and employer feedback visible, giving employers a curated showcase before digging into the full history.
+
+---
+
 ## 2026-05-02 — Pre-Launch Feature Sprint
 
 ### Practice Proofs (Candidate Cold-Start Fix)

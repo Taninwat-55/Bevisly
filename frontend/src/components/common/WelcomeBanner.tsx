@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Briefcase, FileCheck, Trophy, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/Button";
@@ -19,6 +20,7 @@ const EMPLOYER_STEPS = [
     description: "Create your first role and describe what you're looking for.",
     color: "from-blue-500 to-indigo-500",
     iconBg: "bg-blue-500/15 text-blue-500",
+    cta: { label: "Post a Job", href: "/employer/jobs" },
   },
   {
     icon: FileCheck,
@@ -27,6 +29,7 @@ const EMPLOYER_STEPS = [
     description: "Design a real-world task that candidates will complete to prove their skills.",
     color: "from-emerald-500 to-teal-500",
     iconBg: "bg-emerald-500/15 text-emerald-500",
+    cta: { label: "Go to Jobs", href: "/employer/jobs" },
   },
   {
     icon: Trophy,
@@ -35,6 +38,7 @@ const EMPLOYER_STEPS = [
     description: "Evaluate submissions, leave feedback, and hire the best talent.",
     color: "from-amber-500 to-orange-500",
     iconBg: "bg-amber-500/15 text-amber-500",
+    cta: { label: "Open Talent Board", href: "/employer/talent-board" },
   },
 ];
 
@@ -46,6 +50,7 @@ const CANDIDATE_STEPS = [
     description: "Find roles that match your skills and interests.",
     color: "from-blue-500 to-indigo-500",
     iconBg: "bg-blue-500/15 text-blue-500",
+    cta: { label: "Browse Jobs", href: "/candidate/jobs" },
   },
   {
     icon: FileCheck,
@@ -54,6 +59,7 @@ const CANDIDATE_STEPS = [
     description: "Show what you can do with a real-world challenge. No resumes needed.",
     color: "from-emerald-500 to-teal-500",
     iconBg: "bg-emerald-500/15 text-emerald-500",
+    cta: { label: "Try a Practice Proof", href: "/candidate/practice" },
   },
   {
     icon: Trophy,
@@ -62,11 +68,12 @@ const CANDIDATE_STEPS = [
     description: "Companies review your work and hire based on proven ability.",
     color: "from-amber-500 to-orange-500",
     iconBg: "bg-amber-500/15 text-amber-500",
+    cta: null,
   },
 ];
 
 export default function WelcomeBanner({ role, userName, onDismiss }: WelcomeBannerProps) {
-  const [dismissed, setDismissed] = useState(true); // Start hidden, show after check
+  const [dismissed, setDismissed] = useState(true);
 
   useEffect(() => {
     const storageVal = localStorage.getItem(STORAGE_KEY);
@@ -102,28 +109,27 @@ export default function WelcomeBanner({ role, userName, onDismiss }: WelcomeBann
           className="overflow-hidden mb-8"
         >
           <div className="relative rounded-3xl border border-[var(--color-border)] bg-[var(--color-surface)] shadow-xl overflow-hidden">
-            {/* Background effects */}
             <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-gradient-to-br from-[var(--color-brand-primary)]/8 to-[var(--color-brand-secondary)]/8 rounded-full blur-[80px] -z-10 translate-x-1/3 -translate-y-1/3" />
             <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-gradient-to-tr from-emerald-500/5 to-blue-500/5 rounded-full blur-[60px] -z-10 -translate-x-1/4 translate-y-1/4" />
 
-            {/* Top accent */}
             <div className="h-1 bg-gradient-to-r from-[var(--color-brand-primary)] via-emerald-500 to-amber-500" />
 
             <div className="p-8 lg:p-10">
-              {/* Header row */}
               <div className="flex items-start justify-between gap-4 mb-8">
                 <div>
                   <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[var(--color-brand-primary)]/10 border border-[var(--color-brand-primary)]/20 text-[var(--color-brand-primary)] text-xs font-semibold mb-3">
                     ✨ Getting Started
                   </div>
                   <h2 className="text-2xl lg:text-3xl font-bold font-display text-[var(--color-text)] mb-2">
-                    Welcome to Bevisly, <span className="text-transparent bg-clip-text bg-gradient-to-r from-[var(--color-brand-primary)] to-[var(--color-brand-secondary)] capitalize">{displayName}</span>!
+                    Welcome to Bevisly,{" "}
+                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-[var(--color-brand-primary)] to-[var(--color-brand-secondary)] capitalize">
+                      {displayName}
+                    </span>!
                   </h2>
                   <p className="text-[var(--color-text-muted)] text-lg max-w-2xl">
                     {role === "employer"
                       ? "Here's how to find your next great hire in three simple steps."
-                      : "Here's how to land your next job by proving what you can do."
-                    }
+                      : "Here's how to land your next job by proving what you can do."}
                   </p>
                 </div>
                 <button
@@ -135,7 +141,6 @@ export default function WelcomeBanner({ role, userName, onDismiss }: WelcomeBann
                 </button>
               </div>
 
-              {/* Steps */}
               <div className="grid md:grid-cols-3 gap-4 lg:gap-6">
                 {steps.map((step, i) => (
                   <motion.div
@@ -143,36 +148,45 @@ export default function WelcomeBanner({ role, userName, onDismiss }: WelcomeBann
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.1 * (i + 1) }}
-                    className="relative p-5 rounded-2xl bg-[var(--color-bg)] border border-[var(--color-border)] hover:border-[var(--color-brand-primary)]/30 hover:shadow-md transition-all group"
+                    className="relative p-5 rounded-2xl bg-[var(--color-bg)] border border-[var(--color-border)] hover:border-[var(--color-brand-primary)]/30 hover:shadow-md transition-all group flex flex-col"
                   >
-                    {/* Step number */}
                     <div className="absolute -top-3 -left-2">
                       <div className={`w-7 h-7 rounded-lg bg-gradient-to-br ${step.color} text-white text-xs font-bold flex items-center justify-center shadow-md`}>
                         {step.number}
                       </div>
                     </div>
 
-                    {/* Connector line (between cards on md+) */}
                     {i < steps.length - 1 && (
                       <div className="hidden md:block absolute top-1/2 -right-3 lg:-right-4 w-4 lg:w-6 z-10">
                         <ArrowRight size={16} className="text-[var(--color-border)] group-hover:text-[var(--color-brand-primary)]/50 transition-colors" />
                       </div>
                     )}
 
-                    <div className="flex items-start gap-4 mt-2">
+                    <div className="flex items-start gap-4 mt-2 flex-1">
                       <div className={`shrink-0 w-11 h-11 rounded-xl ${step.iconBg} flex items-center justify-center`}>
                         <step.icon size={20} />
                       </div>
-                      <div>
+                      <div className="flex-1">
                         <h3 className="font-bold text-[var(--color-text)] mb-1">{step.title}</h3>
                         <p className="text-sm text-[var(--color-text-muted)] leading-relaxed">{step.description}</p>
                       </div>
                     </div>
+
+                    {step.cta && (
+                      <div className="mt-4 ml-[60px]">
+                        <Link
+                          to={step.cta.href}
+                          className="inline-flex items-center gap-1 text-xs font-semibold text-[var(--color-brand-primary)] hover:underline"
+                          onClick={handleDismiss}
+                        >
+                          {step.cta.label} <ArrowRight size={12} />
+                        </Link>
+                      </div>
+                    )}
                   </motion.div>
                 ))}
               </div>
 
-              {/* Dismiss CTA */}
               <div className="flex justify-center mt-8">
                 <Button
                   variant="ghost"

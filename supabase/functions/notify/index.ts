@@ -161,7 +161,7 @@ async function sendEmail({ to, subject, html }: { to: string[]; subject: string;
       Authorization: `Bearer ${RESEND_API_KEY}`,
     },
     body: JSON.stringify({
-      from: "Bevisly <onboarding@resend.dev>", // Change if you have a custom domain
+      from: "Bevisly <hello@bevisly.com>",
       to,
       subject,
       html,
