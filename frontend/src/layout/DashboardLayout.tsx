@@ -1,5 +1,5 @@
 import { useState, useEffect, type ReactNode } from "react";
-import { Link, useLocation, useNavigate, useSearchParams } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import {
   LogOut,
@@ -10,9 +10,6 @@ import {
   ArrowLeft,
   ArrowRight,
   Plus,
-  ChevronDown,
-  Layers,
-  Search,
   Inbox,
   Users,
   HelpCircle,
@@ -24,8 +21,8 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
 import { useTheme } from "@/hooks/useTheme";
-import { getEmployerJobs, getEmployerSubmissionsWithFeedback } from "@/lib/api";
-import type { EmployerJob, EmployerSubmission } from "@/types";
+import { getEmployerSubmissionsWithFeedback } from "@/lib/api";
+import type { EmployerSubmission } from "@/types";
 import ContactModal from "@/components/common/ContactModal";
 import FeedbackButton from "@/components/common/FeedbackButton";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
@@ -52,34 +49,24 @@ export default function DashboardLayout({
   const [isSidebarOpen, setSidebarOpen] = useState(true);
   const [isContactOpen, setIsContactOpen] = useState(false);
   const [showSignOutConfirm, setShowSignOutConfirm] = useState(false);
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [jobs, setJobs] = useState<EmployerJob[]>([]);
   const [submissions, setSubmissions] = useState<EmployerSubmission[]>([]);
   const { user, signOut } = useAuth();
   const { setTheme } = useTheme();
   const location = useLocation();
   const navigate = useNavigate();
-  const [searchParams, setSearchParams] = useSearchParams();
 
   const role = user?.role || "candidate";
-  const selectedJobId = searchParams.get("jobId");
-  const selectedJob = jobs.find(j => j.id === selectedJobId);
 
   useEffect(() => {
     if (user?.role === "employer" && user?.id) {
-        Promise.all([
-            getEmployerJobs(user.id),
-            getEmployerSubmissionsWithFeedback(user.id)
-        ]).then(([jobsData, subsData]) => {
-            setJobs(jobsData);
-            setSubmissions(subsData);
-        }).catch(console.error);
+      getEmployerSubmissionsWithFeedback(user.id)
+        .then((subsData) => setSubmissions(subsData))
+        .catch(console.error);
     }
   }, [user?.role, user?.id]);
 
-  const needsReviewCount = submissions.filter(s =>
-    s.status === 'submitted' && (!s.feedback || s.feedback.length === 0)
+  const needsReviewCount = submissions.filter(
+    (s) => s.status === "submitted" && (!s.feedback || s.feedback.length === 0)
   ).length;
 
   // Employers default to light mode for a professional B2B appearance.
@@ -129,7 +116,8 @@ export default function DashboardLayout({
             { label: "My Profile", path: `/candidate/${user?.id}`, icon: UserCircle },
           ];
 
-  const footerIconClass = "p-2 text-[var(--color-text-muted)] hover:text-[var(--color-brand-primary)] hover:bg-[var(--color-brand-primary)]/10 rounded-lg transition-all";
+  const footerIconClass =
+    "p-2 text-[var(--color-text-muted)] hover:text-[var(--color-brand-primary)] hover:bg-[var(--color-brand-primary)]/10 rounded-lg transition-all";
 
   return (
     <div className="min-h-screen bg-[var(--color-bg)] transition-colors duration-300">
@@ -159,132 +147,9 @@ export default function DashboardLayout({
             )}
           </Link>
 
-          {/* ── GLOBAL CONTEXT SWITCHER (Employer Only) ─────────── */}
+          {/* Post Job (Employer only) */}
           {role === "employer" && (
-            <div className={`px-4 py-4 relative ${!isSidebarOpen ? "flex justify-center" : ""}`}>
-              <button
-                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                className={`
-                  flex items-center gap-2.5 transition-all duration-300 group
-                  ${isSidebarOpen
-                    ? "w-full px-3 py-2.5 bg-[var(--color-surface-hover)]/50 hover:bg-[var(--color-surface-hover)] border border-[var(--color-border)]/50 rounded-xl shadow-sm"
-                    : "w-11 h-11 justify-center bg-[var(--color-brand-primary)]/10 text-[var(--color-brand-primary)] rounded-xl hover:scale-105"
-                  }
-                `}
-                title={selectedJob ? `Viewing: ${selectedJob.title}` : "Context: All Jobs"}
-              >
-                <div className={`shrink-0 flex items-center justify-center ${isSidebarOpen ? "w-7 h-7 rounded-lg bg-[var(--color-brand-primary)]/10 text-[var(--color-brand-primary)]" : ""}`}>
-                   <Layers size={isSidebarOpen ? 16 : 20} />
-                </div>
-
-                {isSidebarOpen && (
-                  <>
-                    <div className="flex-1 text-left overflow-hidden">
-                      <p className="text-[10px] text-[var(--color-text-muted)] font-bold uppercase tracking-widest leading-none mb-1">Context</p>
-                      <p className="text-sm font-semibold text-[var(--color-text)] truncate leading-tight">
-                        {selectedJob?.title || "Overview (All Jobs)"}
-                      </p>
-                    </div>
-                    <ChevronDown
-                      size={14}
-                      className={`text-[var(--color-text-muted)] transition-transform duration-300 ${isDropdownOpen ? "rotate-180" : ""}`}
-                    />
-                  </>
-                )}
-              </button>
-
-              {/* Dropdown Menu */}
-              <AnimatePresence>
-                {isDropdownOpen && isSidebarOpen && (
-                  <>
-                    <div className="fixed inset-0 z-40" onClick={() => setIsDropdownOpen(false)} />
-
-                    <motion.div
-                      initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                      animate={{ opacity: 1, y: 0, scale: 1 }}
-                      exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                      className="absolute top-full left-4 right-4 mt-2 z-50 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-2xl shadow-2xl overflow-hidden backdrop-blur-xl"
-                    >
-                      <div className="p-2 border-b border-[var(--color-border)]/50 bg-[var(--color-surface-hover)]/30">
-                        <div className="relative">
-                          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)]" />
-                          <input
-                            type="text"
-                            placeholder="Find a job..."
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                            className="w-full pl-9 pr-4 py-2 text-xs bg-transparent border-0 focus:ring-0 text-[var(--color-text)] placeholder:text-[var(--color-text-muted)]"
-                            onClick={(e) => e.stopPropagation()}
-                          />
-                        </div>
-                      </div>
-
-                      <div className="max-h-[320px] overflow-y-auto p-1.5 custom-scrollbar">
-                        <button
-                          onClick={() => {
-                            setSearchParams({});
-                            setIsDropdownOpen(false);
-                            if (location.pathname !== "/employer") navigate("/employer");
-                          }}
-                          className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left transition-colors mb-1
-                            ${!selectedJobId ? "bg-[var(--color-brand-primary)]/10 text-[var(--color-brand-primary)] font-semibold" : "text-[var(--color-text)] hover:bg-[var(--color-surface-hover)]"}
-                          `}
-                        >
-                          <Layers size={14} />
-                          <span className="text-sm">Overview (All Jobs)</span>
-                        </button>
-
-                        <div className="px-3 py-2 text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-widest">Active Jobs</div>
-
-                        {jobs.filter(j => j.status === 'active' && j.title.toLowerCase().includes(searchQuery.toLowerCase())).map(job => (
-                          <button
-                            key={job.id}
-                            onClick={() => {
-                              setSearchParams({ jobId: job.id });
-                              setIsDropdownOpen(false);
-                              if (location.pathname !== "/employer") navigate("/employer");
-                            }}
-                            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left transition-colors mb-1
-                              ${selectedJobId === job.id ? "bg-[var(--color-brand-primary)]/10 text-[var(--color-brand-primary)] font-semibold" : "text-[var(--color-text)] hover:bg-[var(--color-surface-hover)]"}
-                            `}
-                          >
-                            <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />
-                            <span className="text-sm truncate">{job.title}</span>
-                          </button>
-                        ))}
-
-                        {jobs.filter(j => j.status !== 'active' && j.title.toLowerCase().includes(searchQuery.toLowerCase())).length > 0 && (
-                          <>
-                            <div className="px-3 py-2 text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-widest mt-2">Inactive</div>
-                            {jobs.filter(j => j.status !== 'active' && j.title.toLowerCase().includes(searchQuery.toLowerCase())).map(job => (
-                              <button
-                                key={job.id}
-                                onClick={() => {
-                                  setSearchParams({ jobId: job.id });
-                                  setIsDropdownOpen(false);
-                                  if (location.pathname !== "/employer") navigate("/employer");
-                                }}
-                                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left transition-colors opacity-60 hover:opacity-100
-                                  ${selectedJobId === job.id ? "bg-[var(--color-brand-primary)]/10 text-[var(--color-brand-primary)] font-semibold" : "text-[var(--color-text)] hover:bg-[var(--color-surface-hover)]"}
-                                `}
-                              >
-                                <div className="w-1.5 h-1.5 rounded-full bg-slate-400 shrink-0" />
-                                <span className="text-sm truncate">{job.title}</span>
-                              </button>
-                            ))}
-                          </>
-                        )}
-                      </div>
-                    </motion.div>
-                  </>
-                )}
-              </AnimatePresence>
-            </div>
-          )}
-
-          {/* Primary Action (Employer only) */}
-          {role === "employer" && (
-            <div className="px-4 py-4 mb-2">
+            <div className="px-4 py-4 pb-0">
               <motion.button
                 whileHover={{ scale: 1.02, y: -2 }}
                 whileTap={{ scale: 0.98 }}
@@ -367,10 +232,12 @@ export default function DashboardLayout({
                   )}
 
                   {link.badge !== undefined && link.badge > 0 && (
-                    <div className={`
+                    <div
+                      className={`
                       flex items-center justify-center rounded-full bg-red-500 text-white font-bold
                       ${isSidebarOpen ? "px-2 py-0.5 text-[10px] min-w-[20px]" : "absolute top-2 right-2 w-4 h-4 text-[8px]"}
-                    `}>
+                    `}
+                    >
                       {link.badge}
                     </div>
                   )}
@@ -384,7 +251,11 @@ export default function DashboardLayout({
           </nav>
 
           {/* User Footer */}
-          <div className={`p-4 border-t border-[var(--color-border)]/50 bg-[var(--color-surface-hover)]/30 flex ${isSidebarOpen ? "flex-row items-center gap-3" : "flex-col items-center gap-2"}`}>
+          <div
+            className={`p-4 border-t border-[var(--color-border)]/50 bg-[var(--color-surface-hover)]/30 flex ${
+              isSidebarOpen ? "flex-row items-center gap-3" : "flex-col items-center gap-2"
+            }`}
+          >
             <Link
               to={`/${role}/settings`}
               className={`flex items-center gap-3 group overflow-hidden ${isSidebarOpen ? "flex-1" : ""}`}
@@ -428,11 +299,7 @@ export default function DashboardLayout({
               )}
             </Link>
             <div className={`flex items-center gap-0.5 ${!isSidebarOpen ? "flex-col" : ""}`}>
-              <Link
-                to={`/${role}/settings`}
-                className={footerIconClass}
-                title="Settings"
-              >
+              <Link to={`/${role}/settings`} className={footerIconClass} title="Settings">
                 <Settings size={18} />
               </Link>
               <button
@@ -484,12 +351,8 @@ export default function DashboardLayout({
         )}
 
         {/* Content Area */}
-        <main
-          className={`flex-1 overflow-x-hidden ${fullWidth ? "p-0" : "p-4 md:p-8"}`}
-        >
-          <div
-            className={`animate-fade-in-up ${fullWidth ? "h-full" : "max-w-7xl mx-auto"}`}
-          >
+        <main className={`flex-1 overflow-x-hidden ${fullWidth ? "p-0" : "p-4 md:p-8"}`}>
+          <div className={`animate-fade-in-up ${fullWidth ? "h-full" : "max-w-7xl mx-auto"}`}>
             {children}
           </div>
         </main>
@@ -508,10 +371,7 @@ export default function DashboardLayout({
         </button>
       </div>
 
-      <ContactModal
-        isOpen={isContactOpen}
-        onClose={() => setIsContactOpen(false)}
-      />
+      <ContactModal isOpen={isContactOpen} onClose={() => setIsContactOpen(false)} />
 
       <ConfirmDialog
         open={showSignOutConfirm}

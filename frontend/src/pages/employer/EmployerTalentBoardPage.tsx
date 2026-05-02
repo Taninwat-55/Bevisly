@@ -2,13 +2,33 @@ import { useEffect, useState, useMemo } from "react";
 import { createPortal } from "react-dom";
 import { useSearchParams } from "react-router-dom";
 import toast from "react-hot-toast";
-import { getEmployerJobs, getEmployerSubmissionsWithFeedback } from "@/lib/api";
+import {
+  getEmployerJobs,
+  getEmployerSubmissionsWithFeedback,
+  getJobWithTasks,
+  updateJobWithTasks,
+  updateJobStatus,
+  deleteJob,
+} from "@/lib/api";
+import { getErrorMessage, withTimeout } from "@/lib/errorUtils";
 import { useAuth } from "@/hooks/useAuth";
 import type { EmployerJob, EmployerSubmission } from "@/types";
-import { Briefcase, Users, ArrowLeft } from "lucide-react";
+import type { ProofTask } from "@/types";
+import {
+  Briefcase,
+  Users,
+  ArrowLeft,
+  MoreVertical,
+  Pause,
+  Play,
+  Archive,
+  Trash2,
+} from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import TalentBoard from "@/components/talent/TalentBoard";
 import EmployerReviewProof from "./EmployerReviewProof";
+import EmployerJobForm from "./EmployerJobForm";
+import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { AnimatePresence, motion } from "framer-motion";
 
 export default function EmployerTalentBoardPage() {
@@ -18,6 +38,14 @@ export default function EmployerTalentBoardPage() {
   const [submissions, setSubmissions] = useState<EmployerSubmission[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedSubmissionId, setSelectedSubmissionId] = useState<string | null>(null);
+
+  // Job management state
+  const [isEditingJob, setIsEditingJob] = useState(false);
+  const [editJobData, setEditJobData] = useState<Partial<EmployerJob & { proof_tasks: ProofTask[] }> | null>(null);
+  const [editJobLoading, setEditJobLoading] = useState(false);
+  const [showJobActions, setShowJobActions] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const selectedJobId = searchParams.get("jobId");
   const selectedJob = jobs.find((j) => j.id === selectedJobId);
@@ -51,6 +79,46 @@ export default function EmployerTalentBoardPage() {
     () => submissions.filter((s) => s.job_id === selectedJobId),
     [submissions, selectedJobId]
   );
+
+  const handleStatusUpdate = async (status: string) => {
+    if (!selectedJobId) return;
+    try {
+      await withTimeout(
+        updateJobStatus(selectedJobId, status),
+        10000,
+        () => toast.loading("This is taking longer than expected...", { id: "timeout-warning" })
+      );
+      toast.dismiss("timeout-warning");
+      toast.success(`Job marked as ${status}`);
+      setJobs((prev) => prev.map((j) => (j.id === selectedJobId ? { ...j, status } : j)));
+      setShowJobActions(false);
+    } catch (error: unknown) {
+      toast.dismiss("timeout-warning");
+      toast.error(getErrorMessage(error, "Failed to update status"));
+    }
+  };
+
+  const handleDeleteJob = async () => {
+    if (!selectedJobId) return;
+    setIsDeleting(true);
+    try {
+      await withTimeout(
+        deleteJob(selectedJobId),
+        10000,
+        () => toast.loading("This is taking longer than expected...", { id: "timeout-warning" })
+      );
+      toast.dismiss("timeout-warning");
+      toast.success("Job deleted");
+      setJobs((prev) => prev.filter((j) => j.id !== selectedJobId));
+      setSearchParams({});
+      setConfirmDelete(false);
+    } catch (error: unknown) {
+      toast.dismiss("timeout-warning");
+      toast.error(getErrorMessage(error, "Failed to delete job"));
+    } finally {
+      setIsDeleting(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -91,8 +159,87 @@ export default function EmployerTalentBoardPage() {
                 </span>
               </h1>
               <p className="text-[var(--color-text-muted)] text-sm mt-1">
-                Drag candidates through the hiring pipeline.
+                Manage candidates and move them through the hiring pipeline.
               </p>
+            </div>
+
+            {/* Job Management Toolbar */}
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={async () => {
+                  if (!selectedJobId) return;
+                  setEditJobLoading(true);
+                  try {
+                    const data = await getJobWithTasks(selectedJobId);
+                    setEditJobData(data as unknown as EmployerJob & { proof_tasks: ProofTask[] });
+                    setIsEditingJob(true);
+                  } catch {
+                    toast.error("Failed to load job for editing");
+                  } finally {
+                    setEditJobLoading(false);
+                  }
+                }}
+              >
+                {editJobLoading ? "Loading..." : "Edit Job"}
+              </Button>
+
+              <div className="relative">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-9 w-9 p-0"
+                  onClick={() => setShowJobActions(!showJobActions)}
+                >
+                  <MoreVertical size={18} />
+                </Button>
+
+                {showJobActions && (
+                  <div className="absolute right-0 top-full mt-2 w-48 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-xl shadow-xl z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+                    <button
+                      onClick={() =>
+                        handleStatusUpdate(
+                          selectedJob.status === "active" ? "paused" : "active"
+                        )
+                      }
+                      className="w-full text-left px-4 py-2.5 text-sm hover:bg-[var(--color-surface-hover)] flex items-center gap-2 text-[var(--color-text)] transition-colors"
+                    >
+                      {selectedJob.status === "active" ? (
+                        <><Pause size={14} /> Pause Job</>
+                      ) : (
+                        <><Play size={14} /> Resume Job</>
+                      )}
+                    </button>
+                    <button
+                      onClick={() => handleStatusUpdate("closed")}
+                      className="w-full text-left px-4 py-2.5 text-sm hover:bg-[var(--color-surface-hover)] flex items-center gap-2 text-[var(--color-text)] transition-colors"
+                    >
+                      <Archive size={14} /> Close Job
+                    </button>
+                    <button
+                      onClick={() => window.open(`/jobs/${selectedJobId}`, "_blank")}
+                      className="w-full text-left px-4 py-2.5 text-sm hover:bg-[var(--color-surface-hover)] flex items-center gap-2 text-[var(--color-text)] transition-colors"
+                    >
+                      <Users size={14} /> View Public Page
+                    </button>
+                    <div className="h-px bg-[var(--color-border)] my-1" />
+                    <button
+                      onClick={() => {
+                        setShowJobActions(false);
+                        setConfirmDelete(true);
+                      }}
+                      className="w-full text-left px-4 py-2.5 text-sm hover:bg-red-50 dark:hover:bg-red-900/10 text-red-500 flex items-center gap-2 transition-colors"
+                    >
+                      <Trash2 size={14} /> Delete Job
+                    </button>
+                  </div>
+                )}
+
+                {showJobActions && (
+                  <div className="fixed inset-0 z-40" onClick={() => setShowJobActions(false)} />
+                )}
+              </div>
             </div>
           </div>
 
@@ -165,6 +312,72 @@ export default function EmployerTalentBoardPage() {
         </div>
       )}
 
+      {/* ── Edit Job Slide-Over ── */}
+      {createPortal(
+        <AnimatePresence>
+          {isEditingJob && editJobData && (
+            <>
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm"
+                onClick={() => { setIsEditingJob(false); setEditJobData(null); }}
+              />
+              <motion.div
+                initial={{ x: "100%" }}
+                animate={{ x: 0 }}
+                exit={{ x: "100%" }}
+                transition={{ type: "spring", damping: 30, stiffness: 300 }}
+                className="fixed top-0 right-0 z-50 h-full w-full max-w-2xl bg-[var(--color-bg)] border-l border-[var(--color-border)] shadow-2xl overflow-y-auto"
+              >
+                <div className="sticky top-0 z-10 bg-[var(--color-bg)]/80 backdrop-blur-md border-b border-[var(--color-border)] px-6 py-4 flex items-center justify-between">
+                  <h2 className="text-lg font-bold text-[var(--color-text)]">Edit Job</h2>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/10"
+                      onClick={() => { setIsEditingJob(false); setConfirmDelete(true); }}
+                    >
+                      Delete Job
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => { setIsEditingJob(false); setEditJobData(null); }}
+                    >
+                      ✕ Close
+                    </Button>
+                  </div>
+                </div>
+                <div className="p-6">
+                  <EmployerJobForm
+                    mode="edit"
+                    defaultValues={editJobData}
+                    onSubmit={async (values) => {
+                      if (!selectedJobId) return;
+                      await updateJobWithTasks(selectedJobId, values);
+                    }}
+                    submitLabel="Update Job"
+                    onSuccess={async () => {
+                      toast.success("Job updated!");
+                      setIsEditingJob(false);
+                      setEditJobData(null);
+                      if (user?.id) {
+                        const updatedJobs = await getEmployerJobs(user.id);
+                        setJobs(updatedJobs);
+                      }
+                    }}
+                  />
+                </div>
+              </motion.div>
+            </>
+          )}
+        </AnimatePresence>,
+        document.body
+      )}
+
       {/* ── Review Proof Slide-Over ── */}
       {createPortal(
         <AnimatePresence>
@@ -206,6 +419,19 @@ export default function EmployerTalentBoardPage() {
         </AnimatePresence>,
         document.body
       )}
+
+      {/* Delete Job Confirmation */}
+      <ConfirmDialog
+        open={confirmDelete}
+        title="Delete this job?"
+        message="This will permanently remove the job listing and all associated candidate submissions. This cannot be undone."
+        confirmLabel="Delete Job"
+        cancelLabel="Keep It"
+        variant="danger"
+        isLoading={isDeleting}
+        onConfirm={handleDeleteJob}
+        onCancel={() => setConfirmDelete(false)}
+      />
     </div>
   );
 }
