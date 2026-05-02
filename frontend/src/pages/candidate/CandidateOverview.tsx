@@ -22,7 +22,7 @@ import WelcomeBanner from "@/components/common/WelcomeBanner";
 export default function CandidateDashboard() {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const { proofsCompleted, avgScore, jobsApplied, credits } = useCandidateStats();
+  const { proofsCompleted, avgScore, jobsApplied, credits, bevislyScore } = useCandidateStats();
   const [jobs, setJobs] = useState<CandidateJob[]>([]);
   const [loadingJobs, setLoadingJobs] = useState(true);
   const [applications, setApplications] = useState<Awaited<ReturnType<typeof getCandidateApplications>>>([]);
@@ -104,8 +104,8 @@ export default function CandidateDashboard() {
                 Welcome back, <span className="text-transparent bg-clip-text bg-gradient-to-r from-[var(--color-brand-primary)] to-[var(--color-brand-secondary)] capitalize">{displayName}</span>
               </h1>
               <p className="text-[var(--color-text-muted)] text-lg max-w-xl">
-                You have <strong className="text-[var(--color-text)]">{credits} Credits</strong> available.
-                Complete more proof tasks to earn badges and unlock exclusive roles.
+                Your Bevisly Score is <strong className="text-[var(--color-text)]">{bevislyScore ?? 0}</strong>.
+                Complete proof tasks and practice challenges to climb the leaderboard.
               </p>
             </div>
             <div className="flex items-center gap-3">
@@ -116,7 +116,18 @@ export default function CandidateDashboard() {
           </div>
 
           {/* Stats Row within Hero */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-8 md:mt-12 max-w-2xl">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-8 md:mt-12 max-w-3xl">
+            {/* Bevisly Score — flagship card */}
+            <div className="glass-panel bg-gradient-to-br from-indigo-500/10 to-purple-500/10 dark:from-indigo-500/20 dark:to-purple-500/20 p-4 rounded-2xl border border-indigo-300/40 dark:border-indigo-700/40 backdrop-blur-md">
+              <div className="flex items-center gap-3 mb-1">
+                <div className="p-2 rounded-lg bg-indigo-500/15 text-indigo-500">
+                  <Zap size={18} />
+                </div>
+                <span className="text-sm text-[var(--color-text-muted)] font-medium">Bevisly Score</span>
+              </div>
+              <div className="text-2xl font-bold text-indigo-600 dark:text-indigo-400">{bevislyScore ?? 0}</div>
+            </div>
+
             <div className="glass-panel bg-white/50 dark:bg-black/20 p-4 rounded-2xl border border-[var(--color-border)]/50 backdrop-blur-md">
               <div className="flex items-center gap-3 mb-1">
                 <div className="p-2 rounded-lg bg-emerald-500/10 text-emerald-500">

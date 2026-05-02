@@ -79,7 +79,7 @@ Concrete, scoped features to build after the first wave of employer feedback.
 ---
 
 ### 1. Bevisly Score (Unified Skill Score)
-**Status:** 🟡 Queued — Sprint #1
+**Status:** 🟢 Done — Sprint #1
 
 We already have a Leaderboard and a Credits system. The next step is a single, meaningful **Bevisly Score** — a composite number that grows every time a candidate completes a task. Think chess Elo rating, not a follower count.
 

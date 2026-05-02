@@ -8,7 +8,7 @@ import { motion } from "framer-motion";
 type ProfileLite = {
   id: string;
   full_name: string | null;
-  credits: number | null;
+  bevisly_score: number | null;
   avatar_url?: string | null;
 };
 
@@ -20,8 +20,8 @@ export default function PublicLeaderboard() {
     const fetchLeaders = async () => {
       const { data, error } = await supabase
         .from("profiles")
-        .select("id, full_name, credits, avatar_url")
-        .order("credits", { ascending: false })
+        .select("id, full_name, bevisly_score, avatar_url")
+        .order("bevisly_score", { ascending: false })
         .limit(20);
 
       if (error) console.error("Error fetching leaderboard:", error);
@@ -122,9 +122,9 @@ export default function PublicLeaderboard() {
                   <div className="flex items-center justify-center gap-1.5 mt-2">
                     <Star size={14} className={isFirst ? "text-yellow-500 fill-yellow-500" : "text-slate-400"} />
                     <span className="text-xl font-black text-[var(--color-brand-primary)]">
-                      {user.credits ?? 0}
+                      {user.bevisly_score ?? 0}
                     </span>
-                    <span className="text-xs font-bold text-[var(--color-text-muted)] uppercase tracking-widest">pts</span>
+                    <span className="text-xs font-bold text-[var(--color-text-muted)] uppercase tracking-widest">Score</span>
                   </div>
                 </Link>
 
@@ -178,9 +178,9 @@ export default function PublicLeaderboard() {
 
                   <div className="flex flex-col items-end">
                     <span className="text-lg font-bold text-[var(--color-text)]">
-                      {user.credits ?? 0}
+                      {user.bevisly_score ?? 0}
                     </span>
-                    <span className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase">Points</span>
+                    <span className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase">Score</span>
                   </div>
                 </Link>
               ))

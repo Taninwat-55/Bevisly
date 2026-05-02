@@ -7,6 +7,7 @@ export interface CandidateStats {
   avgScore: number | null;
   jobsApplied: number;
   credits: number | null;
+  bevislyScore: number | null;
   loading: boolean;
 }
 
@@ -17,6 +18,7 @@ export function useCandidateStats(): CandidateStats {
     avgScore: null,
     jobsApplied: 0,
     credits: null,
+    bevislyScore: null,
     loading: true,
   });
 
@@ -56,10 +58,10 @@ export function useCandidateStats(): CandidateStats {
           .select("*", { count: "exact", head: true })
           .eq("user_id", user.id);
 
-        // Credits
+        // Credits + Bevisly Score
         const { data: profile } = await supabase
           .from("profiles")
-          .select("credits")
+          .select("credits, bevisly_score")
           .eq("id", user.id)
           .maybeSingle();
 
@@ -67,7 +69,8 @@ export function useCandidateStats(): CandidateStats {
           proofsCompleted: totalProofs || 0,
           avgScore,
           jobsApplied: appliedCount || 0,
-          credits: profile?.credits || 0,
+          credits: profile?.credits ?? 0,
+          bevislyScore: profile?.bevisly_score ?? 0,
           loading: false,
         });
       } catch (err) {

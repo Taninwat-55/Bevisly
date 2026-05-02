@@ -5,7 +5,7 @@ import { supabase } from "@/lib/supabaseClient";
 import { useAuth } from "@/hooks/useAuth";
 import {
     Copy, Loader2, Star, BadgeCheck, Briefcase,
-    Lock, UserX, Code
+    Lock, UserX, Code, Zap
 } from "lucide-react";
 import toast from "react-hot-toast";
 import type { ProfileLite, ProofCardLite } from "@/types/shared";
@@ -18,6 +18,7 @@ interface PublicProfile extends ProfileLite {
     is_public?: boolean;
     email?: string | null;
     skills?: string[] | null;
+    bevisly_score?: number | null;
 }
 
 export default function PublicProfilePage() {
@@ -41,7 +42,7 @@ export default function PublicProfilePage() {
                 // Look up by username (SEO route) or by UUID (legacy route)
                 const query = supabase
                     .from("profiles")
-                    .select("id, full_name, credits, email, avatar_url, skills, is_public, username");
+                    .select("id, full_name, credits, bevisly_score, email, avatar_url, skills, is_public, username");
 
                 const { data: prof, error: profErr } = username
                     ? await query.eq("username", username.toLowerCase()).single()
@@ -258,6 +259,12 @@ export default function PublicProfilePage() {
                                     <BadgeCheck size={16} className="text-emerald-500" />
                                     {cards.length} Verified Proof{cards.length === 1 ? '' : 's'}
                                 </span>
+                                {(profile.bevisly_score ?? 0) > 0 && (
+                                    <span className="flex items-center gap-1.5 bg-indigo-50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-300 px-3 py-1 rounded-full font-bold">
+                                        <Zap size={16} className="text-indigo-500" />
+                                        {profile.bevisly_score} Bevisly Score
+                                    </span>
+                                )}
                             </div>
 
                             {/* CTA Buttons */}
