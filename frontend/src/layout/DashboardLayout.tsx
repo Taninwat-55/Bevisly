@@ -18,7 +18,7 @@ import {
   Zap,
   Kanban,
 } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
 import { useTheme } from "@/hooks/useTheme";
 import { getEmployerSubmissionsWithFeedback } from "@/lib/api";
