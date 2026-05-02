@@ -18,6 +18,7 @@ import {
   HelpCircle,
   Trophy,
   UserCircle,
+  Zap,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
@@ -27,6 +28,14 @@ import type { EmployerJob, EmployerSubmission } from "@/types";
 import ContactModal from "@/components/common/ContactModal";
 import FeedbackButton from "@/components/common/FeedbackButton";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
+
+// CANDIDATE & EMPLOYER SIDEBAR
+// This layout owns the sidebar for /candidate and /employer routes.
+// The sidebar nav links are defined in the `links` array below (~line 100).
+// Admin navigation lives in a separate component: src/components/Sidebar.tsx (used by AdminLayout.tsx).
+//
+// TODO: consolidate into a single Sidebar component that handles all three roles.
+// Tracked intent: merge Sidebar.tsx and this layout's sidebar into one component.
 
 interface DashboardLayoutProps {
   children: ReactNode;
@@ -113,6 +122,7 @@ export default function DashboardLayout({
             { label: "Dashboard", path: "/candidate", icon: LayoutDashboard },
             { label: "Find Jobs", path: "/candidate/jobs", icon: Briefcase },
             { label: "My Proofs", path: "/candidate/proofs", icon: FileCheck, featured: true },
+            { label: "Practice", path: "/candidate/practice", icon: Zap },
             { label: "Leaderboard", path: "/leaderboard", icon: Trophy },
             { label: "My Profile", path: `/candidate/${user?.id}`, icon: UserCircle },
           ];

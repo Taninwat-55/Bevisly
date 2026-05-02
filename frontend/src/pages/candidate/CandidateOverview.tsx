@@ -3,6 +3,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useCandidateStats } from "@/hooks/useCandidateStats";
 import { getAllJobs } from "@/lib/api/jobs";
 import { getCandidateApplications } from "@/lib/api/submissions";
+import { supabase } from "@/lib/supabaseClient";
 import type { CandidateJob } from "@/types";
 import JobCard from "@/components/jobs/JobCard";
 import ApplicationStatusTracker from "@/components/candidate/ApplicationStatusTracker";
@@ -26,6 +27,7 @@ export default function CandidateDashboard() {
   const [loadingJobs, setLoadingJobs] = useState(true);
   const [applications, setApplications] = useState<Awaited<ReturnType<typeof getCandidateApplications>>>([]);
   const [loadingApplications, setLoadingApplications] = useState(true);
+  const [hasPracticed, setHasPracticed] = useState(true); // default true to avoid flash
 
   useEffect(() => {
     const fetchJobs = async () => {
@@ -49,6 +51,15 @@ export default function CandidateDashboard() {
       .finally(() => setLoadingApplications(false));
   }, [user?.id]);
 
+  useEffect(() => {
+    if (!user?.id) return;
+    supabase
+      .from("practice_submissions")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", user.id)
+      .then(({ count }) => setHasPracticed((count ?? 0) > 0));
+  }, [user?.id]);
+
   const displayName = user?.email?.split("@")[0] || "Candidate";
 
   return (
@@ -60,24 +71,26 @@ export default function CandidateDashboard() {
         userName={displayName}
       />
 
-      {/* ── Practice & Improve Banner ────────────────────────────── */}
-      <div className="flex items-center justify-between gap-4 rounded-2xl border border-[var(--color-brand-primary)]/30 bg-[var(--color-brand-primary)]/5 px-6 py-4">
-        <div className="flex items-center gap-3">
-          <div className="p-2 rounded-lg bg-[var(--color-brand-primary)]/15 text-[var(--color-brand-primary)]">
-            <Zap size={18} />
+      {/* ── Practice & Improve Banner (hidden once the user has any submission) ── */}
+      {!hasPracticed && (
+        <div className="flex items-center justify-between gap-4 rounded-2xl border border-[var(--color-brand-primary)]/30 bg-[var(--color-brand-primary)]/5 px-6 py-4">
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-lg bg-[var(--color-brand-primary)]/15 text-[var(--color-brand-primary)]">
+              <Zap size={18} />
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-[var(--color-text)]">Practice & Improve</p>
+              <p className="text-xs text-[var(--color-text-muted)]">Complete AI-graded challenges and earn credits instantly</p>
+            </div>
           </div>
-          <div>
-            <p className="text-sm font-semibold text-[var(--color-text)]">Practice & Improve</p>
-            <p className="text-xs text-[var(--color-text-muted)]">Complete AI-graded challenges and earn credits instantly</p>
-          </div>
+          <button
+            onClick={() => navigate("/candidate/practice")}
+            className="shrink-0 px-4 py-2 rounded-xl bg-[var(--color-brand-primary)] text-white text-sm font-semibold hover:bg-[var(--color-brand-primary)]/90 transition-colors whitespace-nowrap"
+          >
+            Start Practicing →
+          </button>
         </div>
-        <button
-          onClick={() => navigate("/candidate/practice")}
-          className="shrink-0 px-4 py-2 rounded-xl bg-[var(--color-brand-primary)] text-white text-sm font-semibold hover:bg-[var(--color-brand-primary)]/90 transition-colors whitespace-nowrap"
-        >
-          Start Practicing →
-        </button>
-      </div>
+      )}
 
       {/* ── Hero Section ────────────────────────────── */}
       <div className="relative group overflow-hidden rounded-3xl p-8 lg:p-10 border border-[var(--color-border)] bg-[var(--color-surface)] shadow-2xl">

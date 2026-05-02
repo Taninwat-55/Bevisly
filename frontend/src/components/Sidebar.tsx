@@ -1,100 +1,47 @@
+// ADMIN-ONLY SIDEBAR
+// This component is used exclusively by AdminLayout.tsx for the /admin routes.
+//
+// Candidate and employer navigation lives in DashboardLayout.tsx (src/layout/DashboardLayout.tsx),
+// which handles its own sidebar inline. If you're adding nav links for candidates or employers,
+// edit the `links` array in DashboardLayout.tsx — not here.
+//
+// TODO: consolidate into a single Sidebar component that handles all three roles.
+// Tracked intent: merge this and DashboardLayout's sidebar into one component.
+
 import { useState } from "react";
 import { NavLink, Link } from "react-router-dom";
 import {
-  LayoutDashboard,
-  Briefcase,
-  FileText,
-  Users,
   Shield,
-  FolderKanban,
-  PlusCircle,
+  Users,
+  Briefcase,
   Settings,
-  House,
   ChevronLeft,
   ChevronRight,
   LogOut,
   MessageCircle,
   Database,
-  Zap,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 
 interface SidebarProps {
-  role?: "candidate" | "employer" | "admin" | "demo_admin";
+  role?: "admin" | "demo_admin";
 }
 
 export default function Sidebar({ role }: SidebarProps) {
   const { user, signOut } = useAuth();
   const [collapsed, setCollapsed] = useState(false);
-  const rawRole = role || user?.role || "candidate";
-  // Treat demo_admin as admin for sidebar display
+  const rawRole = role || user?.role || "admin";
   const resolvedRole = rawRole === "demo_admin" ? "admin" : rawRole;
 
-  /* Accent color per role */
-  const accentColorMap = {
-    candidate: "var(--color-candidate-dark)",
-    employer: "var(--color-employer-dark)",
-    admin: "var(--color-brand-primary)",
-  } as const;
-  const accentColor = accentColorMap[resolvedRole];
+  const accentColor = "var(--color-brand-primary)";
 
-  /* Role-based links (Settings removed from here) */
-  const links =
-    resolvedRole === "employer"
-      ? [
-        { to: "/employer", label: "Overview", icon: <House size={17} /> },
-        {
-          to: "/employer/dashboard",
-          label: "Dashboard",
-          icon: <LayoutDashboard size={17} />,
-        },
-        {
-          to: "/employer/jobs",
-          label: "My Jobs",
-          icon: <Briefcase size={17} />,
-        },
-        {
-          to: "/employer/jobs/new",
-          label: "Post a Job",
-          icon: <PlusCircle size={17} />,
-        },
-        {
-          to: "/employer/submissions",
-          label: "Submissions",
-          icon: <FolderKanban size={17} />,
-        },
-      ]
-      : resolvedRole === "admin"
-        ? [
-          { to: "/admin", label: "Dashboard", icon: <Shield size={17} /> },
-          { to: "/admin/users", label: "Users", icon: <Users size={17} /> },
-          { to: "/admin/jobs", label: "Jobs Overview", icon: <Briefcase size={17} /> },
-          { to: "/admin/feedback-messages", label: "Platform Feedback", icon: <MessageCircle size={17} /> },
-          { to: "/admin/data-viewer", label: "Data Viewer", icon: <Database size={17} /> },
-        ]
-        : [
-          { to: "/candidate", label: "Overview", icon: <House size={17} /> },
-          {
-            to: "/candidate/dashboard",
-            label: "Dashboard",
-            icon: <LayoutDashboard size={17} />,
-          },
-          {
-            to: "/candidate/jobs",
-            label: "Jobs",
-            icon: <Briefcase size={17} />,
-          },
-          {
-            to: "/candidate/proofs",
-            label: "My Proofs",
-            icon: <FileText size={17} />,
-          },
-          {
-            to: "/candidate/practice",
-            label: "Practice",
-            icon: <Zap size={17} />,
-          },
-        ];
+  const links = [
+    { to: "/admin", label: "Dashboard", icon: <Shield size={17} /> },
+    { to: "/admin/users", label: "Users", icon: <Users size={17} /> },
+    { to: "/admin/jobs", label: "Jobs Overview", icon: <Briefcase size={17} /> },
+    { to: "/admin/feedback-messages", label: "Platform Feedback", icon: <MessageCircle size={17} /> },
+    { to: "/admin/data-viewer", label: "Data Viewer", icon: <Database size={17} /> },
+  ];
 
   return (
     <aside
@@ -106,11 +53,7 @@ export default function Sidebar({ role }: SidebarProps) {
       <div className="flex items-center justify-between px-4 py-3 border-b border-[var(--color-border)]">
         {!collapsed && (
           <span className="font-semibold text-[var(--color-text)] whitespace-nowrap select-none flex items-center gap-2">
-            {resolvedRole === "candidate"
-              ? "🎓 Candidate"
-              : resolvedRole === "employer"
-                ? "🏢 Employer"
-                : <><Shield size={15} className="text-[var(--color-brand-primary)]" /> Admin</>}
+            <Shield size={15} className="text-[var(--color-brand-primary)]" /> Admin
           </span>
         )}
         <button

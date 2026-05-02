@@ -8,7 +8,7 @@ import {
   gradePracticeSubmission,
 } from "@/lib/api/practice";
 import type { PracticeTask, PracticeSubmission } from "@/lib/api/practice";
-import { ArrowLeft, Clock, Zap } from "lucide-react";
+import { ArrowLeft, Clock, Zap, ChevronDown, ChevronUp } from "lucide-react";
 import toast from "react-hot-toast";
 
 type GradeResult = {
@@ -69,6 +69,7 @@ export default function PracticeWorkspace() {
   const [textContent, setTextContent] = useState("");
   const [linkContent, setLinkContent] = useState("");
   const [linkNotes, setLinkNotes] = useState("");
+  const [showFullTask, setShowFullTask] = useState(false);
 
   useEffect(() => {
     if (!id || !user?.id) return;
@@ -164,6 +165,25 @@ export default function PracticeWorkspace() {
           <ArrowLeft size={15} />
           All Practice Tasks
         </Link>
+
+        {/* Task context */}
+        {task && (
+          <div className="space-y-1">
+            <p className="text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wide">{task.category} · {task.expected_time}</p>
+            <h1 className="text-xl font-bold text-[var(--color-text)]">{task.title}</h1>
+            <div>
+              <p className={`text-sm text-[var(--color-text-muted)] leading-relaxed whitespace-pre-wrap ${showFullTask ? "" : "line-clamp-2"}`}>
+                {task.description}
+              </p>
+              <button
+                onClick={() => setShowFullTask(v => !v)}
+                className="mt-1 inline-flex items-center gap-1 text-xs text-[var(--color-brand-primary)] hover:underline"
+              >
+                {showFullTask ? <><ChevronUp size={12} /> Hide task</> : <><ChevronDown size={12} /> Show full task</>}
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* Score Card */}
         <div className={`glass-panel rounded-2xl border p-8 text-center ${scoreBg(gradeResult.score)}`}>
