@@ -16,7 +16,7 @@ const navLinks: NavLink[] = [
   { label: "Employers", to: "/learn-more?mode=employer" },
   { label: "Jobs", to: "/jobs" },
   { label: "About", to: "/about" },
-  { label: "Pricing", href: "/#pricing" },
+  { label: "Pricing", to: "/pricing" },
 ];
 
 const mobileLinks: NavLink[] = navLinks;

@@ -46,6 +46,7 @@ const ProfilePage = lazy(() => import("@/pages/public/ProfilePage"));
 const LeaderboardPage = lazy(() => import("@/pages/public/LeaderboardPage"));
 const PublicProofView = lazy(() => import("@/pages/public/PublicProofView"));
 const LearnMorePage = lazy(() => import("@/pages/public/learn-more/LearnMorePage"));
+const PricingPage = lazy(() => import("@/pages/public/PricingPage"));
 const JobDetailPage = lazy(() => import("@/pages/jobs/JobDetailPage"));
 const JobListingPage = lazy(() => import("@/pages/jobs/JobListingPage"));
 
@@ -62,6 +63,7 @@ export const router = createBrowserRouter([
       { path: "/@:username", element: <ProfilePage /> }, // SEO-friendly username URLs
       { path: "/proof/:id", element: <PublicProofView /> }, // Shareable proof certificate
       { path: "/learn-more", element: <LearnMorePage /> },
+      { path: "/pricing", element: <PricingPage /> },
       { path: "/privacy", element: <PrivacyPolicy /> },
       { path: "/about", element: <AboutPage /> },
     ],

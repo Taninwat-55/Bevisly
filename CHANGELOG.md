@@ -4,6 +4,23 @@ All notable features and changes to Bevis MVP are recorded here in plain languag
 
 ---
 
+## 2026-05-02 — Dedicated Pricing Page
+
+Replaced the shallow pricing section on the landing page with a full `/pricing` route. The new page covers:
+- **Employer plans**: Free ($0), Starter ($149/mo or $119 annual), Growth ($299/mo or $239 annual). Annual billing is on by default.
+- **Candidate plans**: Always free core tier; Bevisly Plus ($9/mo or $7 annual) for advanced profile features.
+- Monthly/annual billing toggle with live price switching and a "Save 20%" badge.
+- Full feature comparison table (collapsible by category: Hiring, Signals & Trust, Pipeline & Discovery, Support).
+- Add-ons section: Featured Job Boost at $99/job/30 days.
+- Value anchor: "One bad hire costs $15,000+" to anchor plan cost against real business risk.
+- 6-question FAQ tailored separately for employer and candidate modes.
+- Bottom CTA strip with 14-day free trial callout.
+- All plan CTAs route to `/auth?mode=signup` — payment not wired yet (Stripe pending).
+
+The landing page pricing section replaced with a lean teaser pointing to `/pricing`. Navbar, footer, and route config all updated.
+
+---
+
 ## 2026-05-02 — Platform Polish & Infrastructure
 
 ### Employer Reply-To Email Fix

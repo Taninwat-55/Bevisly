@@ -40,7 +40,7 @@ export default function LandingFooter() {
               <Link to="/learn-more" className="text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors">
                 How It Works
               </Link>
-              <Link to="/#pricing" className="text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors">
+              <Link to="/pricing" className="text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors">
                 Pricing
               </Link>
               <Link to="/leaderboard" className="text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors">

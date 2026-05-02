@@ -2,13 +2,11 @@ import { useState, useRef } from "react";
 import { Helmet } from "react-helmet-async";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/Button";
-import { ArrowRight, CheckCircle, Play, Check, Search, Loader2 } from "lucide-react";
-import { useAuth } from "@/hooks/useAuth";
+import { ArrowRight, CheckCircle, Play, Search, Loader2 } from "lucide-react";
 import type { GeneratedJobListing } from "@/lib/api/ai";
 import { generateJobListing } from "@/lib/api/ai";
 import toast from "react-hot-toast";
 import AILoadingState from "@/components/common/AILoadingState";
-import RequestAccessModal from "@/components/common/RequestAccessModal";
 import ContactModal from "@/components/common/ContactModal";
 import ReactMarkdown, { type Components } from "react-markdown";
 import DOMPurify from "dompurify";
@@ -28,9 +26,6 @@ const markdownComponents: Components = {
 
 export default function LandingPage() {
   const navigate = useNavigate();
-  const { user } = useAuth();
-  const [pricingMode, setPricingMode] = useState<"employer" | "candidate">("employer");
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const [isContactOpen, setIsContactOpen] = useState(false);
 
   // Magic Box State
@@ -110,18 +105,6 @@ export default function LandingPage() {
     } finally {
       setIsGenerating(false);
     }
-  };
-
-  const handleCTA = () => {
-    if (user) {
-      if (user.role === "employer") return navigate("/employer");
-      return navigate("/candidate");
-    }
-    navigate("/auth");
-  };
-
-  const handleRequestAccess = () => {
-    setIsModalOpen(true);
   };
 
   return (
@@ -593,149 +576,28 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* ── PRICING SECTION ────────────────────────────── */}
-        <section id="pricing" className="py-24 bg-[var(--color-bg)]">
-          <div className="max-w-7xl mx-auto px-6">
-            <div className="text-center mb-12">
-              <h2 className="text-3xl md:text-5xl font-bold font-display text-[var(--color-text)] mb-6">
-                Simple, transparent pricing
-              </h2>
-              <p className="text-[var(--color-text-muted)] text-lg max-w-2xl mx-auto mb-8">
-                Currently in Beta. Early adopters get special rates.
-              </p>
-
-              {/* Toggle */}
-              <div className="inline-flex items-center p-1 rounded-full bg-[var(--color-surface)] border border-[var(--color-border)] shadow-sm">
-                <button
-                  onClick={() => setPricingMode("employer")}
-                  className={`px-6 py-2 rounded-full text-sm font-medium transition-all ${pricingMode === "employer" ? "bg-[var(--color-text)] text-[var(--color-bg)] shadow-sm" : "text-[var(--color-text-muted)] hover:text-[var(--color-text)]"}`}
-                >
-                  For Employers
-                </button>
-                <button
-                  onClick={() => setPricingMode("candidate")}
-                  className={`px-6 py-2 rounded-full text-sm font-medium transition-all ${pricingMode === "candidate" ? "bg-[var(--color-text)] text-[var(--color-bg)] shadow-sm" : "text-[var(--color-text-muted)] hover:text-[var(--color-text)]"}`}
-                >
-                  For Candidates
-                </button>
-              </div>
-            </div>
-
-            {/* Pricing Cards */}
-            <div className="flex flex-col md:flex-row justify-center gap-8 items-start flex-wrap">
-
-              {pricingMode === "employer" ? (
-                <>
-                  {/* Free Tier */}
-                  <div className="flex-1 min-w-[300px] glass-panel p-8 rounded-2xl border border-[var(--color-border)] hover:border-[var(--color-brand-primary)]/50 transition-all group relative">
-                    <div className="mb-6">
-                      <h3 className="text-xl font-bold text-[var(--color-text)]">Free</h3>
-                      <p className="text-[var(--color-text-muted)] text-sm mt-2">Core features for early usage.</p>
-                    </div>
-                    <div className="mb-6">
-                      <span className="text-4xl font-bold text-[var(--color-text)]">0 DKK</span>
-                      <span className="text-[var(--color-text-muted)]"> / month</span>
-                    </div>
-                    <Button variant="outline" className="w-full mb-8 group-hover:border-[var(--color-brand-primary)] group-hover:text-[var(--color-brand-primary)]" onClick={handleRequestAccess}>Start for Free</Button>
-                    <ul className="space-y-4 text-sm text-[var(--color-text-muted)]">
-                      <li className="flex items-center gap-3"><Check size={16} className="text-[var(--color-brand-primary)]" /> <span>Post standard Job Listings</span></li>
-                      <li className="flex items-center gap-3"><Check size={16} className="text-[var(--color-brand-primary)]" /> <span>Basic candidate review</span></li>
-                      <li className="flex items-center gap-3"><Check size={16} className="text-[var(--color-brand-primary)]" /> <span>Standard Support</span></li>
-                    </ul>
-                  </div>
-
-                  {/* Pro Tier (Popular) */}
-                  <div className="flex-1 min-w-[300px] glass-panel p-8 rounded-2xl border border-[var(--color-brand-secondary)]/50 relative hover:shadow-glow-secondary transition-all">
-                    <div className="absolute top-0 right-0 bg-[var(--color-brand-secondary)] text-white text-xs font-bold px-3 py-1 rounded-bl-xl rounded-tr-lg">
-                       POPULAR
-                    </div>
-                    <div className="mb-6">
-                      <h3 className="text-xl font-bold text-[var(--color-text)]">Pro</h3>
-                      <p className="text-[var(--color-text-muted)] text-sm mt-2">Advanced features & automation.</p>
-                    </div>
-                    <div className="mb-6">
-                      <span className="text-4xl font-bold text-[var(--color-text)]">149 DKK</span>
-                      <span className="text-[var(--color-text-muted)]"> / month</span>
-                    </div>
-                    <Button className="w-full mb-8 bg-[var(--color-brand-secondary)] hover:bg-[var(--color-brand-secondary)]/90 text-white" onClick={handleRequestAccess}>Upgrade to Pro</Button>
-                    <ul className="space-y-4 text-sm text-[var(--color-text-muted)]">
-                      <li className="flex items-center gap-3"><Check size={16} className="text-[var(--color-brand-secondary)]" /> <span>Magic Box AI Proof Tasks</span></li>
-                      <li className="flex items-center gap-3"><Check size={16} className="text-[var(--color-brand-secondary)]" /> <span>AI Feedback Drafting</span></li>
-                      <li className="flex items-center gap-3"><Check size={16} className="text-[var(--color-brand-secondary)]" /> <span>Priority Support</span></li>
-                    </ul>
-                  </div>
-
-                  {/* Business Tier */}
-                  <div className="flex-1 min-w-[300px] glass-panel p-8 rounded-2xl border-2 border-[var(--color-brand-primary)] relative shadow-glow-primary">
-                    <div className="absolute top-0 right-0 bg-[var(--color-brand-primary)] text-white text-xs font-bold px-3 py-1 rounded-bl-xl rounded-tr-lg">
-                      BEST VALUE
-                    </div>
-                    <div className="mb-6">
-                      <h3 className="text-xl font-bold text-[var(--color-text)]">Business</h3>
-                      <p className="text-[var(--color-text-muted)] text-sm mt-2">Team scale and deep analytics.</p>
-                    </div>
-                    <div className="mb-6">
-                      <span className="text-4xl font-bold text-[var(--color-text)]">349 DKK</span>
-                      <span className="text-[var(--color-text-muted)]"> / month</span>
-                    </div>
-                    <Button className="w-full mb-8 bg-[var(--color-brand-primary)] hover:bg-[var(--color-brand-primary)]/90 text-white" onClick={handleRequestAccess}>Start Business</Button>
-                    <ul className="space-y-4 text-sm text-[var(--color-text-muted)]">
-                      <li className="flex items-center gap-3"><Check size={16} className="text-[var(--color-brand-primary)]" /> <span>Everything in Pro</span></li>
-                      <li className="flex items-center gap-3"><Check size={16} className="text-[var(--color-brand-primary)]" /> <span>Multi-seat Team Collaboration</span></li>
-                      <li className="flex items-center gap-3"><Check size={16} className="text-[var(--color-brand-primary)]" /> <span>Advanced Cohort Analytics</span></li>
-                      <li className="flex items-center gap-3"><Check size={16} className="text(--color-brand-primary)]" /> <span>Dedicated Success Manager</span></li>
-                    </ul>
-                  </div>
-                </>
-              ) : (
-                <>
-                  {/* Candidate Free */}
-                  <div className="flex-1 min-w-[300px] glass-panel p-8 rounded-2xl border border-[var(--color-border)] hover:border-[var(--color-candidate)]/50 transition-all group relative">
-                    <div className="mb-6">
-                      <h3 className="text-xl font-bold text-[var(--color-text)]">Free</h3>
-                      <p className="text-[var(--color-text-muted)] text-sm mt-2">Everything you need to get started.</p>
-                    </div>
-                    <div className="mb-6">
-                      <span className="text-4xl font-bold text-[var(--color-text)]">0 DKK</span>
-                      <span className="text-[var(--color-text-muted)]"> / forever</span>
-                    </div>
-                    <Button variant="outline" className="w-full mb-8 group-hover:border-[var(--color-candidate)] group-hover:text-[var(--color-candidate)]" onClick={handleCTA}>Get Started Free</Button>
-                    <ul className="space-y-4 text-sm text-[var(--color-text-muted)]">
-                      <li className="flex items-center gap-3"><Check size={16} className="text-[var(--color-candidate)]" /> <span>Create your verified profile</span></li>
-                      <li className="flex items-center gap-3"><Check size={16} className="text-[var(--color-candidate)]" /> <span>Complete Proof Tasks</span></li>
-                      <li className="flex items-center gap-3"><Check size={16} className="text-[var(--color-candidate)]" /> <span>Earn skill badges</span></li>
-                      <li className="flex items-center gap-3"><Check size={16} className="text-[var(--color-candidate)]" /> <span>Apply to open roles</span></li>
-                    </ul>
-                  </div>
-
-                  {/* Candidate Pro */}
-                  <div className="flex-1 min-w-[300px] glass-panel p-8 rounded-2xl border-2 border-[var(--color-candidate)] relative shadow-glow-orange">
-                    <div className="absolute top-0 right-0 bg-[var(--color-candidate)] text-white text-xs font-bold px-3 py-1 rounded-bl-xl rounded-tr-lg">
-                      CAREER BOOST
-                    </div>
-                    <div className="mb-6">
-                      <h3 className="text-xl font-bold text-[var(--color-text)]">Candidate Pro</h3>
-                      <p className="text-[var(--color-text-muted)] text-sm mt-2">Stand out from the crowd.</p>
-                    </div>
-                    <div className="mb-6">
-                      <span className="text-4xl font-bold text-[var(--color-text)]">89 DKK</span>
-                      <span className="text-[var(--color-text-muted)]"> / month</span>
-                    </div>
-                    <Button className="w-full mb-8 bg-[var(--color-candidate)] hover:bg-[var(--color-candidate)]/90 text-white" onClick={handleRequestAccess}>Upgrade to Pro</Button>
-                    <ul className="space-y-4 text-sm text-[var(--color-text-muted)]">
-                      <li className="flex items-center gap-3"><Check size={16} className="text-[var(--color-candidate)]" /> <span>Everything in Free</span></li>
-                      <li className="flex items-center gap-3"><Check size={16} className="text-[var(--color-candidate)]" /> <span>Permanent Profile Hosting</span></li>
-                      <li className="flex items-center gap-3"><Check size={16} className="text-[var(--color-candidate)]" /> <span>Advanced View Analytics</span></li>
-                      <li className="flex items-center gap-3"><Check size={16} className="text-[var(--color-candidate)]" /> <span>Custom Profile URL</span></li>
-                      <li className="flex items-center gap-3"><Check size={16} className="text-[var(--color-candidate)]" /> <span>Priority Placement</span></li>
-                    </ul>
-                  </div>
-                </>
-              )}
-
+        {/* ── PRICING TEASER ────────────────────────────── */}
+        <section id="pricing" className="py-20 bg-[var(--color-bg)] border-t border-[var(--color-border)]">
+          <div className="max-w-3xl mx-auto px-6 text-center">
+            <h2 className="text-3xl md:text-4xl font-bold font-display text-[var(--color-text)] mb-4">
+              Simple, transparent pricing
+            </h2>
+            <p className="text-[var(--color-text-muted)] text-lg mb-2">
+              Free to start. Paid plans from <strong className="text-[var(--color-text)]">$149/month</strong>.
+            </p>
+            <p className="text-sm text-[var(--color-text-muted)] mb-8">
+              14-day free trial on all paid plans · No credit card required · Cancel anytime
+            </p>
+            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+              <Button size="lg" onClick={() => navigate("/auth?mode=signup")}>
+                Get started free
+              </Button>
+              <Button variant="outline" size="lg" onClick={() => navigate("/pricing")}>
+                See full pricing →
+              </Button>
             </div>
           </div>
-        </section >
+        </section>
 
         {/* ── FAQ SECTION (New for GEO) ────────────────────────────── */}
         <section className="py-24 bg-[var(--color-bg)] border-t border-[var(--color-border)]">
@@ -795,7 +657,6 @@ export default function LandingPage() {
 
       </main >
       
-      <RequestAccessModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
       <ContactModal isOpen={isContactOpen} onClose={() => setIsContactOpen(false)} />
     </div >
   );
