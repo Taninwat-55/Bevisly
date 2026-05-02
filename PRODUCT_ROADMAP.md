@@ -1,7 +1,7 @@
 # Bevisly — Product Roadmap
 
 > Living document. No deadlines — ship when it's right.
-> Last updated: 2026-05-01
+> Last updated: 2026-05-02
 
 ---
 
@@ -46,8 +46,8 @@ Inspired by Bitcoin's proof-of-work model: effort produces something verifiable 
 
 | # | Feature | Description | Status |
 |---|---------|-------------|--------|
-| 1 | **Practice Proofs** | Library of 5–10 AI-generated tasks candidates can attempt immediately after signup. AI grades instantly. Score counts toward Leaderboard ranking. Solves the cold-start empty-state problem for new candidates. | 🔴 |
-| 2 | **Application Status Tracker** | Pizza-tracker style timeline on candidate dashboard (`Submitted → Under Review → Interview → Decision`). Syncs in real time when employer moves their Kanban card. Kills the resume black hole. | 🔴 |
+| 1 | **Practice Proofs** | Library of 5–10 AI-generated tasks candidates can attempt immediately after signup. AI grades instantly. Score counts toward Leaderboard ranking. Solves the cold-start empty-state problem for new candidates. | 🟢 |
+| 2 | **Application Status Tracker** | Pizza-tracker style timeline on candidate dashboard (`Submitted → Under Review → Interview → Decision`). Syncs in real time when employer moves their Kanban card. Kills the resume black hole. | 🟢 |
 | 3 | **Verified Skills from Proof Tasks** | AI extracts skills from completed proofs and adds them as "Verified Skills" on the candidate profile — visually distinct from self-claimed skills (Bevisly checkmark badge). | 🟢 |
 | 4 | **Stripe Payment Integration** | Subscription checkout for Free/Pro plans, webhook updates `profiles.subscription_tier` in Supabase, Stripe Customer Portal for billing management, Pro feature gating. | 🔴 |
 
@@ -169,7 +169,7 @@ AI detectors are unreliable and ethically risky — don't try to detect AI use, 
 ---
 
 ### 7. Employer Verification Badge
-**Status:** 🔴
+**Status:** 🟢
 
 Candidates face scams and fake job postings on open platforms. A verified employer badge builds candidate trust before they invest time in a proof task.
 
