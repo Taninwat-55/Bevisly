@@ -61,6 +61,17 @@ Inspired by Bitcoin's proof-of-work model: effort produces something verifiable 
 
 ---
 
+## 🎯 Next Sprint
+
+Features queued to build now, in order. Numbers indicate build sequence.
+
+| Priority | Feature Group | Features |
+|----------|--------------|----------|
+| **#1** | **Bevisly Score + Featured Proofs** | Unified candidate score · Curated proof highlights |
+| **#2** | **Responsibility Score + Employer Brand Page** | Anti-ghosting accountability · Public employer profile |
+
+---
+
 ## 🚀 Post-Launch Features
 
 Concrete, scoped features to build after the first wave of employer feedback.
@@ -68,7 +79,7 @@ Concrete, scoped features to build after the first wave of employer feedback.
 ---
 
 ### 1. Bevisly Score (Unified Skill Score)
-**Status:** 🔴
+**Status:** 🟡 Queued — Sprint #1
 
 We already have a Leaderboard and a Credits system. The next step is a single, meaningful **Bevisly Score** — a composite number that grows every time a candidate completes a task. Think chess Elo rating, not a follower count.
 
@@ -99,7 +110,7 @@ When a candidate completes a proof task and receives a rating, they earn a share
 ---
 
 ### 3. Featured Proofs ("Staking" Your Best Work)
-**Status:** 🔴
+**Status:** 🟡 Queued — Sprint #1
 
 Candidates choose up to 3 of their completed proofs to "feature" at the very top of their public profile — a curated highlight reel, much more powerful than a resume because it shows actual work output.
 
@@ -113,7 +124,7 @@ Candidates choose up to 3 of their completed proofs to "feature" at the very top
 ---
 
 ### 4. Responsibility Score (Anti-Ghosting Accountability)
-**Status:** 🔴
+**Status:** 🟡 Queued — Sprint #2
 
 Ghosting is one of the biggest complaints in hiring — from both sides. Bevisly can solve this because all interactions happen on the platform.
 
@@ -206,7 +217,7 @@ Unpaid take-home tasks that consume 6–8+ hours are one of the biggest candidat
 ---
 
 ### 10. Employer Brand Page
-**Status:** 🔴
+**Status:** 🟡 Queued — Sprint #2
 
 Candidates should be able to research an employer before committing time to a proof task — just as employers research candidates.
 
@@ -356,3 +367,5 @@ Ideas captured but not yet scoped or prioritized. Nothing here is committed.
 | **Proof Chat (in-app messaging)** | Kept as a long-term reminder. For now, mailto + email notifications cover the use case. Once Proof Call (feature 12) is built, in-app messaging becomes the natural complement. Revisit after Proof Call ships. |
 | **Interactive onboarding tutorial** | Takes weeks to build well and most users skip it. Replaced by: Practice Proofs (candidates learn by doing) + first-login checklist prompt for employers. |
 | **Community Peer Review** | High gaming/collusion risk (friends reviewing friends). AI grading is more consistent and scalable at this stage. Revisit once the community is large enough to have meaningful social accountability. |
+| **Interview Scheduling (In-Platform Calendar)** | Most valuable once real hiring is happening at volume. Deferred until there's usage data showing where employers drop off mid-process. |
+| **Proof Call (Built-in Video Interview)** | High build effort, only valuable when real hiring is active. Deferred alongside Scheduling — revisit together once the marketplace has traction. |
