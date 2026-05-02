@@ -1,51 +1,53 @@
+import { lazy } from "react";
 import { createBrowserRouter, Outlet } from "react-router-dom";
 import App from "../App";
-import AuthPage from "../pages/auth/AuthPage";
-import LandingPage from "../pages/landing/LandingPage";
 import ProtectedRoute from "./ProtectedRoute";
 
-// --- Auth
-import ResetPasswordPage from "@/pages/auth/ResetPasswordPage";
-import RequestResetPage from "@/pages/auth/RequestResetPage";
-
-// --- Candidate pages
+// Layouts — keep static: always needed, no benefit from lazy-loading structural chrome
 import CandidateLayout from "@/layout/CandidateLayout";
-import CandidateUnifiedDashboard from "@/pages/candidate/CandidateUnifiedDashboard";
-import CandidateProofWorkspace from "@/pages/candidate/CandidateProofWorkspace";
-import CandidateFeedbackView from "@/pages/candidate/CandidateFeedbackView";
-import PracticeTasksPage from "@/pages/candidate/PracticeTasksPage";
-import PracticeWorkspace from "@/pages/candidate/PracticeWorkspace";
-
-// --- Employer pages
-
 import DashboardLayout from "@/layout/DashboardLayout";
-
-import EmployerDashboard from "@/pages/employer/EmployerDashboard";
-import EmployerInbox from "@/pages/employer/EmployerInbox";
-import EmployerAllCandidates from "@/pages/employer/EmployerAllCandidates";
-import EmployerTalentBoardPage from "@/pages/employer/EmployerTalentBoardPage";
-// (Employer tools are accessed as slide-overs in the Dashboard)
-
-// --- Admin pages
-import AdminDashboard from "@/pages/admin/AdminDashboard";
-import AdminUsers from "@/pages/admin/AdminUsers";
-import AdminJobs from "@/pages/admin/AdminJobs";
-import AdminFeedback from "@/pages/admin/AdminFeedback";
-import AdminDataViewer from "@/pages/admin/AdminDataViewer";
-import UserSettings from "@/pages/shared/UserSettings";
-import AdminFeedbackMessages from "@/pages/admin/AdminFeedbackMessages";
 import AdminLayout from "@/layout/AdminLayout";
-
-// --- Public pages
-import ProfilePage from "@/pages/public/ProfilePage";
-import LeaderboardPage from "@/pages/public/LeaderboardPage";
-import PublicProofView from "@/pages/public/PublicProofView";
 import PublicLayout from "@/layout/PublicLayout";
-import LearnMorePage from "@/pages/public/learn-more/LearnMorePage";
-import AboutPage from "@/pages/shared/AboutPage";
-import JobDetailPage from "@/pages/jobs/JobDetailPage";
-import JobListingPage from "@/pages/jobs/JobListingPage";
-import PrivacyPolicy from "@/pages/shared/PrivacyPolicy";
+
+// Auth
+const AuthPage = lazy(() => import("../pages/auth/AuthPage"));
+const ResetPasswordPage = lazy(() => import("@/pages/auth/ResetPasswordPage"));
+const RequestResetPage = lazy(() => import("@/pages/auth/RequestResetPage"));
+
+// Candidate pages
+const CandidateUnifiedDashboard = lazy(() => import("@/pages/candidate/CandidateUnifiedDashboard"));
+const CandidateProofWorkspace = lazy(() => import("@/pages/candidate/CandidateProofWorkspace"));
+const CandidateFeedbackView = lazy(() => import("@/pages/candidate/CandidateFeedbackView"));
+const PracticeTasksPage = lazy(() => import("@/pages/candidate/PracticeTasksPage"));
+const PracticeWorkspace = lazy(() => import("@/pages/candidate/PracticeWorkspace"));
+
+// Employer pages
+const EmployerDashboard = lazy(() => import("@/pages/employer/EmployerDashboard"));
+const EmployerInbox = lazy(() => import("@/pages/employer/EmployerInbox"));
+const EmployerAllCandidates = lazy(() => import("@/pages/employer/EmployerAllCandidates"));
+const EmployerTalentBoardPage = lazy(() => import("@/pages/employer/EmployerTalentBoardPage"));
+
+// Admin pages
+const AdminDashboard = lazy(() => import("@/pages/admin/AdminDashboard"));
+const AdminUsers = lazy(() => import("@/pages/admin/AdminUsers"));
+const AdminJobs = lazy(() => import("@/pages/admin/AdminJobs"));
+const AdminFeedback = lazy(() => import("@/pages/admin/AdminFeedback"));
+const AdminDataViewer = lazy(() => import("@/pages/admin/AdminDataViewer"));
+const AdminFeedbackMessages = lazy(() => import("@/pages/admin/AdminFeedbackMessages"));
+
+// Shared pages
+const UserSettings = lazy(() => import("@/pages/shared/UserSettings"));
+const AboutPage = lazy(() => import("@/pages/shared/AboutPage"));
+const PrivacyPolicy = lazy(() => import("@/pages/shared/PrivacyPolicy"));
+
+// Public pages
+const LandingPage = lazy(() => import("../pages/landing/LandingPage"));
+const ProfilePage = lazy(() => import("@/pages/public/ProfilePage"));
+const LeaderboardPage = lazy(() => import("@/pages/public/LeaderboardPage"));
+const PublicProofView = lazy(() => import("@/pages/public/PublicProofView"));
+const LearnMorePage = lazy(() => import("@/pages/public/learn-more/LearnMorePage"));
+const JobDetailPage = lazy(() => import("@/pages/jobs/JobDetailPage"));
+const JobListingPage = lazy(() => import("@/pages/jobs/JobListingPage"));
 
 export const router = createBrowserRouter([
   // Public Pages with shared layout
@@ -105,16 +107,14 @@ export const router = createBrowserRouter([
       </ProtectedRoute>
     ),
     children: [
-      // Unified Dashboard (No Layout Wrapper)
-      { 
-        index: true, 
+      {
+        index: true,
         element: (
           <DashboardLayout showSidebar={true} fullWidth={false}>
             <EmployerDashboard />
           </DashboardLayout>
         )
       },
-
 
       {
         element: <DashboardLayout showSidebar={true} fullWidth={false}><Outlet /></DashboardLayout>,

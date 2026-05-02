@@ -25,13 +25,15 @@ export default defineConfig({
     },
   },
   build: {
-    chunkSizeWarningLimit: 1000, // Increased from 500kb to 1MB
     rollupOptions: {
       output: {
         manualChunks: {
           "vendor-react": ["react", "react-dom", "react-router-dom"],
-          "vendor-ui": ["framer-motion", "lucide-react"],
+          "vendor-ui": ["framer-motion", "lucide-react", "@headlessui/react"],
           "vendor-utils": ["@supabase/supabase-js"],
+          "vendor-i18n": ["i18next", "react-i18next", "i18next-browser-languagedetector"],
+          "vendor-dnd": ["@dnd-kit/core", "@dnd-kit/sortable", "@dnd-kit/utilities"],
+          "vendor-markdown": ["react-markdown"],
         },
       },
     },
