@@ -49,7 +49,8 @@ Inspired by Bitcoin's proof-of-work model: effort produces something verifiable 
 | 1 | **Practice Proofs** | Library of 5–10 AI-generated tasks candidates can attempt immediately after signup. AI grades instantly. Score counts toward Leaderboard ranking. Solves the cold-start empty-state problem for new candidates. | 🟢 |
 | 2 | **Application Status Tracker** | Pizza-tracker style timeline on candidate dashboard (`Submitted → Under Review → Interview → Decision`). Syncs in real time when employer moves their Kanban card. Kills the resume black hole. | 🟢 |
 | 3 | **Verified Skills from Proof Tasks** | AI extracts skills from completed proofs and adds them as "Verified Skills" on the candidate profile — visually distinct from self-claimed skills (Bevisly checkmark badge). | 🟢 |
-| 4 | **Stripe Payment Integration** | Subscription checkout for Free/Pro plans, webhook updates `profiles.subscription_tier` in Supabase, Stripe Customer Portal for billing management, Pro feature gating. | 🔴 |
+| 4 | **Kanban Board → Sidebar** | "Talent Board" link in employer sidebar → `/employer/talent-board`. Job picker grid; click a job to open its Kanban pipeline. Removes the 2-click buried path through the dashboard. | 🟢 |
+| 5 | **Stripe Payment Integration** | Subscription checkout for Free/Pro plans, webhook updates `profiles.subscription_tier` in Supabase, Stripe Customer Portal for billing management, Pro feature gating. | 🔴 |
 
 | 5 | **Rejection Email Visual Feedback** | When employer drags a candidate to the Rejected column, the auto-rejection email already sends — but the employer gets no visual confirmation. Show a toast notification and a "Email sent ✓" indicator on the card so employers know it fired. | 🟢 |
 

@@ -19,6 +19,7 @@ import {
   Trophy,
   UserCircle,
   Zap,
+  Kanban,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
@@ -111,6 +112,7 @@ export default function DashboardLayout({
       ? [
           { label: "Dashboard", path: "/employer", icon: LayoutDashboard },
           { label: "Action Items", path: "/employer/inbox", icon: Inbox, badge: needsReviewCount },
+          { label: "Talent Board", path: "/employer/talent-board", icon: Kanban },
           { label: "All Candidates", path: "/employer/candidates", icon: Users },
         ]
       : role === "admin"

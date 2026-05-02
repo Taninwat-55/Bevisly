@@ -156,7 +156,7 @@ Candidates experience a "resume black hole" — they submit and hear nothing. Bu
 - `ApplicationStatusTracker` component replacing the placeholder in `CandidateOverview.tsx`
 - Stage mapping: new/submitted → Under Review, shortlisted → Shortlisted, interview → Interview, offer_sent → Offer, hired/rejected → Decision
 
-### ⬜ Kanban Board → Sidebar (Navigation Improvement)
+### ✅ Kanban Board → Sidebar (Navigation Improvement)
 Kanban stays job-scoped (no change to the board itself). Move the entry point to the sidebar:
 - Add "Talent Board" link in employer sidebar → `/employer/talent-board`
 - New page: job picker grid, click a job to open its existing Kanban
