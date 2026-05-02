@@ -171,9 +171,17 @@ export default function AdminDashboard() {
     </div>
   );
 }
+interface StatCardProps {
+  label: string;
+  value: string | number;
+  icon: React.ElementType;
+  color: "blue" | "orange" | "purple" | "emerald";
+  trend?: string;
+  info?: string;
+}
 
-function StatCard({ label, value, icon: Icon, color, trend, info }: any) {
-  const colorMap: any = {
+function StatCard({ label, value, icon: Icon, color, trend, info }: StatCardProps) {
+  const colorMap: Record<StatCardProps["color"], string> = {
     blue: "text-blue-500 bg-blue-500/10",
     orange: "text-orange-500 bg-orange-500/10",
     purple: "text-purple-500 bg-purple-500/10",
@@ -203,8 +211,16 @@ function StatCard({ label, value, icon: Icon, color, trend, info }: any) {
   );
 }
 
-function ToolTile({ onClick, icon: Icon, label, description, color }: any) {
-  const colorMap: any = {
+interface ToolTileProps {
+  onClick: () => void;
+  icon: React.ElementType;
+  label: string;
+  description: string;
+  color: "blue" | "orange" | "slate";
+}
+
+function ToolTile({ onClick, icon: Icon, label, description, color }: ToolTileProps) {
+  const colorMap: Record<ToolTileProps["color"], string> = {
     blue: "text-blue-500 bg-blue-500/10",
     orange: "text-orange-500 bg-orange-500/10",
     slate: "text-[var(--color-text-muted)] bg-[var(--color-bg)]",

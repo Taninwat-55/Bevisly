@@ -69,7 +69,7 @@ export default function EmployerJobForm({
     if (companyName && !values.company) {
       setValues((prev) => ({ ...prev, company: companyName }));
     }
-  }, [companyName]);
+  }, [companyName, values.company]);
 
   const [loading, setLoading] = useState(false);
   // Handlers

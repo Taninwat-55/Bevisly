@@ -20,6 +20,7 @@ import {
   LogOut,
   MessageCircle,
   Database,
+  Languages,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -102,6 +103,13 @@ export default function Sidebar({ role }: SidebarProps) {
           <Settings size={17} />
           {!collapsed && <span>Settings</span>}
         </Link>
+        <button
+          className="flex items-center gap-3 px-3 py-2 w-full rounded-[var(--radius-button)] text-sm font-medium transition-all text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[var(--color-bg)]"
+          title="Change Language (Coming Soon)"
+        >
+          <Languages size={17} />
+          {!collapsed && <span>Language</span>}
+        </button>
         <button
           onClick={() => {
             if (confirm("Are you sure you want to log out?")) {

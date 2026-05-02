@@ -1,0 +1,17 @@
+{
+  "common": {
+    "loading": "Indlæser...",
+    "error": "Der opstod en fejl",
+    "save": "Gem",
+    "cancel": "Annuller",
+    "delete": "Slet",
+    "edit": "Rediger"
+  },
+  "nav": {
+    "dashboard": "Oversigt",
+    "jobs": "Job",
+    "profile": "Profil",
+    "settings": "Indstillinger",
+    "logout": "Log ud"
+  }
+}

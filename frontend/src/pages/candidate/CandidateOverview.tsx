@@ -22,7 +22,7 @@ import WelcomeBanner from "@/components/common/WelcomeBanner";
 export default function CandidateDashboard() {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const { proofsCompleted, avgScore, jobsApplied, credits, bevislyScore } = useCandidateStats();
+  const { proofsCompleted, avgScore, jobsApplied, bevislyScore } = useCandidateStats();
   const [jobs, setJobs] = useState<CandidateJob[]>([]);
   const [loadingJobs, setLoadingJobs] = useState(true);
   const [applications, setApplications] = useState<Awaited<ReturnType<typeof getCandidateApplications>>>([]);

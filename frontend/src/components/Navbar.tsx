@@ -5,6 +5,7 @@ import { Menu, X } from "lucide-react";
 import UserMenu from "@/components/common/UserMenu";
 import { Button } from "@/components/ui/Button";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
+import { Languages } from "lucide-react";
 
 type RouteLink = { label: string; to: string; href?: never };
 type AnchorLink = { label: string; href: string; to?: never };
@@ -137,6 +138,12 @@ export default function Navbar() {
 
           {/* ─── Right: Theme + Auth ─── */}
           <div className="flex justify-end items-center gap-3">
+            <button
+              className="p-2 rounded-xl text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[var(--color-surface)] transition-colors"
+              title="Change Language (Coming Soon)"
+            >
+              <Languages size={20} />
+            </button>
             <ThemeToggle />
             {!user ? (
               <>

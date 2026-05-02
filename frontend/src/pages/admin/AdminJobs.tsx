@@ -161,7 +161,7 @@ export default function AdminJobs() {
             <div className="flex items-center gap-2 p-1 bg-[var(--color-bg)]/50 border border-[var(--color-border)] rounded-xl">
               <select
                 value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value as any)}
+                onChange={(e) => setStatusFilter(e.target.value as "all" | "open" | "closed")}
                 className="bg-transparent border-0 rounded-lg px-4 py-2 text-sm font-bold outline-none focus:ring-0 cursor-pointer text-[var(--color-text)]"
               >
                 <option value="all">All Status</option>

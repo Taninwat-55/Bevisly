@@ -229,7 +229,7 @@ export default function AdminUsers() {
             <div className="flex items-center gap-2 p-1 bg-[var(--color-bg)]/50 border border-[var(--color-border)] rounded-xl">
               <select
                 value={roleFilter}
-                onChange={(e) => setRoleFilter(e.target.value as any)}
+                onChange={(e) => setRoleFilter(e.target.value as "all" | BevislyUser["role"])}
                 className="bg-transparent border-0 rounded-lg px-4 py-2 text-sm font-bold outline-none focus:ring-0 cursor-pointer text-[var(--color-text)]"
               >
                 <option value="all">All Roles</option>
@@ -335,7 +335,7 @@ export default function AdminUsers() {
                             <select
                               value={u.role}
                               disabled={updating === u.id}
-                              onChange={(e) => handleChangeRole(u.id, e.target.value as any)}
+                              onChange={(e) => handleChangeRole(u.id, e.target.value as BevislyUser["role"])}
                               className={`
                                    appearance-none bg-[var(--color-bg)]/50 pl-4 pr-10 py-2 rounded-xl border border-[var(--color-border)] text-xs font-bold cursor-pointer
                                    hover:border-[var(--color-brand-primary)] focus:outline-none focus:ring-4 focus:ring-[var(--color-brand-primary)]/10 transition-all

@@ -1,0 +1,17 @@
+{
+  "common": {
+    "loading": "Laddar...",
+    "error": "Ett fel uppstod",
+    "save": "Spara",
+    "cancel": "Avbryt",
+    "delete": "Radera",
+    "edit": "Redigera"
+  },
+  "nav": {
+    "dashboard": "Instrumentpanel",
+    "jobs": "Jobb",
+    "profile": "Profil",
+    "settings": "Inställningar",
+    "logout": "Logga ut"
+  }
+}

@@ -88,12 +88,16 @@ export default function CandidateProfileDrawer({ userId, onClose }: CandidatePro
       // Process verified skills
       if (submissions) {
         const verified = new Set<string>();
-        submissions.forEach((s: any) => {
-          const feedbackArr = Array.isArray(s.feedback) ? s.feedback : [s.feedback];
-          const maxStars = Math.max(0, ...feedbackArr.map((f: any) => f?.stars ?? 0));
+        submissions.forEach((s: { 
+          feedback: { stars: number } | { stars: number }[] | null; 
+          jobs: { required_skills: string[] | null } | { required_skills: string[] | null }[] | null 
+        }) => {
+          const feedbackArr = Array.isArray(s.feedback) ? s.feedback : (s.feedback ? [s.feedback] : []);
+          const maxStars = Math.max(0, ...feedbackArr.map((f: { stars: number }) => f?.stars ?? 0));
           
-          if (maxStars >= 4 && s.jobs?.required_skills) {
-            s.jobs.required_skills.forEach((skill: string) => verified.add(skill.toLowerCase()));
+          const job = Array.isArray(s.jobs) ? s.jobs[0] : s.jobs;
+          if (maxStars >= 4 && job?.required_skills) {
+            job.required_skills.forEach((skill: string) => verified.add(skill.toLowerCase()));
           }
         });
         setVerifiedSkills(Array.from(verified));

@@ -17,6 +17,7 @@ import {
   UserCircle,
   Zap,
   Kanban,
+  Languages,
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
@@ -89,7 +90,7 @@ export default function DashboardLayout({
   interface NavItem {
     label: string;
     path: string;
-    icon: any;
+    icon: React.ElementType;
     badge?: number;
     featured?: boolean;
   }
@@ -360,6 +361,12 @@ export default function DashboardLayout({
 
       {/* ── Floating Pill (top-right) ─────────────── */}
       <div className="fixed top-4 right-4 z-50 flex items-center gap-1 px-2 py-1.5 rounded-full bg-[var(--color-surface)]/80 backdrop-blur-md border border-[var(--color-border)] shadow-lg">
+        <button
+          className="p-1.5 text-[var(--color-text-muted)] hover:text-[var(--color-text)] rounded-full transition-colors"
+          title="Change Language (Coming Soon)"
+        >
+          <Languages size={17} />
+        </button>
         <ThemeToggle />
         <div className="w-px h-4 bg-[var(--color-border)]" />
         <button
