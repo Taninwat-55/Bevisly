@@ -114,7 +114,7 @@ export default function DashboardLayout({
             { label: "My Proofs", path: "/candidate/proofs", icon: FileCheck, featured: true },
             { label: "Practice", path: "/candidate/practice", icon: Zap },
             { label: "Leaderboard", path: "/leaderboard", icon: Trophy },
-            { label: "My Profile", path: `/candidate/${user?.id}`, icon: UserCircle },
+            { label: "Public Profile", path: `/candidate/${user?.id}`, icon: UserCircle },
           ];
 
   const footerIconClass =

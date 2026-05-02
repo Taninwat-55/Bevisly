@@ -57,6 +57,7 @@ export type ProofCardLite = {
   reviewed_at: string | null;
   submission_id?: string | null;
   is_public?: boolean;
+  is_featured?: boolean;
 };
 
 export type FeaturedJob = {

@@ -96,6 +96,7 @@ export default function CandidateFeedbackView() {
             improvements: selectedProof.feedback?.[0]?.improvements ?? null,
             reviewed_at: selectedProof.feedback?.[0]?.created_at ?? selectedProof.created_at ?? null,
             is_public: false,
+            is_featured: false,
             share_url: null,
           }}
           isOpen={true}

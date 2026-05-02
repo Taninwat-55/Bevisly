@@ -8,7 +8,7 @@ import toast from "react-hot-toast";
 import { supabase } from "@/lib/supabaseClient";
 import { updateProfileData, downloadUserData } from "@/lib/api/profiles";
 import { updateCompanyProfile } from "@/lib/api/companies";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import {
   User, Building2, Bell, Shield,
   Moon, Sun, LogOut, Trash2, Camera,
@@ -24,11 +24,16 @@ export default function UserSettings() {
   const { company: currentCompanyRecord, refresh: refreshCompany } = useCompany();
   const { isDark, toggleTheme } = useTheme();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
 
   // Default tab depends on role. Candidates don't have "profile" tab here anymore.
   // We can default to "account" for everyone or check role.
   // Since user might be null initially, we start with "account" which is safe for all.
-  const [activeTab, setActiveTab] = useState<Tab>("account");
+  const validTabs: Tab[] = ["profile", "account", "notifications", "security", "privacy"];
+  const tabParam = searchParams.get("tab") as Tab | null;
+  const [activeTab, setActiveTab] = useState<Tab>(
+    tabParam && validTabs.includes(tabParam) ? tabParam : "account"
+  );
   const [isLoading, setIsLoading] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
@@ -771,43 +776,48 @@ export default function UserSettings() {
                         {/* Profile Visibility (Candidates Only) */}
                         {!isEmployer && (
                             <div className="p-6 rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)]/50">
-                                <div className="flex items-center justify-between mb-4">
+                                <div className="flex items-center justify-between gap-4">
                                     <div className="flex items-center gap-3">
-                                        <div className={`p-2 rounded-lg ${user?.is_public ? 'bg-green-100 dark:bg-green-900/20 text-green-600' : 'bg-slate-100 dark:bg-slate-800 text-slate-400'}`}>
+                                        <div className={`p-2 rounded-lg transition-colors ${user?.is_public ? 'bg-emerald-500/15 text-emerald-400' : 'bg-white/5 text-[var(--color-text-muted)]'}`}>
                                             {user?.is_public ? <Eye size={20} /> : <EyeOff size={20} />}
                                         </div>
                                         <div>
-                                            <h3 className="font-bold text-[var(--color-text)]">Profile Visibility</h3>
+                                            <h3 className="font-bold text-[var(--color-text)]">Public Profile</h3>
                                             <p className="text-sm text-[var(--color-text-muted)]">
-                                                {user?.is_public ? 'Your profile is visible to employers' : 'Your profile is hidden'}
+                                                {user?.is_public
+                                                    ? 'Employers can discover and view your profile'
+                                                    : 'Your profile is hidden — only you can see it'}
                                             </p>
                                         </div>
                                     </div>
-                                    
-                                     {/* Simple Toggle - could use a switch component if available */}
-                                     <Button 
-                                        size="sm" 
-                                        variant={user?.is_public ? "outline" : "primary"}
+
+                                    <button
                                         onClick={async () => {
-                                            if(!user) return;
+                                            if (!user) return;
+                                            const newVal = !user.is_public;
                                             try {
-                                                const newVal = !user.is_public;
-                                                // Optimistic update via updateProfileData (which doesn't exist locally as state, so we call API)
-                                                // We rely on user context refresh or local state if we had it. 
-                                                // user object is immutable from context usually, so we trigger refresh
                                                 await updateProfileData(user.id, { is_public: newVal });
                                                 await refreshProfile?.();
-                                                toast.success(newVal ? "Profile is now public" : "Profile is now hidden");
+                                                toast.success(newVal ? 'Profile is now public' : 'Profile is now private');
                                             } catch {
-                                                toast.error("Failed to update visibility");
+                                                toast.error('Failed to update visibility');
                                             }
                                         }}
-                                     >
-                                        {user?.is_public ? 'Make Private' : 'Make Public'}
-                                     </Button>
+                                        title={user?.is_public ? 'Make private' : 'Make public'}
+                                        className={[
+                                            'relative inline-flex h-7 w-12 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/50',
+                                            user?.is_public ? 'bg-emerald-500' : 'bg-white/10',
+                                        ].join(' ')}
+                                    >
+                                        <span className="sr-only">Toggle profile visibility</span>
+                                        <span className={[
+                                            'pointer-events-none inline-block h-6 w-6 rounded-full bg-white shadow-md transition-transform duration-200',
+                                            user?.is_public ? 'translate-x-5' : 'translate-x-0',
+                                        ].join(' ')} />
+                                    </button>
                                 </div>
-                                <p className="text-xs text-[var(--color-text-muted)] leading-relaxed">
-                                    When public, verified employers can discover your profile and invite you to apply for jobs. hiding your profile means you can only apply to jobs directly.
+                                <p className="mt-4 text-xs text-[var(--color-text-muted)] leading-relaxed">
+                                    When public, verified employers can discover your profile and invite you to apply for jobs. When private, you can still apply to jobs directly but won't appear in employer searches.
                                 </p>
                             </div>
                         )}

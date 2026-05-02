@@ -5,7 +5,7 @@ import { supabase } from "@/lib/supabaseClient";
 import { useAuth } from "@/hooks/useAuth";
 import {
     Copy, Loader2, Star, BadgeCheck, Briefcase,
-    Lock, UserX, Code, Zap
+    Lock, UserX, Code, Zap, Bookmark
 } from "lucide-react";
 import toast from "react-hot-toast";
 import type { ProfileLite, ProofCardLite } from "@/types/shared";
@@ -26,6 +26,7 @@ export default function PublicProfilePage() {
     const { user } = useAuth();
     const [profile, setProfile] = useState<PublicProfile | null>(null);
     const [cards, setCards] = useState<ProofCardLite[]>([]);
+    const [featuredCards, setFeaturedCards] = useState<ProofCardLite[]>([]);
     const [verifiedSkills, setVerifiedSkills] = useState<string[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<"not_found" | "private" | null>(null);
@@ -56,8 +57,9 @@ export default function PublicProfilePage() {
                 // Type assert for extended fields
                 const profileData = prof as unknown as PublicProfile;
 
-                // Check if profile is public (default to public if column missing)
-                if (profileData.is_public === false) {
+                // Check if profile is public — owners always see their own profile
+                const isOwner = user?.id === profileData.id;
+                if (profileData.is_public === false && !isOwner) {
                     setError("private");
                     setProfile(profileData);
                     return;
@@ -65,8 +67,8 @@ export default function PublicProfilePage() {
 
                 setProfile(profileData);
 
-                // Fetch proofs and verified skills
-                const [{ data: rpcTimeline }, { data: submissions }] = await Promise.all([
+                // Fetch proofs, featured proofs, and verified skills
+                const [{ data: rpcTimeline }, { data: submissions }, { data: featured }] = await Promise.all([
                     supabase.rpc("get_recent_activity", { user_id: prof.id }),
                     supabase
                         .from("submissions")
@@ -77,8 +79,16 @@ export default function PublicProfilePage() {
                             jobs ( required_skills )
                         `)
                         .eq("user_id", prof.id)
-                        .eq("status", "reviewed")
+                        .eq("status", "reviewed"),
+                    supabase
+                        .from("proof_cards")
+                        .select("id, job_title, rating, comments, reviewed_at, submission_id, is_featured")
+                        .eq("user_id", prof.id)
+                        .eq("is_featured", true)
+                        .order("reviewed_at", { ascending: false }),
                 ]);
+
+                setFeaturedCards(featured ?? []);
 
                 if (rpcTimeline && Array.isArray(rpcTimeline) && rpcTimeline.length > 0) {
                     setCards(rpcTimeline);
@@ -86,7 +96,7 @@ export default function PublicProfilePage() {
                     // Fallback to direct query
                     const { data: fallbackProofs } = await supabase
                         .from("proof_cards")
-                        .select("id, job_title, rating, comments, reviewed_at, submission_id")
+                        .select("id, job_title, rating, comments, reviewed_at, submission_id, is_featured")
                         .eq("user_id", prof.id)
                         .order("reviewed_at", { ascending: false })
                         .limit(10);
@@ -179,6 +189,7 @@ export default function PublicProfilePage() {
 
     if (!profile) return null;
 
+    const isOwner = user?.id === profile.id;
     const visibleCards = showAll ? cards : cards.slice(0, 6);
     const profileUrl = typeof window !== "undefined"
         ? `${window.location.origin}/@${username}`
@@ -290,6 +301,19 @@ export default function PublicProfilePage() {
                         </div>
                     </div>
 
+                    {/* Private profile banner — only visible to the owner */}
+                    {isOwner && !profile.is_public && (
+                        <div className="mt-6 flex items-center gap-3 px-4 py-3 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-400 text-sm">
+                            <Lock size={16} className="shrink-0" />
+                            <span>
+                                Your profile is <strong>private</strong> — employers can't see it yet.{" "}
+                                <Link to="/candidate/settings?tab=privacy" className="underline font-semibold hover:text-amber-300 transition">
+                                    Go to Settings to make it public.
+                                </Link>
+                            </span>
+                        </div>
+                    )}
+
                     {/* Skills Section */}
                     {profile.skills && profile.skills.length > 0 && (
                         <div className="mt-8 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-2xl p-6 shadow-sm">
@@ -323,6 +347,63 @@ export default function PublicProfilePage() {
                                 </p>
                             )}
                         </div>
+                    )}
+
+                    {/* Featured Proofs */}
+                    {featuredCards.length > 0 && (
+                        <section className="mt-10">
+                            <h2 className="text-xl font-bold text-[var(--color-text)] mb-6 flex items-center gap-2">
+                                <Bookmark size={20} className="text-amber-400" fill="currentColor" />
+                                Featured Work
+                            </h2>
+                            <div className="grid sm:grid-cols-2 gap-4">
+                                {featuredCards.map((card) => (
+                                    <motion.div
+                                        key={card.submission_id ?? card.id}
+                                        whileHover={{ y: -2 }}
+                                        className="relative p-px rounded-2xl"
+                                        style={{
+                                            background:
+                                                "linear-gradient(135deg, rgba(251,191,36,0.6) 0%, rgba(30,30,40,0) 50%, rgba(245,158,11,0.45) 100%)",
+                                        }}
+                                    >
+                                        <div className="rounded-[calc(1rem-1px)] bg-[var(--color-surface)] p-5 h-full">
+                                            <div className="flex justify-between items-start mb-3">
+                                                <div>
+                                                    <div className="flex items-center gap-1.5 mb-1.5">
+                                                        <Bookmark size={11} className="text-amber-400 shrink-0" fill="currentColor" />
+                                                        <span className="text-[10px] font-bold tracking-widest uppercase text-amber-400">
+                                                            Featured
+                                                        </span>
+                                                    </div>
+                                                    <h3 className="font-semibold text-[var(--color-text)] text-lg line-clamp-1">
+                                                        {card.job_title}
+                                                    </h3>
+                                                </div>
+                                                {card.rating && (
+                                                    <div className="flex items-center gap-1 bg-amber-50 dark:bg-amber-900/20 px-2 py-1 rounded text-xs font-bold text-amber-700 dark:text-amber-400 shrink-0">
+                                                        <Star size={12} fill="currentColor" />
+                                                        {card.rating.toFixed(1)}
+                                                    </div>
+                                                )}
+                                            </div>
+
+                                            <p className="text-sm text-[var(--color-text-muted)] mb-4 line-clamp-2 italic">
+                                                "{card.comments || "Excellent work demonstrating core skills."}"
+                                            </p>
+
+                                            <div className="pt-3 border-t border-white/5 flex justify-between items-center text-xs text-[var(--color-text-muted)]">
+                                                <span className="flex items-center gap-1">
+                                                    <BadgeCheck size={12} className="text-green-500" />
+                                                    Verified
+                                                </span>
+                                                <span>{new Date(card.reviewed_at ?? "").toLocaleDateString()}</span>
+                                            </div>
+                                        </div>
+                                    </motion.div>
+                                ))}
+                            </div>
+                        </section>
                     )}
 
                     {/* Verified Proofs Grid */}
@@ -385,7 +466,7 @@ export default function PublicProfilePage() {
                     </section>
 
                     {/* LinkedIn Share CTA — only visible to the profile owner */}
-                    {cards.length > 0 && user?.id === profile?.id && (
+                    {cards.length > 0 && isOwner && (
                         <section className="mt-8">
                             <ShareToLinkedIn
                                 taskTitle={cards[0]?.job_title || "Proof Task"}

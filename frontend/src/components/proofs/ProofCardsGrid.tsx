@@ -9,6 +9,7 @@ import {
   Star,
   BadgeCheck,
   Building2,
+  Bookmark,
 } from "lucide-react";
 import toast from "react-hot-toast";
 import ProofDetailModal from "@/components/proofs/ProofDetailModal";
@@ -23,10 +24,11 @@ export default function ProofCardsGrid({
   allowTogglePublic = false,
   username,
 }: ProofCardsGridProps) {
-  const { cards, loading, toggleProofPublic } = useProofs();
+  const { cards, loading, toggleProofPublic, toggleProofFeatured } = useProofs();
   const [showAll, setShowAll] = useState(false);
   const [toggling, setToggling] = useState<Record<string, boolean>>({});
   const [selectedCard, setSelectedCard] = useState<ProofCard | null>(null);
+  const featuredCount = cards.filter((c) => c.is_featured).length;
 
   if (loading)
     return (
@@ -62,6 +64,18 @@ export default function ProofCardsGrid({
     setToggling((prev) => ({ ...prev, [submissionId]: false }));
   };
 
+  const handleToggleFeatured = async (submissionId: string | null, currentStatus: boolean) => {
+    if (!submissionId) return;
+    setToggling((prev) => ({ ...prev, [`feat_${submissionId}`]: true }));
+    const result = await toggleProofFeatured(submissionId, currentStatus);
+    if (result.success) {
+      toast.success(result.is_featured ? "Added to Featured" : "Removed from Featured");
+    } else {
+      toast.error(typeof result.error === "string" ? result.error : "Failed to update");
+    }
+    setToggling((prev) => ({ ...prev, [`feat_${submissionId}`]: false }));
+  };
+
   return (
     <>
       <div className="grid sm:grid-cols-2 gap-4">
@@ -74,26 +88,38 @@ export default function ProofCardsGrid({
               key={key}
               className="group relative p-px rounded-2xl transition-all duration-300"
               style={{
-                background:
-                  "linear-gradient(135deg, rgba(139,92,246,0.35) 0%, rgba(30,30,40,0) 50%, rgba(59,130,246,0.25) 100%)",
+                background: card.is_featured
+                  ? "linear-gradient(135deg, rgba(251,191,36,0.6) 0%, rgba(30,30,40,0) 50%, rgba(245,158,11,0.45) 100%)"
+                  : "linear-gradient(135deg, rgba(139,92,246,0.35) 0%, rgba(30,30,40,0) 50%, rgba(59,130,246,0.25) 100%)",
               }}
             >
               <div
                 className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
                 style={{
-                  background:
-                    "linear-gradient(135deg, rgba(139,92,246,0.65) 0%, rgba(30,30,40,0) 50%, rgba(59,130,246,0.55) 100%)",
+                  background: card.is_featured
+                    ? "linear-gradient(135deg, rgba(251,191,36,0.85) 0%, rgba(30,30,40,0) 50%, rgba(245,158,11,0.7) 100%)"
+                    : "linear-gradient(135deg, rgba(139,92,246,0.65) 0%, rgba(30,30,40,0) 50%, rgba(59,130,246,0.55) 100%)",
                 }}
               />
 
               <div className="relative rounded-[calc(1rem-1px)] bg-[var(--color-surface)] flex flex-col h-full overflow-hidden">
 
                 <div className="flex items-center justify-between px-4 pt-4 pb-3 border-b border-white/5">
-                  <div className="flex items-center gap-1.5">
-                    <BadgeCheck size={13} className="text-violet-400 shrink-0" />
-                    <span className="text-[10px] font-semibold tracking-widest uppercase text-violet-400/80">
-                      Verified
-                    </span>
+                  <div className="flex items-center gap-2.5">
+                    <div className="flex items-center gap-1.5">
+                      <BadgeCheck size={13} className="text-violet-400 shrink-0" />
+                      <span className="text-[10px] font-semibold tracking-widest uppercase text-violet-400/80">
+                        Verified
+                      </span>
+                    </div>
+                    {card.is_featured && (
+                      <div className="flex items-center gap-1 px-1.5 py-0.5 rounded bg-amber-400/15 border border-amber-400/30">
+                        <Bookmark size={10} className="text-amber-400 shrink-0" fill="currentColor" />
+                        <span className="text-[9px] font-bold tracking-widest uppercase text-amber-400">
+                          Featured
+                        </span>
+                      </div>
+                    )}
                   </div>
                   {card.reviewed_at && (
                     <span className="text-[10px] text-[var(--color-text-muted)] tabular-nums">
@@ -186,6 +212,35 @@ export default function ProofCardsGrid({
                       </span>
 
                       <div className="flex items-center gap-2.5">
+                        <button
+                          onClick={() => handleToggleFeatured(sid, card.is_featured)}
+                          disabled={
+                            toggling[`feat_${sid}`] ||
+                            (!card.is_featured && featuredCount >= 3)
+                          }
+                          title={
+                            card.is_featured
+                              ? "Remove from Featured"
+                              : featuredCount >= 3
+                              ? "Max 3 featured proofs"
+                              : "Feature this proof"
+                          }
+                          className={[
+                            "transition-colors",
+                            card.is_featured
+                              ? "text-amber-400 hover:text-amber-300"
+                              : !card.is_featured && featuredCount >= 3
+                              ? "text-white/20 cursor-not-allowed"
+                              : "text-white/30 hover:text-amber-400",
+                            toggling[`feat_${sid}`] ? "opacity-50 cursor-not-allowed" : "",
+                          ].join(" ")}
+                        >
+                          <Bookmark
+                            size={13}
+                            fill={card.is_featured ? "currentColor" : "none"}
+                          />
+                        </button>
+
                         {card.is_public && (
                           <button
                             onClick={() => handleShare(sid)}

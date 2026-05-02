@@ -16,6 +16,7 @@ export type ProofCard = {
   improvements: string | null;
   reviewed_at: string | null;
   is_public: boolean;
+  is_featured: boolean;
   share_url: string | null;
 };
 
@@ -73,5 +74,36 @@ export function useProofs() {
     }
   };
 
-  return { cards, credits, loading, toggleProofPublic };
+  const toggleProofFeatured = async (submissionId: string, currentStatus: boolean) => {
+    const newStatus = !currentStatus;
+    if (newStatus) {
+      const featuredCount = cards.filter((c) => c.is_featured).length;
+      if (featuredCount >= 3) {
+        return { success: false, error: "You can feature up to 3 proofs at a time" };
+      }
+    }
+    try {
+      const { error } = await supabase
+        .from("submissions")
+        .update({ is_featured: newStatus })
+        .eq("id", submissionId);
+
+      if (error) throw error;
+
+      setCards((prev) =>
+        prev.map((card) =>
+          card.submission_id === submissionId
+            ? { ...card, is_featured: newStatus }
+            : card
+        )
+      );
+
+      return { success: true, is_featured: newStatus };
+    } catch (err) {
+      console.error("Error toggling proof featured:", err);
+      return { success: false, error: err };
+    }
+  };
+
+  return { cards, credits, loading, toggleProofPublic, toggleProofFeatured };
 }
