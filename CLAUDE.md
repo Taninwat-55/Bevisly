@@ -148,4 +148,4 @@ Wire up Stripe before sending cold emails — a pricing page with no working che
 ## Additional Pre-Launch Checks
 - Full user flow walkthrough for both candidate and employer roles
 - Pricing research: validate plan prices against comparable tools (Workable, Lever, etc.)
-- Onboarding experience: employer first-login guidance (what to do first, how proof tasks work)
+- ✅ Onboarding experience: employer and candidate first-login guidance — done via WelcomeBanner with role-specific steps and action links

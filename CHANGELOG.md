@@ -4,6 +4,25 @@ All notable features and changes to Bevis MVP are recorded here in plain languag
 
 ---
 
+## 2026-05-02 — Platform Polish & Infrastructure
+
+### Employer Reply-To Email Fix
+Offer and feedback emails sent to candidates now set the employer's email as the reply-to address. When a candidate hits "Reply" on any platform email, it goes directly to the employer's inbox — no platform login required to continue the conversation. Falls back to the Bevisly support address if the employer email cannot be resolved. Also switched the `notify` edge function sender from Resend's test address (`onboarding@resend.dev`) to the verified custom domain (`hello@bevisly.com`), so submission and review notifications now deliver to all real users, not just the account owner.
+
+### First-Login Onboarding (Both Roles)
+Candidates and employers both now see a guided welcome banner on first login with three actionable steps and direct navigation links. Each step card links to the relevant part of the platform (e.g. "Browse Jobs", "Try a Practice Proof" for candidates; "Post a Job", "Open Talent Board" for employers). Banner is dismissible and only shown once per role via localStorage.
+
+### Auth Email Templates (Branded)
+All six Supabase auth emails — Confirm Sign Up, Invite User, Magic Link, Change Email, Reset Password, and Reauthentication — now use Bevisly's brand colours and typography instead of Supabase's default template. Consistent with the rest of the platform experience.
+
+### Security Hardening (3 Criticals Resolved)
+Fixed all three critical security advisories flagged in the Supabase dashboard:
+- `ai_usage_logs` — RLS enabled. Table was previously fully open; edge functions continue to work via service role key which bypasses RLS.
+- `proof_cards` view — Rebuilt with `security_invoker = true` so queries run under the calling user's RLS context rather than the view owner's. All underlying tables already had appropriate public-read policies so the proof vault and public profiles are unaffected.
+- `employer_job_summary` view — Same fix. Employers now only see submission counts for their own jobs, which is the intended behaviour.
+
+---
+
 ## 2026-05-02 — Sprint #1: Bevisly Score + Featured Proofs (Complete)
 
 ### Bevisly Score (Candidate Signal System)
