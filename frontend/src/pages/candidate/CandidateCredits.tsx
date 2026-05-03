@@ -1,8 +1,7 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { getCandidateCredits } from "@/lib/api/credits";
-import { Button } from "@/components/ui/Button";
-import { Coins, History, CheckCircle2, TrendingUp, ShoppingBag } from "lucide-react";
+import { Coins, History, TrendingUp, ShoppingBag } from "lucide-react";
 import toast from "react-hot-toast";
 
 export default function CandidateCredits() {
@@ -42,9 +41,9 @@ export default function CandidateCredits() {
                     <p className="text-[var(--color-text-muted)] text-sm mt-1">Perfect for {amount} proof submissions</p>
                 </div>
                 <div className="text-3xl font-bold text-[var(--color-text)]">${price}</div>
-                <Button variant={popular ? "primary" : "outline"} className="w-full">
-                    Purchase Now
-                </Button>
+                <button disabled className="w-full px-4 py-2 rounded-lg text-sm font-medium text-[var(--color-text-muted)] bg-[var(--color-surface-hover)] border border-[var(--color-border)] cursor-not-allowed">
+                    Stripe checkout coming soon
+                </button>
             </div>
         </div>
     );
@@ -113,18 +112,12 @@ export default function CandidateCredits() {
                                 <th className="px-6 py-4 font-medium text-[var(--color-text-muted)]">Status</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-[var(--color-border)]">
-                            <tr className="hover:bg-[var(--color-surface)]">
-                                <td className="px-6 py-4 text-[var(--color-text)]">Oct 24, 2026</td>
-                                <td className="px-6 py-4 text-[var(--color-text)]">Account Activation Bonus</td>
-                                <td className="px-6 py-4 text-emerald-600 font-medium text-right">+3</td>
-                                <td className="px-6 py-4"><span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 text-xs font-semibold"><CheckCircle2 size={12} /> Success</span></td>
-                            </tr>
-                            <tr className="hover:bg-[var(--color-surface)]">
-                                <td className="px-6 py-4 text-[var(--color-text)]">Oct 25, 2026</td>
-                                <td className="px-6 py-4 text-[var(--color-text)]">Applied to Senior React Dev</td>
-                                <td className="px-6 py-4 text-[var(--color-text)] font-medium text-right">-1</td>
-                                <td className="px-6 py-4"><span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 text-xs font-semibold"><CheckCircle2 size={12} /> Success</span></td>
+                        <tbody>
+                            <tr>
+                                <td colSpan={4} className="px-6 py-12 text-center">
+                                    <p className="font-medium text-[var(--color-text)]">No transactions yet</p>
+                                    <p className="text-xs text-[var(--color-text-muted)] mt-1">Your credit purchases and usage will appear here.</p>
+                                </td>
                             </tr>
                         </tbody>
                     </table>
