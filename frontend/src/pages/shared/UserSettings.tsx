@@ -10,14 +10,97 @@ import { updateProfileData, downloadUserData } from "@/lib/api/profiles";
 import { updateCompanyProfile } from "@/lib/api/companies";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import {
-  User, Building2, Bell, Shield,
+  UserCircle, Building2, Bell, Shield,
   Moon, Sun, LogOut, Trash2, Camera,
-  Mail, Upload, Loader2,
-  FileJson, Eye, EyeOff
+  Mail, Upload, Loader2, FileJson,
+  Eye, EyeOff, CreditCard, ChevronRight,
+  Sparkles, Lock
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 
 type Tab = "profile" | "account" | "notifications" | "security" | "privacy";
+
+const tabConfig: { id: Tab; label: string; icon: React.ElementType }[] = [
+  { id: "profile", label: "Profile", icon: UserCircle },
+  { id: "account", label: "Account", icon: Building2 },
+  { id: "notifications", label: "Notifications", icon: Bell },
+  { id: "security", label: "Security", icon: Shield },
+  { id: "privacy", label: "Privacy & Data", icon: FileJson },
+];
+
+function SettingsCard({ children, className = "" }: { children: React.ReactNode; className?: string }) {
+  return (
+    <div className={`bg-[var(--color-surface,var(--color-bg))] border border-[var(--color-border)] rounded-2xl overflow-hidden ${className}`}>
+      {children}
+    </div>
+  );
+}
+
+function SettingsRow({
+  icon,
+  iconBg,
+  title,
+  description,
+  action,
+}: {
+  icon: React.ReactNode;
+  iconBg: string;
+  title: string;
+  description?: string;
+  action?: React.ReactNode;
+}) {
+  return (
+    <div className="flex items-center justify-between gap-4 p-5">
+      <div className="flex items-center gap-4 min-w-0">
+        <div className={`shrink-0 w-10 h-10 rounded-xl flex items-center justify-center ${iconBg}`}>
+          {icon}
+        </div>
+        <div className="min-w-0">
+          <p className="text-sm font-semibold text-[var(--color-text)] leading-tight">{title}</p>
+          {description && (
+            <p className="text-xs text-[var(--color-text-muted)] mt-0.5 leading-snug">{description}</p>
+          )}
+        </div>
+      </div>
+      {action && <div className="shrink-0">{action}</div>}
+    </div>
+  );
+}
+
+function SectionHeader({ title, description }: { title: string; description?: string }) {
+  return (
+    <div className="px-5 pt-5 pb-4 border-b border-[var(--color-border)]">
+      <h3 className="text-sm font-bold text-[var(--color-text)] tracking-tight">{title}</h3>
+      {description && <p className="text-xs text-[var(--color-text-muted)] mt-0.5">{description}</p>}
+    </div>
+  );
+}
+
+function FormField({
+  label,
+  hint,
+  children,
+}: {
+  label: string;
+  hint?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div>
+      <label className="block text-xs font-semibold text-[var(--color-text)] uppercase tracking-wider mb-1.5">
+        {label}
+      </label>
+      {children}
+      {hint && <p className="text-xs text-[var(--color-text-muted)] mt-1.5">{hint}</p>}
+    </div>
+  );
+}
+
+const inputCls =
+  "w-full px-3.5 py-2.5 rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)] text-[var(--color-text)] text-sm placeholder:text-[var(--color-text-muted)]/60 focus:ring-2 focus:ring-[var(--color-brand-primary)] focus:border-transparent outline-none transition-all";
+
+const textareaCls =
+  "w-full px-3.5 py-2.5 rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)] text-[var(--color-text)] text-sm placeholder:text-[var(--color-text-muted)]/60 focus:ring-2 focus:ring-[var(--color-brand-primary)] focus:border-transparent outline-none transition-all resize-y";
 
 export default function UserSettings() {
   const { user, signOut, refreshProfile } = useAuth();
@@ -26,50 +109,44 @@ export default function UserSettings() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
-  // Default tab depends on role. Candidates don't have "profile" tab here anymore.
-  // We can default to "account" for everyone or check role.
-  // Since user might be null initially, we start with "account" which is safe for all.
   const validTabs: Tab[] = ["profile", "account", "notifications", "security", "privacy"];
   const tabParam = searchParams.get("tab") as Tab | null;
+
+  const isEmployer = user?.role === "employer";
+  const hasPassword = user?.app_metadata?.providers?.includes("email");
+  const defaultTabSet = useRef(false);
+
   const [activeTab, setActiveTab] = useState<Tab>(
     tabParam && validTabs.includes(tabParam) ? tabParam : "account"
   );
   const [isLoading, setIsLoading] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
-  // Profile State
-  // Initialize from context to prevent empty fields
+  // Profile state
   const [name, setName] = useState(user?.full_name || "");
   const [company, setCompany] = useState(user?.company_name || "");
   const [avatarUrl, setAvatarUrl] = useState<string | null>(user?.avatar_url || null);
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Company Profile State (employer-only)
+  // Company profile state (employer-only)
   const [companyDescription, setCompanyDescription] = useState("");
   const [companyMission, setCompanyMission] = useState("");
   const [companyCulture, setCompanyCulture] = useState("");
   const [companyWebsite, setCompanyWebsite] = useState("");
 
-  // Prefs State
+  // Prefs state
   const [emailNotif, setEmailNotif] = useState(true);
   const [marketingEmails, setMarketingEmails] = useState(false);
 
-  const isEmployer = user?.role === "employer";
-  const hasPassword = user?.app_metadata?.providers?.includes('email');
-
-  // If employer, we might want to default to profile, but account is fine too.
-  // Or we can use an effect to switch if we really want "profile" first for employers.
+  // Set default tab to "profile" for employers once, on first load
   useEffect(() => {
-    if (isEmployer && activeTab === 'account') {
-       // Optional: Force profile tab for employer? 
-       // Let's leave it as 'account' default to be consistent.
-       // Actually, previous default was 'profile'. Let's switch it for employers.
-       setActiveTab("profile"); 
+    if (!defaultTabSet.current && isEmployer && !tabParam) {
+      defaultTabSet.current = true;
+      setActiveTab("profile");
     }
-  }, [isEmployer, activeTab]);
+  }, [isEmployer, tabParam]);
 
-  // Sync state with user context updates (e.g. after refreshProfile)
   useEffect(() => {
     if (user) {
       setName(user.full_name || "");
@@ -78,7 +155,6 @@ export default function UserSettings() {
     }
   }, [user]);
 
-  // Sync company profile fields from company context
   useEffect(() => {
     if (currentCompanyRecord) {
       setCompanyDescription(currentCompanyRecord.description || "");
@@ -91,51 +167,24 @@ export default function UserSettings() {
   const handleAvatarUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file || !user) return;
-
-    // Validate file type
-    if (!file.type.startsWith("image/")) {
-      toast.error("Please select an image file");
-      return;
-    }
-
-    // Validate size (max 2MB)
-    if (file.size > 2 * 1024 * 1024) {
-      toast.error("Image must be less than 2MB");
-      return;
-    }
+    if (!file.type.startsWith("image/")) { toast.error("Please select an image file"); return; }
+    if (file.size > 2 * 1024 * 1024) { toast.error("Image must be less than 2MB"); return; }
 
     setUploading(true);
     try {
       const fileExt = file.name.split(".").pop();
-      const fileName = `${Date.now()}.${fileExt}`;
-      const filePath = `${user.id}/${fileName}`;
-
-      // Upload to Supabase Storage
-      const { error: uploadError } = await supabase.storage
-        .from("avatars")
-        .upload(filePath, file, { upsert: true });
-
+      const filePath = `${user.id}/${Date.now()}.${fileExt}`;
+      const { error: uploadError } = await supabase.storage.from("avatars").upload(filePath, file, { upsert: true });
       if (uploadError) {
-        // If bucket doesn't exist, show helpful message
-        if (uploadError.message.includes("not found")) {
-          toast.error("Avatar storage not configured. Please create an 'avatars' bucket in Supabase.");
-          return;
-        }
+        if (uploadError.message.includes("not found")) { toast.error("Avatar storage not configured."); return; }
         throw uploadError;
       }
-
-      // Get public URL
-      const { data: { publicUrl } } = supabase.storage
-        .from("avatars")
-        .getPublicUrl(filePath);
-
-      // Update profile with new avatar URL
+      const { data: { publicUrl } } = supabase.storage.from("avatars").getPublicUrl(filePath);
       await updateProfileData(user.id, { avatar_url: publicUrl });
       setAvatarUrl(publicUrl);
-      await refreshProfile?.(); // Refresh context for immediate UI update
-      toast.success("Profile photo updated!");
-    } catch (error) {
-      console.error("Avatar upload error:", error);
+      await refreshProfile?.();
+      toast.success("Photo updated!");
+    } catch {
       toast.error("Failed to upload image");
     } finally {
       setUploading(false);
@@ -147,8 +196,8 @@ export default function UserSettings() {
     try {
       await updateProfileData(user.id, { avatar_url: null });
       setAvatarUrl(null);
-      await refreshProfile?.(); // Refresh context for immediate UI update
-      toast.success("Profile photo removed");
+      await refreshProfile?.();
+      toast.success("Photo removed");
     } catch {
       toast.error("Failed to remove photo");
     }
@@ -159,155 +208,105 @@ export default function UserSettings() {
     try {
       const updates: Record<string, string | null> = { full_name: name };
       if (isEmployer) updates.company_name = company;
-
       await updateProfileData(user!.id, updates);
 
-      // Also sync company name to the real companies table
       if (isEmployer && company) {
         const { updateCompanyName, getCurrentCompanyId } = await import("@/lib/api/companies");
-        const companyId = currentCompanyRecord?.id || await getCurrentCompanyId();
+        const companyId = currentCompanyRecord?.id || (await getCurrentCompanyId());
         if (companyId) {
           await updateCompanyName(companyId, company);
-          // Save company profile fields
           await updateCompanyProfile(companyId, {
             description: companyDescription || null,
             mission: companyMission || null,
             culture: companyCulture || null,
             website_url: companyWebsite || null,
           });
-          await refreshCompany(); // Update global context immediately
+          await refreshCompany();
         }
       }
-
-      await refreshProfile?.(); // Refresh context for immediate UI update
-      toast.success("Profile updated successfully");
+      await refreshProfile?.();
+      toast.success("Saved!");
     } catch {
-      toast.error("Failed to update profile");
+      toast.error("Failed to save");
     } finally {
       setIsLoading(false);
     }
   };
 
   const handlePasswordUpdate = async (e: React.FormEvent) => {
-      e.preventDefault();
-      if (!user?.email) return;
-
-      const form = e.target as HTMLFormElement;
-      const currentPassword = (form.elements.namedItem('current_password') as HTMLInputElement).value;
-      const newPassword = (form.elements.namedItem('new_password') as HTMLInputElement).value;
-      const confirmPassword = (form.elements.namedItem('confirm_password') as HTMLInputElement).value;
-
-      if(newPassword !== confirmPassword) {
-          toast.error("New passwords do not match");
-          return;
-      }
-      
-      setIsLoading(true);
-      try {
-          // 1. Re-authenticate to verify current password
-          const { error: signInError } = await supabase.auth.signInWithPassword({
-              email: user.email,
-              password: currentPassword
-          });
-
-          if (signInError) {
-              throw new Error("Incorrect current password");
-          }
-
-          // 2. Update password if verified
-          const { error: updateError } = await supabase.auth.updateUser({ password: newPassword });
-          if(updateError) throw updateError;
-          
-          toast.success("Password updated successfully");
-          form.reset();
-      } catch (err: unknown) {
-          console.error(err);
-          const message = err instanceof Error ? err.message : "Failed to update password";
-          toast.error(message);
-      } finally {
-          setIsLoading(false);
-      }
+    e.preventDefault();
+    if (!user?.email) return;
+    const form = e.target as HTMLFormElement;
+    const currentPassword = (form.elements.namedItem("current_password") as HTMLInputElement).value;
+    const newPassword = (form.elements.namedItem("new_password") as HTMLInputElement).value;
+    const confirmPassword = (form.elements.namedItem("confirm_password") as HTMLInputElement).value;
+    if (newPassword !== confirmPassword) { toast.error("Passwords do not match"); return; }
+    setIsLoading(true);
+    try {
+      const { error: signInError } = await supabase.auth.signInWithPassword({ email: user.email, password: currentPassword });
+      if (signInError) throw new Error("Incorrect current password");
+      const { error: updateError } = await supabase.auth.updateUser({ password: newPassword });
+      if (updateError) throw updateError;
+      toast.success("Password updated!");
+      form.reset();
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : "Failed to update password");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleUpdateEmail = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user?.email) return;
-
     const form = e.target as HTMLFormElement;
-    const newEmail = (form.elements.namedItem('new_email') as HTMLInputElement).value;
-    
-    // Only get current password if user has one
+    const newEmail = (form.elements.namedItem("new_email") as HTMLInputElement).value;
     let currentPassword = "";
-    if (hasPassword) {
-        currentPassword = (form.elements.namedItem('current_password_email') as HTMLInputElement).value;
-    }
-
-    if (newEmail === user.email) {
-      toast.error("New email must be different from current email");
-      return;
-    }
-
+    if (hasPassword) currentPassword = (form.elements.namedItem("current_password_email") as HTMLInputElement).value;
+    if (newEmail === user.email) { toast.error("New email must differ from current"); return; }
     setIsLoading(true);
     try {
-      // 1. Re-authenticate ONLY if user has a password
       if (hasPassword) {
-        const { error: signInError } = await supabase.auth.signInWithPassword({
-            email: user.email,
-            password: currentPassword
-        });
-
-        if (signInError) {
-            throw new Error("Incorrect current password");
-        }
+        const { error: signInError } = await supabase.auth.signInWithPassword({ email: user.email, password: currentPassword });
+        if (signInError) throw new Error("Incorrect current password");
       }
-
-      // 2. Update email
       const { error: updateError } = await supabase.auth.updateUser({ email: newEmail });
       if (updateError) throw updateError;
-
-      toast.success("Confirmation link sent to both emails!");
+      toast.success("Confirmation sent to both emails!");
       form.reset();
     } catch (err: unknown) {
-      console.error(err);
-      const message = err instanceof Error ? err.message : "Failed to update email";
-      toast.error(message);
+      toast.error(err instanceof Error ? err.message : "Failed to update email");
     } finally {
       setIsLoading(false);
     }
   };
 
   const handleDownloadData = async () => {
-      if(!user) return;
-      
-      toast.promise(
-          (async () => {
-               // Default to "candidate" if role is null (shouldn't happen for logged in users) check
-               const role = user.role === "demo_admin" ? "admin" : (user.role || "candidate");
-               const blob = await downloadUserData(user.id, role);
-               const url = window.URL.createObjectURL(blob);
-               const a = document.createElement('a');
-               a.href = url;
-               a.download = `bevis-data-export-${new Date().toISOString().split('T')[0]}.json`;
-               document.body.appendChild(a);
-               a.click();
-               window.URL.revokeObjectURL(url);
-               document.body.removeChild(a);
-          })(),
-          {
-              loading: 'Preparing data export...',
-              success: 'Download started!',
-              error: 'Failed to export data'
-          }
-      );
+    if (!user) return;
+    toast.promise(
+      (async () => {
+        const role = user.role === "demo_admin" ? "admin" : (user.role || "candidate");
+        const blob = await downloadUserData(user.id, role);
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `bevis-data-export-${new Date().toISOString().split("T")[0]}.json`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+      })(),
+      { loading: "Preparing export...", success: "Download started!", error: "Failed to export data" }
+    );
   };
 
   const handleLogout = async () => {
     await signOut();
-    toast.success("Logged out successfully");
+    toast.success("Signed out");
   };
 
   const handleDeleteAccount = async () => {
-    if (!window.confirm("Are you sure? This action cannot be undone.")) return;
+    if (!window.confirm("Delete your account permanently? This cannot be undone.")) return;
     setDeleting(true);
     try {
       const { error } = await supabase.rpc("delete_user_account");
@@ -320,527 +319,513 @@ export default function UserSettings() {
     }
   };
 
-  const TabButton = ({ id, label, icon: Icon }: { id: Tab, label: string, icon: React.ElementType }) => (
-    <button
-      onClick={() => setActiveTab(id)}
-      className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium text-sm ${activeTab === id
-        ? "bg-[var(--color-brand-primary)] text-white shadow-lg shadow-blue-500/20"
-        : "text-[var(--color-text-muted)] hover:bg-[var(--color-surface-hover)] hover:text-[var(--color-text)]"
-        }`}
-    >
-      <Icon size={18} />
-      {label}
-    </button>
+  // Avatar shared component
+  const AvatarSection = () => (
+    <div className="flex items-center gap-5 p-5">
+      <div className="relative group shrink-0">
+        <div
+          className="w-20 h-20 rounded-2xl bg-gradient-to-br from-[var(--color-brand-primary)] to-purple-600 flex items-center justify-center text-2xl font-bold text-white overflow-hidden cursor-pointer shadow-lg"
+          onClick={() => fileInputRef.current?.click()}
+        >
+          {avatarUrl ? (
+            <img src={avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
+          ) : (
+            <span>{(name[0] || user?.email?.[0] || "?").toUpperCase()}</span>
+          )}
+        </div>
+        <div
+          className="absolute inset-0 bg-black/50 rounded-2xl flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+          onClick={() => fileInputRef.current?.click()}
+        >
+          {uploading ? <Loader2 className="text-white animate-spin" size={20} /> : <Camera className="text-white" size={20} />}
+        </div>
+        <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} disabled={uploading} />
+      </div>
+      <div>
+        <p className="font-semibold text-[var(--color-text)] text-sm">
+          {isEmployer ? (company || name || "Company") : (name || "Your Name")}
+        </p>
+        <p className="text-xs text-[var(--color-text-muted)] mb-3">{user?.email}</p>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => fileInputRef.current?.click()}
+            disabled={uploading}
+            className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg border border-[var(--color-border)] hover:bg-[var(--color-surface-hover)] text-[var(--color-text)] transition-colors disabled:opacity-50"
+          >
+            {uploading ? <Loader2 size={12} className="animate-spin" /> : <Upload size={12} />}
+            {uploading ? "Uploading..." : "Change photo"}
+          </button>
+          {avatarUrl && (
+            <button
+              onClick={handleRemoveAvatar}
+              className="text-xs font-medium px-3 py-1.5 rounded-lg text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 transition-colors"
+            >
+              Remove
+            </button>
+          )}
+        </div>
+        <p className="text-xs text-[var(--color-text-muted)]/60 mt-1.5">JPG, PNG or GIF · Max 2MB</p>
+      </div>
+    </div>
   );
 
   return (
-    <div className="min-h-screen bg-[var(--color-bg)] px-6 md:px-10 py-12 font-sans transition-colors">
-      <div className="max-w-6xl mx-auto">
+    <div className="min-h-screen bg-[var(--color-bg)] transition-colors">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
 
-        {/* Header */}
-        <header className="mb-10">
-          <h1 className="text-3xl font-bold font-display text-[var(--color-text)] mb-2">Settings</h1>
-          <p className="text-[var(--color-text-muted)]">Manage your account preferences and profile.</p>
-        </header>
+        {/* Page header */}
+        <div className="mb-8">
+          <h1 className="text-2xl font-bold text-[var(--color-text)] tracking-tight">Settings</h1>
+          <p className="text-sm text-[var(--color-text-muted)] mt-1">
+            Manage your {isEmployer ? "company profile and" : ""} account preferences.
+          </p>
+        </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+        <div className="flex flex-col lg:flex-row gap-6">
 
-          {/* Sidebar Navigation */}
-          <nav className="space-y-2">
-            {isEmployer && <TabButton id="profile" label="Company Profile" icon={User} />}
-            <TabButton id="account" label="Account" icon={Building2} />
-            <TabButton id="notifications" label="Notifications" icon={Bell} />
-            <TabButton id="security" label="Security" icon={Shield} />
-            <TabButton id="privacy" label="Privacy & Data" icon={FileJson} />
+          {/* Sidebar */}
+          <nav className="lg:w-52 shrink-0">
+            <ul className="space-y-0.5">
+              {tabConfig.map(({ id, label, icon: Icon }) => {
+                const isActive = activeTab === id;
+                return (
+                  <li key={id}>
+                    <button
+                      onClick={() => setActiveTab(id)}
+                      className={[
+                        "w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all",
+                        isActive
+                          ? "bg-[var(--color-brand-primary)] text-white shadow-md shadow-blue-500/20"
+                          : "text-[var(--color-text-muted)] hover:bg-[var(--color-surface-hover)] hover:text-[var(--color-text)]",
+                      ].join(" ")}
+                    >
+                      <Icon size={16} className="shrink-0" />
+                      <span>{id === "profile" && isEmployer ? "Company" : label}</span>
+                      {isActive && <ChevronRight size={14} className="ml-auto opacity-70" />}
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
           </nav>
 
-          {/* Main Content Area */}
-          <div className="lg:col-span-3">
-            <div className="glass-panel min-h-[500px] border border-[var(--color-border)] rounded-2xl p-8 relative overflow-hidden">
-              <AnimatePresence mode="wait">
+          {/* Content */}
+          <div className="flex-1 min-w-0">
+            <AnimatePresence mode="wait">
 
-                {/* ── PROFILE TAB ──────────────────────────────── */}
-                {activeTab === "profile" && (
-                  <motion.div
-                    key="profile"
-                    initial={{ opacity: 0, x: 10 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: -10 }}
-                    transition={{ duration: 0.2 }}
-                    className="max-w-2xl"
-                  >
+              {/* ── PROFILE TAB ── */}
+              {activeTab === "profile" && (
+                <motion.div
+                  key="profile"
+                  initial={{ opacity: 0, y: 6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -6 }}
+                  transition={{ duration: 0.18 }}
+                  className="space-y-4"
+                >
+                  <SettingsCard>
+                    <SectionHeader
+                      title={isEmployer ? "Company Identity" : "Public Profile"}
+                      description={isEmployer ? "This information appears on your job listings and brand page." : "How you appear to employers on Bevis."}
+                    />
+                    <AvatarSection />
+                  </SettingsCard>
 
-                    <h2 className="text-xl font-bold text-[var(--color-text)] mb-6">
-                      {isEmployer ? "Company Profile" : "Public Profile"}
-                    </h2>
-
-                    {/* Avatar Upload */}
-                    <div className="flex items-center gap-6 mb-8">
-                      <div className="relative group">
-                        <div
-                          className="w-24 h-24 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-3xl font-bold text-white shadow-xl overflow-hidden cursor-pointer"
-                          onClick={() => fileInputRef.current?.click()}
-                        >
-                          {avatarUrl ? (
-                            <img src={avatarUrl} alt="Profile" className="w-full h-full object-cover" />
-                          ) : (
-                            name[0]?.toUpperCase() || user?.email?.[0]?.toUpperCase()
-                          )}
-                        </div>
-                        <div
-                          className="absolute inset-0 bg-black/40 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
-                          onClick={() => fileInputRef.current?.click()}
-                        >
-                          {uploading ? (
-                            <Loader2 className="text-white animate-spin" size={24} />
-                          ) : (
-                            <Camera className="text-white" size={24} />
-                          )}
-                        </div>
-                        <input
-                          ref={fileInputRef}
-                          type="file"
-                          accept="image/*"
-                          className="hidden"
-                          onChange={handleAvatarUpload}
-                          disabled={uploading}
-                        />
-                      </div>
-                      <div className="flex-1">
-                        <h3 className="text-lg font-bold text-[var(--color-text)]">
-                          {isEmployer
-                            ? (company || name || "Company Name")
-                            : (name || "Your Name")}
-                        </h3>
-                        <p className="text-sm text-[var(--color-text-muted)] mb-3 font-medium">
-                          {user?.email}
-                        </p>
-                        <div className="flex gap-2">
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => fileInputRef.current?.click()}
-                            disabled={uploading}
-                            leftIcon={uploading ? <Loader2 size={14} className="animate-spin" /> : <Upload size={14} />}
-                          >
-                            {uploading ? "Uploading..." : "Change"}
-                          </Button>
-                          {avatarUrl && (
-                            <Button size="sm" variant="ghost" className="text-red-500 hover:text-red-600" onClick={handleRemoveAvatar}>
-                              Remove
-                            </Button>
-                          )}
-                        </div>
-                        <p className="text-xs text-[var(--color-text-muted)] mt-2 opacity-70">Recommended 400x400px, max 2MB</p>
-                      </div>
-                    </div>
-
-                    <div className="space-y-5">
-                      <div>
-                        <label className="block text-sm font-medium text-[var(--color-text)] mb-2">
-                          {isEmployer ? "Contact Person Name" : "Display Name"}
-                        </label>
+                  <SettingsCard>
+                    <SectionHeader title={isEmployer ? "Contact & Company Details" : "Display Name"} />
+                    <div className="p-5 space-y-4">
+                      <FormField label={isEmployer ? "Contact Person Name" : "Display Name"}>
                         <input
                           type="text"
                           value={name}
                           onChange={(e) => setName(e.target.value)}
-                          className="w-full px-4 py-2.5 rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)] text-[var(--color-text)] focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                          placeholder="Your full name"
+                          className={inputCls}
                         />
-                      </div>
+                      </FormField>
 
                       {isEmployer && (
-                        <div>
-                          <label className="block text-sm font-medium text-[var(--color-text)] mb-2">Company Name</label>
+                        <FormField label="Company Name">
                           <input
                             type="text"
                             value={company}
                             onChange={(e) => setCompany(e.target.value)}
-                            className="w-full px-4 py-2.5 rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)] text-[var(--color-text)] focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                            placeholder="Your company name"
+                            className={inputCls}
                           />
-                        </div>
+                        </FormField>
                       )}
 
                       {isEmployer && (
                         <>
-                          <div className="pt-4 border-t border-[var(--color-border)]">
-                            <h3 className="text-sm font-bold text-[var(--color-text)] mb-1">Company Profile</h3>
-                            <p className="text-xs text-[var(--color-text-muted)] mb-4">These details appear on all your job posts automatically.</p>
-                          </div>
-
-                          <div>
-                            <label className="block text-sm font-medium text-[var(--color-text)] mb-2">About the Company</label>
+                          <FormField label="About the Company" hint="Tell candidates what makes your company unique.">
                             <textarea
                               value={companyDescription}
                               onChange={(e) => setCompanyDescription(e.target.value)}
-                              placeholder="Tell candidates what your company does, what makes it unique..."
+                              placeholder="We're building..."
                               rows={4}
-                              className="w-full px-4 py-2.5 rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)] text-[var(--color-text)] focus:ring-2 focus:ring-blue-500 outline-none transition-all resize-y"
+                              className={textareaCls}
                             />
-                          </div>
-
-                          <div>
-                            <label className="block text-sm font-medium text-[var(--color-text)] mb-2">Mission Statement</label>
+                          </FormField>
+                          <FormField label="Mission Statement">
                             <textarea
                               value={companyMission}
                               onChange={(e) => setCompanyMission(e.target.value)}
-                              placeholder="What is your company's mission or purpose?"
+                              placeholder="What drives your company..."
                               rows={2}
-                              className="w-full px-4 py-2.5 rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)] text-[var(--color-text)] focus:ring-2 focus:ring-blue-500 outline-none transition-all resize-y"
+                              className={textareaCls}
                             />
-                          </div>
-
-                          <div>
-                            <label className="block text-sm font-medium text-[var(--color-text)] mb-2">Culture & Values</label>
+                          </FormField>
+                          <FormField label="Culture & Values">
                             <textarea
                               value={companyCulture}
                               onChange={(e) => setCompanyCulture(e.target.value)}
-                              placeholder="Describe your team culture, work environment, and core values..."
+                              placeholder="Describe your team culture..."
                               rows={3}
-                              className="w-full px-4 py-2.5 rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)] text-[var(--color-text)] focus:ring-2 focus:ring-blue-500 outline-none transition-all resize-y"
+                              className={textareaCls}
                             />
-                          </div>
-
-                          <div>
-                            <label className="block text-sm font-medium text-[var(--color-text)] mb-2">Company Website</label>
+                          </FormField>
+                          <FormField label="Company Website">
                             <input
                               type="url"
                               value={companyWebsite}
                               onChange={(e) => setCompanyWebsite(e.target.value)}
                               placeholder="https://yourcompany.com"
-                              className="w-full px-4 py-2.5 rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)] text-[var(--color-text)] focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                              className={inputCls}
                             />
-                          </div>
+                          </FormField>
                         </>
                       )}
 
-                      <div className="pt-6">
-                        <Button onClick={handleSaveProfile} isLoading={isLoading}>
+                      <div className="pt-2">
+                        <Button onClick={handleSaveProfile} isLoading={isLoading} size="sm">
                           Save Changes
                         </Button>
                       </div>
                     </div>
-                  </motion.div>
-                )}
+                  </SettingsCard>
+                </motion.div>
+              )}
 
-                {/* ── ACCOUNT TAB ──────────────────────────────── */}
-                {activeTab === "account" && (
-                  <motion.div
-                    key="account"
-                    initial={{ opacity: 0, x: 10 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: -10 }}
-                    transition={{ duration: 0.2 }}
-                    className="max-w-2xl"
-                  >
-                    <h2 className="text-xl font-bold text-[var(--color-text)] mb-6">Account Preferences</h2>
+              {/* ── ACCOUNT TAB ── */}
+              {activeTab === "account" && (
+                <motion.div
+                  key="account"
+                  initial={{ opacity: 0, y: 6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -6 }}
+                  transition={{ duration: 0.18 }}
+                  className="space-y-4"
+                >
+                  {/* Account overview */}
+                  <SettingsCard>
+                    <SectionHeader title="Account Overview" />
+                    <div className="divide-y divide-[var(--color-border)]">
+                      <SettingsRow
+                        icon={<Mail size={16} />}
+                        iconBg="bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400"
+                        title="Email Address"
+                        description={user?.email}
+                        action={
+                          <span className="text-[10px] font-bold px-2 py-1 rounded-md bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 uppercase tracking-wider">
+                            Verified
+                          </span>
+                        }
+                      />
+                      <SettingsRow
+                        icon={isDark ? <Moon size={16} /> : <Sun size={16} />}
+                        iconBg="bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400"
+                        title="Appearance"
+                        description={isDark ? "Dark mode" : "Light mode"}
+                        action={
+                          <Button size="sm" variant="outline" onClick={toggleTheme}>
+                            Toggle
+                          </Button>
+                        }
+                      />
+                      {isEmployer && (
+                        <SettingsRow
+                          icon={<Sparkles size={16} />}
+                          iconBg="bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400"
+                          title="Subscription Plan"
+                          description={user?.subscription_tier === "pro_saas" ? "Pro Plan — all features unlocked" : "Free Tier — upgrade to unlock Pro features"}
+                          action={
+                            user?.subscription_tier !== "pro_saas" && (
+                              <Button size="sm" variant="outline" onClick={() => navigate("/pricing")}>
+                                Upgrade
+                              </Button>
+                            )
+                          }
+                        />
+                      )}
+                      {!isEmployer && (
+                        <SettingsRow
+                          icon={<CreditCard size={16} />}
+                          iconBg="bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400"
+                          title="Available Credits"
+                          description={`${user?.credits ?? 0} credits remaining`}
+                          action={
+                            <Button size="sm" variant="outline" onClick={() => navigate("/candidate")}>
+                              Get More
+                            </Button>
+                          }
+                        />
+                      )}
+                    </div>
+                  </SettingsCard>
 
-                    <div className="space-y-6">
-                      <div className="flex items-center justify-between p-4 rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)]/50">
-                        <div className="flex items-center gap-4">
-                          <div className="p-2 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400">
-                            {isDark ? <Moon size={20} /> : <Sun size={20} />}
-                          </div>
-                          <div>
-                            <h3 className="font-medium text-[var(--color-text)]">Appearance</h3>
-                            <p className="text-sm text-[var(--color-text-muted)]">
-                              Current: {isDark ? "Dark Mode" : "Light Mode"}
-                            </p>
-                          </div>
-                        </div>
-                        <Button size="sm" variant="outline" onClick={toggleTheme}>
-                          Toggle Theme
+                  {/* Change email */}
+                  <SettingsCard>
+                    <SectionHeader title="Change Email Address" description="A confirmation link will be sent to both your current and new email." />
+                    <form onSubmit={handleUpdateEmail} className="p-5 space-y-4">
+                      <FormField label="New Email Address">
+                        <input name="new_email" type="email" placeholder="new@example.com" required className={inputCls} />
+                      </FormField>
+                      {hasPassword && (
+                        <FormField label="Confirm with Current Password">
+                          <input name="current_password_email" type="password" placeholder="••••••••" required className={inputCls} />
+                        </FormField>
+                      )}
+                      <div className="flex justify-end">
+                        <Button type="submit" size="sm" isLoading={isLoading}>
+                          Update Email
                         </Button>
                       </div>
+                    </form>
+                  </SettingsCard>
 
-                      <div className="flex items-center justify-between p-4 rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)]/50">
-                        <div className="flex items-center gap-4">
-                          <div className="p-2 rounded-lg bg-blue-100 dark:bg-blue-900/30 text-blue-600">
-                            <Mail size={20} />
+                  {/* Danger zone */}
+                  <SettingsCard className="border-red-200 dark:border-red-900/40">
+                    <div className="px-5 pt-5 pb-4 border-b border-red-100 dark:border-red-900/30">
+                      <h3 className="text-sm font-bold text-red-600 dark:text-red-400">Danger Zone</h3>
+                      <p className="text-xs text-[var(--color-text-muted)] mt-0.5">These actions are permanent and cannot be undone.</p>
+                    </div>
+                    <div className="p-5 flex flex-col sm:flex-row gap-3">
+                      <Button variant="outline" onClick={handleLogout} leftIcon={<LogOut size={15} />} size="sm">
+                        Sign Out
+                      </Button>
+                      <Button
+                        variant="danger"
+                        onClick={handleDeleteAccount}
+                        isLoading={deleting}
+                        leftIcon={<Trash2 size={15} />}
+                        size="sm"
+                      >
+                        Delete Account
+                      </Button>
+                    </div>
+                  </SettingsCard>
+                </motion.div>
+              )}
+
+              {/* ── NOTIFICATIONS TAB ── */}
+              {activeTab === "notifications" && (
+                <motion.div
+                  key="notifications"
+                  initial={{ opacity: 0, y: 6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -6 }}
+                  transition={{ duration: 0.18 }}
+                >
+                  <SettingsCard>
+                    <SectionHeader title="Email Notifications" description="Choose which emails you receive from Bevis." />
+                    <div className="divide-y divide-[var(--color-border)]">
+                      {[
+                        {
+                          key: "emailNotif" as const,
+                          icon: <Bell size={16} />,
+                          iconBg: emailNotif
+                            ? "bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600"
+                            : "bg-slate-100 dark:bg-slate-800 text-slate-400",
+                          title: "Platform Updates",
+                          description: isEmployer
+                            ? "New applications, submission reviews, and platform news."
+                            : "Status changes on your applications and new opportunities.",
+                          checked: emailNotif,
+                          onChange: () => setEmailNotif((v) => !v),
+                          color: "bg-emerald-500",
+                        },
+                        {
+                          key: "marketingEmails" as const,
+                          icon: <Mail size={16} />,
+                          iconBg: marketingEmails
+                            ? "bg-purple-100 dark:bg-purple-900/30 text-purple-600"
+                            : "bg-slate-100 dark:bg-slate-800 text-slate-400",
+                          title: "Tips & Marketing",
+                          description: isEmployer
+                            ? "Recruitment tips, feature highlights, and product news."
+                            : "Profile tips, job search advice, and Bevis news.",
+                          checked: marketingEmails,
+                          onChange: () => setMarketingEmails((v) => !v),
+                          color: "bg-purple-500",
+                        },
+                      ].map((item) => (
+                        <label
+                          key={item.key}
+                          className="flex items-center justify-between gap-4 p-5 cursor-pointer hover:bg-[var(--color-surface-hover)]/50 transition-colors"
+                        >
+                          <div className="flex items-center gap-4 min-w-0">
+                            <div className={`shrink-0 w-10 h-10 rounded-xl flex items-center justify-center transition-colors ${item.iconBg}`}>
+                              {item.icon}
+                            </div>
+                            <div className="min-w-0">
+                              <p className="text-sm font-semibold text-[var(--color-text)]">{item.title}</p>
+                              <p className="text-xs text-[var(--color-text-muted)] mt-0.5">{item.description}</p>
+                            </div>
                           </div>
-                          <div>
-                            <h3 className="font-medium text-[var(--color-text)]">Email Address</h3>
-                            <p className="text-sm text-[var(--color-text-muted)]">{user?.email}</p>
+                          <button
+                            type="button"
+                            onClick={item.onChange}
+                            className={[
+                              "relative shrink-0 inline-flex h-6 w-11 rounded-full border-2 border-transparent transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-brand-primary)]",
+                              item.checked ? item.color : "bg-slate-200 dark:bg-slate-700",
+                            ].join(" ")}
+                          >
+                            <span
+                              className={[
+                                "pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow-sm transition-transform duration-200",
+                                item.checked ? "translate-x-5" : "translate-x-0",
+                              ].join(" ")}
+                            />
+                          </button>
+                        </label>
+                      ))}
+                    </div>
+                  </SettingsCard>
+                </motion.div>
+              )}
+
+              {/* ── SECURITY TAB ── */}
+              {activeTab === "security" && (
+                <motion.div
+                  key="security"
+                  initial={{ opacity: 0, y: 6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -6 }}
+                  transition={{ duration: 0.18 }}
+                  className="space-y-4"
+                >
+                  <SettingsCard>
+                    <SectionHeader title="Password" description={hasPassword ? "Update your login password." : "You're signed in with a social account."} />
+                    <div className="p-5">
+                      {hasPassword ? (
+                        <form onSubmit={handlePasswordUpdate} className="space-y-4">
+                          <FormField label="Current Password">
+                            <input name="current_password" type="password" placeholder="••••••••" required className={inputCls} />
+                          </FormField>
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <FormField label="New Password">
+                              <input name="new_password" type="password" placeholder="••••••••" required minLength={6} className={inputCls} />
+                            </FormField>
+                            <FormField label="Confirm Password">
+                              <input name="confirm_password" type="password" placeholder="••••••••" required minLength={6} className={inputCls} />
+                            </FormField>
                           </div>
+                          <div className="flex justify-end pt-1">
+                            <Button type="submit" size="sm" isLoading={isLoading}>
+                              Update Password
+                            </Button>
+                          </div>
+                        </form>
+                      ) : (
+                        <div className="flex items-center gap-3 text-sm text-[var(--color-text-muted)]">
+                          <Lock size={16} className="shrink-0 text-blue-500" />
+                          Signed in via Google or GitHub — no password needed.
                         </div>
-                        <span className="text-xs font-bold px-2 py-1 rounded bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 uppercase tracking-wide">
-                          Verified
-                        </span>
-                      </div>
+                      )}
+                    </div>
+                  </SettingsCard>
 
-                      {/* Employer Subscription Info */}
-                      {isEmployer && (
-                        <div className="flex items-center justify-between p-4 rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)]/50">
-                          <div className="flex items-center gap-4">
-                            <div className="p-2 rounded-lg bg-amber-100 dark:bg-amber-900/30 text-amber-600">
-                               <Shield size={20} />
+                  <SettingsCard>
+                    <SectionHeader title="Two-Factor Authentication" description="Add an extra layer of security to your account." />
+                    <div className="p-5">
+                      <MFASettings />
+                    </div>
+                  </SettingsCard>
+                </motion.div>
+              )}
+
+              {/* ── PRIVACY TAB ── */}
+              {activeTab === "privacy" && (
+                <motion.div
+                  key="privacy"
+                  initial={{ opacity: 0, y: 6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -6 }}
+                  transition={{ duration: 0.18 }}
+                  className="space-y-4"
+                >
+                  {!isEmployer && (
+                    <SettingsCard>
+                      <SectionHeader title="Profile Visibility" description="Control who can discover and view your profile." />
+                      <div className="p-5">
+                        <div className="flex items-start justify-between gap-6">
+                          <div className="flex items-start gap-4">
+                            <div
+                              className={[
+                                "shrink-0 w-10 h-10 rounded-xl flex items-center justify-center transition-colors",
+                                user?.is_public
+                                  ? "bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600"
+                                  : "bg-slate-100 dark:bg-slate-800 text-slate-400",
+                              ].join(" ")}
+                            >
+                              {user?.is_public ? <Eye size={16} /> : <EyeOff size={16} />}
                             </div>
                             <div>
-                              <h3 className="font-medium text-[var(--color-text)]">Subscription Plan</h3>
-                              <p className="text-sm text-[var(--color-text-muted)]">
-                                {user?.subscription_tier === 'pro_saas' ? 'Pro Plan' : 'Free Tier'}
+                              <p className="text-sm font-semibold text-[var(--color-text)]">
+                                {user?.is_public ? "Public profile" : "Private profile"}
+                              </p>
+                              <p className="text-xs text-[var(--color-text-muted)] mt-0.5 max-w-sm">
+                                {user?.is_public
+                                  ? "Employers can discover you in searches and invite you to apply."
+                                  : "You won't appear in employer searches. You can still apply to jobs directly."}
                               </p>
                             </div>
                           </div>
-                        </div>
-                      )}
-
-                      {/* Change Email Form */}
-                      <div className="p-6 rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)]/50">
-                        <div className="flex items-center gap-4 mb-4">
-                          <div className="p-2 rounded-lg bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600">
-                             <Mail size={20} />
-                          </div>
-                          <div>
-                            <h3 className="font-medium text-[var(--color-text)]">Change Email Address</h3>
-                             <p className="text-sm text-[var(--color-text-muted)]">Update the email used to sign in.</p>
-                          </div>
-                        </div>
-
-                        <form onSubmit={handleUpdateEmail} className="space-y-4">
-                            <div>
-                                <label className="block text-xs font-bold text-[var(--color-text)] uppercase tracking-wider mb-1">New Email Address</label>
-                                <input name="new_email" type="email" placeholder="new@example.com" required className="w-full bg-[var(--color-bg)] border border-[var(--color-border)] rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-[var(--color-brand-primary)]" />
-                            </div>
-                            {hasPassword && (
-                                <div>
-                                    <label className="block text-xs font-bold text-[var(--color-text)] uppercase tracking-wider mb-1">Confirm with Current Password</label>
-                                    <input name="current_password_email" type="password" placeholder="••••••••" required className="w-full bg-[var(--color-bg)] border border-[var(--color-border)] rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-[var(--color-brand-primary)]" />
-                                </div>
-                            )}
-                            <div className="flex justify-end">
-                                <Button type="submit" size="sm" isLoading={isLoading}>Update Email</Button>
-                            </div>
-                        </form>
-                      </div>
-                      
-                      {/* Candidate Credits Info */}
-                      {!isEmployer && (
-                         <div className="flex items-center justify-between p-4 rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)]/50">
-                          <div className="flex items-center gap-4">
-                            <div className="p-2 rounded-lg bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600">
-                               <Building2 size={20} /> 
-                            </div>
-                            <div>
-                              <h3 className="font-medium text-[var(--color-text)]">Available Credits</h3>
-                              <div className="flex items-center gap-2">
-                                <span className="font-semibold text-lg">{user?.credits || 0}</span>
-                                <Button size="sm" variant="outline" onClick={() => navigate('/candidate')}>Get More</Button>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Danger Zone */}
-                      <div className="mt-12 pt-8 border-t border-[var(--color-border)]">
-                        <h3 className="text-lg font-bold text-red-600 mb-4 flex items-center gap-2">
-                          <Trash2 size={18} /> Danger Zone
-                        </h3>
-
-                        <div className="flex flex-col sm:flex-row gap-4">
-                          <Button variant="outline" onClick={handleLogout} leftIcon={<LogOut size={16} />}>
-                            Sign Out
-                          </Button>
-                          <Button
-                            variant="danger"
-                            onClick={handleDeleteAccount}
-                            isLoading={deleting}
-                            leftIcon={<Trash2 size={16} />}
+                          <button
+                            onClick={async () => {
+                              if (!user) return;
+                              const newVal = !user.is_public;
+                              try {
+                                await updateProfileData(user.id, { is_public: newVal });
+                                await refreshProfile?.();
+                                toast.success(newVal ? "Profile is now public" : "Profile is now private");
+                              } catch {
+                                toast.error("Failed to update visibility");
+                              }
+                            }}
+                            className={[
+                              "relative shrink-0 inline-flex h-6 w-11 rounded-full border-2 border-transparent transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500",
+                              user?.is_public ? "bg-emerald-500" : "bg-slate-200 dark:bg-slate-700",
+                            ].join(" ")}
                           >
-                            Delete Account
-                          </Button>
+                            <span
+                              className={[
+                                "pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow-sm transition-transform duration-200",
+                                user?.is_public ? "translate-x-5" : "translate-x-0",
+                              ].join(" ")}
+                            />
+                          </button>
                         </div>
                       </div>
+                    </SettingsCard>
+                  )}
+
+                  <SettingsCard>
+                    <SectionHeader title="Your Data" description="Download everything Bevis stores about you." />
+                    <div className="p-5">
+                      <p className="text-sm text-[var(--color-text-muted)] mb-5 max-w-lg">
+                        In line with GDPR and data portability rights, you can request a full export of your personal data — including your profile, applications, submissions, and account history.
+                      </p>
+                      <Button onClick={handleDownloadData} variant="outline" leftIcon={<FileJson size={15} />} size="sm">
+                        Export Data (JSON)
+                      </Button>
                     </div>
-                  </motion.div>
-                )}
+                  </SettingsCard>
+                </motion.div>
+              )}
 
-                {/* ── NOTIFICATIONS TAB ────────────────────────── */}
-                {activeTab === "notifications" && (
-                  <motion.div
-                    key="notifications"
-                    initial={{ opacity: 0, x: 10 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: -10 }}
-                    transition={{ duration: 0.2 }}
-                    className="max-w-2xl"
-                  >
-                    <h2 className="text-xl font-bold text-[var(--color-text)] mb-6">Notification Settings</h2>
-
-                    <div className="space-y-4">
-                      <label className="flex items-center justify-between p-4 rounded-xl border border-[var(--color-border)] hover:bg-[var(--color-bg)]/50 transition cursor-pointer">
-                        <div className="flex items-center gap-4">
-                          <div className={`p-2 rounded-lg ${emailNotif ? 'bg-green-100 dark:bg-green-900/20 text-green-600' : 'bg-slate-100 dark:bg-slate-800 text-slate-400'}`}>
-                            <Bell size={20} />
-                          </div>
-                          <div>
-                            <h3 className="font-medium text-[var(--color-text)]">Platform Updates</h3>
-                            <p className="text-sm text-[var(--color-text-muted)]">Get notified about status changes and new features.</p>
-                          </div>
-                        </div>
-                        <div className={`w-12 h-6 rounded-full p-1 transition-colors ${emailNotif ? 'bg-green-500' : 'bg-slate-300 dark:bg-slate-700'}`}>
-                          <div className={`w-4 h-4 bg-white rounded-full shadow-sm transition-transform ${emailNotif ? 'translate-x-6' : ''}`} />
-                        </div>
-                        <input type="checkbox" className="hidden" checked={emailNotif} onChange={() => setEmailNotif(!emailNotif)} />
-                      </label>
-
-                      <label className="flex items-center justify-between p-4 rounded-xl border border-[var(--color-border)] hover:bg-[var(--color-bg)]/50 transition cursor-pointer">
-                        <div className="flex items-center gap-4">
-                          <div className={`p-2 rounded-lg ${marketingEmails ? 'bg-purple-100 dark:bg-purple-900/20 text-purple-600' : 'bg-slate-100 dark:bg-slate-800 text-slate-400'}`}>
-                            <Mail size={20} />
-                          </div>
-                          <div>
-                            <h3 className="font-medium text-[var(--color-text)]">Marketing & Tips</h3>
-                            <p className="text-sm text-[var(--color-text-muted)]">Receive tips to improve your profile and task success.</p>
-                          </div>
-                        </div>
-                        <div className={`w-12 h-6 rounded-full p-1 transition-colors ${marketingEmails ? 'bg-purple-500' : 'bg-slate-300 dark:bg-slate-700'}`}>
-                          <div className={`w-4 h-4 bg-white rounded-full shadow-sm transition-transform ${marketingEmails ? 'translate-x-6' : ''}`} />
-                        </div>
-                        <input type="checkbox" className="hidden" checked={marketingEmails} onChange={() => setMarketingEmails(!marketingEmails)} />
-                      </label>
-                    </div>
-                  </motion.div>
-                )}
-
-                {/* ── SECURITY TAB ────────────────────────────── */}
-                {activeTab === "security" && (
-                  <motion.div
-                    key="security"
-                    initial={{ opacity: 0, x: 10 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: -10 }}
-                    transition={{ duration: 0.2 }}
-                    className="max-w-2xl"
-                  >
-                    <h2 className="text-xl font-bold text-[var(--color-text)] mb-6">Login & Security</h2>
-
-                    <div className="space-y-6">
-                      {hasPassword ? (
-                      <div className="p-6 rounded-xl bg-orange-50 dark:bg-orange-900/10 border border-orange-100 dark:border-orange-900/30">
-                        <div className="flex items-center gap-3 mb-4">
-                          <Shield className="text-orange-600 dark:text-orange-400" size={24} />
-                          <h3 className="font-bold text-orange-900 dark:text-orange-100">Password</h3>
-                        </div>
-                          <form onSubmit={handlePasswordUpdate}>
-                              <div className="space-y-4">
-                                <div>
-                                    <label className="block text-xs font-bold text-orange-800 dark:text-orange-200 uppercase tracking-wider mb-1">Current Password</label>
-                                    <input name="current_password" type="password" placeholder="••••••••" required className="w-full bg-white dark:bg-black/20 border border-orange-200 dark:border-orange-800 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-orange-500" />
-                                </div>
-                                <div>
-                                    <label className="block text-xs font-bold text-orange-800 dark:text-orange-200 uppercase tracking-wider mb-1">New Password</label>
-                                    <input name="new_password" type="password" placeholder="••••••••" required minLength={6} className="w-full bg-white dark:bg-black/20 border border-orange-200 dark:border-orange-800 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-orange-500" />
-                                </div>
-                                <div>
-                                    <label className="block text-xs font-bold text-orange-800 dark:text-orange-200 uppercase tracking-wider mb-1">Confirm Password</label>
-                                    <input name="confirm_password" type="password" placeholder="••••••••" required minLength={6} className="w-full bg-white dark:bg-black/20 border border-orange-200 dark:border-orange-800 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-orange-500" />
-                                </div>
-                                <div className="flex justify-end pt-2">
-                                    <Button type="submit" size="sm" isLoading={isLoading} className="bg-orange-600 hover:bg-orange-700 text-white border-transparent">Update Password</Button>
-                                </div>
-                              </div>
-                          </form>
-                      </div>
-                      ) : (
-                        <div className="p-6 rounded-xl bg-blue-50 dark:bg-blue-900/10 border border-blue-100 dark:border-blue-900/30">
-                            <div className="flex items-center gap-3 mb-2">
-                                <Shield className="text-blue-600 dark:text-blue-400" size={24} />
-                                <h3 className="font-bold text-blue-900 dark:text-blue-100">Social Login Active</h3>
-                            </div>
-                            <p className="text-sm text-blue-800 dark:text-blue-200">
-                                You are logged in via a social provider (Google/GitHub). You don't need a password.
-                            </p>
-                        </div>
-                      )}
-
-                      {/* Two-Factor Authentication Settings */}
-                      <MFASettings />
-                    </div>
-                  </motion.div>
-                )}
-
-                {/* ── PRIVACY TAB ──────────────────────────────── */}
-                {activeTab === "privacy" && (
-                   <motion.div
-                    key="privacy"
-                    initial={{ opacity: 0, x: 10 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: -10 }}
-                    transition={{ duration: 0.2 }}
-                    className="max-w-2xl"
-                  >
-                     <h2 className="text-xl font-bold text-[var(--color-text)] mb-6">Privacy & Data Control</h2>
-                     
-                     <div className="space-y-6">
-                        {/* Profile Visibility (Candidates Only) */}
-                        {!isEmployer && (
-                            <div className="p-6 rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)]/50">
-                                <div className="flex items-center justify-between gap-4">
-                                    <div className="flex items-center gap-3">
-                                        <div className={`p-2 rounded-lg transition-colors ${user?.is_public ? 'bg-emerald-500/15 text-emerald-400' : 'bg-white/5 text-[var(--color-text-muted)]'}`}>
-                                            {user?.is_public ? <Eye size={20} /> : <EyeOff size={20} />}
-                                        </div>
-                                        <div>
-                                            <h3 className="font-bold text-[var(--color-text)]">Public Profile</h3>
-                                            <p className="text-sm text-[var(--color-text-muted)]">
-                                                {user?.is_public
-                                                    ? 'Employers can discover and view your profile'
-                                                    : 'Your profile is hidden — only you can see it'}
-                                            </p>
-                                        </div>
-                                    </div>
-
-                                    <button
-                                        onClick={async () => {
-                                            if (!user) return;
-                                            const newVal = !user.is_public;
-                                            try {
-                                                await updateProfileData(user.id, { is_public: newVal });
-                                                await refreshProfile?.();
-                                                toast.success(newVal ? 'Profile is now public' : 'Profile is now private');
-                                            } catch {
-                                                toast.error('Failed to update visibility');
-                                            }
-                                        }}
-                                        title={user?.is_public ? 'Make private' : 'Make public'}
-                                        className={[
-                                            'relative inline-flex h-7 w-12 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/50',
-                                            user?.is_public ? 'bg-emerald-500' : 'bg-white/10',
-                                        ].join(' ')}
-                                    >
-                                        <span className="sr-only">Toggle profile visibility</span>
-                                        <span className={[
-                                            'pointer-events-none inline-block h-6 w-6 rounded-full bg-white shadow-md transition-transform duration-200',
-                                            user?.is_public ? 'translate-x-5' : 'translate-x-0',
-                                        ].join(' ')} />
-                                    </button>
-                                </div>
-                                <p className="mt-4 text-xs text-[var(--color-text-muted)] leading-relaxed">
-                                    When public, verified employers can discover your profile and invite you to apply for jobs. When private, you can still apply to jobs directly but won't appear in employer searches.
-                                </p>
-                            </div>
-                        )}
-
-                        {/* GDPR Data Export */}
-                         <div className="w-full p-6 rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)]/50">
-                             <div className="flex items-center gap-3 mb-4">
-                                <FileJson className="text-blue-500" size={24} />
-                                <h3 className="font-bold text-[var(--color-text)]">Download Your Data</h3>
-                             </div>
-                             <p className="text-sm text-[var(--color-text-muted)] mb-6">
-                                 In compliance with GDPR and data portability standards, you can download a copy of all your personal data stored on our platform, including your profile, job submissions, and account history.
-                             </p>
-                             <Button onClick={handleDownloadData} variant="outline" leftIcon={<FileJson size={16} />}>
-                                 Download Data (JSON)
-                             </Button>
-                         </div>
-                     </div>
-                  </motion.div>
-                )}
-
-              </AnimatePresence>
-            </div>
+            </AnimatePresence>
           </div>
         </div>
       </div>

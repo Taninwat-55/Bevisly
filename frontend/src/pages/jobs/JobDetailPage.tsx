@@ -264,7 +264,16 @@ export default function JobDetailPage() {
                 {job.title}
               </h1>
               <div className="flex items-center gap-2 text-[var(--color-text-muted)]">
-                <span className="font-semibold text-[var(--color-brand-primary)]">{job.company || "Company"}</span>
+                {companyProfile?.slug ? (
+                  <a
+                    href={`/company/${companyProfile.slug}`}
+                    className="font-semibold text-[var(--color-brand-primary)] hover:underline underline-offset-2"
+                  >
+                    {job.company || "Company"}
+                  </a>
+                ) : (
+                  <span className="font-semibold text-[var(--color-brand-primary)]">{job.company || "Company"}</span>
+                )}
                 {job.employer_verified && (
                   <span title="Verified Employer" className="inline-flex items-center gap-0.5 text-xs font-medium text-blue-600 dark:text-blue-400">
                     <ShieldCheck size={13} className="text-blue-500" />
@@ -433,14 +442,6 @@ export default function JobDetailPage() {
                 </h3>
                 <div className="flex items-center gap-3">
                   <ResponsibilityScoreBadge score={companyProfile.responsibility_score} size="sm" showLabel />
-                  {companyProfile.slug && (
-                    <a
-                      href={`/company/${companyProfile.slug}`}
-                      className="text-xs text-[var(--color-brand-primary)] hover:underline font-medium"
-                    >
-                      View employer profile →
-                    </a>
-                  )}
                 </div>
               </div>
               <div className="space-y-6">

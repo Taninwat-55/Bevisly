@@ -157,8 +157,19 @@ export default function EmployerDashboard() {
                   Here's what's happening internally across all your jobs.
                 </p>
               </div>
-              {jobs.length === 0 && (
-                <div className="flex flex-col sm:flex-row gap-3">
+              <div className="flex flex-col sm:flex-row gap-3 shrink-0">
+                {company?.slug && (
+                  <a
+                    href={`/company/${company.slug}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] hover:bg-[var(--color-surface-hover)] text-sm font-semibold text-[var(--color-text)] transition-colors"
+                  >
+                    <ArrowUpRight size={15} className="text-[var(--color-text-muted)]" />
+                    View public page
+                  </a>
+                )}
+                {jobs.length === 0 && (
                   <Button
                     onClick={() => {
                       setPostJobData(null);
@@ -171,8 +182,8 @@ export default function EmployerDashboard() {
                   >
                     Post a Job
                   </Button>
-                </div>
-              )}
+                )}
+              </div>
             </div>
           </div>
         </div>
@@ -228,18 +239,8 @@ export default function EmployerDashboard() {
                 </p>
               </div>
             </div>
-            <div className="flex items-center gap-3 shrink-0">
+            <div className="shrink-0">
               <ResponsibilityScoreBadge score={company.responsibility_score} size="lg" showLabel={false} />
-              {company.slug && (
-                <a
-                  href={`/company/${company.slug}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-1 text-xs text-[var(--color-brand-primary)] hover:underline font-medium"
-                >
-                  View page <ArrowUpRight size={12} />
-                </a>
-              )}
             </div>
           </div>
         )}
