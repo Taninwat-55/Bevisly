@@ -42,6 +42,7 @@ export type Database = {
           mission: string | null
           name: string
           owner_id: string | null
+          responsibility_score: number | null
           slug: string | null
           updated_at: string | null
           website_url: string | null
@@ -55,6 +56,7 @@ export type Database = {
           mission?: string | null
           name: string
           owner_id?: string | null
+          responsibility_score?: number | null
           slug?: string | null
           updated_at?: string | null
           website_url?: string | null
@@ -68,6 +70,7 @@ export type Database = {
           mission?: string | null
           name?: string
           owner_id?: string | null
+          responsibility_score?: number | null
           slug?: string | null
           updated_at?: string | null
           website_url?: string | null
@@ -527,6 +530,7 @@ export type Database = {
           languages: string[] | null
           linkedin_url: string | null
           monthly_job_posts_count: number | null
+          reliability_score: number | null
           resume_updated_at: string | null
           resume_url: string | null
           role: string
@@ -559,6 +563,7 @@ export type Database = {
           languages?: string[] | null
           linkedin_url?: string | null
           monthly_job_posts_count?: number | null
+          reliability_score?: number | null
           resume_updated_at?: string | null
           resume_url?: string | null
           role?: string
@@ -591,6 +596,7 @@ export type Database = {
           languages?: string[] | null
           linkedin_url?: string | null
           monthly_job_posts_count?: number | null
+          reliability_score?: number | null
           resume_updated_at?: string | null
           resume_url?: string | null
           role?: string
@@ -721,6 +727,7 @@ export type Database = {
           hiring_stage: string | null
           id: string
           is_fast_pass: boolean | null
+          is_featured: boolean | null
           is_public: boolean | null
           job_id: string | null
           offer_email_sent: boolean
@@ -747,6 +754,7 @@ export type Database = {
           hiring_stage?: string | null
           id?: string
           is_fast_pass?: boolean | null
+          is_featured?: boolean | null
           is_public?: boolean | null
           job_id?: string | null
           offer_email_sent?: boolean
@@ -773,6 +781,7 @@ export type Database = {
           hiring_stage?: string | null
           id?: string
           is_fast_pass?: boolean | null
+          is_featured?: boolean | null
           is_public?: boolean | null
           job_id?: string | null
           offer_email_sent?: boolean
@@ -857,6 +866,7 @@ export type Database = {
           company_name: string | null
           id: string | null
           improvements: string | null
+          is_featured: boolean | null
           is_public: boolean | null
           job_title: string | null
           rating: number | null
@@ -887,6 +897,14 @@ export type Database = {
       check_invite_code: { Args: { invite_code: string }; Returns: boolean }
       claim_invite_code: { Args: { invite_code: string }; Returns: undefined }
       compute_bevisly_score: { Args: { p_user_id: string }; Returns: number }
+      compute_reliability_score: {
+        Args: { p_user_id: string }
+        Returns: number
+      }
+      compute_responsibility_score: {
+        Args: { p_company_id: string }
+        Returns: number
+      }
       deduct_credits: {
         Args: { amount: number; user_id_input: string }
         Returns: boolean

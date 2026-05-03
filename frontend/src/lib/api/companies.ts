@@ -49,6 +49,7 @@ export async function getCurrentCompany(): Promise<Company | null> {
     mission: company.mission ?? null,
     culture: company.culture ?? null,
     website_url: company.website_url ?? null,
+    responsibility_score: company.responsibility_score ?? null,
     subscription_tier: profile?.subscription_tier,
     active_jobs_count: profile?.active_jobs_count,
     monthly_job_posts_count: profile?.monthly_job_posts_count,
@@ -214,7 +215,7 @@ export async function updateCompanyProfile(
 export async function getCompanyProfile(companyId: string): Promise<Company | null> {
   const { data, error } = await supabase
     .from("companies")
-    .select("id, name, slug, logo_url, description, mission, culture, website_url")
+    .select("id, name, slug, logo_url, description, mission, culture, website_url, responsibility_score")
     .eq("id", companyId)
     .single();
 
@@ -231,6 +232,34 @@ export async function getCompanyProfile(companyId: string): Promise<Company | nu
     mission: data.mission ?? null,
     culture: data.culture ?? null,
     website_url: data.website_url ?? null,
+    responsibility_score: data.responsibility_score ?? null,
+  };
+}
+
+/**
+ * Get company by slug (public — used by the Employer Brand Page)
+ */
+export async function getCompanyBySlug(slug: string): Promise<Company | null> {
+  const { data, error } = await supabase
+    .from("companies")
+    .select("id, name, slug, logo_url, description, mission, culture, website_url, responsibility_score")
+    .eq("slug", slug)
+    .maybeSingle();
+
+  if (error || !data) return null;
+
+  return {
+    id: data.id,
+    name: data.name,
+    slug: data.slug,
+    logo_url: data.logo_url,
+    owner_id: null,
+    created_at: null,
+    description: data.description ?? null,
+    mission: data.mission ?? null,
+    culture: data.culture ?? null,
+    website_url: data.website_url ?? null,
+    responsibility_score: data.responsibility_score ?? null,
   };
 }
 

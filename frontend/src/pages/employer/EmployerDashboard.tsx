@@ -22,7 +22,11 @@ import {
   Sparkles,
   PenTool,
   ArrowRight,
+  ShieldCheck,
+  ArrowUpRight,
 } from "lucide-react";
+import { useCompany } from "@/hooks/useCompany";
+import ResponsibilityScoreBadge from "@/components/employer/ResponsibilityScoreBadge";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import EmployerJobForm from "./EmployerJobForm";
@@ -34,6 +38,7 @@ import { AnimatePresence, motion } from "framer-motion";
 
 export default function EmployerDashboard() {
   const { user } = useAuth();
+  const { company } = useCompany();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -206,6 +211,38 @@ export default function EmployerDashboard() {
             color="amber"
           />
         </div>
+
+        {/* Responsibility Score Widget */}
+        {company && (
+          <div className="mt-4 p-5 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] flex flex-col sm:flex-row sm:items-center gap-4">
+            <div className="flex items-center gap-3 flex-1 min-w-0">
+              <div className="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-900/20 flex items-center justify-center shrink-0">
+                <ShieldCheck size={20} className="text-emerald-600 dark:text-emerald-400" />
+              </div>
+              <div>
+                <h3 className="font-semibold text-[var(--color-text)] text-sm">Responsibility Score</h3>
+                <p className="text-xs text-[var(--color-text-muted)] mt-0.5">
+                  {company.responsibility_score === null || company.responsibility_score === undefined
+                    ? "Review your first proof submission to start building your score."
+                    : "Visible to candidates on your job listings. Review promptly to keep it high."}
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3 shrink-0">
+              <ResponsibilityScoreBadge score={company.responsibility_score} size="lg" showLabel={false} />
+              {company.slug && (
+                <a
+                  href={`/company/${company.slug}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-1 text-xs text-[var(--color-brand-primary)] hover:underline font-medium"
+                >
+                  View page <ArrowUpRight size={12} />
+                </a>
+              )}
+            </div>
+          </div>
+        )}
 
         {/* Active Jobs List */}
         <div className="mt-8">

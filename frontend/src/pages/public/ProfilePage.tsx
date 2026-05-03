@@ -5,7 +5,7 @@ import { supabase } from "@/lib/supabaseClient";
 import { useAuth } from "@/hooks/useAuth";
 import {
     Copy, Loader2, Star, BadgeCheck, Briefcase,
-    Lock, UserX, Code, Zap, Bookmark
+    Lock, UserX, Code, Zap, Bookmark, ShieldCheck
 } from "lucide-react";
 import toast from "react-hot-toast";
 import type { ProfileLite, ProofCardLite } from "@/types/shared";
@@ -19,6 +19,7 @@ interface PublicProfile extends ProfileLite {
     email?: string | null;
     skills?: string[] | null;
     bevisly_score?: number | null;
+    reliability_score?: number | null;
 }
 
 export default function PublicProfilePage() {
@@ -43,7 +44,7 @@ export default function PublicProfilePage() {
                 // Look up by username (SEO route) or by UUID (legacy route)
                 const query = supabase
                     .from("profiles")
-                    .select("id, full_name, credits, bevisly_score, email, avatar_url, skills, is_public, username");
+                    .select("id, full_name, credits, bevisly_score, reliability_score, email, avatar_url, skills, is_public, username");
 
                 const { data: prof, error: profErr } = username
                     ? await query.eq("username", username.toLowerCase()).single()
@@ -274,6 +275,15 @@ export default function PublicProfilePage() {
                                     <span className="flex items-center gap-1.5 bg-indigo-50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-300 px-3 py-1 rounded-full font-bold">
                                         <Zap size={16} className="text-indigo-500" />
                                         {profile.bevisly_score} Bevisly Score
+                                    </span>
+                                )}
+                                {(profile.reliability_score ?? 0) > 0 && (
+                                    <span
+                                        className="flex items-center gap-1.5 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-300 px-3 py-1 rounded-full font-bold"
+                                        title="Reliability Score — based on proof completion rate and profile completeness"
+                                    >
+                                        <ShieldCheck size={16} className="text-emerald-500" />
+                                        {profile.reliability_score} Reliable
                                     </span>
                                 )}
                             </div>

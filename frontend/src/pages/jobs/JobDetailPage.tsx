@@ -34,6 +34,7 @@ import DOMPurify from "dompurify";
 import ReactMarkdown from "react-markdown";
 import { getCompanyProfile } from "@/lib/api/companies";
 import type { Company } from "@/types/company";
+import ResponsibilityScoreBadge from "@/components/employer/ResponsibilityScoreBadge";
 
 /* ─── Component ─────────────────────────────────────────────── */
 export default function JobDetailPage() {
@@ -425,10 +426,23 @@ export default function JobDetailPage() {
           {/* About the Company */}
           {companyProfile && (companyProfile.description || companyProfile.mission || companyProfile.culture) && (
             <section className="animate-in fade-in slide-in-from-bottom-4 duration-700 delay-150">
-              <h3 className="text-xl font-bold text-[var(--color-text)] mb-6 flex items-center gap-2">
-                <Briefcase size={22} className="text-[var(--color-brand-primary)]" />
-                About {job.company || "the Company"}
-              </h3>
+              <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
+                <h3 className="text-xl font-bold text-[var(--color-text)] flex items-center gap-2">
+                  <Briefcase size={22} className="text-[var(--color-brand-primary)]" />
+                  About {job.company || "the Company"}
+                </h3>
+                <div className="flex items-center gap-3">
+                  <ResponsibilityScoreBadge score={companyProfile.responsibility_score} size="sm" showLabel />
+                  {companyProfile.slug && (
+                    <a
+                      href={`/company/${companyProfile.slug}`}
+                      className="text-xs text-[var(--color-brand-primary)] hover:underline font-medium"
+                    >
+                      View employer profile →
+                    </a>
+                  )}
+                </div>
+              </div>
               <div className="space-y-6">
                 {companyProfile.description && (
                   <div>

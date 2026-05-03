@@ -15,6 +15,7 @@ import {
   TrendingUp,
   ArrowRight,
   Zap,
+  ShieldCheck,
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import WelcomeBanner from "@/components/common/WelcomeBanner";
@@ -22,7 +23,7 @@ import WelcomeBanner from "@/components/common/WelcomeBanner";
 export default function CandidateDashboard() {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const { proofsCompleted, avgScore, jobsApplied, bevislyScore } = useCandidateStats();
+  const { proofsCompleted, avgScore, jobsApplied, bevislyScore, reliabilityScore } = useCandidateStats();
   const [jobs, setJobs] = useState<CandidateJob[]>([]);
   const [loadingJobs, setLoadingJobs] = useState(true);
   const [applications, setApplications] = useState<Awaited<ReturnType<typeof getCandidateApplications>>>([]);
@@ -116,7 +117,7 @@ export default function CandidateDashboard() {
           </div>
 
           {/* Stats Row within Hero */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-8 md:mt-12 max-w-3xl">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 mt-8 md:mt-12 max-w-4xl">
             {/* Bevisly Score — flagship card */}
             <div className="glass-panel bg-gradient-to-br from-indigo-500/10 to-purple-500/10 dark:from-indigo-500/20 dark:to-purple-500/20 p-4 rounded-2xl border border-indigo-300/40 dark:border-indigo-700/40 backdrop-blur-md">
               <div className="flex items-center gap-3 mb-1">
@@ -156,6 +157,22 @@ export default function CandidateDashboard() {
                 <span className="text-sm text-[var(--color-text-muted)] font-medium">Applied</span>
               </div>
               <div className="text-2xl font-bold text-[var(--color-text)]">{jobsApplied}</div>
+            </div>
+
+            {/* Reliability Score */}
+            <div
+              className="glass-panel bg-gradient-to-br from-emerald-500/10 to-teal-500/10 dark:from-emerald-500/20 dark:to-teal-500/20 p-4 rounded-2xl border border-emerald-300/40 dark:border-emerald-700/40 backdrop-blur-md"
+              title="Reliability Score — based on proof completion rate and profile completeness"
+            >
+              <div className="flex items-center gap-3 mb-1">
+                <div className="p-2 rounded-lg bg-emerald-500/15 text-emerald-500">
+                  <ShieldCheck size={18} />
+                </div>
+                <span className="text-sm text-[var(--color-text-muted)] font-medium">Reliability</span>
+              </div>
+              <div className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">
+                {reliabilityScore !== null ? reliabilityScore : "—"}
+              </div>
             </div>
           </div>
         </div>
