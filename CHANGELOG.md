@@ -4,6 +4,25 @@ All notable features and changes to Bevis MVP are recorded here in plain languag
 
 ---
 
+## 2026-05-03 — Sprint #2: Responsibility Score + Employer Brand Page (Complete)
+
+### Employer Responsibility Score
+A 0–100 score auto-calculated for every employer from three signals: response rate (50 pts), review speed (30 pts), and feedback quality (20 pts). Calculated via a DB trigger on the `companies` table so it stays current without manual intervention. Displayed as a badge on job cards, the job detail page, the employer dashboard, and the public company brand page. Gives candidates a concrete anti-ghosting signal before they invest time in a proof task.
+
+### Candidate Reliability Score
+A 0–100 score auto-calculated on candidate profiles from task completion rate and profile completeness. Updated via DB trigger. Displayed as a badge on the candidate's own overview and their public profile.
+
+### Public Employer Brand Page (`/company/:slug`)
+Employers now have a public-facing page at `/company/:slug` showing the company description, mission, culture, website, open roles, and Responsibility Score. Company data columns (`description`, `mission`, `culture`, `website_url`) added to the schema and made publicly readable. Gives candidates a way to research employers before applying.
+
+### Docs & Help Page (`/docs`)
+A new `/docs` route with a feature guide for both candidates and employers, an FAQ, and a platform overview tab. Linked from the navbar ("Help") and the landing page footer.
+
+### Navbar & Footer Polish
+Navbar trimmed from 6 items to 4 (Jobs, About, Pricing, Help) to prevent overflow. Footer restructured to a 4-column layout with a new "Learn More" column (For Candidates, For Employers, How It Works).
+
+---
+
 ## 2026-05-02 — Dedicated Pricing Page
 
 Replaced the shallow pricing section on the landing page with a full `/pricing` route. The new page covers:

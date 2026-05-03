@@ -110,7 +110,7 @@ When a candidate completes a proof task and receives a rating, they earn a share
 ---
 
 ### 3. Featured Proofs ("Staking" Your Best Work)
-**Status:** 🟡 Queued — Sprint #1
+**Status:** 🟢 Done — Sprint #1
 
 Candidates choose up to 3 of their completed proofs to "feature" at the very top of their public profile — a curated highlight reel, much more powerful than a resume because it shows actual work output.
 
@@ -124,7 +124,7 @@ Candidates choose up to 3 of their completed proofs to "feature" at the very top
 ---
 
 ### 4. Responsibility Score (Anti-Ghosting Accountability)
-**Status:** 🟡 Queued — Sprint #2
+**Status:** 🟢 Done — Sprint #2
 
 Ghosting is one of the biggest complaints in hiring — from both sides. Bevisly can solve this because all interactions happen on the platform.
 

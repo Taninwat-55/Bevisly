@@ -126,9 +126,10 @@ supabase migration new <migration-name>
 
 ## Current Task
 
-Building feature sprints before outreach to startups/organizations:
-- **Sprint #1 (done):** Bevisly Score + Featured Proofs — shipped. Unified score and pinned proof highlights on candidate profiles.
-- **Sprint #2 (now):** Responsibility Score + Employer Brand Page — anti-ghosting accountability and public employer profiles to build two-sided trust.
+Pre-launch sprint work is complete. Next step: Stripe integration before cold outreach.
+
+- **Sprint #1 (done):** Bevisly Score + Featured Proofs — unified score and pinned proof highlights on candidate profiles.
+- **Sprint #2 (done):** Responsibility Score + Employer Brand Page — anti-ghosting accountability scores (employer + candidate) via DB triggers, public `/company/:slug` brand pages, score badges on job cards and profiles, Docs & Help page, navbar/footer polish.
 
 ---
 
