@@ -40,7 +40,7 @@ interface FaqItem {
 // ─── Data ────────────────────────────────────────────────────────────────────
 
 const NAV_PILLS: NavPill[] = [
-  { id: "how-it-works", label: "How It Works" },
+  { id: "how-it-works", label: "Overview" },
   { id: "for-candidates", label: "For Candidates" },
   { id: "for-employers", label: "For Employers" },
   { id: "key-features", label: "Key Features" },

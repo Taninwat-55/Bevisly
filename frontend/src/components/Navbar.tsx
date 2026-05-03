@@ -12,12 +12,10 @@ type AnchorLink = { label: string; href: string; to?: never };
 type NavLink = RouteLink | AnchorLink;
 
 const navLinks: NavLink[] = [
-  { label: "Candidates", to: "/learn-more?mode=candidate" },
-  { label: "Employers", to: "/learn-more?mode=employer" },
   { label: "Jobs", to: "/jobs" },
   { label: "About", to: "/about" },
   { label: "Pricing", to: "/pricing" },
-  { label: "Docs & Help", to: "/docs" },
+  { label: "Help", to: "/docs" },
 ];
 
 const mobileLinks: NavLink[] = navLinks;
