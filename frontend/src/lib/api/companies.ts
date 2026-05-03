@@ -131,14 +131,24 @@ export async function deductCompanyCredits(amount: number): Promise<boolean> {
 /**
  * Create a new company (for real multi-tenant usage)
  */
+function generateSlug(name: string): string {
+  return name
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
 export async function createCompany(name: string, slug?: string): Promise<Company> {
   const user = (await supabase.auth.getUser()).data.user;
   if (!user) throw new Error("Not authenticated");
 
+  const resolvedSlug = slug || generateSlug(name) || null;
+
   // Create the company
   const { data: company, error: compError } = await supabase
     .from("companies")
-    .insert({ name, slug: slug || null, owner_id: user.id })
+    .insert({ name, slug: resolvedSlug, owner_id: user.id })
     .select()
     .single();
 
@@ -242,7 +252,7 @@ export async function getCompanyProfile(companyId: string): Promise<Company | nu
 export async function getCompanyBySlug(slug: string): Promise<Company | null> {
   const { data, error } = await supabase
     .from("companies")
-    .select("id, name, slug, logo_url, description, mission, culture, website_url, responsibility_score")
+    .select("id, name, slug, logo_url, description, mission, culture, website_url, responsibility_score, avg_review_days")
     .eq("slug", slug)
     .maybeSingle();
 
@@ -260,6 +270,7 @@ export async function getCompanyBySlug(slug: string): Promise<Company | null> {
     culture: data.culture ?? null,
     website_url: data.website_url ?? null,
     responsibility_score: data.responsibility_score ?? null,
+    avg_review_days: data.avg_review_days ?? null,
   };
 }
 

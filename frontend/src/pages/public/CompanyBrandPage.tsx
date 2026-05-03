@@ -174,7 +174,7 @@ export default function CompanyBrandPage() {
             </div>
 
             {/* Trust Stats Row */}
-            <div className="mt-6 pt-5 border-t border-[var(--color-border)] grid grid-cols-3 gap-4 text-center">
+            <div className="mt-6 pt-5 border-t border-[var(--color-border)] grid grid-cols-2 sm:grid-cols-4 gap-4 text-center">
               <div>
                 <p className="text-lg font-bold text-[var(--color-text)]">
                   {isNew ? "—" : `${company.responsibility_score}/100`}
@@ -182,6 +182,17 @@ export default function CompanyBrandPage() {
                 <p className="text-xs text-[var(--color-text-muted)] mt-0.5 flex items-center justify-center gap-1">
                   <ShieldCheck size={11} />
                   Responsibility Score
+                </p>
+              </div>
+              <div>
+                <p className="text-lg font-bold text-[var(--color-text)]">
+                  {company.avg_review_days == null
+                    ? "—"
+                    : `~${company.avg_review_days}d`}
+                </p>
+                <p className="text-xs text-[var(--color-text-muted)] mt-0.5 flex items-center justify-center gap-1">
+                  <Clock size={11} />
+                  Avg Review Time
                 </p>
               </div>
               <div>

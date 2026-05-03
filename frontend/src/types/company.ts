@@ -18,6 +18,7 @@ export type Company = {
   website_url?: string | null;
   // Responsibility Score (anti-ghosting accountability)
   responsibility_score?: number | null;
+  avg_review_days?: number | null;
   // Pricing & Usage
   subscription_tier?: "free" | "pro_saas";
   active_jobs_count?: number;

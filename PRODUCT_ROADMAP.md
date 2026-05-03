@@ -63,12 +63,12 @@ Inspired by Bitcoin's proof-of-work model: effort produces something verifiable 
 
 ## 🎯 Next Sprint
 
-Features queued to build now, in order. Numbers indicate build sequence.
+Both pre-launch feature sprints are complete. Next: **Stripe Payment Integration** (see Pre-Launch section above).
 
-| Priority | Feature Group | Features |
-|----------|--------------|----------|
-| **#1** | **Bevisly Score + Featured Proofs** | Unified candidate score · Curated proof highlights |
-| **#2** | **Responsibility Score + Employer Brand Page** | Anti-ghosting accountability · Public employer profile |
+| Priority | Feature Group | Status |
+|----------|--------------|--------|
+| **#1** | **Bevisly Score + Featured Proofs** | 🟢 Done |
+| **#2** | **Responsibility Score + Employer Brand Page** | 🟢 Done |
 
 ---
 
@@ -217,7 +217,7 @@ Unpaid take-home tasks that consume 6–8+ hours are one of the biggest candidat
 ---
 
 ### 10. Employer Brand Page
-**Status:** 🟡 Queued — Sprint #2
+**Status:** 🟢 Done — Sprint #2
 
 Candidates should be able to research an employer before committing time to a proof task — just as employers research candidates.
 
