@@ -39,6 +39,7 @@ const AdminFeedbackMessages = lazy(() => import("@/pages/admin/AdminFeedbackMess
 const UserSettings = lazy(() => import("@/pages/shared/UserSettings"));
 const AboutPage = lazy(() => import("@/pages/shared/AboutPage"));
 const PrivacyPolicy = lazy(() => import("@/pages/shared/PrivacyPolicy"));
+const DocsPage = lazy(() => import("@/pages/shared/DocsPage"));
 
 // Public pages
 const LandingPage = lazy(() => import("../pages/landing/LandingPage"));
@@ -68,6 +69,7 @@ export const router = createBrowserRouter([
       { path: "/pricing", element: <PricingPage /> },
       { path: "/privacy", element: <PrivacyPolicy /> },
       { path: "/about", element: <AboutPage /> },
+      { path: "/docs", element: <DocsPage /> },
     ],
   },
 

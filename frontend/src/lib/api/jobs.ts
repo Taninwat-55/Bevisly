@@ -33,8 +33,10 @@ export async function getAllJobs(): Promise<CandidateJob[]> {
       expires_at,
       apply_url,
       employer_id,
+      company_id,
       proof_tasks ( id, title, expected_time ),
-      employer:profiles!jobs_employer_id_fkey ( avatar_url, is_verified )
+      employer:profiles!jobs_employer_id_fkey ( avatar_url, is_verified ),
+      company_data:companies ( responsibility_score, slug )
     `)
     .eq("status", "active")
     // Use an OR condition to include jobs with no deadline, or jobs whose deadline is in the future
@@ -43,12 +45,13 @@ export async function getAllJobs(): Promise<CandidateJob[]> {
 
   if (error) throw error;
 
-  // Map the nested employer avatar to the top-level company_logo field
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return data.map((job: any) => ({
     ...job,
     company_logo: job.employer?.avatar_url || null,
     employer_verified: job.employer?.is_verified ?? false,
+    company_responsibility_score: job.company_data?.responsibility_score ?? null,
+    company_slug: job.company_data?.slug ?? null,
   }));
 }
 

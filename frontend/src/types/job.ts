@@ -38,6 +38,10 @@ export interface Job {
   updated_at?: string | null;
   expires_at?: string | null;
 
+  // Company-level fields (joined from companies table)
+  company_responsibility_score?: number | null;
+  company_slug?: string | null;
+
   proof_tasks?: {
     id: string;
     title: string;

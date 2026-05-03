@@ -58,6 +58,9 @@ export default function LandingFooter() {
               <Link to="/about" className="text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors">
                 About
               </Link>
+              <Link to="/docs" className="text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors">
+                Docs & Help
+              </Link>
               <button
                 onClick={() => setIsContactOpen(true)}
                 className="text-left text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors"

@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import type { CandidateJob } from "@/types";
+import ResponsibilityScoreBadge from "@/components/employer/ResponsibilityScoreBadge";
 
 interface JobCardProps {
     job: CandidateJob;
@@ -125,9 +126,16 @@ export default function JobCard({ job, compact = false, isSaved, onToggleSave }:
 
             {/* Footer / CTA */}
             <div className="mt-auto flex items-center justify-between pt-4 border-t border-[var(--color-border)]/50">
-                <div className="flex items-center gap-1.5 text-xs text-[var(--color-text-muted)]">
-                    <Clock size={12} />
-                    <span>{timeEstimate}</span>
+                <div className="flex items-center gap-2 flex-wrap">
+                    <div className="flex items-center gap-1.5 text-xs text-[var(--color-text-muted)]">
+                        <Clock size={12} />
+                        <span>{timeEstimate}</span>
+                    </div>
+                    {(job.company_responsibility_score !== undefined) && (
+                        <span onClick={(e) => e.stopPropagation()}>
+                            <ResponsibilityScoreBadge score={job.company_responsibility_score} size="sm" showLabel={false} />
+                        </span>
+                    )}
                 </div>
 
                 <Button
