@@ -62,6 +62,7 @@ export default function CandidateDashboard() {
   }, [user?.id]);
 
   const displayName = user?.email?.split("@")[0] || "Candidate";
+  const isNewCandidate = proofsCompleted === 0 && jobsApplied === 0;
 
   return (
     <div className="space-y-8 pb-10">
@@ -105,8 +106,14 @@ export default function CandidateDashboard() {
                 Welcome back, <span className="text-transparent bg-clip-text bg-gradient-to-r from-[var(--color-brand-primary)] to-[var(--color-brand-secondary)] capitalize">{displayName}</span>
               </h1>
               <p className="text-[var(--color-text-muted)] text-lg max-w-xl">
-                Your Bevisly Score is <strong className="text-[var(--color-text)]">{bevislyScore ?? 0}</strong>.
-                Complete proof tasks and practice challenges to climb the leaderboard.
+                {isNewCandidate ? (
+                  <>Prove your skills with real-world tasks. Complete a practice proof or apply to a role to get started.</>
+                ) : (
+                  <>
+                    Your Bevisly Score is <strong className="text-[var(--color-text)]">{bevislyScore ?? 0}</strong>.
+                    Complete proof tasks and practice challenges to climb the leaderboard.
+                  </>
+                )}
               </p>
             </div>
             <div className="flex items-center gap-3">
@@ -116,65 +123,87 @@ export default function CandidateDashboard() {
             </div>
           </div>
 
-          {/* Stats Row within Hero */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 mt-8 md:mt-12 max-w-4xl">
-            {/* Bevisly Score — flagship card */}
-            <div className="glass-panel bg-gradient-to-br from-indigo-500/10 to-purple-500/10 dark:from-indigo-500/20 dark:to-purple-500/20 p-4 rounded-2xl border border-indigo-300/40 dark:border-indigo-700/40 backdrop-blur-md">
-              <div className="flex items-center gap-3 mb-1">
-                <div className="p-2 rounded-lg bg-indigo-500/15 text-indigo-500">
-                  <Zap size={18} />
-                </div>
-                <span className="text-sm text-[var(--color-text-muted)] font-medium">Bevisly Score</span>
+          {isNewCandidate ? (
+            <div className="mt-8 md:mt-12 max-w-4xl p-6 md:p-8 rounded-2xl border border-dashed border-[var(--color-border)] bg-[var(--color-bg)]/40 backdrop-blur-md flex flex-col sm:flex-row sm:items-center gap-5">
+              <div className="shrink-0 w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-500/15 to-purple-500/15 text-indigo-500 flex items-center justify-center">
+                <Trophy size={28} />
               </div>
-              <div className="text-2xl font-bold text-indigo-600 dark:text-indigo-400">{bevislyScore ?? 0}</div>
+              <div className="flex-1">
+                <h3 className="text-lg font-bold text-[var(--color-text)] mb-1">Your scores will show up here</h3>
+                <p className="text-sm text-[var(--color-text-muted)]">
+                  Complete a practice proof or apply to a role to start earning your Bevisly Score and Reliability rating.
+                </p>
+              </div>
+              <div className="flex flex-col sm:flex-row gap-2 sm:items-center">
+                <Button onClick={() => navigate("/candidate/practice")} className="shadow-glow-primary whitespace-nowrap">
+                  Try a Practice Proof
+                </Button>
+                <Link
+                  to="/candidate/jobs"
+                  className="inline-flex items-center gap-1 text-sm font-semibold text-[var(--color-brand-primary)] hover:underline whitespace-nowrap px-2 py-2"
+                >
+                  Browse Jobs <ArrowRight size={14} />
+                </Link>
+              </div>
             </div>
+          ) : (
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 mt-8 md:mt-12 max-w-4xl">
+              <div className="glass-panel bg-gradient-to-br from-indigo-500/10 to-purple-500/10 dark:from-indigo-500/20 dark:to-purple-500/20 p-4 rounded-2xl border border-indigo-300/40 dark:border-indigo-700/40 backdrop-blur-md">
+                <div className="flex items-center gap-3 mb-1">
+                  <div className="p-2 rounded-lg bg-indigo-500/15 text-indigo-500">
+                    <Zap size={18} />
+                  </div>
+                  <span className="text-sm text-[var(--color-text-muted)] font-medium">Bevisly Score</span>
+                </div>
+                <div className="text-2xl font-bold text-indigo-600 dark:text-indigo-400">{bevislyScore ?? 0}</div>
+              </div>
 
-            <div className="glass-panel bg-white/50 dark:bg-black/20 p-4 rounded-2xl border border-[var(--color-border)]/50 backdrop-blur-md">
-              <div className="flex items-center gap-3 mb-1">
-                <div className="p-2 rounded-lg bg-emerald-500/10 text-emerald-500">
-                  <Trophy size={18} />
+              <div className="glass-panel bg-white/50 dark:bg-black/20 p-4 rounded-2xl border border-[var(--color-border)]/50 backdrop-blur-md">
+                <div className="flex items-center gap-3 mb-1">
+                  <div className="p-2 rounded-lg bg-emerald-500/10 text-emerald-500">
+                    <Trophy size={18} />
+                  </div>
+                  <span className="text-sm text-[var(--color-text-muted)] font-medium">Proofs</span>
                 </div>
-                <span className="text-sm text-[var(--color-text-muted)] font-medium">Proofs</span>
+                <div className="text-2xl font-bold text-[var(--color-text)]">{proofsCompleted}</div>
               </div>
-              <div className="text-2xl font-bold text-[var(--color-text)]">{proofsCompleted}</div>
-            </div>
 
-            <div className="glass-panel bg-white/50 dark:bg-black/20 p-4 rounded-2xl border border-[var(--color-border)]/50 backdrop-blur-md">
-              <div className="flex items-center gap-3 mb-1">
-                <div className="p-2 rounded-lg bg-amber-500/10 text-amber-500">
-                  <Target size={18} />
+              <div className="glass-panel bg-white/50 dark:bg-black/20 p-4 rounded-2xl border border-[var(--color-border)]/50 backdrop-blur-md">
+                <div className="flex items-center gap-3 mb-1">
+                  <div className="p-2 rounded-lg bg-amber-500/10 text-amber-500">
+                    <Target size={18} />
+                  </div>
+                  <span className="text-sm text-[var(--color-text-muted)] font-medium">Avg Score</span>
                 </div>
-                <span className="text-sm text-[var(--color-text-muted)] font-medium">Avg Score</span>
+                <div className="text-2xl font-bold text-[var(--color-text)]">{avgScore ? avgScore : "-"}</div>
               </div>
-              <div className="text-2xl font-bold text-[var(--color-text)]">{avgScore ? avgScore : "-"}</div>
-            </div>
 
-            <div className="glass-panel bg-white/50 dark:bg-black/20 p-4 rounded-2xl border border-[var(--color-border)]/50 backdrop-blur-md">
-              <div className="flex items-center gap-3 mb-1">
-                <div className="p-2 rounded-lg bg-blue-500/10 text-blue-500">
-                  <TrendingUp size={18} />
+              <div className="glass-panel bg-white/50 dark:bg-black/20 p-4 rounded-2xl border border-[var(--color-border)]/50 backdrop-blur-md">
+                <div className="flex items-center gap-3 mb-1">
+                  <div className="p-2 rounded-lg bg-blue-500/10 text-blue-500">
+                    <TrendingUp size={18} />
+                  </div>
+                  <span className="text-sm text-[var(--color-text-muted)] font-medium">Applied</span>
                 </div>
-                <span className="text-sm text-[var(--color-text-muted)] font-medium">Applied</span>
+                <div className="text-2xl font-bold text-[var(--color-text)]">{jobsApplied}</div>
               </div>
-              <div className="text-2xl font-bold text-[var(--color-text)]">{jobsApplied}</div>
-            </div>
 
-            {/* Reliability Score */}
-            <div
-              className="glass-panel bg-gradient-to-br from-emerald-500/10 to-teal-500/10 dark:from-emerald-500/20 dark:to-teal-500/20 p-4 rounded-2xl border border-emerald-300/40 dark:border-emerald-700/40 backdrop-blur-md"
-              title="Reliability Score — based on proof completion rate and profile completeness"
-            >
-              <div className="flex items-center gap-3 mb-1">
-                <div className="p-2 rounded-lg bg-emerald-500/15 text-emerald-500">
-                  <ShieldCheck size={18} />
+              <div
+                className="glass-panel bg-gradient-to-br from-emerald-500/10 to-teal-500/10 dark:from-emerald-500/20 dark:to-teal-500/20 p-4 rounded-2xl border border-emerald-300/40 dark:border-emerald-700/40 backdrop-blur-md"
+                title="Reliability Score — based on proof completion rate and profile completeness"
+              >
+                <div className="flex items-center gap-3 mb-1">
+                  <div className="p-2 rounded-lg bg-emerald-500/15 text-emerald-500">
+                    <ShieldCheck size={18} />
+                  </div>
+                  <span className="text-sm text-[var(--color-text-muted)] font-medium">Reliability</span>
                 </div>
-                <span className="text-sm text-[var(--color-text-muted)] font-medium">Reliability</span>
-              </div>
-              <div className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">
-                {reliabilityScore !== null ? reliabilityScore : "—"}
+                <div className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">
+                  {reliabilityScore !== null ? reliabilityScore : "—"}
+                </div>
               </div>
             </div>
-          </div>
+          )}
         </div>
       </div>
 

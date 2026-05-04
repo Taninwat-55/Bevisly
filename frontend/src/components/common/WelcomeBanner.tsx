@@ -20,7 +20,7 @@ const EMPLOYER_STEPS = [
     description: "Create your first role and describe what you're looking for.",
     color: "from-blue-500 to-indigo-500",
     iconBg: "bg-blue-500/15 text-blue-500",
-    cta: { label: "Post a Job", href: "/employer/jobs" },
+    cta: { label: "Post a Job", href: "/employer?post=true" },
   },
   {
     icon: FileCheck,
@@ -73,7 +73,7 @@ const CANDIDATE_STEPS = [
 ];
 
 export default function WelcomeBanner({ role, userName, onDismiss }: WelcomeBannerProps) {
-  const [dismissed, setDismissed] = useState(true);
+  const [dismissed, setDismissed] = useState<boolean | null>(null);
 
   useEffect(() => {
     const storageVal = localStorage.getItem(STORAGE_KEY);
@@ -100,7 +100,7 @@ export default function WelcomeBanner({ role, userName, onDismiss }: WelcomeBann
 
   return (
     <AnimatePresence>
-      {!dismissed && (
+      {dismissed === false && (
         <motion.div
           initial={{ opacity: 0, y: -20, height: 0 }}
           animate={{ opacity: 1, y: 0, height: "auto" }}

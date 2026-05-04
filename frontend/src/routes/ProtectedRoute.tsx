@@ -32,7 +32,10 @@ export default function ProtectedRoute({
     return <>{children || <Outlet />}</>;
   }
 
-  const effectiveRole = user.role;
+  // Defensive: a null role (e.g. brief race after OAuth signup before profile
+  // row is fetched) is treated as a candidate so the user lands somewhere
+  // valid instead of looping through redirects.
+  const effectiveRole = user.role ?? "candidate";
 
   // Wrong role → redirect to their own dashboard
   if (allowedRole && effectiveRole !== allowedRole) {
