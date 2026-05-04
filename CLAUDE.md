@@ -146,6 +146,15 @@ Wire up Stripe before sending cold emails — a pricing page with no working che
 
 ---
 
+## Post-Launch Roadmap
+
+Features to build after launch and initial traction.
+
+### ⬜ AI Chatbot
+In-app AI assistant powered by Gemini. Dual-purpose: helps candidates refine applications, understand proof task requirements, and prep for interviews; helps employers draft job descriptions and proof tasks faster. Surfaced as a chat widget available across both dashboards.
+
+---
+
 ## Additional Pre-Launch Checks
 - Full user flow walkthrough for both candidate and employer roles
 - Pricing research: validate plan prices against comparable tools (Workable, Lever, etc.)

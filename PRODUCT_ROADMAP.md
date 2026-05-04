@@ -348,6 +348,19 @@ An additional revenue stream beyond subscriptions. Employers pay to have their j
 
 ---
 
+### 19. AI Chatbot Assistant
+**Status:** 🔴
+
+An in-app AI assistant (powered by Gemini) surfaced as a chat widget across both dashboards.
+
+**Candidate-side:** Helps candidates understand proof task requirements, refine their submissions, prep interview answers, and identify skill gaps based on their history.
+
+**Employer-side:** Helps employers draft job descriptions and proof tasks faster, suggests follow-up questions for submissions, and answers platform how-to questions.
+
+**Why it matters:** Reduces the learning curve for new users on both sides and keeps people on-platform rather than switching to ChatGPT mid-task. Long-term, the chatbot becomes a career coach for candidates and a recruitment assistant for employers — a compounding retention feature.
+
+---
+
 ## 💡 Ideas Backlog (Unfiltered)
 
 Ideas captured but not yet scoped or prioritized. Nothing here is committed.
