@@ -17,7 +17,7 @@ interface SuccessCelebrationProps {
 const VARIANT_CONFIG = {
   "job-posted": {
     icon: Rocket,
-    title: "Job Posted Successfully! 🚀",
+    title: "Job Posted Successfully!",
     subtitle: "Your job is now live and candidates can start applying. You'll get notified when someone submits a proof.",
     gradient: "from-blue-500 to-indigo-600",
     iconBg: "bg-blue-500/20 text-blue-400",
@@ -25,7 +25,7 @@ const VARIANT_CONFIG = {
   },
   "proof-submitted": {
     icon: PartyPopper,
-    title: "Proof Deployed! 🎉",
+    title: "Proof Deployed!",
     subtitle: "Great work! Your submission has been sent to the hiring team for review. You'll receive feedback soon.",
     gradient: "from-emerald-500 to-teal-600",
     iconBg: "bg-emerald-500/20 text-emerald-400",

@@ -1,7 +1,7 @@
 # Bevisly — Product Roadmap
 
 > Living document. No deadlines — ship when it's right.
-> Last updated: 2026-05-02
+> Last updated: 2026-05-04
 
 ---
 
@@ -32,6 +32,20 @@ Bevisly replaces **trust-based hiring** (resumes, interviews, gut feel) with **p
 
 ---
 
+## Product Principles (Non-Negotiable)
+
+These are the rules every feature on Bevisly must obey. They define what the platform is and what it refuses to be.
+
+1. **AI is decision support, never the decision.** Bevisly never auto-accepts or auto-rejects a candidate. AI ratings, scores, and signals exist to help a human evaluate faster and more consistently — not to replace the human.
+2. **Evaluate against a rubric, not vibes.** Every proof task is scored against criteria the employer defined up front. The rubric is the contract between employer and candidate.
+3. **Evidence over opinion.** When the platform (or AI) says something about a submission, it must point to the part of the submission that supports it. No abstract "good fit" claims.
+4. **Proof quality is separate from hire decision.** A candidate can have a perfect proof and still not get the role (team fit, timing, headcount). The score reflects the work, not the outcome.
+5. **Both sides are accountable and visible.** Employer Responsibility Score and Candidate Reliability Score are first-class platform citizens, not afterthoughts.
+
+**Public positioning:** *"Bevisly does not replace human judgment. It makes human judgment more structured, evidence-based, and auditable."*
+
+---
+
 ## Core Concept: Proof-of-Work
 
 Inspired by Bitcoin's proof-of-work model: effort produces something verifiable and permanent. On Bevisly:
@@ -51,8 +65,8 @@ Inspired by Bitcoin's proof-of-work model: effort produces something verifiable 
 | 3 | **Verified Skills from Proof Tasks** | AI extracts skills from completed proofs and adds them as "Verified Skills" on the candidate profile — visually distinct from self-claimed skills (Bevisly checkmark badge). | 🟢 |
 | 4 | **Kanban Board → Sidebar** | "Talent Board" link in employer sidebar → `/employer/talent-board`. Job picker grid; click a job to open its Kanban pipeline. Removes the 2-click buried path through the dashboard. | 🟢 |
 | 5 | **Stripe Payment Integration** | Subscription checkout for Free/Pro plans, webhook updates `profiles.subscription_tier` in Supabase, Stripe Customer Portal for billing management, Pro feature gating. | 🔴 |
-
-| 5 | **Rejection Email Visual Feedback** | When employer drags a candidate to the Rejected column, the auto-rejection email already sends — but the employer gets no visual confirmation. Show a toast notification and a "Email sent ✓" indicator on the card so employers know it fired. | 🟢 |
+| 6 | **Rejection Email Visual Feedback** | When employer drags a candidate to the Rejected column, the auto-rejection email already sends — but the employer gets no visual confirmation. Show a toast notification and a "Email sent ✓" indicator on the card so employers know it fired. | 🟢 |
+| 7 | **AI Framing & Disclaimers (Anti-Bias Hygiene)** | Cheap, defensive copy + UX changes so we never *appear* to be an "AI hiring decision" tool. Three concrete items: (a) rename "AI suggested rating" → "AI evidence summary" everywhere it appears in the employer review flow; (b) add a one-line disclaimer under every AI-generated rating: *"Suggested by AI based on submission content. Final decision is yours."*; (c) add a one-paragraph "How Bevisly uses AI" section to the `/docs` page and link it from the AI suggestion UI. Protects the brand before any employer or journalist asks "is this an AI hiring tool?" | 🔴 |
 
 ### Pre-Launch Checks (non-feature)
 - [ ] Full end-to-end user flow walkthrough as both candidate and employer on the production URL
@@ -348,7 +362,42 @@ An additional revenue stream beyond subscriptions. Employers pay to have their j
 
 ---
 
-### 19. AI Chatbot Assistant
+### 19. Fairness & Evidence Layer (Anti-Bias Tooling)
+**Status:** 🔴
+
+Once employers are actually using Bevisly to make hire/reject decisions at volume, we need to enforce the Product Principles in product, not just in copy. This is the post-launch follow-through to the pre-launch "AI Framing & Disclaimers" item.
+
+Build in this order — each one is a small, shippable feature:
+
+**Phase 1 — Locked Rubric Before Submissions Open**
+- When an employer creates a proof task, they must define 3–5 rubric criteria (e.g. "Code clarity", "Problem decomposition", "UX polish"). Each gets a weight.
+- Once the first candidate submits, the rubric locks. Changing it after the fact requires creating a new task version.
+- All AI suggestions and human ratings score against the locked rubric, not a vague 1–5 star.
+- Why: stops employers from moving the goalposts mid-funnel, which is one of the main vectors for unconscious bias.
+
+**Phase 2 — Blind First Review**
+- During the first review pass, hide candidate name, photo, university, and demographic-adjacent fields. Show only the submission and the rubric.
+- After the employer scores, the identity is revealed for the human conversation phase.
+- Toggleable per employer (some will want it off; default on).
+
+**Phase 3 — Required Justification on Override**
+- If the employer's rating differs from the AI evidence summary by more than 1.5 points (on a 5-point scale), require a one-sentence written justification before the rating saves.
+- Not a punishment — a forcing function that makes the employer articulate their reasoning. The justifications also become training data for improving AI suggestions over time.
+
+**Phase 4 — Employer Consistency Dashboard**
+- Per-employer analytics page showing: pass rate by stage, score distributions, rejection patterns, time-to-review.
+- Soft "fairness alerts" when patterns look off: e.g. *"You've rejected 80% of submissions in under 2 minutes this week"* or *"Your scores cluster around 2/5 — consider whether the rubric is calibrated correctly."*
+- No public scoring of the employer's bias (that's punitive and unhelpful). Private nudges only.
+
+**Phase 5 — AI Self-Audit (Internal)**
+- Weekly internal job that re-runs the AI evidence summary on a sample of past submissions and flags drift, inconsistency, or hallucination.
+- Not user-facing. Operational hygiene so we can confidently say "we audit our AI."
+
+**Why post-launch and not pre-launch:** None of this is useful until we have real employers making real decisions at volume. Building it before launch is premature optimization — we'd be guessing at the failure modes instead of observing them.
+
+---
+
+### 20. AI Chatbot Assistant
 **Status:** 🔴
 
 An in-app AI assistant (powered by Gemini) surfaced as a chat widget across both dashboards.

@@ -118,7 +118,7 @@ export default function WelcomeBanner({ role, userName, onDismiss }: WelcomeBann
               <div className="flex items-start justify-between gap-4 mb-8">
                 <div>
                   <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[var(--color-brand-primary)]/10 border border-[var(--color-brand-primary)]/20 text-[var(--color-brand-primary)] text-xs font-semibold mb-3">
-                    ✨ Getting Started
+                    Getting Started
                   </div>
                   <h2 className="text-2xl lg:text-3xl font-bold font-display text-[var(--color-text)] mb-2">
                     Welcome to Bevisly,{" "}

@@ -234,12 +234,6 @@ export default function DashboardLayout({
                     </motion.span>
                   )}
 
-                  {isFeatured && isSidebarOpen && !isActive && (
-                    <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-gradient-to-r from-[var(--color-brand-primary)] to-[var(--color-brand-secondary)] text-white font-bold tracking-wide uppercase">
-                      Core
-                    </span>
-                  )}
-
                   {link.badge !== undefined && link.badge > 0 && (
                     <div
                       className={`

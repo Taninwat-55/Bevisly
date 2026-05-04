@@ -298,9 +298,9 @@ export default function EditProfileModal({
                         onChange={(e) => setWorkStatus(e.target.value)}
                         className="w-full px-4 py-2.5 rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)] text-[var(--color-text)] focus:ring-2 focus:ring-blue-500 outline-none appearance-none"
                      >
-                        <option value="open">🟢 Open to Work (Active)</option>
-                        <option value="partial">🟡 Partial Look for Work (Passive)</option>
-                        <option value="closed">🔴 Not Open to Work</option>
+                        <option value="open">Open to Work (Active)</option>
+                        <option value="partial">Casually Looking (Passive)</option>
+                        <option value="closed">Not Open to Work</option>
                      </select>
                   </div>
 

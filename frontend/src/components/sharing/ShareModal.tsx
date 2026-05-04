@@ -104,7 +104,7 @@ export default function ShareModal({
                                     transition={{ delay: 0.2 }}
                                     className="text-2xl font-bold text-[var(--color-text)] mb-2"
                                 >
-                                    Proof Verified! 🎉
+                                    Proof Verified!
                                 </motion.h2>
 
                                 <motion.p

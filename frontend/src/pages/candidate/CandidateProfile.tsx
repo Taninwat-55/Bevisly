@@ -144,7 +144,7 @@ export default function CandidateProfile() {
     try {
       const url = await uploadResume(file);
       setResumeUrl(url);
-      toast.success("✅ CV uploaded successfully!");
+      toast.success("CV uploaded successfully");
     } catch (err) {
       console.error(err);
       toast.error("Failed to upload CV");
@@ -200,7 +200,7 @@ export default function CandidateProfile() {
             return (
                 <span className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 text-xs font-semibold">
                     <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
-                    Partial Look for Work
+                    Casually Looking
                 </span>
             );
       case 'closed':

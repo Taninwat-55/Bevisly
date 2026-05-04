@@ -7,6 +7,9 @@ import {
   ArrowDownUp,
   Search,
   BarChart2,
+  Bug,
+  Lightbulb,
+  HelpCircle,
 } from "lucide-react";
 import toast from "react-hot-toast";
 import type { FeedbackMessage } from "@/types/admin";
@@ -129,10 +132,10 @@ export default function AdminFeedbackMessages() {
         {!loading && summary.total > 0 && (
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {[
-              { key: "bug", label: "Bugs", icon: "🐞", color: "red", count: summary.bug },
-              { key: "suggestion", label: "Ideas", icon: "💡", color: "yellow", count: summary.suggestion },
-              { key: "question", label: "Queries", icon: "❓", color: "blue", count: summary.question },
-              { key: "general", label: "General", icon: "💬", color: "emerald", count: summary.general },
+              { key: "bug", label: "Bugs", Icon: Bug, color: "red", count: summary.bug },
+              { key: "suggestion", label: "Ideas", Icon: Lightbulb, color: "yellow", count: summary.suggestion },
+              { key: "question", label: "Queries", Icon: HelpCircle, color: "blue", count: summary.question },
+              { key: "general", label: "General", Icon: MessageCircle, color: "emerald", count: summary.general },
             ].map((cat) => (
               <button
                 key={cat.key}
@@ -145,7 +148,7 @@ export default function AdminFeedbackMessages() {
                 `}
               >
                 <div className="relative z-10 flex flex-col gap-1">
-                  <span className="text-2xl mb-1">{cat.icon}</span>
+                  <cat.Icon size={22} className={`mb-1 ${categoryFilter === cat.key ? `text-${cat.color}-600 dark:text-${cat.color}-400` : 'text-[var(--color-text-muted)]'}`} />
                   <span className={`text-[10px] font-black uppercase tracking-widest ${categoryFilter === cat.key ? `text-${cat.color}-600 dark:text-${cat.color}-400` : 'text-[var(--color-text-muted)]'}`}>
                     {cat.label}
                   </span>

@@ -4,6 +4,20 @@
 
 Bevisly is a recruitment platform where **recent graduates, career switchers, and students** find jobs and prove their skills by completing employer-set tasks. **Employers (startups & SMEs)** post jobs, manage candidates, and get high-competency matches while saving recruitment time. The core differentiator is the **Proof Task** system — candidates don't just apply, they demonstrate capability.
 
+**Positioning:** *"Bevisly does not replace human judgment. It makes human judgment more structured, evidence-based, and auditable."*
+
+---
+
+## Product Principles (Non-Negotiable)
+
+Every feature must obey these. Full rationale lives in `PRODUCT_ROADMAP.md` → "Product Principles".
+
+1. **AI is decision support, never the decision** — no auto-accept, no auto-reject.
+2. **Evaluate against a rubric** the employer defined up front, not vibes.
+3. **Evidence over opinion** — when AI makes a claim it must point to the part of the submission it's referring to.
+4. **Proof quality is separate from hire decision.**
+5. **Both sides are accountable and visible** (Employer Responsibility Score + Candidate Reliability Score).
+
 ---
 
 ## Tech Stack
@@ -144,11 +158,22 @@ Wire up Stripe before sending cold emails — a pricing page with no working che
 - "Manage Billing" button → Stripe Customer Portal
 - Gate Pro features behind subscription check
 
+### ⬜ AI Framing & Disclaimers (Anti-Bias Hygiene)
+Cheap defensive copy + UX so we never *appear* to be an "AI hiring decision" tool. Three concrete items:
+- Rename "AI suggested rating" → "AI evidence summary" everywhere it appears in the employer review flow.
+- Add a one-line disclaimer under every AI-generated rating: *"Suggested by AI based on submission content. Final decision is yours."*
+- Add a one-paragraph "How Bevisly uses AI" section to the `/docs` page; link it from the AI suggestion UI.
+
+This is the bare minimum to ship before cold outreach. The deeper Fairness & Evidence Layer (locked rubrics, blind first review, override justification, consistency dashboard, AI self-audit) is post-launch — see `PRODUCT_ROADMAP.md` feature #19.
+
 ---
 
 ## Post-Launch Roadmap
 
-Features to build after launch and initial traction.
+Features to build after launch and initial traction. Full list in `PRODUCT_ROADMAP.md`.
+
+### ⬜ Fairness & Evidence Layer
+Five-phase build that operationalises the Product Principles once we have real employer usage data: locked rubrics, blind first review, required justification on override, employer consistency dashboard with fairness alerts, and weekly AI self-audit. See `PRODUCT_ROADMAP.md` feature #19.
 
 ### ⬜ AI Chatbot
 In-app AI assistant powered by Gemini. Dual-purpose: helps candidates refine applications, understand proof task requirements, and prep for interviews; helps employers draft job descriptions and proof tasks faster. Surfaced as a chat widget available across both dashboards.

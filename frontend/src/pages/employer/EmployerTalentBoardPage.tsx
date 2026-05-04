@@ -37,11 +37,15 @@ export default function EmployerTalentBoardPage() {
   const [jobs, setJobs] = useState<EmployerJob[]>([]);
   const [submissions, setSubmissions] = useState<EmployerSubmission[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedSubmissionId, setSelectedSubmissionId] = useState<string | null>(null);
+  const [selectedSubmissionId, setSelectedSubmissionId] = useState<
+    string | null
+  >(null);
 
   // Job management state
   const [isEditingJob, setIsEditingJob] = useState(false);
-  const [editJobData, setEditJobData] = useState<Partial<EmployerJob & { proof_tasks: ProofTask[] }> | null>(null);
+  const [editJobData, setEditJobData] = useState<Partial<
+    EmployerJob & { proof_tasks: ProofTask[] }
+  > | null>(null);
   const [editJobLoading, setEditJobLoading] = useState(false);
   const [showJobActions, setShowJobActions] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
@@ -77,20 +81,22 @@ export default function EmployerTalentBoardPage() {
 
   const jobSubmissions = useMemo(
     () => submissions.filter((s) => s.job_id === selectedJobId),
-    [submissions, selectedJobId]
+    [submissions, selectedJobId],
   );
 
   const handleStatusUpdate = async (status: string) => {
     if (!selectedJobId) return;
     try {
-      await withTimeout(
-        updateJobStatus(selectedJobId, status),
-        10000,
-        () => toast.loading("This is taking longer than expected...", { id: "timeout-warning" })
+      await withTimeout(updateJobStatus(selectedJobId, status), 10000, () =>
+        toast.loading("This is taking longer than expected...", {
+          id: "timeout-warning",
+        }),
       );
       toast.dismiss("timeout-warning");
       toast.success(`Job marked as ${status}`);
-      setJobs((prev) => prev.map((j) => (j.id === selectedJobId ? { ...j, status } : j)));
+      setJobs((prev) =>
+        prev.map((j) => (j.id === selectedJobId ? { ...j, status } : j)),
+      );
       setShowJobActions(false);
     } catch (error: unknown) {
       toast.dismiss("timeout-warning");
@@ -102,10 +108,10 @@ export default function EmployerTalentBoardPage() {
     if (!selectedJobId) return;
     setIsDeleting(true);
     try {
-      await withTimeout(
-        deleteJob(selectedJobId),
-        10000,
-        () => toast.loading("This is taking longer than expected...", { id: "timeout-warning" })
+      await withTimeout(deleteJob(selectedJobId), 10000, () =>
+        toast.loading("This is taking longer than expected...", {
+          id: "timeout-warning",
+        }),
       );
       toast.dismiss("timeout-warning");
       toast.success("Job deleted");
@@ -173,7 +179,11 @@ export default function EmployerTalentBoardPage() {
                   setEditJobLoading(true);
                   try {
                     const data = await getJobWithTasks(selectedJobId);
-                    setEditJobData(data as unknown as EmployerJob & { proof_tasks: ProofTask[] });
+                    setEditJobData(
+                      data as unknown as EmployerJob & {
+                        proof_tasks: ProofTask[];
+                      },
+                    );
                     setIsEditingJob(true);
                   } catch {
                     toast.error("Failed to load job for editing");
@@ -200,15 +210,19 @@ export default function EmployerTalentBoardPage() {
                     <button
                       onClick={() =>
                         handleStatusUpdate(
-                          selectedJob.status === "active" ? "paused" : "active"
+                          selectedJob.status === "active" ? "paused" : "active",
                         )
                       }
                       className="w-full text-left px-4 py-2.5 text-sm hover:bg-[var(--color-surface-hover)] flex items-center gap-2 text-[var(--color-text)] transition-colors"
                     >
                       {selectedJob.status === "active" ? (
-                        <><Pause size={14} /> Pause Job</>
+                        <>
+                          <Pause size={14} /> Pause Job
+                        </>
                       ) : (
-                        <><Play size={14} /> Resume Job</>
+                        <>
+                          <Play size={14} /> Resume Job
+                        </>
                       )}
                     </button>
                     <button
@@ -218,7 +232,9 @@ export default function EmployerTalentBoardPage() {
                       <Archive size={14} /> Close Job
                     </button>
                     <button
-                      onClick={() => window.open(`/jobs/${selectedJobId}`, "_blank")}
+                      onClick={() =>
+                        window.open(`/jobs/${selectedJobId}`, "_blank")
+                      }
                       className="w-full text-left px-4 py-2.5 text-sm hover:bg-[var(--color-surface-hover)] flex items-center gap-2 text-[var(--color-text)] transition-colors"
                     >
                       <Users size={14} /> View Public Page
@@ -237,7 +253,10 @@ export default function EmployerTalentBoardPage() {
                 )}
 
                 {showJobActions && (
-                  <div className="fixed inset-0 z-40" onClick={() => setShowJobActions(false)} />
+                  <div
+                    className="fixed inset-0 z-40"
+                    onClick={() => setShowJobActions(false)}
+                  />
                 )}
               </div>
             </div>
@@ -266,7 +285,9 @@ export default function EmployerTalentBoardPage() {
               <div className="w-16 h-16 mx-auto bg-[var(--color-brand-primary)]/10 text-[var(--color-brand-primary)] rounded-full flex items-center justify-center mb-4">
                 <Briefcase size={32} />
               </div>
-              <h3 className="text-xl font-bold text-[var(--color-text)] mb-2">No jobs yet</h3>
+              <h3 className="text-xl font-bold text-[var(--color-text)] mb-2">
+                No jobs yet
+              </h3>
               <p className="text-[var(--color-text-muted)] max-w-sm mx-auto">
                 Post a job from the Dashboard to start managing candidates here.
               </p>
@@ -302,7 +323,8 @@ export default function EmployerTalentBoardPage() {
                   <div className="mt-4 flex items-center gap-1.5 text-sm font-medium text-blue-600 dark:text-blue-400">
                     <Users size={16} />
                     <span>
-                      {submissions.filter((s) => s.job_id === job.id).length} Candidates
+                      {submissions.filter((s) => s.job_id === job.id).length}{" "}
+                      Candidates
                     </span>
                   </div>
                 </button>
@@ -322,7 +344,10 @@ export default function EmployerTalentBoardPage() {
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm"
-                onClick={() => { setIsEditingJob(false); setEditJobData(null); }}
+                onClick={() => {
+                  setIsEditingJob(false);
+                  setEditJobData(null);
+                }}
               />
               <motion.div
                 initial={{ x: "100%" }}
@@ -332,20 +357,28 @@ export default function EmployerTalentBoardPage() {
                 className="fixed top-0 right-0 z-50 h-full w-full max-w-2xl bg-[var(--color-bg)] border-l border-[var(--color-border)] shadow-2xl overflow-y-auto"
               >
                 <div className="sticky top-0 z-10 bg-[var(--color-bg)]/80 backdrop-blur-md border-b border-[var(--color-border)] px-6 py-4 flex items-center justify-between">
-                  <h2 className="text-lg font-bold text-[var(--color-text)]">Edit Job</h2>
+                  <h2 className="text-lg font-bold text-[var(--color-text)]">
+                    Edit Job
+                  </h2>
                   <div className="flex items-center gap-2">
                     <Button
                       variant="ghost"
                       size="sm"
                       className="text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/10"
-                      onClick={() => { setIsEditingJob(false); setConfirmDelete(true); }}
+                      onClick={() => {
+                        setIsEditingJob(false);
+                        setConfirmDelete(true);
+                      }}
                     >
                       Delete Job
                     </Button>
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => { setIsEditingJob(false); setEditJobData(null); }}
+                      onClick={() => {
+                        setIsEditingJob(false);
+                        setEditJobData(null);
+                      }}
                     >
                       ✕ Close
                     </Button>
@@ -375,7 +408,7 @@ export default function EmployerTalentBoardPage() {
             </>
           )}
         </AnimatePresence>,
-        document.body
+        document.body,
       )}
 
       {/* ── Review Proof Slide-Over ── */}
@@ -395,10 +428,12 @@ export default function EmployerTalentBoardPage() {
                 animate={{ x: 0 }}
                 exit={{ x: "100%" }}
                 transition={{ type: "spring", damping: 30, stiffness: 300 }}
-                className="fixed top-0 right-0 z-50 h-full w-full max-w-3xl bg-[var(--color-bg)] border-l border-[var(--color-border)] shadow-2xl overflow-y-auto"
+                className="fixed top-0 right-0 z-50 h-full w-full max-w-5xl bg-[var(--color-bg)] border-l border-[var(--color-border)] shadow-2xl overflow-y-auto"
               >
                 <div className="sticky top-0 z-10 bg-[var(--color-bg)]/80 backdrop-blur-md border-b border-[var(--color-border)] px-6 py-4 flex items-center justify-between">
-                  <h2 className="text-lg font-bold text-[var(--color-text)]">Review Proof</h2>
+                  <h2 className="text-lg font-bold text-[var(--color-text)]">
+                    Review Proof
+                  </h2>
                   <Button
                     variant="ghost"
                     size="sm"
@@ -417,7 +452,7 @@ export default function EmployerTalentBoardPage() {
             </>
           )}
         </AnimatePresence>,
-        document.body
+        document.body,
       )}
 
       {/* Delete Job Confirmation */}

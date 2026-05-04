@@ -2,11 +2,10 @@
 // This component is used exclusively by AdminLayout.tsx for the /admin routes.
 //
 // Candidate and employer navigation lives in DashboardLayout.tsx (src/layout/DashboardLayout.tsx),
-// which handles its own sidebar inline. If you're adding nav links for candidates or employers,
-// edit the `links` array in DashboardLayout.tsx — not here.
+// which handles its own sidebar inline. If you're adding nav links for admin, edit the
+// `links` array below — for candidate/employer nav, edit DashboardLayout.tsx.
 //
 // TODO: consolidate into a single Sidebar component that handles all three roles.
-// Tracked intent: merge this and DashboardLayout's sidebar into one component.
 
 import { useState } from "react";
 import { NavLink, Link } from "react-router-dom";
@@ -15,8 +14,8 @@ import {
   Users,
   Briefcase,
   Settings,
-  ChevronLeft,
-  ChevronRight,
+  ArrowLeft,
+  ArrowRight,
   LogOut,
   MessageCircle,
   Database,
@@ -30,99 +29,146 @@ interface SidebarProps {
 
 export default function Sidebar({ role }: SidebarProps) {
   const { user, signOut } = useAuth();
-  const [collapsed, setCollapsed] = useState(false);
+  const [isSidebarOpen, setSidebarOpen] = useState(true);
   const rawRole = role || user?.role || "admin";
   const resolvedRole = rawRole === "demo_admin" ? "admin" : rawRole;
 
-  const accentColor = "var(--color-brand-primary)";
-
   const links = [
-    { to: "/admin", label: "Dashboard", icon: <Shield size={17} /> },
-    { to: "/admin/users", label: "Users", icon: <Users size={17} /> },
-    { to: "/admin/jobs", label: "Jobs Overview", icon: <Briefcase size={17} /> },
-    { to: "/admin/feedback-messages", label: "Platform Feedback", icon: <MessageCircle size={17} /> },
-    { to: "/admin/data-viewer", label: "Data Viewer", icon: <Database size={17} /> },
+    { to: "/admin", label: "Dashboard", icon: Shield, end: true },
+    { to: "/admin/users", label: "Users", icon: Users, end: false },
+    { to: "/admin/jobs", label: "Jobs Overview", icon: Briefcase, end: false },
+    { to: "/admin/feedback-messages", label: "Platform Feedback", icon: MessageCircle, end: false },
+    { to: "/admin/data-viewer", label: "Data Viewer", icon: Database, end: false },
   ];
+
+  const footerIconClass =
+    "p-2 text-[var(--color-text-muted)] hover:text-[var(--color-brand-primary)] hover:bg-[var(--color-brand-primary)]/10 rounded-lg transition-all";
 
   return (
     <aside
-      className={`hidden md:flex flex-col transition-all duration-300 border-r border-[var(--color-border)] shadow-[var(--shadow-soft)]
-        bg-[color-mix(in srgb,var(--color-surface) 95%,transparent)]
-        ${collapsed ? "w-[72px]" : "w-[230px]"} overflow-hidden`}
+      className={`relative hidden md:flex flex-col glass-panel border-r border-[var(--glass-border)] backdrop-blur-xl transition-all duration-300 ${
+        isSidebarOpen ? "w-[280px]" : "w-[80px]"
+      }`}
     >
-      {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-[var(--color-border)]">
-        {!collapsed && (
-          <span className="font-semibold text-[var(--color-text)] whitespace-nowrap select-none flex items-center gap-2">
-            <Shield size={15} className="text-[var(--color-brand-primary)]" /> Admin
+      {/* Brand */}
+      <Link
+        to="/"
+        className={`h-20 flex items-center ${isSidebarOpen ? "px-8" : "justify-center"} border-b border-[var(--color-border)]/50 hover:bg-[var(--color-surface-hover)] transition-colors`}
+      >
+        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[var(--color-brand-primary)] to-[var(--color-brand-secondary)] flex items-center justify-center text-white font-bold text-lg shadow-glow-primary shrink-0">
+          B
+        </div>
+        {isSidebarOpen && (
+          <span className="ml-3 text-xl font-bold font-display text-[var(--color-text)] tracking-tight">
+            Bevisly
           </span>
         )}
-        <button
-          onClick={() => setCollapsed(!collapsed)}
-          className="p-1 rounded-md text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[var(--color-bg)] transition"
-          title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-        >
-          {collapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
-        </button>
-      </div>
+      </Link>
 
       {/* Navigation */}
-      <nav className="flex-1 flex flex-col px-2 py-3 space-y-1 overflow-y-auto">
-        {links.map(({ to, label, icon }) => (
+      <nav className="flex-1 py-8 px-3 space-y-3 overflow-y-auto">
+        {links.map(({ to, label, icon: Icon, end }) => (
           <NavLink
             key={to}
             to={to}
-            end
+            end={end}
             title={label}
             className={({ isActive }) =>
-              `flex items-center gap-3 px-3 py-2 rounded-[var(--radius-button)] text-sm font-medium transition-all
-     ${isActive
-                ? "bg-[color-mix(in srgb,var(--color-bg) 85%,transparent)] text-[var(--color-text)] font-semibold"
-                : "text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[color-mix(in srgb,var(--color-bg) 90%,transparent)]"
-              }`
-            }
-            style={({ isActive }) =>
-              isActive
-                ? { borderLeft: `3px solid ${accentColor}`, color: accentColor }
-                : undefined
+              `flex items-center gap-3 px-4 py-3.5 rounded-xl transition-all duration-200 group relative
+              ${
+                isActive
+                  ? "text-[var(--color-brand-primary)] bg-[var(--color-brand-primary)]/10 font-semibold shadow-sm"
+                  : "text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[var(--color-surface-hover)]"
+              }
+              ${!isSidebarOpen ? "justify-center" : ""}`
             }
           >
-            {icon}
-            {!collapsed && <span>{label}</span>}
+            {({ isActive }) => (
+              <>
+                <Icon
+                  size={isSidebarOpen ? 20 : 24}
+                  className={`shrink-0 ${
+                    isActive
+                      ? "text-[var(--color-brand-primary)]"
+                      : "text-[var(--color-text-muted)] group-hover:text-[var(--color-text)]"
+                  }`}
+                />
+                {isSidebarOpen && (
+                  <span className="whitespace-nowrap flex-1">{label}</span>
+                )}
+                {isActive && (
+                  <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 rounded-r-full bg-[var(--color-brand-primary)]" />
+                )}
+              </>
+            )}
           </NavLink>
         ))}
       </nav>
 
-      {/* Footer / User Settings & Logout */}
-      <div className="mt-auto px-2 py-4 border-t border-[var(--color-border)] space-y-1">
+      {/* User Footer */}
+      <div
+        className={`p-4 border-t border-[var(--color-border)]/50 bg-[var(--color-surface-hover)]/30 flex ${
+          isSidebarOpen ? "flex-row items-center gap-3" : "flex-col items-center gap-2"
+        }`}
+      >
         <Link
           to={`/${resolvedRole}/settings`}
-          className="flex items-center gap-3 px-3 py-2 w-full rounded-[var(--radius-button)] text-sm font-medium transition-all text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[var(--color-bg)]"
-          title="Settings"
+          className={`flex items-center gap-3 group overflow-hidden ${isSidebarOpen ? "flex-1" : ""}`}
+          title="Account Settings"
         >
-          <Settings size={17} />
-          {!collapsed && <span>Settings</span>}
+          <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-slate-200 to-slate-100 dark:from-slate-700 dark:to-slate-800 flex items-center justify-center border border-[var(--color-border)] shrink-0 group-hover:border-[var(--color-brand-primary)] transition-all shadow-sm group-hover:shadow-glow-primary/20">
+            <span className="font-semibold text-[var(--color-text)]">
+              {user?.avatar_url ? (
+                <img src={user.avatar_url} alt="User" className="w-full h-full object-cover rounded-full" />
+              ) : (
+                user?.full_name?.[0]?.toUpperCase() ||
+                user?.email?.[0].toUpperCase() ||
+                "A"
+              )}
+            </span>
+          </div>
+          {isSidebarOpen && (
+            <div className="overflow-hidden text-left">
+              <p className="text-sm font-semibold text-[var(--color-text)] truncate group-hover:text-[var(--color-brand-primary)] transition-colors">
+                {user?.full_name || user?.email}
+              </p>
+              <p className="text-[10px] text-[var(--color-text-muted)] truncate uppercase tracking-wider">
+                {rawRole === "demo_admin" ? "Demo Admin" : "Admin"}
+              </p>
+            </div>
+          )}
         </Link>
-        <button
-          className="flex items-center gap-3 px-3 py-2 w-full rounded-[var(--radius-button)] text-sm font-medium transition-all text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[var(--color-bg)]"
-          title="Change Language (Coming Soon)"
-        >
-          <Languages size={17} />
-          {!collapsed && <span>Language</span>}
-        </button>
-        <button
-          onClick={() => {
-            if (confirm("Are you sure you want to log out?")) {
-              signOut();
-            }
-          }}
-          className={`flex items-center gap-3 px-3 py-2 w-full rounded-[var(--radius-button)] text-sm font-medium transition-all text-red-500 hover:bg-red-500/10 hover:text-red-600`}
-          title="Log Out"
-        >
-          <LogOut size={17} />
-          {!collapsed && <span>Log Out</span>}
-        </button>
+        <div className={`flex items-center gap-0.5 ${!isSidebarOpen ? "flex-col" : ""}`}>
+          <button className={footerIconClass} title="Change Language (Coming Soon)">
+            <Languages size={18} />
+          </button>
+          <Link to={`/${resolvedRole}/settings`} className={footerIconClass} title="Settings">
+            <Settings size={18} />
+          </Link>
+          <button
+            onClick={() => {
+              if (confirm("Are you sure you want to log out?")) signOut();
+            }}
+            className="p-2 text-[var(--color-text-muted)] hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-all"
+            title="Sign Out"
+          >
+            <LogOut size={18} />
+          </button>
+        </div>
       </div>
+
+      {/* Collapse Toggle */}
+      <button
+        onClick={() => setSidebarOpen(!isSidebarOpen)}
+        className="absolute -right-3 top-20 z-50 p-1.5 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-full shadow-lg text-[var(--color-text)] hover:text-[var(--color-brand-primary)] hover:border-[var(--color-brand-primary)] transition-all transform hover:scale-105 active:scale-95 flex items-center justify-center"
+        title={isSidebarOpen ? "Collapse sidebar" : "Expand sidebar"}
+      >
+        {isSidebarOpen ? (
+          <ArrowLeft size={14} strokeWidth={2.5} />
+        ) : (
+          <ArrowRight size={14} strokeWidth={2.5} />
+        )}
+      </button>
     </aside>
   );
 }

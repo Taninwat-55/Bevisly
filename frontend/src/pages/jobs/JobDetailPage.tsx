@@ -186,7 +186,7 @@ export default function JobDetailPage() {
   const confirmStartProof = () => {
     if (!proof) return;
     setStarting(true);
-    toast.success("🚀 Proof task started!");
+    toast.success("Proof task started");
     setTimeout(() => {
       setShowConfirm(false);
       navigate(`/candidate/proof/${proof.id}`);
@@ -286,7 +286,7 @@ export default function JobDetailPage() {
               <div className="flex flex-wrap gap-2 mt-5">
                 {job.paid && (
                   <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[var(--color-surface)] border border-[var(--color-border)] text-[var(--color-text-muted)] text-xs font-medium">
-                    💰 {(() => {
+                    <DollarSign size={12} /> {(() => {
                       const periodLabel = job.pay_period === 'yearly' ? '/yr' : job.pay_period === 'hourly' ? '/hr' : '/mo';
                       if (job.salary_min && job.salary_max) {
                         return `${job.salary_min.toLocaleString()} – ${job.salary_max.toLocaleString()} ${job.payment_currency}${periodLabel}`;

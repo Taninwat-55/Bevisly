@@ -43,7 +43,7 @@ export default function FeedbackButton() {
       console.error(error);
       notify.error("Failed to send feedback");
     } else {
-      notify.success("Thanks for your feedback! 💬");
+      notify.success("Thanks for your feedback");
       setMessage("");
       setCategory("general");
       setEmail("");

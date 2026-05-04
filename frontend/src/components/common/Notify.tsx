@@ -1,4 +1,5 @@
 import { toast } from "react-hot-toast";
+import { Lightbulb } from "lucide-react";
 
 /**
  * Helper functions for easy branded calls across the app.
@@ -27,7 +28,7 @@ export const notify = {
     }),
   info: (msg: string) =>
     toast(msg, {
-      icon: "💡",
+      icon: <Lightbulb size={16} className="text-[var(--color-warning)]" />,
       style: {
         borderLeft: `4px solid var(--color-employer-dark)`,
         maxWidth: "360px",

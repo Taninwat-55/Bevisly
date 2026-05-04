@@ -17,17 +17,17 @@ import StageColumn from "./StageColumn";
 import { CandidateCardOverlay } from "./CandidateCard";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
-const STAGES: { key: HiringStage; label: string; emoji: string }[] = [
-  { key: "new", label: "New", emoji: "🆕" },
-  { key: "shortlisted", label: "Shortlisted", emoji: "⭐" },
-  { key: "interview", label: "Interview", emoji: "💬" },
-  { key: "offer_sent", label: "Offer Sent", emoji: "📨" },
-  { key: "hold", label: "On Hold", emoji: "⏸" },
-  { key: "hired", label: "Hired", emoji: "🎉" },
-  { key: "rejected", label: "Rejected", emoji: "❌" },
+const STAGES: { key: HiringStage; label: string }[] = [
+  { key: "new", label: "New" },
+  { key: "shortlisted", label: "Shortlisted" },
+  { key: "interview", label: "Interview" },
+  { key: "offer_sent", label: "Offer Sent" },
+  { key: "hold", label: "On Hold" },
+  { key: "hired", label: "Hired" },
+  { key: "rejected", label: "Rejected" },
 ];
 
-// 🧭 Custom collision: prioritize columns
+// Custom collision: prioritize columns
 const collisionDetectionStrategy: CollisionDetection = (args) => {
   const intersections = rectIntersection(args);
   if (intersections.length > 0) {
@@ -197,11 +197,11 @@ export default function TalentBoard({
           ref={scrollRef}
           className="flex overflow-x-auto gap-x-4 px-6 py-2 snap-x snap-mandatory relative scroll-smooth"
         >
-          {STAGES.map(({ key, label, emoji }) => (
+          {STAGES.map(({ key, label }) => (
             <StageColumn
               key={key}
               stage={key}
-              label={`${emoji} ${label}`}
+              label={label}
               submissions={grouped[key]}
               onReview={onReview}
               onUpdateSubmission={handleUpdateSubmission}

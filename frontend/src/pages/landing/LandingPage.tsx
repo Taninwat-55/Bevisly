@@ -2,7 +2,7 @@ import { useState, useRef } from "react";
 import { Helmet } from "react-helmet-async";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/Button";
-import { ArrowRight, CheckCircle, Play, Search, Loader2 } from "lucide-react";
+import { ArrowRight, CheckCircle, Play, Search, Loader2, Star } from "lucide-react";
 import type { GeneratedJobListing } from "@/lib/api/ai";
 import { generateJobListing } from "@/lib/api/ai";
 import toast from "react-hot-toast";
@@ -361,7 +361,7 @@ export default function LandingPage() {
               <div className="absolute -right-4 md:-right-8 top-12 glass-card p-3 md:p-4 rounded-xl hidden md:block animate-card-lift bg-white/90 dark:bg-slate-800/90 shadow-xl border border-white/20" style={{ animationDelay: "0.8s" }}>
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center text-amber-500 border border-amber-200">
-                    <span>⭐️</span>
+                    <Star size={18} className="fill-current" />
                   </div>
                   <div className="pr-2">
                     <p className="font-bold text-lg text-[var(--color-text)] leading-none">4.9/5</p>

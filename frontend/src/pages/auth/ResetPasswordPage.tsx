@@ -46,7 +46,7 @@ export default function ResetPasswordPage() {
 
       console.log("Password updated successfully!");
       setSuccess(true);
-      notify.success("✅ Password updated!");
+      notify.success("Password updated");
     } catch (err: unknown) {
       console.error("Catch block error:", err);
       const message = err instanceof Error ? err.message : "Reset failed. Try again.";

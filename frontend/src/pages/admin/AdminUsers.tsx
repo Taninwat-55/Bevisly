@@ -44,7 +44,7 @@ export default function AdminUsers() {
     setUpdating(id);
     try {
       await updateUserRole(id, newRole);
-      toast.success(`✅ Role updated to ${newRole}`);
+      toast.success(`Role updated to ${newRole}`);
       setUsers((prev) =>
         prev.map((u) =>
           u.id === id ? { ...u, role: newRole as BevislyUser["role"] } : u
@@ -68,7 +68,7 @@ export default function AdminUsers() {
     setUpdating(id);
     try {
       const newBal = await addCredits(id, amount);
-      toast.success(`✅ Credits updated. New balance: ${newBal}`);
+      toast.success(`Credits updated. New balance: ${newBal}`);
       setUsers((prev) =>
         prev.map((u) => (u.id === id ? { ...u, credits: newBal } : u))
       );

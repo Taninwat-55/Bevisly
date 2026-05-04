@@ -125,7 +125,7 @@ export default function AuthPage() {
       }
 
       if (data.session) {
-        notify.success("🎉 Account created! Logging you in...", role);
+        notify.success("Account created. Logging you in...", role);
         if (role === "employer") {
           try {
              // Attempt to claim code immediately if session exists
@@ -135,7 +135,7 @@ export default function AuthPage() {
           }
         }
       } else if (data.user) {
-        notify.success("✅ Success! Please check your email to confirm.", role);
+        notify.success("Success. Please check your email to confirm.", role);
         setIsLogin(true);
       }
     } catch (err) {
@@ -175,7 +175,7 @@ export default function AuthPage() {
       }
 
       console.log("[Login] 3. Auth succeeded. Waiting for AuthProvider to set user...");
-      notify.success("✅ Logged in successfully!");
+      notify.success("Logged in successfully");
     } catch (err: unknown) {
       console.error("[Login] Unexpected error:", err);
       setFormError("Unexpected error. Please try again later.");
@@ -211,7 +211,7 @@ export default function AuthPage() {
         // For now, we'll assume the MFA check will be handled on the redirect target or after the session is established.
         // If the user is redirected back to this page and a session is established, the useEffect for user will handle it.
         // If MFA is required, the session will be AAL1 and the redirect target should handle AAL2 challenge.
-        notify.success("✨ Magic Link sent! Check your email to log in.");
+        notify.success("Magic Link sent. Check your email to log in.");
       }
     } catch (err) {
       console.error(err);
@@ -487,7 +487,7 @@ export default function AuthPage() {
                     onClick={handleMagicLinkForLogin}
                     disabled={formLoading}
                   >
-                    ✨ Sign in with Magic Link
+                    Sign in with Magic Link
                   </Button>
 
                   <div className="grid grid-cols-2 gap-3">

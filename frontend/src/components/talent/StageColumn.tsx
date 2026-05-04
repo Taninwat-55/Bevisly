@@ -6,6 +6,7 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { motion } from "framer-motion";
+import { Inbox } from "lucide-react";
 
 interface StageColumnProps {
   stage: HiringStage;
@@ -105,7 +106,7 @@ export default function StageColumn({
             {submissions.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-12 text-center">
                 <div className="w-12 h-12 rounded-full bg-[var(--color-surface)] flex items-center justify-center mb-3">
-                  <span className="text-2xl">🕊️</span>
+                  <Inbox size={20} className="text-[var(--color-text-muted)]" />
                 </div>
                 <p className="text-xs text-[var(--color-text-muted)]">
                   No candidates here yet

@@ -307,18 +307,18 @@ export default function PricingPage() {
 
           {/* Value anchor */}
           <section className="px-6 py-16 mb-6">
-            <div className="max-w-4xl mx-auto rounded-3xl overflow-hidden" style={{ background: "linear-gradient(135deg, #0f172a 0%, #1e293b 100%)" }}>
+            <div className="max-w-4xl mx-auto rounded-3xl overflow-hidden" style={{ background: "linear-gradient(135deg, var(--color-slate-900) 0%, var(--color-slate-800) 100%)" }}>
               <div className="p-10 md:p-14 text-center">
-                <p className="text-xs font-semibold uppercase tracking-widest mb-4" style={{ color: "#ff8b3d" }}>
+                <p className="text-xs font-semibold uppercase tracking-widest mb-4 text-[var(--color-brand-secondary)]">
                   The real cost of hiring
                 </p>
-                <h2 className="text-2xl md:text-4xl font-bold leading-snug mb-6" style={{ color: "#f8fafc" }}>
+                <h2 className="text-2xl md:text-4xl font-bold leading-snug mb-6 text-[var(--color-slate-50)]">
                   One bad hire costs{" "}
-                  <span style={{ color: "#ff8b3d" }}>$15,000+</span>
+                  <span className="text-[var(--color-brand-secondary)]">$15,000+</span>
                   {" "}in lost time,<br className="hidden md:block" />
                   rehiring fees, and team disruption.
                 </h2>
-                <p className="text-sm mb-10 max-w-xl mx-auto leading-relaxed" style={{ color: "#94a3b8" }}>
+                <p className="text-sm mb-10 max-w-xl mx-auto leading-relaxed text-[var(--color-slate-400)]">
                   Bevisly lets candidates prove their skills before you commit. At $149/month, it pays
                   for itself the moment you avoid one wrong hire.
                 </p>
@@ -329,8 +329,8 @@ export default function PricingPage() {
                     { stat: "$149",   label: "per month vs. $15k per bad hire" },
                   ].map(({ stat, label }) => (
                     <div key={label}>
-                      <div className="text-3xl font-bold" style={{ color: "#ff8b3d" }}>{stat}</div>
-                      <div className="text-xs mt-1 leading-snug" style={{ color: "#64748b" }}>{label}</div>
+                      <div className="text-3xl font-bold text-[var(--color-brand-secondary)]">{stat}</div>
+                      <div className="text-xs mt-1 leading-snug text-[var(--color-slate-500)]">{label}</div>
                     </div>
                   ))}
                 </div>
@@ -461,16 +461,16 @@ export default function PricingPage() {
 
           {/* Candidate value anchor */}
           <section className="px-6 pb-16">
-            <div className="max-w-3xl mx-auto rounded-3xl overflow-hidden" style={{ background: "linear-gradient(135deg, #0f172a 0%, #1e293b 100%)" }}>
+            <div className="max-w-3xl mx-auto rounded-3xl overflow-hidden" style={{ background: "linear-gradient(135deg, var(--color-slate-900) 0%, var(--color-slate-800) 100%)" }}>
               <div className="p-10 text-center">
-                <p className="text-xs font-semibold uppercase tracking-widest mb-4" style={{ color: "#ff8b3d" }}>
+                <p className="text-xs font-semibold uppercase tracking-widest mb-4 text-[var(--color-brand-secondary)]">
                   Why it matters
                 </p>
-                <h2 className="text-2xl md:text-3xl font-bold leading-snug mb-4" style={{ color: "#f8fafc" }}>
+                <h2 className="text-2xl md:text-3xl font-bold leading-snug mb-4 text-[var(--color-slate-50)]">
                   A higher Bevisly Score means{" "}
-                  <span style={{ color: "#ff8b3d" }}>more employer attention</span>.
+                  <span className="text-[var(--color-brand-secondary)]">more employer attention</span>.
                 </h2>
-                <p className="text-sm leading-relaxed max-w-md mx-auto" style={{ color: "#94a3b8" }}>
+                <p className="text-sm leading-relaxed max-w-md mx-auto text-[var(--color-slate-400)]">
                   Employers search and filter candidates by score. More practice proofs = higher score =
                   more visibility. Plus gives you unlimited practice so you can improve as fast as you want.
                 </p>

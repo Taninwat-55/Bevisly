@@ -270,7 +270,7 @@ export default function AdminJobs() {
                             onClick={async () => {
                               try {
                                 await toggleFeaturedJob(j.id, !j.featured);
-                                toast.success(j.featured ? "Removed from featured" : "Added to featured ⭐");
+                                toast.success(j.featured ? "Removed from featured" : "Added to featured");
                                 setJobs((prev) => prev.map((job) => job.id === j.id ? { ...job, featured: !j.featured } : job));
                               } catch (err) {
                                 console.error(err);

@@ -9,14 +9,14 @@ import type { EmployerSubmission, HiringStage } from "@/types";
 import NotesModal from "./NotesModal";
 import { useNavigate } from "react-router-dom";
 
-const STAGES: { key: HiringStage; label: string; emoji: string }[] = [
-  { key: "new", label: "New", emoji: "🆕" },
-  { key: "shortlisted", label: "Shortlisted", emoji: "⭐" },
-  { key: "interview", label: "Interview", emoji: "💬" },
-  { key: "offer_sent", label: "Offer Sent", emoji: "📨" },
-  { key: "hold", label: "On Hold", emoji: "⏸" },
-  { key: "hired", label: "Hired", emoji: "🎉" },
-  { key: "rejected", label: "Rejected", emoji: "❌" },
+const STAGES: { key: HiringStage; label: string }[] = [
+  { key: "new", label: "New" },
+  { key: "shortlisted", label: "Shortlisted" },
+  { key: "interview", label: "Interview" },
+  { key: "offer_sent", label: "Offer Sent" },
+  { key: "hold", label: "On Hold" },
+  { key: "hired", label: "Hired" },
+  { key: "rejected", label: "Rejected" },
 ];
 
 function getRelativeTime(dateString?: string | null) {
@@ -268,7 +268,7 @@ function InnerCard({
                 <div className="px-3 py-1 text-[10px] uppercase font-bold text-[var(--color-text-muted)] tracking-wider">
                   Move to
                 </div>
-                {STAGES.map(({ key, label, emoji }) => (
+                {STAGES.map(({ key, label }) => (
                   <button
                     key={key}
                     onClick={(e) => {
@@ -281,7 +281,7 @@ function InnerCard({
                       : "text-[var(--color-text)]"
                       }`}
                   >
-                    <span>{emoji}</span> <span className="text-xs">{label}</span>
+                    <span className="text-xs">{label}</span>
                   </button>
                 ))}
               </div>,
@@ -302,7 +302,7 @@ function InnerCard({
   );
 }
 
-// 🟢 Standard Sortable Card
+// Standard Sortable Card
 export default function CandidateCard({
   submission,
   onReview,
