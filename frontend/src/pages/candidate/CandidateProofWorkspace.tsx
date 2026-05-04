@@ -12,7 +12,7 @@ import {
   Loader2, Clock, Upload, Link as LinkIcon,
   Github, Video,
   Terminal, Play, Maximize2, Minimize2,
-  Code2, Layout, Save, X, AlertCircle
+  FileText, Layout, Save, X, AlertCircle
 } from "lucide-react";
 import type { ProofTask } from "@/types/shared";
 import ReactMarkdown from 'react-markdown';
@@ -240,21 +240,21 @@ export default function CandidateProofWorkspace() {
               active={activeTab === 'submission'}
               onClick={() => setActiveTab('submission')}
               icon={Layout}
-              label="Submission Config"
+              label="Details"
             />
             {task.submission_type !== 'file' && (
               <IDETab
                 active={activeTab === 'code'}
                 onClick={() => setActiveTab('code')}
-                icon={Code2}
-                label="Response Editor"
+                icon={FileText}
+                label="Your Response"
               />
             )}
             <IDETab
               active={activeTab === 'preview'}
               onClick={() => setActiveTab('preview')}
               icon={Video}
-              label="Preview / Media"
+              label="Media"
             />
           </div>
 

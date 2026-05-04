@@ -5,6 +5,7 @@ export type SessionUser = {
   email: string;
   role: "candidate" | "employer" | "admin" | "demo_admin" | null;
   full_name?: string | null;
+  username?: string | null;
   avatar_url?: string | null;
   company_name?: string | null;
   company_id?: string | null;

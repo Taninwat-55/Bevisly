@@ -5,7 +5,7 @@ import { supabase } from "@/lib/supabaseClient";
 import { useAuth } from "@/hooks/useAuth";
 import {
     Copy, Loader2, Star, BadgeCheck, Briefcase,
-    Lock, UserX, Code, Zap, Bookmark, ShieldCheck
+    Lock, UserX, Code, Zap, Bookmark, ShieldCheck, AtSign
 } from "lucide-react";
 import toast from "react-hot-toast";
 import type { ProfileLite, ProofCardLite } from "@/types/shared";
@@ -310,6 +310,19 @@ export default function PublicProfilePage() {
                             </div>
                         </div>
                     </div>
+
+                    {/* Set-username nudge — owner is viewing via UUID and has no username yet */}
+                    {isOwner && !profile.username && (
+                        <div className="mt-6 flex items-center gap-3 px-4 py-3 rounded-xl bg-blue-500/10 border border-blue-500/30 text-blue-500 dark:text-blue-300 text-sm">
+                            <AtSign size={16} className="shrink-0" />
+                            <span>
+                                Pick a username to share your profile at <strong>/@yourname</strong> instead of a long ID.{" "}
+                                <Link to="/candidate/settings" className="underline font-semibold hover:opacity-80 transition">
+                                    Set username in Settings.
+                                </Link>
+                            </span>
+                        </div>
+                    )}
 
                     {/* Private profile banner — only visible to the owner */}
                     {isOwner && !profile.is_public && (

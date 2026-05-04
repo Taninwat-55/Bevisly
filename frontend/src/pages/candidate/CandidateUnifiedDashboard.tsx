@@ -20,7 +20,7 @@ export default function CandidateUnifiedDashboard() {
           }`}
         >
           <Briefcase size={16} />
-          My Tasks
+          Overview
         </button>
         <button
           onClick={() => setActiveTab("profile")}

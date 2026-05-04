@@ -7,6 +7,7 @@ import toast from "react-hot-toast";
 async function fetchProfileFromDB(userId: string): Promise<{
   role: SessionUser["role"];
   full_name: string | null;
+  username: string | null;
   avatar_url: string | null;
   company_name: string | null;
   company_id: string | null;
@@ -16,7 +17,7 @@ async function fetchProfileFromDB(userId: string): Promise<{
 }> {
   const { data, error } = await supabase
     .from("profiles")
-    .select("role, full_name, avatar_url, company_name, credits, subscription_tier, is_public")
+    .select("role, full_name, username, avatar_url, company_name, credits, subscription_tier, is_public")
     .eq("id", userId)
     .maybeSingle();
 
@@ -42,10 +43,11 @@ async function fetchProfileFromDB(userId: string): Promise<{
       }
     }
 
-    return { 
-        role: "candidate", 
-        full_name: null, 
-        avatar_url: null, 
+    return {
+        role: "candidate",
+        full_name: null,
+        username: null,
+        avatar_url: null,
         company_name: null,
         company_id: null,
         credits: 0,
@@ -70,6 +72,7 @@ async function fetchProfileFromDB(userId: string): Promise<{
   return {
     role: (data?.role as SessionUser["role"]) ?? "candidate",
     full_name: data?.full_name ?? null,
+    username: data?.username ?? null,
     avatar_url: data?.avatar_url ?? null,
     company_name: data?.company_name ?? null,
     company_id: companyId,
@@ -111,6 +114,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         email: sessionUser.email!,
         role: profile.role,
         full_name: profile.full_name,
+        username: profile.username,
         avatar_url: profile.avatar_url,
         company_name: profile.company_name,
         company_id: profile.company_id,
@@ -154,6 +158,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             email: sessionUser.email!,
             role: profile.role,
             full_name: profile.full_name,
+            username: profile.username,
             avatar_url: profile.avatar_url,
             company_name: profile.company_name,
             company_id: profile.company_id,
@@ -201,6 +206,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               email: sessionUser.email!,
               role: profile.role,
               full_name: profile.full_name,
+              username: profile.username,
               avatar_url: profile.avatar_url,
               company_name: profile.company_name,
               company_id: profile.company_id,

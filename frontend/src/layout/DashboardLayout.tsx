@@ -18,7 +18,9 @@ import {
   Zap,
   Kanban,
   Languages,
+  Menu,
 } from "lucide-react";
+import MobileNavDrawer from "@/components/MobileNavDrawer";
 import { motion } from "framer-motion";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
 import { useTheme } from "@/hooks/useTheme";
@@ -48,6 +50,7 @@ export default function DashboardLayout({
   fullWidth = false,
 }: DashboardLayoutProps) {
   const [isSidebarOpen, setSidebarOpen] = useState(true);
+  const [isMobileDrawerOpen, setMobileDrawerOpen] = useState(false);
   const [isContactOpen, setIsContactOpen] = useState(false);
   const [showSignOutConfirm, setShowSignOutConfirm] = useState(false);
   const [submissions, setSubmissions] = useState<EmployerSubmission[]>([]);
@@ -100,6 +103,7 @@ export default function DashboardLayout({
       ? [
           { label: "Dashboard", path: "/employer", icon: LayoutDashboard },
           { label: "Action Items", path: "/employer/inbox", icon: Inbox, badge: needsReviewCount },
+          { label: "My Jobs", path: "/employer/jobs", icon: Briefcase },
           { label: "Talent Board", path: "/employer/talent-board", icon: Kanban },
           { label: "All Candidates", path: "/employer/candidates", icon: Users },
         ]
@@ -114,7 +118,11 @@ export default function DashboardLayout({
             { label: "My Proofs", path: "/candidate/proofs", icon: FileCheck, featured: true },
             { label: "Practice", path: "/candidate/practice", icon: Zap },
             { label: "Leaderboard", path: "/leaderboard", icon: Trophy },
-            { label: "Public Profile", path: `/candidate/${user?.id}`, icon: UserCircle },
+            {
+              label: "Public Profile",
+              path: user?.username ? `/@${user.username}` : `/candidate/${user?.id}`,
+              icon: UserCircle,
+            },
           ];
 
   const footerIconClass =
@@ -337,9 +345,16 @@ export default function DashboardLayout({
         {/* Mobile: zero left margin since sidebar is hidden */}
         <style>{`@media (max-width: 767px) { [style*="margin-left"] { margin-left: 0 !important; } }`}</style>
 
-        {/* Mobile header (logo only — shown when sidebar is hidden) */}
+        {/* Mobile header (hamburger + logo — shown when sidebar is hidden) */}
         {showSidebar && (
-          <header className="h-14 glass-panel border-b border-[var(--glass-border)] sticky top-0 z-30 px-4 flex items-center md:hidden">
+          <header className="h-14 glass-panel border-b border-[var(--glass-border)] sticky top-0 z-30 px-3 flex items-center gap-2 md:hidden">
+            <button
+              onClick={() => setMobileDrawerOpen(true)}
+              className="p-2 -ml-1 rounded-lg text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[var(--color-surface-hover)] transition-colors"
+              aria-label="Open menu"
+            >
+              <Menu size={22} />
+            </button>
             <Link to="/" className="flex items-center gap-2">
               <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[var(--color-brand-primary)] to-[var(--color-brand-secondary)] flex items-center justify-center text-white font-bold text-sm shadow-glow-primary shrink-0">
                 B
@@ -377,6 +392,17 @@ export default function DashboardLayout({
           <HelpCircle size={17} />
         </button>
       </div>
+
+      {showSidebar && (
+        <MobileNavDrawer
+          open={isMobileDrawerOpen}
+          onClose={() => setMobileDrawerOpen(false)}
+          links={links}
+          user={user}
+          role={role}
+          onSignOut={() => setShowSignOutConfirm(true)}
+        />
+      )}
 
       <ContactModal isOpen={isContactOpen} onClose={() => setIsContactOpen(false)} />
 
