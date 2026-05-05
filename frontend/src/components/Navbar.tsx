@@ -12,6 +12,7 @@ type AnchorLink = { label: string; href: string; to?: never };
 type NavLink = RouteLink | AnchorLink;
 
 const navLinks: NavLink[] = [
+  { label: "Home", to: "/" },
   { label: "Jobs", to: "/jobs" },
   { label: "About", to: "/about" },
   { label: "Pricing", to: "/pricing" },
@@ -37,13 +38,16 @@ export default function Navbar() {
 
   useEffect(() => {
     document.body.style.overflow = mobileOpen ? "hidden" : "";
-    return () => { document.body.style.overflow = ""; };
+    return () => {
+      document.body.style.overflow = "";
+    };
   }, [mobileOpen]);
 
   const goToDashboard = () => {
     if (!user) return navigate("/auth");
     if (user.role === "employer") return navigate("/employer");
-    if (user.role === "admin" || user.role === "demo_admin") return navigate("/admin");
+    if (user.role === "admin" || user.role === "demo_admin")
+      return navigate("/admin");
     return navigate("/candidate");
   };
 
@@ -61,7 +65,6 @@ export default function Navbar() {
         }`}
       >
         <div className="max-w-7xl mx-auto px-6 h-full grid grid-cols-3 items-center">
-
           {/* ─── Left: Hamburger + Logo ─── */}
           <div className="flex items-center gap-3">
             <button
@@ -130,7 +133,7 @@ export default function Navbar() {
                   >
                     {link.label}
                   </Link>
-                )
+                ),
               )}
             </div>
           </nav>
@@ -146,7 +149,11 @@ export default function Navbar() {
             <ThemeToggle />
             {!user ? (
               <>
-                <Button variant="outline" size="sm" onClick={() => navigate("/auth")}>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => navigate("/auth")}
+                >
                   Sign In
                 </Button>
                 <Button
@@ -159,7 +166,11 @@ export default function Navbar() {
               </>
             ) : (
               <>
-                <Button size="sm" onClick={goToDashboard} className="hidden sm:flex">
+                <Button
+                  size="sm"
+                  onClick={goToDashboard}
+                  className="hidden sm:flex"
+                >
                   Dashboard
                 </Button>
                 <UserMenu />
@@ -184,10 +195,13 @@ export default function Navbar() {
 
           {/* Content */}
           <div className="relative z-10 flex flex-col h-full px-8 py-6">
-
             {/* Top: logo + close */}
             <div className="flex items-center justify-between mb-12">
-              <Link to="/" onClick={closeMobile} className="flex items-center gap-2">
+              <Link
+                to="/"
+                onClick={closeMobile}
+                className="flex items-center gap-2"
+              >
                 <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[var(--color-brand-primary)] to-[var(--color-brand-secondary)] flex items-center justify-center text-white font-bold text-lg">
                   B
                 </div>
@@ -213,7 +227,10 @@ export default function Navbar() {
                     href={link.href}
                     onClick={closeMobile}
                     className="text-4xl font-bold font-display text-[var(--color-text)] hover:text-[var(--color-brand-primary)] transition-colors duration-200 py-2 animate-fade-in-up"
-                    style={{ animationDelay: `${i * 0.06}s`, animationFillMode: "both" }}
+                    style={{
+                      animationDelay: `${i * 0.06}s`,
+                      animationFillMode: "both",
+                    }}
                   >
                     {link.label}
                   </a>
@@ -223,11 +240,14 @@ export default function Navbar() {
                     to={link.to}
                     onClick={closeMobile}
                     className="text-4xl font-bold font-display text-[var(--color-text)] hover:text-[var(--color-brand-primary)] transition-colors duration-200 py-2 animate-fade-in-up"
-                    style={{ animationDelay: `${i * 0.06}s`, animationFillMode: "both" }}
+                    style={{
+                      animationDelay: `${i * 0.06}s`,
+                      animationFillMode: "both",
+                    }}
                   >
                     {link.label}
                   </Link>
-                )
+                ),
               )}
             </nav>
 
@@ -238,7 +258,10 @@ export default function Navbar() {
                   <Button
                     size="lg"
                     className="w-full shadow-glow-primary"
-                    onClick={() => { navigate("/auth?tab=signup"); closeMobile(); }}
+                    onClick={() => {
+                      navigate("/auth?tab=signup");
+                      closeMobile();
+                    }}
                   >
                     Sign Up Free
                   </Button>
@@ -246,7 +269,10 @@ export default function Navbar() {
                     variant="outline"
                     size="lg"
                     className="w-full"
-                    onClick={() => { navigate("/auth"); closeMobile(); }}
+                    onClick={() => {
+                      navigate("/auth");
+                      closeMobile();
+                    }}
                   >
                     Sign In
                   </Button>
@@ -255,7 +281,10 @@ export default function Navbar() {
                 <Button
                   size="lg"
                   className="w-full"
-                  onClick={() => { goToDashboard(); closeMobile(); }}
+                  onClick={() => {
+                    goToDashboard();
+                    closeMobile();
+                  }}
                 >
                   My Dashboard
                 </Button>
