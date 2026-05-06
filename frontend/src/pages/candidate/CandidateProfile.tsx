@@ -259,7 +259,7 @@ export default function CandidateProfile() {
                   <img src={user.avatar_url} alt="Profile" className="w-full h-full object-cover rounded-xl bg-white dark:bg-zinc-800" />
                ) : (
                   <div className="w-full h-full rounded-xl bg-gradient-to-br from-slate-200 to-slate-300 dark:from-slate-700 dark:to-slate-800 flex items-center justify-center text-4xl font-bold text-[var(--color-text-muted)]">
-                    {user?.email?.[0].toUpperCase()}
+                    {user?.email?.[0]?.toUpperCase()}
                   </div>
                )}
             </div>

@@ -271,7 +271,7 @@ export default function DashboardLayout({
                   ) : (
                     user?.company_name?.[0]?.toUpperCase() ||
                     user?.full_name?.[0]?.toUpperCase() ||
-                    user?.email?.[0].toUpperCase()
+                    user?.email?.[0]?.toUpperCase()
                   )}
                 </span>
               </div>
