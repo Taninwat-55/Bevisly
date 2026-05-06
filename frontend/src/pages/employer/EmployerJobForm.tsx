@@ -85,8 +85,19 @@ export default function EmployerJobForm({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!values.title?.trim() || !values.company?.trim() || !values.location?.trim()) {
-      toast.error("Please fill in all required fields");
+    const missingFields: string[] = [];
+    if (!values.title?.trim()) missingFields.push("Job Title");
+    if (!values.company?.trim()) missingFields.push("Company Name");
+    if (!values.location?.trim()) missingFields.push("Location");
+    if (!values.description?.trim()) missingFields.push("Job Description");
+    
+    values.proof_tasks?.forEach((task, index) => {
+      if (!task.title?.trim()) missingFields.push(`Task Title (Task ${index + 1})`);
+      if (!task.description?.trim()) missingFields.push(`Task Instructions (Task ${index + 1})`);
+    });
+
+    if (missingFields.length > 0) {
+      toast.error(`Please fill in: ${missingFields.join(", ")}`);
       return;
     }
 
