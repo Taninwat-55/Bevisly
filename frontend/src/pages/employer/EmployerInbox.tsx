@@ -131,7 +131,7 @@ export default function EmployerInbox() {
                       className="w-14 h-14 rounded-2xl bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-700 flex items-center justify-center border border-[var(--color-border)] shrink-0 group-hover:scale-105 transition-transform duration-300 hover:ring-2 hover:ring-[var(--color-brand-primary)]/50 cursor-pointer"
                     >
                       <span className="text-xl font-bold text-[var(--color-text)]">
-                        {submission.profiles?.full_name?.[0].toUpperCase() || (
+                        {submission.profiles?.full_name?.[0]?.toUpperCase() || (
                           <User size={24} />
                         )}
                       </span>

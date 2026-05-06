@@ -122,7 +122,7 @@ export default function Sidebar({ role }: SidebarProps) {
                 <img src={user.avatar_url} alt="User" className="w-full h-full object-cover rounded-full" />
               ) : (
                 user?.full_name?.[0]?.toUpperCase() ||
-                user?.email?.[0].toUpperCase() ||
+                user?.email?.[0]?.toUpperCase() ||
                 "A"
               )}
             </span>

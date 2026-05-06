@@ -274,7 +274,7 @@ export default function AdminUsers() {
                       <td className="py-5 px-8">
                         <div className="flex items-center gap-4">
                           <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-700 flex items-center justify-center text-slate-500 dark:text-slate-400 font-black border border-[var(--color-border)] shadow-sm group-hover:scale-105 transition-transform">
-                            {u.email[0].toUpperCase()}
+                            {u.email?.[0]?.toUpperCase()}
                           </div>
                           <div className="min-w-0">
                             <p className="font-bold text-[var(--color-text)] truncate">{u.email}</p>
