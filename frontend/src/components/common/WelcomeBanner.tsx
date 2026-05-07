@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Briefcase, FileCheck, Trophy, ArrowRight } from "lucide-react";
+import { X, Briefcase, FileCheck, Trophy, ArrowRight, HelpCircle } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 
 interface WelcomeBannerProps {
@@ -16,29 +16,29 @@ const EMPLOYER_STEPS = [
   {
     icon: Briefcase,
     number: "1",
-    title: "Post a Job",
-    description: "Create your first role and describe what you're looking for.",
+    title: "Post a Role + Proof Task",
+    description: "Create a job listing and attach a short, real-work challenge (a Proof Task) that candidates complete to apply. AI can generate both for you.",
     color: "from-blue-500 to-indigo-500",
     iconBg: "bg-blue-500/15 text-blue-500",
-    cta: { label: "Post a Job", href: "/employer?post=true" },
+    cta: null,
   },
   {
     icon: FileCheck,
     number: "2",
-    title: "Add a Proof Task",
-    description: "Design a real-world task that candidates will complete to prove their skills.",
+    title: "Candidates Prove Their Skills",
+    description: "Instead of sending CVs, candidates complete your Proof Task. You review their actual output \u2014 code, designs, writing \u2014 not r\u00e9sum\u00e9s.",
     color: "from-emerald-500 to-teal-500",
     iconBg: "bg-emerald-500/15 text-emerald-500",
-    cta: { label: "Go to Jobs", href: "/employer/jobs" },
+    cta: null,
   },
   {
     icon: Trophy,
     number: "3",
-    title: "Review & Hire",
-    description: "Evaluate submissions, leave feedback, and hire the best talent.",
+    title: "Review, Feedback & Hire",
+    description: "Rate submissions, give feedback (AI helps draft it), and manage your pipeline on a visual Kanban board. Hire based on proven ability.",
     color: "from-blue-500 to-indigo-500",
     iconBg: "bg-indigo-500/15 text-indigo-500",
-    cta: { label: "Open Pipeline Board", href: "/employer/talent-board" },
+    cta: { label: "Learn more about Proof Tasks", href: "/docs#how-it-works" },
   },
 ];
 
@@ -128,7 +128,7 @@ export default function WelcomeBanner({ role, userName, onDismiss }: WelcomeBann
                   </h2>
                   <p className="text-[var(--color-text-muted)] text-lg max-w-2xl">
                     {role === "employer"
-                      ? "Here's how to find your next great hire in three simple steps."
+                      ? "Bevisly replaces CVs with Proof Tasks — short, real-work challenges that show you what candidates can actually do."
                       : "Here's how to land your next job by proving what you can do."}
                   </p>
                 </div>
@@ -186,6 +186,21 @@ export default function WelcomeBanner({ role, userName, onDismiss }: WelcomeBann
                   </motion.div>
                 ))}
               </div>
+
+              {role === "employer" && (
+                <div className="mt-6 mx-auto max-w-2xl p-4 rounded-xl bg-[var(--color-brand-primary)]/5 border border-[var(--color-brand-primary)]/15">
+                  <div className="flex items-start gap-3">
+                    <HelpCircle size={18} className="text-[var(--color-brand-primary)] shrink-0 mt-0.5" />
+                    <div>
+                      <p className="text-sm font-semibold text-[var(--color-text)] mb-1">What is a Proof Task?</p>
+                      <p className="text-xs text-[var(--color-text-muted)] leading-relaxed">
+                        A Proof Task is a short, scoped work sample (1–3 hours) that reflects what the first week on the job looks like. 
+                        Instead of reviewing CVs, you review a candidate's actual output. Think of it as a practical audition — not a quiz.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
 
               <div className="flex justify-center mt-8">
                 <Button

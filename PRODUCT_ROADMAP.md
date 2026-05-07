@@ -71,7 +71,7 @@ Inspired by Bitcoin's proof-of-work model: effort produces something verifiable 
 ### Pre-Launch Checks (non-feature)
 - [ ] Full end-to-end user flow walkthrough as both candidate and employer on the production URL
 - [ ] Pricing research — validate plan prices against comparable tools (Workable, Lever, Greenhouse)
-- [ ] Employer first-login experience — ensure it's immediately clear what to do and what a Proof Task is
+- [ 🟢 ] Employer first-login experience — ensure it's immediately clear what to do and what a Proof Task is
 
 ---
 

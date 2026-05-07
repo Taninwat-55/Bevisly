@@ -154,7 +154,9 @@ export default function EmployerDashboard() {
                   </span>
                 </h1>
                 <p className="text-[var(--color-text-muted)] text-lg max-w-xl">
-                  Here's what's happening internally across all your jobs.
+                  {jobs.length === 0
+                    ? "Let's get your first role live. It only takes a few minutes."
+                    : "Here's what's happening internally across all your jobs."}
                 </p>
               </div>
               <div className="flex flex-col sm:flex-row gap-3 shrink-0">
@@ -255,10 +257,30 @@ export default function EmployerDashboard() {
               <div className="w-16 h-16 mx-auto bg-[var(--color-brand-primary)]/10 text-[var(--color-brand-primary)] rounded-full flex items-center justify-center mb-4">
                 <Briefcase size={32} />
               </div>
-              <h3 className="text-xl font-bold text-[var(--color-text)] mb-2">Welcome to Bevisly!</h3>
-              <p className="text-[var(--color-text-muted)] max-w-md mx-auto mb-6">
-                You don't have any active jobs yet. Create your first role with an AI-generated Proof Task and start hiring based on actual skills.
+              <h3 className="text-xl font-bold text-[var(--color-text)] mb-2">Post your first role</h3>
+              <p className="text-[var(--color-text-muted)] max-w-lg mx-auto mb-6">
+                On Bevisly, every job listing includes a <strong className="text-[var(--color-text)]">Proof Task</strong> — a short, real-work challenge (1–3 hours) 
+                that candidates complete instead of sending a CV. You review their actual output, not résumés.
               </p>
+
+              {/* Quick visual flow */}
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-6 mb-8 text-sm text-[var(--color-text-muted)]">
+                <div className="flex items-center gap-2">
+                  <div className="w-6 h-6 rounded-full bg-[var(--color-brand-primary)] text-white text-xs font-bold flex items-center justify-center">1</div>
+                  <span>Describe the role</span>
+                </div>
+                <ArrowRight size={14} className="hidden sm:block text-[var(--color-border)]" />
+                <div className="flex items-center gap-2">
+                  <div className="w-6 h-6 rounded-full bg-[var(--color-brand-primary)] text-white text-xs font-bold flex items-center justify-center">2</div>
+                  <span>AI builds the listing + task</span>
+                </div>
+                <ArrowRight size={14} className="hidden sm:block text-[var(--color-border)]" />
+                <div className="flex items-center gap-2">
+                  <div className="w-6 h-6 rounded-full bg-[var(--color-brand-primary)] text-white text-xs font-bold flex items-center justify-center">3</div>
+                  <span>Review & publish</span>
+                </div>
+              </div>
+
               <Button
                 onClick={() => {
                   setPostJobData(null);
@@ -266,11 +288,14 @@ export default function EmployerDashboard() {
                   setIsPostingJob(true);
                 }}
                 size="lg"
-                className="bg-gradient-to-br from-[var(--color-brand-primary)] to-blue-400 hover:from-blue-500 hover:to-blue-300 border-0 text-white font-bold"
+                className="bg-[var(--color-brand-primary)] hover:bg-blue-700 border-0 text-white font-bold"
                 leftIcon={<Plus size={18} strokeWidth={3} />}
               >
                 Post Your First Role
               </Button>
+              <p className="text-xs text-[var(--color-text-muted)] mt-3">
+                Takes about 2 minutes with AI generation
+              </p>
             </div>
           ) : (
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -389,6 +414,14 @@ export default function EmployerDashboard() {
                         </div>
                         <ArrowRight size={20} className="text-[var(--color-text-muted)] group-hover:text-[var(--color-brand-primary)] group-hover:translate-x-1 transition-all shrink-0 mt-1" />
                       </button>
+                    </div>
+
+                    {/* Proof Task Explainer */}
+                    <div className="mt-4 p-4 rounded-xl bg-[var(--color-brand-primary)]/5 border border-[var(--color-brand-primary)]/15 text-left">
+                      <p className="text-xs text-[var(--color-text-muted)] leading-relaxed">
+                        <strong className="text-[var(--color-text)]">💡 What's a Proof Task?</strong> A short, real-work challenge (1–3 hours) attached to your listing. 
+                        Candidates complete it to apply — so you review their actual output instead of résumés. AI can generate one based on your role description.
+                      </p>
                     </div>
 
                     <button
