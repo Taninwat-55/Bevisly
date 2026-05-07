@@ -12,7 +12,7 @@ async function fetchProfileFromDB(userId: string): Promise<{
   company_name: string | null;
   company_id: string | null;
   credits: number;
-  subscription_tier?: "free" | "pro_saas";
+  subscription_tier?: "free" | "plus" | "starter" | "growth" | "pro_saas" | string;
   is_public?: boolean;
 }> {
   const { data, error } = await supabase
@@ -77,7 +77,7 @@ async function fetchProfileFromDB(userId: string): Promise<{
     company_name: data?.company_name ?? null,
     company_id: companyId,
     credits: data?.credits ?? 0,
-    subscription_tier: data?.subscription_tier as "free" | "pro_saas" | undefined,
+    subscription_tier: data?.subscription_tier as string | undefined,
     is_public: data?.is_public ?? false,
   };
 }
@@ -267,7 +267,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Apply local override
   const overrideRole = localStorage.getItem("overrideRole");
   const effectiveUser = user
-    ? { ...user, role: (overrideRole as SessionUser["role"]) || user.role }
+    ? { ...user, role: (overrideRole as SessionUser["role"]) || user.role, original_role: user.role }
     : null;
 
   const setOverride = (role: SessionUser["role"]) => {

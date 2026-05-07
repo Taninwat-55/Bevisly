@@ -10,7 +10,8 @@ export type SessionUser = {
   company_name?: string | null;
   company_id?: string | null;
   credits?: number;
-  subscription_tier?: "free" | "pro_saas";
+  subscription_tier?: "free" | "plus" | "starter" | "growth" | "pro_saas" | string;
+  original_role?: string | null;
   is_public?: boolean;
   app_metadata?: {
     provider?: string;

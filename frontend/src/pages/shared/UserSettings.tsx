@@ -14,15 +14,16 @@ import {
   Moon, Sun, LogOut, Trash2, Camera,
   Mail, Upload, Loader2, FileJson,
   Eye, EyeOff, CreditCard, ChevronRight,
-  Sparkles, Lock
+  Sparkles, Lock, Receipt
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 
-type Tab = "profile" | "account" | "notifications" | "security" | "privacy";
+type Tab = "profile" | "account" | "billing" | "notifications" | "security" | "privacy";
 
 const tabConfig: { id: Tab; label: string; icon: React.ElementType }[] = [
   { id: "profile", label: "Profile", icon: UserCircle },
   { id: "account", label: "Account", icon: Building2 },
+  { id: "billing", label: "Billing", icon: Receipt },
   { id: "notifications", label: "Notifications", icon: Bell },
   { id: "security", label: "Security", icon: Shield },
   { id: "privacy", label: "Privacy & Data", icon: FileJson },
@@ -109,7 +110,7 @@ export default function UserSettings() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
-  const validTabs: Tab[] = ["profile", "account", "notifications", "security", "privacy"];
+  const validTabs: Tab[] = ["profile", "account", "billing", "notifications", "security", "privacy"];
   const tabParam = searchParams.get("tab") as Tab | null;
 
   const isEmployer = user?.role === "employer";
@@ -566,21 +567,26 @@ export default function UserSettings() {
                           </Button>
                         }
                       />
-                      {isEmployer && (
-                        <SettingsRow
-                          icon={<Sparkles size={16} />}
-                          iconBg="bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400"
-                          title="Subscription Plan"
-                          description={user?.subscription_tier === "pro_saas" ? "Pro Plan — all features unlocked" : "Free Tier — upgrade to unlock Pro features"}
-                          action={
-                            user?.subscription_tier !== "pro_saas" && (
-                              <Button size="sm" variant="outline" onClick={() => navigate("/pricing")}>
-                                Upgrade
-                              </Button>
-                            )
-                          }
-                        />
-                      )}
+                      <SettingsRow
+                        icon={<Sparkles size={16} />}
+                        iconBg="bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400"
+                        title="Subscription Tier"
+                        description={
+                          isEmployer
+                            ? ((user?.subscription_tier === "growth" || user?.original_role === "admin" || user?.original_role === "demo_admin") ? "Growth Plan — maximum reach"
+                              : user?.subscription_tier === "starter" ? "Starter Plan — essential hiring tools"
+                              : "Free Plan — upgrade to unlock more tools")
+                            : ((user?.subscription_tier === "plus" || user?.original_role === "admin" || user?.original_role === "demo_admin") ? "Plus Plan — premium candidate features"
+                              : "Free Plan — upgrade to stand out")
+                        }
+                        action={
+                          ((isEmployer && user?.subscription_tier !== "growth" && user?.original_role !== "admin" && user?.original_role !== "demo_admin") || (!isEmployer && user?.subscription_tier !== "plus" && user?.original_role !== "admin" && user?.original_role !== "demo_admin")) && (
+                            <Button size="sm" variant="outline" onClick={() => navigate("/pricing")}>
+                              Upgrade
+                            </Button>
+                          )
+                        }
+                      />
                       {!isEmployer && (
                         <SettingsRow
                           icon={<CreditCard size={16} />}
@@ -638,6 +644,130 @@ export default function UserSettings() {
                       </Button>
                     </div>
                   </SettingsCard>
+                </motion.div>
+              )}
+
+              {/* ── BILLING TAB ── */}
+              {activeTab === "billing" && (
+                <motion.div
+                  key="billing"
+                  initial={{ opacity: 0, y: 6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -6 }}
+                  transition={{ duration: 0.18 }}
+                  className="space-y-4"
+                >
+                  {isEmployer ? (
+                    <>
+                      <SettingsCard>
+                        <SectionHeader title="Subscription Details" description="Manage your current plan and limits." />
+                        <div className="p-5 space-y-5">
+                          <div className="flex items-center justify-between p-4 bg-amber-50 dark:bg-amber-900/10 border border-amber-200 dark:border-amber-900/30 rounded-xl">
+                            <div>
+                              <p className="text-sm font-bold text-amber-800 dark:text-amber-400 capitalize">
+                                {(user?.original_role === "admin" || user?.original_role === "demo_admin") ? "Growth Plan" : (user?.subscription_tier && user.subscription_tier !== "free" ? `${user.subscription_tier} Plan` : "Free Plan")}
+                              </p>
+                              <p className="text-xs text-amber-700/80 dark:text-amber-500/80 mt-1">
+                                {(user?.subscription_tier === "growth" || user?.original_role === "admin" || user?.original_role === "demo_admin")
+                                  ? "You have maximum access to premium features." 
+                                  : "Upgrade to unlock more job posts and higher visibility."}
+                              </p>
+                            </div>
+                            <div className="shrink-0">
+                              <Sparkles className="text-amber-500 opacity-20" size={40} />
+                            </div>
+                          </div>
+                          
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="p-4 border border-[var(--color-border)] rounded-xl bg-[var(--color-bg)]">
+                              <p className="text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider mb-1">Active Jobs</p>
+                              <p className="text-xl font-bold text-[var(--color-text)]">0 <span className="text-sm font-medium text-[var(--color-text-muted)]">/ {user?.subscription_tier === "pro_saas" ? "Unlimited" : "1"}</span></p>
+                            </div>
+                            <div className="p-4 border border-[var(--color-border)] rounded-xl bg-[var(--color-bg)]">
+                              <p className="text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider mb-1">Monthly Posts</p>
+                              <p className="text-xl font-bold text-[var(--color-text)]">0 <span className="text-sm font-medium text-[var(--color-text-muted)]">/ {user?.subscription_tier === "pro_saas" ? "Unlimited" : "1"}</span></p>
+                            </div>
+                          </div>
+                          
+                          <div className="pt-2 flex justify-end">
+                            <Button
+                              onClick={() => toast.success("Stripe integration coming soon!")}
+                            >
+                              Manage Subscription
+                            </Button>
+                          </div>
+                        </div>
+                      </SettingsCard>
+                      
+                      <SettingsCard>
+                        <SectionHeader title="Billing History" description="View past invoices and receipts." />
+                        <div className="p-10 text-center text-sm text-[var(--color-text-muted)]">
+                          No billing history available yet.
+                        </div>
+                      </SettingsCard>
+                    </>
+                  ) : (
+                    <>
+                      <SettingsCard>
+                        <SectionHeader title="Subscription Details" description="Manage your current plan and features." />
+                        <div className="p-5 space-y-5">
+                          <div className="flex items-center justify-between p-4 bg-purple-50 dark:bg-purple-900/10 border border-purple-200 dark:border-purple-900/30 rounded-xl">
+                            <div>
+                              <p className="text-sm font-bold text-purple-800 dark:text-purple-400 capitalize">
+                                {(user?.subscription_tier === "plus" || user?.original_role === "admin" || user?.original_role === "demo_admin") ? "Plus Plan" : "Free Plan"}
+                              </p>
+                              <p className="text-xs text-purple-700/80 dark:text-purple-500/80 mt-1">
+                                {(user?.subscription_tier === "plus" || user?.original_role === "admin" || user?.original_role === "demo_admin")
+                                  ? "You have unlocked premium profile features."
+                                  : "Upgrade to plus to stand out to employers."}
+                              </p>
+                            </div>
+                            <div className="shrink-0">
+                              <Sparkles className="text-purple-500 opacity-20" size={40} />
+                            </div>
+                          </div>
+                          <div className="pt-2 flex justify-end">
+                            <Button
+                              onClick={() => toast.success("Stripe integration coming soon!")}
+                            >
+                              Manage Subscription
+                            </Button>
+                          </div>
+                        </div>
+                      </SettingsCard>
+                      <SettingsCard>
+                        <SectionHeader title="Credits & Billing" description="Manage your Bevisly Credits balance." />
+                        <div className="p-5 space-y-5">
+                          <div className="flex items-center justify-between p-4 bg-emerald-50 dark:bg-emerald-900/10 border border-emerald-200 dark:border-emerald-900/30 rounded-xl">
+                            <div>
+                              <p className="text-sm font-bold text-emerald-800 dark:text-emerald-400">Current Balance</p>
+                              <p className="text-3xl font-black text-emerald-600 dark:text-emerald-500 mt-1">
+                                {user?.credits || 0} <span className="text-base font-bold opacity-70">CR</span>
+                              </p>
+                            </div>
+                            <div className="shrink-0">
+                              <CreditCard className="text-emerald-500 opacity-20" size={40} />
+                            </div>
+                          </div>
+                          
+                          <div className="pt-2 flex justify-end">
+                            <Button
+                              onClick={() => toast.success("Stripe integration coming soon!")}
+                            >
+                              Purchase Credits
+                            </Button>
+                          </div>
+                        </div>
+                      </SettingsCard>
+                      
+                      <SettingsCard>
+                        <SectionHeader title="Transaction History" description="View past credit purchases and usage." />
+                        <div className="p-10 text-center text-sm text-[var(--color-text-muted)]">
+                          No transaction history available yet.
+                        </div>
+                      </SettingsCard>
+                    </>
+                  )}
                 </motion.div>
               )}
 

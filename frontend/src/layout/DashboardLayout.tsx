@@ -19,6 +19,8 @@ import {
   Kanban,
   Languages,
   Menu,
+  Sparkles,
+  Shield,
 } from "lucide-react";
 import MobileNavDrawer from "@/components/MobileNavDrawer";
 import { motion } from "framer-motion";
@@ -264,16 +266,41 @@ export default function DashboardLayout({
               className={`flex items-center gap-3 group overflow-hidden ${isSidebarOpen ? "flex-1" : ""}`}
               title="Account Settings"
             >
-              <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-slate-200 to-slate-100 dark:from-slate-700 dark:to-slate-800 flex items-center justify-center border border-[var(--color-border)] shrink-0 group-hover:border-[var(--color-brand-primary)] transition-all shadow-sm group-hover:shadow-glow-primary/20">
-                <span className="font-semibold text-[var(--color-text)]">
-                  {user?.avatar_url ? (
-                    <img src={user.avatar_url} alt="User" className="w-full h-full object-cover rounded-full" />
-                  ) : (
-                    user?.company_name?.[0]?.toUpperCase() ||
-                    user?.full_name?.[0]?.toUpperCase() ||
-                    user?.email?.[0]?.toUpperCase()
-                  )}
-                </span>
+              <div className="relative shrink-0">
+                <div className={`w-10 h-10 rounded-full flex items-center justify-center border-2 transition-all shadow-sm
+                  ${(user?.original_role === "admin" || user?.original_role === "demo_admin" || user?.role === "admin" || user?.role === "demo_admin")
+                    ? "border-purple-400 dark:border-purple-500 shadow-purple-500/20 group-hover:shadow-purple-500/40"
+                    : (user?.subscription_tier === "growth" || user?.subscription_tier === "plus" || user?.subscription_tier === "pro_saas")
+                    ? "border-amber-400 dark:border-amber-500 shadow-amber-500/20 group-hover:shadow-amber-500/40"
+                    : user?.subscription_tier === "starter"
+                    ? "border-blue-400 dark:border-blue-500 shadow-blue-500/20 group-hover:shadow-blue-500/40"
+                    : "border-[var(--color-border)] group-hover:border-[var(--color-brand-primary)] group-hover:shadow-glow-primary/20 bg-gradient-to-tr from-slate-200 to-slate-100 dark:from-slate-700 dark:to-slate-800"
+                  }
+                `}>
+                  <span className="font-semibold text-[var(--color-text)] flex items-center justify-center w-full h-full rounded-full overflow-hidden">
+                    {user?.avatar_url ? (
+                      <img src={user.avatar_url} alt="User" className="w-full h-full object-cover" />
+                    ) : (
+                      user?.company_name?.[0]?.toUpperCase() ||
+                      user?.full_name?.[0]?.toUpperCase() ||
+                      user?.email?.[0]?.toUpperCase()
+                    )}
+                  </span>
+                </div>
+                {/* Badge Overlays */}
+                {(user?.original_role === "admin" || user?.original_role === "demo_admin" || user?.role === "admin" || user?.role === "demo_admin") ? (
+                  <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 bg-purple-500 rounded-full border-2 border-[var(--color-surface)] flex items-center justify-center text-white" title="Admin">
+                    <Shield size={8} strokeWidth={3} className="text-purple-50" />
+                  </div>
+                ) : (user?.subscription_tier === "growth" || user?.subscription_tier === "plus" || user?.subscription_tier === "pro_saas") ? (
+                  <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 bg-amber-500 rounded-full border-2 border-[var(--color-surface)] flex items-center justify-center text-white" title="Premium Tier">
+                    <Sparkles size={8} strokeWidth={3} className="text-amber-50" />
+                  </div>
+                ) : user?.subscription_tier === "starter" ? (
+                  <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 bg-blue-500 rounded-full border-2 border-[var(--color-surface)] flex items-center justify-center text-white" title="Starter Tier">
+                    <Briefcase size={8} strokeWidth={3} className="text-blue-50" />
+                  </div>
+                ) : null}
               </div>
               {isSidebarOpen && (
                 <div className="overflow-hidden text-left">
