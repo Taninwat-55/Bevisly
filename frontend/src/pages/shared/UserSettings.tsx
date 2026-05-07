@@ -124,6 +124,7 @@ export default function UserSettings() {
 
   // Profile state
   const [name, setName] = useState(user?.full_name || "");
+  const [username, setUsername] = useState(user?.username || "");
   const [company, setCompany] = useState(user?.company_name || "");
   const [avatarUrl, setAvatarUrl] = useState<string | null>(user?.avatar_url || null);
   const [uploading, setUploading] = useState(false);
@@ -150,6 +151,7 @@ export default function UserSettings() {
   useEffect(() => {
     if (user) {
       setName(user.full_name || "");
+      setUsername(user.username || "");
       setCompany(user.company_name || "");
       setAvatarUrl(user.avatar_url || null);
     }
@@ -207,7 +209,11 @@ export default function UserSettings() {
     setIsLoading(true);
     try {
       const updates: Record<string, string | null> = { full_name: name };
-      if (isEmployer) updates.company_name = company;
+      if (isEmployer) {
+        updates.company_name = company;
+      } else {
+        updates.username = username || null;
+      }
       await updateProfileData(user!.id, updates);
 
       if (isEmployer && company) {
@@ -443,6 +449,23 @@ export default function UserSettings() {
                           className={inputCls}
                         />
                       </FormField>
+
+                      {!isEmployer && (
+                        <FormField label="Username" hint="Share your profile at bevisly.com/@yourname">
+                          <div className="flex items-stretch">
+                            <span className="flex items-center px-3.5 bg-[var(--color-surface-hover)] border border-r-0 border-[var(--color-border)] rounded-l-xl text-sm text-[var(--color-text-muted)] font-medium">
+                              @
+                            </span>
+                            <input
+                              type="text"
+                              value={username}
+                              onChange={(e) => setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_-]/g, ""))}
+                              placeholder="username"
+                              className={`${inputCls} rounded-l-none`}
+                            />
+                          </div>
+                        </FormField>
+                      )}
 
                       {isEmployer && (
                         <FormField label="Company Name">

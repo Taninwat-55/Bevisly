@@ -252,8 +252,12 @@ export default function PublicProfilePage() {
 
                         <div className="relative z-10 flex flex-col items-center">
                             {/* Avatar */}
-                            <div className="w-20 h-20 md:w-24 md:h-24 rounded-full bg-gradient-to-br from-[var(--color-candidate)] to-purple-600 flex items-center justify-center text-white text-3xl md:text-4xl font-bold mb-4 shadow-lg">
-                                {profile.full_name?.charAt(0) || "U"}
+                            <div className="w-20 h-20 md:w-24 md:h-24 rounded-full bg-gradient-to-br from-[var(--color-candidate)] to-purple-600 flex items-center justify-center text-white text-3xl md:text-4xl font-bold mb-4 shadow-lg overflow-hidden shrink-0">
+                                {profile.avatar_url ? (
+                                    <img src={profile.avatar_url} alt={`${profile.full_name}'s avatar`} className="w-full h-full object-cover bg-white" />
+                                ) : (
+                                    profile.full_name?.charAt(0) || "U"
+                                )}
                             </div>
 
                             {/* Name with Badge */}
