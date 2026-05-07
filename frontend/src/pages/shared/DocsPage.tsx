@@ -25,7 +25,7 @@ import { Button } from "@/components/ui/Button";
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
-type SectionId = "how-it-works" | "for-candidates" | "for-employers" | "key-features" | "faq";
+type SectionId = "how-it-works" | "for-candidates" | "for-employers" | "key-features" | "faq" | "how-ai-works";
 
 interface NavPill {
   id: SectionId;
@@ -45,6 +45,7 @@ const NAV_PILLS: NavPill[] = [
   { id: "for-employers", label: "For Employers" },
   { id: "key-features", label: "Key Features" },
   { id: "faq", label: "FAQ" },
+  { id: "how-ai-works", label: "AI & Ethics" },
 ];
 
 const HOW_IT_WORKS_STEPS = [
@@ -356,6 +357,7 @@ export default function DocsPage() {
     "for-employers": useRef<HTMLElement>(null),
     "key-features": useRef<HTMLElement>(null),
     faq: useRef<HTMLElement>(null),
+    "how-ai-works": useRef<HTMLElement>(null),
   };
 
   function scrollTo(id: SectionId) {
@@ -587,6 +589,91 @@ export default function DocsPage() {
             {EMPLOYER_FAQS.map((item) => (
               <FaqAccordionItem key={item.q} item={item} />
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── How Bevisly Uses AI ── */}
+      <section
+        id="how-ai-works"
+        ref={sectionRefs["how-ai-works"] as React.RefObject<HTMLElement>}
+        className="max-w-3xl mx-auto px-6 pt-20 pb-16 border-b border-[var(--color-border)]"
+      >
+        <div className="text-center mb-10">
+          <SectionLabel>AI &amp; Ethics</SectionLabel>
+          <SectionHeading>How Bevisly uses AI.</SectionHeading>
+          <p className="text-[var(--color-text-muted)] max-w-xl mx-auto text-base leading-relaxed">
+            Transparency about what AI does and doesn't do on this platform.
+          </p>
+        </div>
+
+        <div className="glass-panel rounded-2xl p-8 border border-[var(--color-border)] space-y-6">
+          <div className="flex items-start gap-4">
+            <div className="w-10 h-10 rounded-xl bg-purple-500/10 flex items-center justify-center shrink-0 mt-0.5">
+              <Sparkles size={20} className="text-purple-500" />
+            </div>
+            <div>
+              <h3 className="text-base font-semibold text-[var(--color-text)] mb-2">
+                AI assists. Humans decide.
+              </h3>
+              <p className="text-sm text-[var(--color-text-muted)] leading-relaxed mb-4">
+                Bevisly uses AI in three places: generating job listing drafts from a brief, generating proof task descriptions, and summarising evidence from candidate submissions to help employers write feedback faster. In every case, AI output is a <strong className="text-[var(--color-text)]">starting suggestion</strong> — the employer reviews, edits, and submits the final version. No candidate is ever accepted, rejected, ranked, or filtered by AI. Every hiring decision is made by a human.
+              </p>
+            </div>
+          </div>
+
+          <div className="border-t border-[var(--color-border)] pt-6 space-y-4">
+            <h4 className="text-sm font-semibold text-[var(--color-text)]">
+              What AI does
+            </h4>
+            <ul className="space-y-2 text-sm text-[var(--color-text-muted)] leading-relaxed">
+              <li className="flex items-start gap-2">
+                <span className="text-emerald-500 mt-0.5">✓</span>
+                <span>Generates draft job descriptions and proof tasks from an employer's one-line brief</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-emerald-500 mt-0.5">✓</span>
+                <span>Summarises key evidence from a candidate's submission text (strengths, areas for improvement)</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-emerald-500 mt-0.5">✓</span>
+                <span>Suggests a star rating as a starting point — employers can override it before submitting</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-emerald-500 mt-0.5">✓</span>
+                <span>Grades practice-mode tasks for candidates to learn from (no employer involvement)</span>
+              </li>
+            </ul>
+          </div>
+
+          <div className="space-y-4">
+            <h4 className="text-sm font-semibold text-[var(--color-text)]">
+              What AI does <em>not</em> do
+            </h4>
+            <ul className="space-y-2 text-sm text-[var(--color-text-muted)] leading-relaxed">
+              <li className="flex items-start gap-2">
+                <span className="text-red-500 mt-0.5">✗</span>
+                <span>Screen, filter, or rank real candidates</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-red-500 mt-0.5">✗</span>
+                <span>Make hiring, rejection, or shortlisting decisions</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-red-500 mt-0.5">✗</span>
+                <span>Access candidate identity, demographics, or personal information</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-red-500 mt-0.5">✗</span>
+                <span>Produce output that employers cannot edit or override</span>
+              </li>
+            </ul>
+          </div>
+
+          <div className="bg-[var(--color-brand-primary)]/5 border border-[var(--color-brand-primary)]/15 rounded-xl p-4 mt-4">
+            <p className="text-xs text-[var(--color-text-muted)] leading-relaxed">
+              <strong className="text-[var(--color-text)]">ℹ️ Employer notice:</strong> When you use the "AI Evidence Summary" feature in the review panel, the output is a draft based solely on the submission text. You are responsible for reviewing, editing, and finalising all feedback before it is sent to the candidate.
+            </p>
           </div>
         </div>
       </section>

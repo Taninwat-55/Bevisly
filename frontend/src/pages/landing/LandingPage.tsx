@@ -410,7 +410,7 @@ export default function LandingPage() {
                   </div>
                   <h3 className="text-2xl font-bold font-display text-[var(--color-text)] mb-2">Review Real Work, Not Resumes</h3>
                   <p className="text-[var(--color-text-muted)]">
-                    Candidates submit actual deliverables — code, designs, writing, analysis. You review what they built, guided by AI-assisted scoring. Humans decide. AI helps.
+                    Candidates submit actual deliverables — code, designs, writing, analysis. You review what they built, guided by AI evidence summaries. Humans decide. AI helps.
                   </p>
                 </div>
                 <div className="absolute inset-x-0 bottom-0 h-48 bg-gradient-to-t from-[var(--color-brand-secondary)]/10 to-transparent" />

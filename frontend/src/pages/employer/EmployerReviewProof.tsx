@@ -130,22 +130,30 @@ function Scorecard({
         </h3>
         {!isLocked &&
           (canAIEvaluate ? (
-            <button
-              type="button"
-              onClick={onSuggestAI}
-              disabled={isSuggesting}
-              className="flex items-center gap-1.5 text-xs font-medium text-purple-600 hover:text-purple-700 bg-purple-50 hover:bg-purple-100 dark:bg-purple-900/20 px-3 py-1.5 rounded-lg transition-colors"
-            >
-              {isSuggesting ? (
-                <Loader2 size={12} className="animate-spin" />
-              ) : (
-                <Sparkles size={12} />
-              )}
-              AI Evaluate
-            </button>
+            <div className="flex flex-col items-end gap-1">
+              <button
+                type="button"
+                onClick={onSuggestAI}
+                disabled={isSuggesting}
+                className="flex items-center gap-1.5 text-xs font-medium text-purple-600 hover:text-purple-700 bg-purple-50 hover:bg-purple-100 dark:bg-purple-900/20 px-3 py-1.5 rounded-lg transition-colors"
+              >
+                {isSuggesting ? (
+                  <Loader2 size={12} className="animate-spin" />
+                ) : (
+                  <Sparkles size={12} />
+                )}
+                AI Evidence Summary
+              </button>
+              <Link
+                to="/docs#how-ai-works"
+                className="text-[10px] text-[var(--color-text-muted)] hover:text-[var(--color-brand-primary)] transition-colors"
+              >
+                How Bevisly uses AI →
+              </Link>
+            </div>
           ) : (
             <span className="text-xs text-[var(--color-text-muted)] italic">
-              AI evaluation unavailable for links &amp; files
+              AI summary unavailable for links &amp; files
             </span>
           ))}
       </div>
@@ -206,6 +214,12 @@ function Scorecard({
           rows={3}
         />
       </div>
+      {/* AI Disclaimer */}
+      {(strengths || improvements) && !isLocked && (
+        <p className="text-[10px] text-[var(--color-text-muted)] italic leading-snug">
+          Suggested by AI based on submission content. Final decision is yours.
+        </p>
+      )}
     </div>
   );
 }
@@ -317,12 +331,12 @@ export default function EmployerReviewProof({
   const handleSuggestFeedback = async () => {
     if (!submission?.text_response) {
       toast(
-        "AI evaluation is only available for text submissions. Please evaluate this submission manually.",
+        "AI summary is only available for text submissions. Please review this submission manually.",
       );
       return;
     }
     setSuggestingAI(true);
-    const toastId = toast.loading("AI is analyzing submission...");
+    const toastId = toast.loading("AI is summarising evidence...");
     try {
       const criteria = submission?.proof_tasks?.title || "General";
       const content =
@@ -344,7 +358,7 @@ export default function EmployerReviewProof({
         setStars(result.suggested_rating || stars || 3);
         if (result.strengths) setStrengths(result.strengths);
         if (result.improvements) setImprovements(result.improvements);
-        toast.success("AI Evaluation complete! Feel free to edit.", {
+        toast.success("AI evidence summary ready. Review and edit before submitting.", {
           id: toastId,
         });
       }
