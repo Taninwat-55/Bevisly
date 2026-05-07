@@ -29,7 +29,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
 
         // Variants
         const variants = {
-            primary: "bg-[var(--color-brand-primary)] text-white hover:bg-blue-700 shadow-glow-primary border border-transparent hover:-translate-y-0.5",
+            primary: "bg-[var(--color-brand-primary)] text-white hover:bg-blue-700 shadow-[var(--shadow-glow-cta)] border border-transparent hover:-translate-y-0.5",
             secondary: "bg-[var(--color-slate-800)] text-white hover:bg-[var(--color-slate-700)] shadow-md border border-transparent hover:-translate-y-0.5",
             outline: "bg-transparent border border-[var(--color-border)] text-[var(--color-text)] hover:bg-black/5 dark:hover:bg-[var(--color-slate-800)]",
             ghost: "bg-transparent text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-black/5 dark:hover:bg-[var(--color-slate-800)]",

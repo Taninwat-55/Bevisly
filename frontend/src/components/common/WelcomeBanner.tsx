@@ -36,8 +36,8 @@ const EMPLOYER_STEPS = [
     number: "3",
     title: "Review & Hire",
     description: "Evaluate submissions, leave feedback, and hire the best talent.",
-    color: "from-amber-500 to-orange-500",
-    iconBg: "bg-amber-500/15 text-amber-500",
+    color: "from-blue-500 to-indigo-500",
+    iconBg: "bg-indigo-500/15 text-indigo-500",
     cta: { label: "Open Pipeline Board", href: "/employer/talent-board" },
   },
 ];
@@ -66,8 +66,8 @@ const CANDIDATE_STEPS = [
     number: "3",
     title: "Get Hired",
     description: "Companies review your work and hire based on proven ability.",
-    color: "from-amber-500 to-orange-500",
-    iconBg: "bg-amber-500/15 text-amber-500",
+    color: "from-blue-500 to-indigo-500",
+    iconBg: "bg-indigo-500/15 text-indigo-500",
     cta: null,
   },
 ];
@@ -112,7 +112,7 @@ export default function WelcomeBanner({ role, userName, onDismiss }: WelcomeBann
             <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-gradient-to-br from-[var(--color-brand-primary)]/8 to-[var(--color-brand-secondary)]/8 rounded-full blur-[80px] -z-10 translate-x-1/3 -translate-y-1/3" />
             <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-gradient-to-tr from-emerald-500/5 to-blue-500/5 rounded-full blur-[60px] -z-10 -translate-x-1/4 translate-y-1/4" />
 
-            <div className="h-1 bg-gradient-to-r from-[var(--color-brand-primary)] via-emerald-500 to-amber-500" />
+            <div className="h-1 bg-gradient-to-r from-[var(--color-brand-primary)] via-[var(--color-brand-secondary)] to-[var(--color-accent)]" />
 
             <div className="p-8 lg:p-10">
               <div className="flex items-start justify-between gap-4 mb-8">
@@ -122,7 +122,7 @@ export default function WelcomeBanner({ role, userName, onDismiss }: WelcomeBann
                   </div>
                   <h2 className="text-2xl lg:text-3xl font-bold font-display text-[var(--color-text)] mb-2">
                     Welcome to Bevisly,{" "}
-                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-[var(--color-brand-primary)] to-[var(--color-brand-secondary)] capitalize">
+                    <span className="text-[var(--color-brand-primary)] capitalize">
                       {displayName}
                     </span>!
                   </h2>

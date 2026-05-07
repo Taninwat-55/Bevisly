@@ -64,9 +64,9 @@ const HOW_IT_WORKS_STEPS = [
     title: "Candidate applies by doing",
     description:
       "Instead of uploading a CV, the candidate completes the Proof Task to apply. The submission — their actual output — is what the employer reviews. No cover letters. No filtering by school name.",
-    accent: "from-orange-500/20 to-orange-600/10",
-    iconColor: "text-orange-500",
-    iconBg: "bg-orange-500/10",
+    accent: "from-indigo-500/20 to-indigo-600/10",
+    iconColor: "text-indigo-500",
+    iconBg: "bg-indigo-500/10",
   },
   {
     number: "03",
@@ -126,8 +126,8 @@ const CANDIDATE_CARDS = [
     title: "Leaderboard",
     description:
       "Top candidates are ranked publicly by Bevisly Score. It gives early-career candidates a transparent, merit-based signal that stands in place of years of experience.",
-    iconBg: "bg-orange-500/10",
-    iconColor: "text-orange-500",
+    iconBg: "bg-amber-500/10",
+    iconColor: "text-amber-500",
   },
 ];
 
@@ -383,7 +383,7 @@ export default function DocsPage() {
       </Helmet>
 
       {/* ── Hero Banner ── */}
-      <div className="relative py-20 px-8 overflow-hidden mt-2 rounded-b-[3rem] mx-4 text-center bg-[#0B0C10]">
+      <div className="relative py-20 px-8 overflow-hidden mt-2 rounded-b-[3rem] mx-4 text-center bg-[var(--color-obsidian)]">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[900px] h-[480px] bg-[var(--color-brand-primary)]/20 rounded-full blur-[120px] -z-0 pointer-events-none" />
         <div className="absolute bottom-0 right-0 w-[500px] h-[350px] bg-[var(--color-brand-secondary)]/10 rounded-full blur-[100px] -z-0 pointer-events-none" />
         <div className="absolute inset-0 bg-noise opacity-[0.03] mix-blend-overlay pointer-events-none" />
@@ -400,7 +400,7 @@ export default function DocsPage() {
           </div>
           <h1 className="text-5xl md:text-6xl font-bold font-display leading-tight mb-4 text-white">
             How{" "}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-[var(--color-brand-primary)] to-[var(--color-brand-secondary)]">
+            <span className="text-[var(--color-brand-primary)]">
               Bevisly
             </span>{" "}
             works

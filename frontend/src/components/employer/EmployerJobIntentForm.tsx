@@ -64,7 +64,7 @@ export default function EmployerJobIntentForm({
        </div>
 
        <div className="text-center mb-6">
-          <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-gradient-to-br from-[var(--color-brand-primary)] to-blue-400 shadow-lg shadow-blue-500/30 mb-4 group">
+          <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-[var(--color-brand-primary)] shadow-lg shadow-blue-500/30 mb-4 group">
             <Sparkles className="w-6 h-6 text-white group-hover:scale-110 transition-transform duration-500" />
           </div>
           <h2 className="text-2xl font-bold text-white mb-1 font-display">Let AI build your job post</h2>
@@ -87,7 +87,7 @@ export default function EmployerJobIntentForm({
           <Button
             type="submit"
             disabled={isGenerating}
-            className="w-full h-12 text-base font-semibold bg-gradient-to-r from-[var(--color-brand-primary)] to-blue-400 hover:from-blue-500 hover:to-blue-300 shadow-xl shadow-blue-500/25 border-0"
+            className="w-full h-12 text-base font-semibold bg-[var(--color-brand-primary)] hover:bg-blue-700 shadow-[var(--shadow-glow-cta)] border-0"
           >
             {isGenerating ? (
               <>

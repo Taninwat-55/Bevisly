@@ -13,7 +13,7 @@ export default function LandingFooter() {
           {/* Brand column */}
           <div className="md:col-span-1">
             <div className="flex items-center gap-2 mb-3">
-              <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-[var(--color-brand-primary)] to-[var(--color-brand-secondary)] flex items-center justify-center text-white font-bold text-sm">
+              <div className="w-7 h-7 rounded-lg bg-[var(--color-brand-primary)] flex items-center justify-center text-white font-bold text-sm">
                 B
               </div>
               <span className="text-base font-bold font-display tracking-tight text-[var(--color-text)]">

@@ -149,7 +149,7 @@ export default function EmployerDashboard() {
               <div>
                 <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold font-display text-[var(--color-text)] mb-2">
                   Welcome back,{" "}
-                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-[var(--color-brand-primary)] to-[var(--color-brand-secondary)] capitalize">
+                  <span className="text-[var(--color-brand-primary)] capitalize">
                     {user?.full_name || user?.company_name || "Employer"}
                   </span>
                 </h1>
@@ -177,7 +177,7 @@ export default function EmployerDashboard() {
                       setIsPostingJob(true);
                     }}
                     size="lg"
-                    className="bg-gradient-to-br from-[var(--color-brand-primary)] to-blue-400 hover:from-blue-500 hover:to-blue-300 border-0 text-white font-bold"
+                    className="bg-[var(--color-brand-primary)] hover:bg-blue-700 border-0 text-white font-bold"
                     leftIcon={<Plus size={18} strokeWidth={3} />}
                   >
                     Post a Job
@@ -352,7 +352,7 @@ export default function EmployerDashboard() {
                         onClick={() => setPostJobCreationMode("ai")}
                         className="group relative flex items-start gap-5 p-6 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] hover:border-[var(--color-brand-primary)] hover:shadow-xl hover:shadow-[var(--color-brand-primary)]/5 transition-all text-left"
                       >
-                        <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-[var(--color-brand-primary)] to-blue-400 flex items-center justify-center text-white shrink-0 shadow-lg group-hover:scale-110 transition-transform">
+                        <div className="w-14 h-14 rounded-xl bg-[var(--color-brand-primary)] flex items-center justify-center text-white shrink-0 shadow-lg group-hover:scale-110 transition-transform">
                           <Sparkles size={28} />
                         </div>
                         <div className="flex-1 min-w-0">

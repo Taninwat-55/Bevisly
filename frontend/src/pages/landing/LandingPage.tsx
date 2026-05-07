@@ -132,7 +132,7 @@ export default function LandingPage() {
 
               <h1 className="text-5xl md:text-7xl font-bold font-display tracking-tight text-[var(--color-text)] mb-6 leading-[1.1] animate-fade-in-up" style={{ animationDelay: "0.1s" }}>
                 The{" "}
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-[var(--color-brand-primary)] to-[var(--color-brand-secondary)]">
+                <span className="text-[var(--color-brand-primary)]">
                   proof-first
                 </span>{" "}
                 platform <br />
@@ -161,7 +161,7 @@ export default function LandingPage() {
                   <button 
                      type="submit"
                      disabled={isGenerating || !rawInput.trim()}
-                     className="absolute right-2 top-2 bottom-2 bg-gradient-to-r from-[var(--color-brand-primary)] to-[var(--color-brand-secondary)] text-white font-bold px-4 md:px-8 rounded-xl hover:opacity-90 disabled:opacity-50 transition-opacity flex items-center gap-2"
+                     className="absolute right-2 top-2 bottom-2 bg-[var(--color-brand-primary)] text-white font-bold px-4 md:px-8 rounded-xl hover:bg-blue-700 disabled:opacity-50 transition-colors flex items-center gap-2 shadow-glow-primary"
                   >
                      {isGenerating ? (
                         <>
@@ -403,9 +403,9 @@ export default function LandingPage() {
               </div>
 
               {/* Feature 2: Tall Box */}
-              <div className="glass-panel p-8 rounded-2xl md:row-span-2 relative overflow-hidden group hover:shadow-glow-orange transition-all duration-300">
+              <div className="glass-panel p-8 rounded-2xl md:row-span-2 relative overflow-hidden group hover:shadow-glow-secondary transition-all duration-300">
                 <div className="relative z-10">
-                  <div className="w-12 h-12 rounded-xl bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center text-orange-600 mb-6">
+                  <div className="w-12 h-12 rounded-xl bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center text-[var(--color-brand-secondary)] mb-6">
                     <Play />
                   </div>
                   <h3 className="text-2xl font-bold font-display text-[var(--color-text)] mb-2">Review Real Work, Not Resumes</h3>

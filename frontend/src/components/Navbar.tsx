@@ -80,7 +80,7 @@ export default function Navbar() {
                 onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
                 className="flex items-center gap-2 hover:opacity-80 transition-opacity"
               >
-                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[var(--color-brand-primary)] to-[var(--color-brand-secondary)] flex items-center justify-center text-white font-bold text-lg">
+                <div className="w-8 h-8 rounded-lg bg-[var(--color-brand-primary)] flex items-center justify-center text-white font-bold text-lg">
                   B
                 </div>
                 <span className="text-xl font-bold font-display tracking-tight text-[var(--color-text)]">
@@ -92,7 +92,7 @@ export default function Navbar() {
                 to="/"
                 className="flex items-center gap-2 hover:opacity-80 transition-opacity"
               >
-                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[var(--color-brand-primary)] to-[var(--color-brand-secondary)] flex items-center justify-center text-white font-bold text-lg">
+                <div className="w-8 h-8 rounded-lg bg-[var(--color-brand-primary)] flex items-center justify-center text-white font-bold text-lg">
                   B
                 </div>
                 <span className="text-xl font-bold font-display tracking-tight text-[var(--color-text)]">
@@ -202,7 +202,7 @@ export default function Navbar() {
                 onClick={closeMobile}
                 className="flex items-center gap-2"
               >
-                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[var(--color-brand-primary)] to-[var(--color-brand-secondary)] flex items-center justify-center text-white font-bold text-lg">
+                <div className="w-8 h-8 rounded-lg bg-[var(--color-brand-primary)] flex items-center justify-center text-white font-bold text-lg">
                   B
                 </div>
                 <span className="text-xl font-bold font-display tracking-tight text-[var(--color-text)]">

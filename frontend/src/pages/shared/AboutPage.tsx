@@ -11,7 +11,7 @@ export default function AboutPage() {
   return (
     <div className="min-h-screen bg-[var(--color-bg)] text-[var(--color-text)] transition-colors pb-20">
       {/* ── Hero Banner ── */}
-      <div className="relative py-16 px-8 overflow-hidden mt-2 rounded-b-[3rem] mx-4 text-center bg-[#0B0C10]">
+      <div className="relative py-16 px-8 overflow-hidden mt-2 rounded-b-[3rem] mx-4 text-center bg-[var(--color-obsidian)]">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[500px] bg-[var(--color-brand-primary)]/20 rounded-full blur-[120px] -z-0" />
         <div className="absolute bottom-0 right-0 w-[600px] h-[400px] bg-[var(--color-brand-secondary)]/10 rounded-full blur-[100px] -z-0" />
         <div className="absolute inset-0 bg-noise opacity-[0.03] mix-blend-overlay pointer-events-none" />
@@ -23,7 +23,7 @@ export default function AboutPage() {
           </div>
           <h1 className="text-5xl md:text-6xl font-bold font-display leading-tight mb-4 text-white">
             About{" "}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-[var(--color-brand-primary)] to-[var(--color-brand-secondary)]">
+            <span className="text-[var(--color-brand-primary)]">
               Bevisly
             </span>
           </h1>

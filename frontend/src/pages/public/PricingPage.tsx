@@ -177,7 +177,7 @@ export default function PricingPage() {
           </div>
           <h1 className="text-4xl md:text-6xl font-bold font-display text-[var(--color-text)] leading-tight mb-5">
             Hiring that pays<br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-[var(--color-brand-primary)] to-orange-400">
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-[var(--color-brand-primary)] to-indigo-400">
               for itself
             </span>
           </h1>
@@ -250,9 +250,9 @@ export default function PricingPage() {
               </div>
 
               {/* Starter */}
-              <div className="flex flex-col rounded-2xl border-2 border-[var(--color-brand-primary)] bg-[var(--color-surface)] p-7 relative shadow-[0_0_32px_-4px_rgba(255,139,61,0.25)]" style={{ marginTop: "-8px", marginBottom: "-8px" }}>
+              <div className="flex flex-col rounded-2xl border-2 border-[var(--color-brand-primary)] bg-[var(--color-surface)] p-7 relative shadow-[var(--shadow-glow-cta)]" style={{ marginTop: "-8px", marginBottom: "-8px" }}>
                 <div className="absolute -top-4 inset-x-0 flex justify-center">
-                  <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-[var(--color-brand-primary)] text-white text-[11px] font-bold shadow">
+                  <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-[var(--color-accent)] text-white text-[11px] font-bold shadow">
                     <Star size={10} fill="white" /> MOST POPULAR
                   </span>
                 </div>
@@ -307,14 +307,14 @@ export default function PricingPage() {
 
           {/* Value anchor */}
           <section className="px-6 py-16 mb-6">
-            <div className="max-w-4xl mx-auto rounded-3xl overflow-hidden" style={{ background: "linear-gradient(135deg, var(--color-slate-900) 0%, var(--color-slate-800) 100%)" }}>
+            <div className="max-w-4xl mx-auto rounded-3xl overflow-hidden bg-[var(--color-obsidian)]">
               <div className="p-10 md:p-14 text-center">
-                <p className="text-xs font-semibold uppercase tracking-widest mb-4 text-[var(--color-brand-secondary)]">
+                <p className="text-xs font-semibold uppercase tracking-widest mb-4 text-[var(--color-accent)]">
                   The real cost of hiring
                 </p>
                 <h2 className="text-2xl md:text-4xl font-bold leading-snug mb-6 text-[var(--color-slate-50)]">
                   One bad hire costs{" "}
-                  <span className="text-[var(--color-brand-secondary)]">$15,000+</span>
+                  <span className="text-[var(--color-accent)]">$15,000+</span>
                   {" "}in lost time,<br className="hidden md:block" />
                   rehiring fees, and team disruption.
                 </h2>
@@ -329,7 +329,7 @@ export default function PricingPage() {
                     { stat: "$149",   label: "per month vs. $15k per bad hire" },
                   ].map(({ stat, label }) => (
                     <div key={label}>
-                      <div className="text-3xl font-bold text-[var(--color-brand-secondary)]">{stat}</div>
+                      <div className="text-3xl font-bold text-[var(--color-accent)]">{stat}</div>
                       <div className="text-xs mt-1 leading-snug text-[var(--color-slate-500)]">{label}</div>
                     </div>
                   ))}
@@ -429,7 +429,7 @@ export default function PricingPage() {
                 </div>
 
                 {/* Plus */}
-                <div className="flex flex-col rounded-2xl border-2 border-[var(--color-brand-primary)] bg-[var(--color-surface)] p-7 relative shadow-[0_0_32px_-4px_rgba(255,139,61,0.2)]">
+                <div className="flex flex-col rounded-2xl border-2 border-[var(--color-brand-primary)] bg-[var(--color-surface)] p-7 relative shadow-[var(--shadow-glow-cta)]">
                   <div className="absolute -top-4 inset-x-0 flex justify-center">
                     <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[var(--color-brand-primary)] text-white text-[11px] font-bold shadow">
                       <Sparkles size={10} /> BEVISLY PLUS
@@ -461,14 +461,14 @@ export default function PricingPage() {
 
           {/* Candidate value anchor */}
           <section className="px-6 pb-16">
-            <div className="max-w-3xl mx-auto rounded-3xl overflow-hidden" style={{ background: "linear-gradient(135deg, var(--color-slate-900) 0%, var(--color-slate-800) 100%)" }}>
+            <div className="max-w-3xl mx-auto rounded-3xl overflow-hidden bg-[var(--color-obsidian)]">
               <div className="p-10 text-center">
-                <p className="text-xs font-semibold uppercase tracking-widest mb-4 text-[var(--color-brand-secondary)]">
+                <p className="text-xs font-semibold uppercase tracking-widest mb-4 text-[var(--color-accent)]">
                   Why it matters
                 </p>
                 <h2 className="text-2xl md:text-3xl font-bold leading-snug mb-4 text-[var(--color-slate-50)]">
                   A higher Bevisly Score means{" "}
-                  <span className="text-[var(--color-brand-secondary)]">more employer attention</span>.
+                  <span className="text-[var(--color-accent)]">more employer attention</span>.
                 </h2>
                 <p className="text-sm leading-relaxed max-w-md mx-auto text-[var(--color-slate-400)]">
                   Employers search and filter candidates by score. More practice proofs = higher score =
@@ -508,7 +508,7 @@ export default function PricingPage() {
         </div>
       </section>
 
-      <div className="text-center pb-8 text-xs" style={{ color: "var(--color-text-muted)", opacity: 0.5 }}>
+      <div className="text-center pb-8 text-xs text-[var(--color-text-muted)] opacity-50">
         Prices in USD · EU VAT may apply · Cancel anytime
       </div>
     </div>

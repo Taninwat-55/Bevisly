@@ -317,7 +317,7 @@ export default function JobListingPage() {
     <div className="min-h-screen bg-[var(--color-bg)] transition-colors">
 
       {/* ── Fancy Banner / Header ── */}
-      <div className="relative py-12 px-8 bg-gradient-to-r from-[var(--color-brand-primary)] to-[var(--color-brand-secondary)] text-white shadow-xl overflow-hidden mt-2 rounded-b-[3rem] mx-4">
+      <div className="relative py-12 px-8 bg-[var(--color-brand-primary)] text-white shadow-xl overflow-hidden mt-2 rounded-b-[3rem] mx-4">
         <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20" />
         <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3 pointer-events-none" />
 
@@ -335,13 +335,13 @@ export default function JobListingPage() {
           </div>
 
           {role === "employer" && (
-            <Button
+            <button
               onClick={() => navigate("/employer/jobs/new")}
-              className="bg-white text-[var(--color-brand-primary)] hover:bg-blue-50 border-transparent"
-              leftIcon={<Plus size={16} />}
+              className="inline-flex items-center justify-center gap-2 h-10 px-5 rounded-lg bg-white text-[var(--color-brand-primary)] hover:bg-blue-50 font-bold shadow-lg transition-all active:scale-[0.98]"
             >
+              <Plus size={16} />
               Post New Job
-            </Button>
+            </button>
           )}
         </div>
       </div>

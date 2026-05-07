@@ -145,7 +145,7 @@ export default function DashboardLayout({
             to="/"
             className={`h-20 flex items-center ${isSidebarOpen ? "px-8" : "justify-center"} border-b border-[var(--color-border)]/50 hover:bg-[var(--color-surface-hover)] transition-colors`}
           >
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[var(--color-brand-primary)] to-[var(--color-brand-secondary)] flex items-center justify-center text-white font-bold text-lg shadow-glow-primary shrink-0">
+            <div className="w-10 h-10 rounded-xl bg-[var(--color-brand-primary)] flex items-center justify-center text-white font-bold text-lg shadow-glow-primary shrink-0">
               B
             </div>
             {isSidebarOpen && (
@@ -168,7 +168,7 @@ export default function DashboardLayout({
                 onClick={() => navigate("/employer?post=true")}
                 className={`
                   relative flex items-center justify-center gap-2 rounded-xl
-                  bg-gradient-to-br from-[var(--color-brand-primary)] to-blue-400
+                  bg-[var(--color-brand-primary)] hover:bg-blue-700
                   text-white font-bold tracking-tight
                   transition-all duration-300 group overflow-hidden
                   ${!isSidebarOpen ? "w-12 h-12" : "w-full py-3.5"}
@@ -204,7 +204,7 @@ export default function DashboardLayout({
                   className={`flex items-center gap-3 px-4 py-3.5 rounded-xl transition-all duration-200 group relative
                   ${
                     isActive && isFeatured
-                      ? "text-white bg-gradient-to-r from-[var(--color-brand-primary)] to-[var(--color-brand-secondary)] font-semibold shadow-md"
+                      ? "text-white bg-[var(--color-brand-primary)] font-semibold shadow-md"
                       : isActive
                       ? "text-[var(--color-brand-primary)] bg-[var(--color-brand-primary)]/10 font-semibold shadow-sm"
                       : isFeatured
@@ -384,7 +384,7 @@ export default function DashboardLayout({
               <Menu size={22} />
             </button>
             <Link to="/" className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[var(--color-brand-primary)] to-[var(--color-brand-secondary)] flex items-center justify-center text-white font-bold text-sm shadow-glow-primary shrink-0">
+              <div className="w-8 h-8 rounded-lg bg-[var(--color-brand-primary)] flex items-center justify-center text-white font-bold text-sm shadow-glow-primary shrink-0">
                 B
               </div>
               <span className="text-lg font-bold font-display text-[var(--color-text)] tracking-tight">

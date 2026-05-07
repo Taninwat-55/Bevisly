@@ -103,7 +103,7 @@ export default function CandidateDashboard() {
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div>
               <h1 className="text-3xl md:text-4xl font-bold font-display text-[var(--color-text)] mb-2">
-                Welcome back, <span className="text-transparent bg-clip-text bg-gradient-to-r from-[var(--color-brand-primary)] to-[var(--color-brand-secondary)] capitalize">{displayName}</span>
+                Welcome back, <span className="text-[var(--color-brand-primary)] capitalize">{displayName}</span>
               </h1>
               <p className="text-[var(--color-text-muted)] text-lg max-w-xl">
                 {isNewCandidate ? (

@@ -80,7 +80,7 @@ export default function RequestResetPage() {
 
         <div className="relative z-10">
           <div className="flex items-center gap-3 mb-12">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[var(--color-brand-primary)] to-[var(--color-brand-secondary)] flex items-center justify-center font-bold text-lg shadow-glow-primary">
+            <div className="w-10 h-10 rounded-xl bg-[var(--color-brand-primary)] flex items-center justify-center font-bold text-lg shadow-glow-primary">
               B
             </div>
             <span className="text-2xl font-bold font-display tracking-tight">
@@ -140,7 +140,7 @@ export default function RequestResetPage() {
               className="w-full max-w-md space-y-8"
             >
               <div className="lg:hidden flex items-center gap-2 mb-8">
-                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[var(--color-brand-primary)] to-[var(--color-brand-secondary)] flex items-center justify-center text-white font-bold">
+                <div className="w-8 h-8 rounded-lg bg-[var(--color-brand-primary)] flex items-center justify-center text-white font-bold">
                   B
                 </div>
                 <span className="text-xl font-bold font-display text-[var(--color-text)]">

@@ -71,7 +71,7 @@ export default function MobileNavDrawer({
             {/* Header */}
             <div className="h-16 flex items-center justify-between px-5 border-b border-[var(--color-border)]/60">
               <Link to="/" onClick={onClose} className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[var(--color-brand-primary)] to-[var(--color-brand-secondary)] flex items-center justify-center text-white font-bold text-sm">
+                <div className="w-8 h-8 rounded-lg bg-[var(--color-brand-primary)] flex items-center justify-center text-white font-bold text-sm">
                   B
                 </div>
                 <span className="text-lg font-bold font-display tracking-tight text-[var(--color-text)]">
@@ -95,7 +95,7 @@ export default function MobileNavDrawer({
                     navigate("/employer?post=true");
                     onClose();
                   }}
-                  className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-gradient-to-br from-[var(--color-brand-primary)] to-blue-400 text-white font-bold tracking-tight shadow-glow-primary"
+                  className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-[var(--color-brand-primary)] hover:bg-blue-700 text-white font-bold tracking-tight shadow-[var(--shadow-glow-cta)]"
                 >
                   <Plus size={18} strokeWidth={3} />
                   Post Job

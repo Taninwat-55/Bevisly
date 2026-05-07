@@ -33,7 +33,7 @@ export default function MobileBottomNav({ links }: MobileBottomNavProps) {
                 to={link.path}
                 className="relative -top-4 flex flex-col items-center justify-center w-full h-full group active:scale-95 transition-all"
               >
-                <div className="w-14 h-14 rounded-full bg-gradient-to-tr from-[var(--color-brand-primary)] to-[var(--color-brand-secondary)] text-white flex items-center justify-center shadow-lg shadow-brand-primary/30 group-hover:scale-105 transition-transform">
+                <div className="w-14 h-14 rounded-full bg-[var(--color-brand-primary)] text-white flex items-center justify-center shadow-lg shadow-brand-primary/30 group-hover:scale-105 transition-transform">
                   <Icon size={24} strokeWidth={2.5} className="drop-shadow-sm" />
                 </div>
                 <span className={`mt-1 text-[10px] text-center w-full truncate px-1 transition-all text-[var(--color-brand-primary)] font-bold drop-shadow-sm`}>

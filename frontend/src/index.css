@@ -7,8 +7,10 @@
   /* Core Brand Colors */
   --color-brand-primary: #2563eb;
   /* Electric Blue */
-  --color-brand-secondary: #f97316;
-  /* Vibrant Orange */
+  --color-brand-secondary: #4f46e5;
+  /* Deep Indigo */
+  --color-accent: #10b981;
+  /* Emerald Accent for highlights */
 
   /* Neutral Scale (Slate) */
   --color-slate-50: #f8fafc;
@@ -46,6 +48,13 @@
   --color-warning: #f59e0b;
   /* Amber 500 */
 
+  /* Score / Data Accent — reserved for Responsibility Score, star ratings, leaderboard medals */
+  --color-score-accent: #f59e0b;
+  /* Amber 500 — the ONLY acceptable use of warm color */
+
+  /* Hero/Banner dark background (avoids hardcoded #0B0C10) */
+  --color-obsidian: #0b0c10;
+
   /* Legacy Mappings (for backward compatibility) */
   --color-candidate: var(--color-brand-secondary);
   --color-employer: var(--color-brand-primary);
@@ -63,12 +72,13 @@
   --shadow-lg:
     0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
   --shadow-glow-primary: 0 0 20px rgba(37, 99, 235, 0.15);
-  --shadow-glow-orange: 0 0 20px rgba(249, 115, 22, 0.15);
+  --shadow-glow-secondary: 0 0 20px rgba(79, 70, 229, 0.15);
+  --shadow-glow-cta: 0 4px 14px rgba(37, 99, 235, 0.25);
 
   /* Glassmorphism */
-  --glass-bg: rgba(255, 255, 255, 0.7);
-  --glass-border: rgba(255, 255, 255, 0.5);
-  --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.05);
+  --glass-bg: rgba(255, 255, 255, 0.75);
+  --glass-border: rgba(0, 0, 0, 0.06);
+  --glass-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
 
   /* Fonts */
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
@@ -92,7 +102,8 @@
 
   /* Enhanced Glows for Dark Mode */
   --shadow-glow-primary: 0 0 40px rgba(37, 99, 235, 0.25);
-  --shadow-glow-orange: 0 0 40px rgba(249, 115, 22, 0.2);
+  --shadow-glow-secondary: 0 0 40px rgba(79, 70, 229, 0.2);
+  --shadow-glow-cta: 0 4px 20px rgba(37, 99, 235, 0.35);
 
   /* Glassmorphism (Dark) */
   --glass-bg: rgba(19, 21, 26, 0.7);
