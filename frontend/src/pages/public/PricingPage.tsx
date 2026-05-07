@@ -155,7 +155,7 @@ export default function PricingPage() {
   const [billing, setBilling] = useState<BillingCycle>("annual");
   const [mode, setMode] = useState<PricingMode>("employer");
 
-  const handleCTA = () => navigate("/auth?mode=signup");
+  const handleCTA = () => navigate("/auth?tab=signup");
 
   const starterPrice = EMPLOYER_PRICES.starter[billing];
   const growthPrice  = EMPLOYER_PRICES.growth[billing];

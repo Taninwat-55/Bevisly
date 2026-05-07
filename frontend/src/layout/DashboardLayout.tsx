@@ -23,6 +23,7 @@ import {
   Crown
 } from "lucide-react";
 import MobileNavDrawer from "@/components/MobileNavDrawer";
+import MobileBottomNav from "@/components/MobileBottomNav";
 import { motion } from "framer-motion";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
 import { useTheme } from "@/hooks/useTheme";
@@ -394,7 +395,7 @@ export default function DashboardLayout({
         )}
 
         {/* Content Area */}
-        <main className={`flex-1 overflow-x-hidden ${fullWidth ? "p-0" : "p-4 md:p-8"}`}>
+        <main className={`flex-1 overflow-x-hidden ${fullWidth ? "p-0 pb-20 md:pb-0" : "p-4 md:p-8 pb-24 md:pb-8"}`}>
           <div className={`animate-fade-in-up ${fullWidth ? "h-full" : "max-w-7xl mx-auto"}`}>
             {children}
           </div>
@@ -445,6 +446,8 @@ export default function DashboardLayout({
       />
 
       <FeedbackButton />
+
+      {showSidebar && <MobileBottomNav links={links} />}
     </div>
   );
 }

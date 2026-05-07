@@ -589,7 +589,7 @@ export default function LandingPage() {
               14-day free trial on all paid plans · No credit card required · Cancel anytime
             </p>
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
-              <Button size="lg" onClick={() => navigate("/auth?mode=signup")}>
+              <Button size="lg" onClick={() => navigate("/auth?tab=signup")}>
                 Get started free
               </Button>
               <Button variant="outline" size="lg" onClick={() => navigate("/pricing")}>
