@@ -39,7 +39,7 @@ const EMPLOYER_FEATURES: FeatureGroup[] = [
       { label: "Proof task designer",                    free: "Basic",  starter: "Full + AI templates", growth: "Full + AI templates" },
       { label: "AI proof task generation",               free: false,    starter: true,                  growth: true },
       { label: "Application status tracker",             free: true,     starter: true,                  growth: true },
-      { label: "Kanban talent board",                    free: true,     starter: true,                  growth: true },
+      { label: "Kanban pipeline board",                    free: true,     starter: true,                  growth: true },
     ],
   },
   {
@@ -241,7 +241,7 @@ export default function PricingPage() {
                 <p className="text-xs text-[var(--color-text-muted)] mb-6">forever</p>
                 <Button variant="outline" className="w-full mb-8" onClick={handleCTA}>Get started free</Button>
                 <ul className="space-y-3 text-sm text-[var(--color-text-muted)]">
-                  {["1 active job listing", "Basic proof task designer", "Kanban talent board", "Candidate status tracker", "Employer verification badge (after review)"].map(f => (
+                  {["1 active job listing", "Basic proof task designer", "Kanban pipeline board", "Candidate status tracker", "Employer verification badge (after review)"].map(f => (
                     <li key={f} className="flex items-start gap-2.5">
                       <Check size={14} className="text-[var(--color-brand-primary)] shrink-0 mt-0.5" />{f}
                     </li>

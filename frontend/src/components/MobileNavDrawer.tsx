@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
-import { LogOut, Plus, Settings, X } from "lucide-react";
+import { LogOut, Plus, Settings, X, Shield, Crown, Zap, Briefcase } from "lucide-react";
 import type { SessionUser } from "@/context/AuthContext";
 
 export interface MobileNavItem {
@@ -138,7 +138,19 @@ export default function MobileNavDrawer({
                 onClick={onClose}
                 className="flex items-center gap-3 mb-3 group"
               >
-                <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-slate-200 to-slate-100 dark:from-slate-700 dark:to-slate-800 flex items-center justify-center border border-[var(--color-border)] shrink-0 overflow-hidden">
+              <div className="relative shrink-0">
+                <div className={`w-10 h-10 rounded-full flex items-center justify-center border-2 transition-all shadow-sm overflow-hidden
+                  ${(user?.original_role === "admin" || user?.original_role === "demo_admin" || user?.role === "admin" || user?.role === "demo_admin")
+                    ? "border-purple-400 dark:border-purple-500 shadow-purple-500/20"
+                    : (user?.subscription_tier === "growth" || user?.subscription_tier === "pro_saas")
+                    ? "border-amber-400 dark:border-amber-500 shadow-amber-500/20"
+                    : user?.subscription_tier === "plus"
+                    ? "border-emerald-400 dark:border-emerald-500 shadow-emerald-500/20"
+                    : user?.subscription_tier === "starter"
+                    ? "border-blue-400 dark:border-blue-500 shadow-blue-500/20"
+                    : "border-[var(--color-border)] bg-gradient-to-tr from-slate-200 to-slate-100 dark:from-slate-700 dark:to-slate-800"
+                  }
+                `}>
                   {user?.avatar_url ? (
                     <img src={user.avatar_url} alt="User" className="w-full h-full object-cover" />
                   ) : (
@@ -149,6 +161,25 @@ export default function MobileNavDrawer({
                     </span>
                   )}
                 </div>
+                {/* Badge Overlays */}
+                {(user?.original_role === "admin" || user?.original_role === "demo_admin" || user?.role === "admin" || user?.role === "demo_admin") ? (
+                  <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 bg-purple-500 rounded-full border-2 border-[var(--color-surface)] flex items-center justify-center text-white" title="Admin">
+                    <Shield size={8} strokeWidth={3} className="text-purple-50" />
+                  </div>
+                ) : (user?.subscription_tier === "growth" || user?.subscription_tier === "pro_saas") ? (
+                  <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 bg-amber-500 rounded-full border-2 border-[var(--color-surface)] flex items-center justify-center text-white" title="Growth Tier">
+                    <Crown size={8} strokeWidth={3} className="text-amber-50" />
+                  </div>
+                ) : user?.subscription_tier === "plus" ? (
+                  <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 bg-emerald-500 rounded-full border-2 border-[var(--color-surface)] flex items-center justify-center text-white" title="Plus Tier">
+                    <Zap size={8} strokeWidth={3} className="text-emerald-50" />
+                  </div>
+                ) : user?.subscription_tier === "starter" ? (
+                  <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 bg-blue-500 rounded-full border-2 border-[var(--color-surface)] flex items-center justify-center text-white" title="Starter Tier">
+                    <Briefcase size={8} strokeWidth={3} className="text-blue-50" />
+                  </div>
+                ) : null}
+              </div>
                 <div className="min-w-0 flex-1">
                   <p className="text-sm font-semibold text-[var(--color-text)] truncate group-hover:text-[var(--color-brand-primary)] transition-colors">
                     {role === "employer" && user?.company_name

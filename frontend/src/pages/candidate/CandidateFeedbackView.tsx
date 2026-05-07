@@ -34,23 +34,20 @@ export default function CandidateFeedbackView() {
   return (
     <div className="space-y-8 pb-20">
       {/* ── Header Section ────────────────────────────────────────── */}
-      <div className="relative rounded-3xl overflow-hidden glass-panel border border-[var(--glass-border)] p-8 md:p-12 shadow-2xl">
-        <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-[var(--color-brand-secondary)]/10 rounded-full blur-[100px] -z-10 translate-x-1/2 -translate-y-1/2" />
-        <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-[var(--color-brand-primary)]/10 rounded-full blur-[80px] -z-10 -translate-x-1/3 translate-y-1/3" />
-
-        <div className="relative z-10 max-w-2xl">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[var(--color-surface)] border border-[var(--color-border)] shadow-sm mb-6">
-            <ShieldCheck size={14} className="text-[var(--color-brand-primary)]" />
-            <span className="text-xs font-medium text-[var(--color-text)]">
-              Real-world Skills Verification
-            </span>
-          </div>
-          <h1 className="text-4xl md:text-5xl font-bold font-display text-[var(--color-text)] mb-4 tracking-tight">
+      <div className="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-[var(--color-text)] tracking-tight">
             My Proofs & Feedback
           </h1>
-          <p className="text-lg text-[var(--color-text-muted)] leading-relaxed">
-            Track your submissions and review feedback from companies. Every proof you complete adds to your verified skill portfolio.
+          <p className="text-sm text-[var(--color-text-muted)] mt-1">
+            Track your submissions and review feedback from companies.
           </p>
+        </div>
+        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[var(--color-brand-primary)]/10 text-[var(--color-brand-primary)]">
+          <ShieldCheck size={14} />
+          <span className="text-xs font-semibold uppercase tracking-wider">
+            Verified Proofs
+          </span>
         </div>
       </div>
 

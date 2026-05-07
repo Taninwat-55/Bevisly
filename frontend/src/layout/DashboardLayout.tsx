@@ -19,8 +19,8 @@ import {
   Kanban,
   Languages,
   Menu,
-  Sparkles,
   Shield,
+  Crown
 } from "lucide-react";
 import MobileNavDrawer from "@/components/MobileNavDrawer";
 import { motion } from "framer-motion";
@@ -104,10 +104,10 @@ export default function DashboardLayout({
     role === "employer"
       ? [
           { label: "Dashboard", path: "/employer", icon: LayoutDashboard },
-          { label: "Action Items", path: "/employer/inbox", icon: Inbox, badge: needsReviewCount },
+          { label: "Review Queue", path: "/employer/inbox", icon: Inbox, badge: needsReviewCount },
           { label: "My Jobs", path: "/employer/jobs", icon: Briefcase },
-          { label: "Talent Board", path: "/employer/talent-board", icon: Kanban },
-          { label: "All Candidates", path: "/employer/candidates", icon: Users },
+          { label: "Pipeline Board", path: "/employer/talent-board", icon: Kanban },
+          { label: "Talent Directory", path: "/employer/candidates", icon: Users },
         ]
       : role === "admin"
         ? [
@@ -270,8 +270,10 @@ export default function DashboardLayout({
                 <div className={`w-10 h-10 rounded-full flex items-center justify-center border-2 transition-all shadow-sm
                   ${(user?.original_role === "admin" || user?.original_role === "demo_admin" || user?.role === "admin" || user?.role === "demo_admin")
                     ? "border-purple-400 dark:border-purple-500 shadow-purple-500/20 group-hover:shadow-purple-500/40"
-                    : (user?.subscription_tier === "growth" || user?.subscription_tier === "plus" || user?.subscription_tier === "pro_saas")
+                    : (user?.subscription_tier === "growth" || user?.subscription_tier === "pro_saas")
                     ? "border-amber-400 dark:border-amber-500 shadow-amber-500/20 group-hover:shadow-amber-500/40"
+                    : user?.subscription_tier === "plus"
+                    ? "border-emerald-400 dark:border-emerald-500 shadow-emerald-500/20 group-hover:shadow-emerald-500/40"
                     : user?.subscription_tier === "starter"
                     ? "border-blue-400 dark:border-blue-500 shadow-blue-500/20 group-hover:shadow-blue-500/40"
                     : "border-[var(--color-border)] group-hover:border-[var(--color-brand-primary)] group-hover:shadow-glow-primary/20 bg-gradient-to-tr from-slate-200 to-slate-100 dark:from-slate-700 dark:to-slate-800"
@@ -292,9 +294,13 @@ export default function DashboardLayout({
                   <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 bg-purple-500 rounded-full border-2 border-[var(--color-surface)] flex items-center justify-center text-white" title="Admin">
                     <Shield size={8} strokeWidth={3} className="text-purple-50" />
                   </div>
-                ) : (user?.subscription_tier === "growth" || user?.subscription_tier === "plus" || user?.subscription_tier === "pro_saas") ? (
-                  <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 bg-amber-500 rounded-full border-2 border-[var(--color-surface)] flex items-center justify-center text-white" title="Premium Tier">
-                    <Sparkles size={8} strokeWidth={3} className="text-amber-50" />
+                ) : (user?.subscription_tier === "growth" || user?.subscription_tier === "pro_saas") ? (
+                  <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 bg-amber-500 rounded-full border-2 border-[var(--color-surface)] flex items-center justify-center text-white" title="Growth Tier">
+                    <Crown size={8} strokeWidth={3} className="text-amber-50" />
+                  </div>
+                ) : user?.subscription_tier === "plus" ? (
+                  <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 bg-emerald-500 rounded-full border-2 border-[var(--color-surface)] flex items-center justify-center text-white" title="Plus Tier">
+                    <Zap size={8} strokeWidth={3} className="text-emerald-50" />
                   </div>
                 ) : user?.subscription_tier === "starter" ? (
                   <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 bg-blue-500 rounded-full border-2 border-[var(--color-surface)] flex items-center justify-center text-white" title="Starter Tier">

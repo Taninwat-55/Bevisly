@@ -91,10 +91,10 @@ export default function EmployerAllCandidates() {
         <div className="space-y-2">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[var(--color-brand-primary)]/10 text-[var(--color-brand-primary)] text-xs font-bold uppercase tracking-widest">
             <Users size={14} />
-            Candidates
+            Directory
           </div>
           <h1 className="text-3xl md:text-4xl font-bold font-display text-[var(--color-text)]">
-            Talent Database
+            Talent Directory
           </h1>
           <p className="text-[var(--color-text-muted)] text-lg max-w-xl">
             A complete history of every candidate who has engaged with your job

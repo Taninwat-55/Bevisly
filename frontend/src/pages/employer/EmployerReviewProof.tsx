@@ -487,7 +487,7 @@ export default function EmployerReviewProof({
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="min-h-screen bg-[var(--color-bg)] px-4 md:px-8 py-6 md:py-10"
+      className="h-full bg-[var(--color-bg)] px-4 md:px-8 py-6 md:py-10 flex flex-col"
     >
       {/* Header */}
       <header className="max-w-5xl mx-auto mb-6">
@@ -778,7 +778,7 @@ export default function EmployerReviewProof({
         />
 
         {/* Action Bar */}
-        <div className="flex items-center justify-between p-4 glass-panel rounded-2xl">
+        <div className="sticky bottom-0 z-20 flex items-center justify-between p-4 glass-panel rounded-2xl shadow-xl border border-[var(--color-border)] mt-8">
           <button
             onClick={() =>
               prevCandidate && navigate(`/employer/review/${prevCandidate.id}`)

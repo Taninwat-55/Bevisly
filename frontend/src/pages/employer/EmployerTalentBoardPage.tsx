@@ -69,7 +69,7 @@ export default function EmployerTalentBoardPage() {
           setSubmissions(subsData);
         }
       } catch {
-        toast.error("Failed to load talent board.");
+        toast.error("Failed to load pipeline board.");
       } finally {
         if (mounted) setLoading(false);
       }
@@ -131,7 +131,7 @@ export default function EmployerTalentBoardPage() {
       <div className="flex items-center justify-center h-64 text-[var(--color-text-muted)]">
         <div className="flex flex-col items-center gap-3">
           <div className="w-8 h-8 border-2 border-[var(--color-brand-primary)] border-t-transparent rounded-full animate-spin" />
-          <p>Loading talent board...</p>
+          <p>Loading pipeline board...</p>
         </div>
       </div>
     );
@@ -273,7 +273,7 @@ export default function EmployerTalentBoardPage() {
         <div className="space-y-6">
           <div>
             <h1 className="text-2xl font-bold font-display text-[var(--color-text)]">
-              Talent Board
+              Pipeline Board
             </h1>
             <p className="text-[var(--color-text-muted)] text-sm mt-1">
               Select a job to manage its candidate pipeline.

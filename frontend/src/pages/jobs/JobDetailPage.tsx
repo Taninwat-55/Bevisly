@@ -243,7 +243,7 @@ export default function JobDetailPage() {
         </Helmet>
       )}
 
-      <div className="max-w-3xl mx-auto px-6 pt-8 pb-32">
+      <div className="max-w-4xl mx-auto px-6 pt-8 pb-32">
         {/* Back Button */}
         <button
           onClick={() => navigate(-1)}
@@ -554,7 +554,7 @@ export default function JobDetailPage() {
             transition={{ type: "spring", stiffness: 380, damping: 32 }}
             className="fixed bottom-0 inset-x-0 z-40 bg-[var(--color-surface)]/95 backdrop-blur-md border-t border-[var(--color-border)] px-6 py-3 shadow-2xl"
           >
-            <div className="max-w-3xl mx-auto flex items-center justify-between gap-4">
+            <div className="max-w-4xl mx-auto flex items-center justify-between gap-4">
               <div className="min-w-0">
                 <p className="text-sm font-bold text-[var(--color-text)] truncate">{job.title}</p>
                 <p className="text-xs text-[var(--color-text-muted)] truncate">{job.company} · {job.location || "Remote"}</p>

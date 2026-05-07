@@ -38,7 +38,7 @@ const EMPLOYER_STEPS = [
     description: "Evaluate submissions, leave feedback, and hire the best talent.",
     color: "from-amber-500 to-orange-500",
     iconBg: "bg-amber-500/15 text-amber-500",
-    cta: { label: "Open Talent Board", href: "/employer/talent-board" },
+    cta: { label: "Open Pipeline Board", href: "/employer/talent-board" },
   },
 ];
 

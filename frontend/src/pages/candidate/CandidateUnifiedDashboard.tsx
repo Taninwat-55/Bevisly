@@ -36,7 +36,9 @@ export default function CandidateUnifiedDashboard() {
       </div>
 
       {/* ── Profile Progress Widget ────────────────── */}
-      <ProfileProgress onNavigateToProfile={() => setActiveTab("profile")} />
+      {activeTab === "tasks" && (
+        <ProfileProgress onNavigateToProfile={() => setActiveTab("profile")} />
+      )}
 
       {/* ── Content Area ────────────────────────────── */}
       <div className="animate-fade-in max-w-5xl mx-auto mt-6">
