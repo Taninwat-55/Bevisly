@@ -40,7 +40,6 @@ export default function EmployerJobIntentForm({
         proof_tasks: data.proof_tasks.map(task => ({
           ...task,
           id: crypto.randomUUID(),
-          ai_tools_allowed: true, // Default
         })) as ProofTask[],
       });
       

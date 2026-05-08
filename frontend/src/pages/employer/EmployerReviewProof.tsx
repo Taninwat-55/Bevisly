@@ -12,7 +12,7 @@ import {
   getSubmissionsByJob,
 } from "@/lib/api/submissions";
 import { useAuth } from "@/hooks/useAuth";
-import type { EmployerSubmission } from "@/types";
+import type { EmployerSubmission, RubricCriterion, RubricScore } from "@/types";
 import {
   Loader2,
   ArrowRight,
@@ -29,8 +29,6 @@ import {
   CheckCircle2,
   Clock,
   Paperclip,
-  Bot,
-  Ban,
 } from "lucide-react";
 import { distributeCredits } from "@/lib/api/credits";
 import { Star, Sparkles } from "lucide-react";
@@ -41,7 +39,6 @@ interface TaskInfo {
   description: string | null;
   expected_time: string | null;
   submission_type: "link" | "file" | "text";
-  ai_tools_allowed: boolean;
 }
 
 function TaskRequirementsPanel({ task }: { task: TaskInfo | null }) {
@@ -80,17 +77,6 @@ function TaskRequirementsPanel({ task }: { task: TaskInfo | null }) {
         <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-full bg-[var(--color-bg)] border border-[var(--color-border)]">
           <Paperclip size={12} /> {task.submission_type}
         </span>
-        <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-full bg-[var(--color-bg)] border border-[var(--color-border)]">
-          {task.ai_tools_allowed ? (
-            <>
-              <Bot size={12} /> AI Allowed
-            </>
-          ) : (
-            <>
-              <Ban size={12} /> No AI
-            </>
-          )}
-        </span>
       </div>
     </div>
   );
@@ -98,8 +84,11 @@ function TaskRequirementsPanel({ task }: { task: TaskInfo | null }) {
 
 // Inline Scorecard (original was deleted)
 interface ScorecardProps {
-  stars: number;
-  setStars: (v: number) => void;
+  rubricCriteria: RubricCriterion[] | null;
+  rubricScores: RubricScore[];
+  setRubricScores: (next: RubricScore[]) => void;
+  legacyStars: number;
+  setLegacyStars: (v: number) => void;
   strengths: string;
   setStrengths: (v: string) => void;
   improvements: string;
@@ -111,9 +100,47 @@ interface ScorecardProps {
   aiSuggested: boolean;
 }
 
+function getScoreFor(scores: RubricScore[], name: string): number {
+  return scores.find((s) => s.name === name)?.score ?? 0;
+}
+
+function getNoteFor(scores: RubricScore[], name: string): string {
+  return scores.find((s) => s.name === name)?.note ?? "";
+}
+
+function upsertScore(
+  scores: RubricScore[],
+  name: string,
+  patch: Partial<RubricScore>,
+): RubricScore[] {
+  const idx = scores.findIndex((s) => s.name === name);
+  if (idx === -1) {
+    return [...scores, { name, score: 0, note: "", ...patch }];
+  }
+  const next = [...scores];
+  next[idx] = { ...next[idx], ...patch };
+  return next;
+}
+
+export function computeWeightedOverall(
+  criteria: RubricCriterion[],
+  scores: RubricScore[],
+): number {
+  const totalWeight = criteria.reduce((sum, c) => sum + (Number(c.weight) || 0), 0);
+  if (totalWeight <= 0) return 0;
+  const weighted = criteria.reduce((sum, c) => {
+    const score = getScoreFor(scores, c.name);
+    return sum + score * (Number(c.weight) || 0);
+  }, 0);
+  return weighted / totalWeight;
+}
+
 function Scorecard({
-  stars,
-  setStars,
+  rubricCriteria,
+  rubricScores,
+  setRubricScores,
+  legacyStars,
+  setLegacyStars,
   strengths,
   setStrengths,
   improvements,
@@ -124,6 +151,11 @@ function Scorecard({
   canAIEvaluate,
   aiSuggested,
 }: ScorecardProps) {
+  const hasRubric = !!rubricCriteria && rubricCriteria.length > 0;
+  const weightedOverall = hasRubric
+    ? computeWeightedOverall(rubricCriteria!, rubricScores)
+    : 0;
+
   return (
     <div className="glass-panel rounded-2xl p-6 space-y-6">
       <div className="flex justify-between items-center">
@@ -160,37 +192,120 @@ function Scorecard({
           ))}
       </div>
 
-      {/* Star Rating */}
-      <div>
-        <label className="block text-sm font-medium text-[var(--color-text)] mb-2">
-          Rating
-        </label>
-        <div className="flex gap-1">
-          {[1, 2, 3, 4, 5].map((n) => (
-            <button
-              key={n}
-              type="button"
-              disabled={isLocked}
-              onClick={() => setStars(n)}
-              className={`p-1 transition-colors ${isLocked ? "cursor-not-allowed" : "hover:scale-110"}`}
-            >
-              <Star
-                size={24}
-                className={
-                  n <= stars
-                    ? "fill-yellow-400 text-yellow-400"
-                    : "text-[var(--color-border)]"
-                }
-              />
-            </button>
-          ))}
+      {hasRubric ? (
+        <>
+          <div className="space-y-4">
+            {rubricCriteria!.map((c) => {
+              const score = getScoreFor(rubricScores, c.name);
+              const note = getNoteFor(rubricScores, c.name);
+              return (
+                <div
+                  key={c.name}
+                  className="p-3 rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)]/40 space-y-2"
+                >
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="text-sm font-semibold text-[var(--color-text)] truncate">
+                        {c.name}
+                        <span className="ml-2 text-[10px] font-medium text-[var(--color-text-muted)]">
+                          weight {c.weight}
+                        </span>
+                      </p>
+                      <p className="text-xs text-[var(--color-text-muted)] truncate">
+                        {c.description}
+                      </p>
+                    </div>
+                    <div className="flex gap-1 shrink-0">
+                      {[1, 2, 3, 4, 5].map((n) => (
+                        <button
+                          key={n}
+                          type="button"
+                          disabled={isLocked}
+                          onClick={() =>
+                            setRubricScores(
+                              upsertScore(rubricScores, c.name, { score: n }),
+                            )
+                          }
+                          className={`p-0.5 transition-transform ${
+                            isLocked ? "cursor-not-allowed" : "hover:scale-110"
+                          }`}
+                          aria-label={`${c.name}: ${n} of 5`}
+                        >
+                          <Star
+                            size={20}
+                            className={
+                              n <= score
+                                ? "fill-yellow-400 text-yellow-400"
+                                : "text-[var(--color-border)]"
+                            }
+                          />
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  <input
+                    type="text"
+                    disabled={isLocked}
+                    value={note}
+                    onChange={(e) =>
+                      setRubricScores(
+                        upsertScore(rubricScores, c.name, { note: e.target.value }),
+                      )
+                    }
+                    placeholder="Optional: cite the part of the submission that drove this score"
+                    className="w-full text-xs p-2 rounded-md border border-[var(--color-border)] bg-[var(--color-input-bg)] text-[var(--color-text)] focus:outline-none focus:ring-2 focus:ring-[var(--color-employer)] disabled:opacity-60"
+                  />
+                </div>
+              );
+            })}
+          </div>
+
+          <div className="flex items-center justify-between border-t border-[var(--color-border)] pt-3">
+            <span className="text-xs uppercase tracking-wider text-[var(--color-text-muted)] font-semibold">
+              Weighted overall
+            </span>
+            <span className="text-base font-bold text-[var(--color-text)]">
+              {weightedOverall.toFixed(2)} / 5
+            </span>
+          </div>
+        </>
+      ) : (
+        <div>
+          <label className="block text-sm font-medium text-[var(--color-text)] mb-2">
+            Rating
+          </label>
+          <div className="flex gap-1">
+            {[1, 2, 3, 4, 5].map((n) => (
+              <button
+                key={n}
+                type="button"
+                disabled={isLocked}
+                onClick={() => setLegacyStars(n)}
+                className={`p-1 transition-colors ${
+                  isLocked ? "cursor-not-allowed" : "hover:scale-110"
+                }`}
+              >
+                <Star
+                  size={24}
+                  className={
+                    n <= legacyStars
+                      ? "fill-yellow-400 text-yellow-400"
+                      : "text-[var(--color-border)]"
+                  }
+                />
+              </button>
+            ))}
+          </div>
+          <p className="text-[10px] text-[var(--color-text-muted)] italic mt-2">
+            Legacy task — no rubric defined. Edit the task to add one.
+          </p>
         </div>
-      </div>
+      )}
 
       {/* Strengths */}
       <div>
         <label className="block text-sm font-medium text-[var(--color-text)] mb-2">
-          Strengths
+          Overall strengths
         </label>
         <textarea
           value={strengths}
@@ -205,7 +320,7 @@ function Scorecard({
       {/* Improvements */}
       <div>
         <label className="block text-sm font-medium text-[var(--color-text)] mb-2">
-          Areas for Improvement
+          Overall areas for improvement
         </label>
         <textarea
           value={improvements}
@@ -216,7 +331,6 @@ function Scorecard({
           rows={3}
         />
       </div>
-      {/* AI Disclaimer — only shown when current content originated from AI */}
       {aiSuggested && !isLocked && (
         <p className="text-xs text-[var(--color-text-muted)] italic leading-snug">
           Suggested by AI based on submission content. Final decision is yours.
@@ -284,12 +398,17 @@ export default function EmployerReviewProof({
   const [strengths, setStrengths] = useState("");
   const [improvements, setImprovements] = useState("");
   const [stars, setStars] = useState<number>(0);
+  const [rubricScores, setRubricScores] = useState<RubricScore[]>([]);
   const [loading, setLoading] = useState(false);
   const [suggestingAI, setSuggestingAI] = useState(false);
   const [strengthsFromAI, setStrengthsFromAI] = useState(false);
   const [improvementsFromAI, setImprovementsFromAI] = useState(false);
+  const [scoresFromAI, setScoresFromAI] = useState(false);
   const [fetching, setFetching] = useState(true);
   const [currentIndex, setCurrentIndex] = useState<number>(0);
+
+  const rubricCriteria = submission?.proof_tasks?.rubric_criteria ?? null;
+  const hasRubric = Array.isArray(rubricCriteria) && rubricCriteria.length > 0;
 
   const isReviewed =
     submission?.status === "reviewed" ||
@@ -306,6 +425,9 @@ export default function EmployerReviewProof({
           setStrengths(data.feedback[0].strengths || "");
           setImprovements(data.feedback[0].improvements || "");
           setStars(data.feedback[0].stars || 0);
+          if (Array.isArray(data.feedback[0].rubric_scores)) {
+            setRubricScores(data.feedback[0].rubric_scores);
+          }
         }
 
         if (data?.job_id && submissionsCache.current.length === 0) {
@@ -356,10 +478,19 @@ export default function EmployerReviewProof({
         content,
         taskDescription,
         reflection,
+        rubricCriteria ?? undefined,
       );
 
-      if (result && (result.strengths || result.improvements)) {
-        setStars(result.suggested_rating || stars || 3);
+      if (
+        result &&
+        (result.strengths || result.improvements || result.rubric_scores)
+      ) {
+        if (Array.isArray(result.rubric_scores) && result.rubric_scores.length) {
+          setRubricScores(result.rubric_scores);
+          setScoresFromAI(true);
+        } else if (typeof result.suggested_rating === "number") {
+          setStars(result.suggested_rating || stars || 3);
+        }
         if (result.strengths) {
           setStrengths(result.strengths);
           setStrengthsFromAI(true);
@@ -368,9 +499,10 @@ export default function EmployerReviewProof({
           setImprovements(result.improvements);
           setImprovementsFromAI(true);
         }
-        toast.success("AI evidence summary ready. Review and edit before submitting.", {
-          id: toastId,
-        });
+        toast.success(
+          "AI evidence summary ready. Review and edit before submitting.",
+          { id: toastId },
+        );
       }
     } catch (e: unknown) {
       console.error(e);
@@ -397,7 +529,32 @@ export default function EmployerReviewProof({
       return;
     }
 
-    if (!stars) return toast.error("Please provide a rating.");
+    let finalStars = stars;
+    let finalRubricScores: RubricScore[] | null = null;
+
+    if (hasRubric) {
+      const incomplete = rubricCriteria!.filter(
+        (c) => (getScoreFor(rubricScores, c.name) || 0) <= 0,
+      );
+      if (incomplete.length > 0) {
+        return toast.error(
+          `Score every criterion: ${incomplete.map((c) => c.name).join(", ")}`,
+        );
+      }
+      const weighted = computeWeightedOverall(rubricCriteria!, rubricScores);
+      finalStars = Math.max(1, Math.min(5, Math.round(weighted)));
+      // Drop any stale entries that don't match the locked rubric.
+      finalRubricScores = rubricCriteria!.map((c) => {
+        const s = rubricScores.find((r) => r.name === c.name);
+        return {
+          name: c.name,
+          score: s?.score ?? 0,
+          note: s?.note ?? "",
+        };
+      });
+    } else if (!stars) {
+      return toast.error("Please provide a rating.");
+    }
 
     setLoading(true);
     try {
@@ -406,12 +563,13 @@ export default function EmployerReviewProof({
         employer_id: user.id,
         strengths,
         improvements,
-        stars,
+        stars: finalStars,
+        rubric_scores: finalRubricScores,
       });
 
       await updateSubmissionStatus(submission.id, "reviewed");
 
-      if (stars >= 4) {
+      if (finalStars >= 4) {
         await distributeCredits(
           submission.user_id || "",
           50,
@@ -503,7 +661,6 @@ export default function EmployerReviewProof({
         description: submission.proof_tasks.description ?? null,
         expected_time: null,
         submission_type: "link" as const,
-        ai_tools_allowed: true,
       }
     : null;
 
@@ -789,8 +946,14 @@ export default function EmployerReviewProof({
 
         {/* Scorecard */}
         <Scorecard
-          stars={stars}
-          setStars={setStars}
+          rubricCriteria={rubricCriteria}
+          rubricScores={rubricScores}
+          setRubricScores={(next) => {
+            setRubricScores(next);
+            setScoresFromAI(false);
+          }}
+          legacyStars={stars}
+          setLegacyStars={setStars}
           strengths={strengths}
           setStrengths={(v) => {
             setStrengths(v);
@@ -805,7 +968,7 @@ export default function EmployerReviewProof({
           onSuggestAI={handleSuggestFeedback}
           isSuggesting={suggestingAI}
           canAIEvaluate={canAIEvaluate}
-          aiSuggested={strengthsFromAI || improvementsFromAI}
+          aiSuggested={strengthsFromAI || improvementsFromAI || scoresFromAI}
         />
 
         {/* Action Bar */}
@@ -822,7 +985,15 @@ export default function EmployerReviewProof({
 
           <motion.button
             onClick={() => handleSubmitFeedback("next")}
-            disabled={loading || (!isReviewed && !stars)}
+            disabled={
+              loading ||
+              (!isReviewed &&
+                (hasRubric
+                  ? rubricCriteria!.some(
+                      (c) => (getScoreFor(rubricScores, c.name) || 0) <= 0,
+                    )
+                  : !stars))
+            }
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             className={`flex items-center gap-2 px-6 py-2.5 rounded-xl font-medium transition-all

@@ -20,7 +20,6 @@ import {
   Heart,
   DollarSign,
   Clock,
-  Bot
 } from "lucide-react";
 import toast from "react-hot-toast";
 
@@ -65,7 +64,6 @@ export default function JobListingPage() {
   const [query, setQuery] = useState("");
   const [filters, setFilters] = useState({
     paid: false,
-    aiAllowed: false,
     short: false,
     savedOnly: false,
   });
@@ -206,9 +204,6 @@ export default function JobListingPage() {
         proof?.title?.toLowerCase().includes(debouncedQuery.toLowerCase());
 
       const paidMatch = filters.paid ? job.paid === true : true;
-      const aiMatch = filters.aiAllowed
-        ? proof?.ai_tools_allowed === true
-        : true;
       const shortMatch = filters.short
         ? proof?.expected_time?.toLowerCase().includes("30")
         : true;
@@ -234,7 +229,6 @@ export default function JobListingPage() {
       return (
         textMatch &&
         paidMatch &&
-        aiMatch &&
         shortMatch &&
         savedMatch &&
         locationMatch &&
@@ -270,7 +264,7 @@ export default function JobListingPage() {
   };
 
   const handleClearAll = () => {
-    setFilters({ paid: false, aiAllowed: false, short: false, savedOnly: false });
+    setFilters({ paid: false, short: false, savedOnly: false });
     setQuery("");
     setCompanies([]);
     setLocations([]);
@@ -373,7 +367,6 @@ export default function JobListingPage() {
                 <div className="flex flex-wrap gap-2 mt-2">
                   <button onClick={() => setFilters((f) => ({ ...f, paid: !f.paid }))} className={`px-4 py-2 rounded-full border transition-all font-medium flex items-center gap-2 ${filters.paid ? "bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 border-emerald-200" : "border-[var(--color-border)] text-[var(--color-text-muted)] hover:bg-[var(--color-surface-hover)]"}`}><DollarSign size={14} /> Paid Opportunities</button>
                   <button onClick={() => setFilters((f) => ({ ...f, short: !f.short }))} className={`px-4 py-2 rounded-full border transition-all font-medium flex items-center gap-2 ${filters.short ? "bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 border-blue-200" : "border-[var(--color-border)] text-[var(--color-text-muted)] hover:bg-[var(--color-surface-hover)]"}`}><Clock size={14} /> Under 30 mins</button>
-                  <button onClick={() => setFilters((f) => ({ ...f, aiAllowed: !f.aiAllowed }))} className={`px-4 py-2 rounded-full border transition-all font-medium flex items-center gap-2 ${filters.aiAllowed ? "bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400 border-purple-200" : "border-[var(--color-border)] text-[var(--color-text-muted)] hover:bg-[var(--color-surface-hover)]"}`}><Bot size={14} /> AI Tools Allowed</button>
                   {user && (
                     <button onClick={() => setFilters((f) => ({ ...f, savedOnly: !f.savedOnly }))} className={`px-4 py-2 rounded-full border transition-all font-medium flex items-center gap-2 ${filters.savedOnly ? "bg-rose-100 dark:bg-rose-900/30 text-rose-700 dark:text-rose-400 border-rose-200" : "border-[var(--color-border)] text-[var(--color-text-muted)] hover:bg-[var(--color-surface-hover)]"}`}>
                       <Heart size={14} className={filters.savedOnly ? "fill-current" : ""} /> Saved Jobs{savedJobIds.length > 0 ? ` (${savedJobIds.length})` : ""}

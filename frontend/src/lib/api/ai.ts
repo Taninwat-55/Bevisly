@@ -1,6 +1,7 @@
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
 import { supabase } from "../supabaseClient";
+import type { RubricCriterion, RubricScore } from "@/types";
 
 export interface GeneratedJobListing {
     title: string;
@@ -11,6 +12,7 @@ export interface GeneratedJobListing {
         description: string;
         expected_time: string;
         submission_format: string;
+        rubric_criteria?: RubricCriterion[];
     }[];
 }
 
@@ -65,13 +67,21 @@ export async function generateJobListing(
     }
 }
 
+export interface SuggestFeedbackResult {
+    strengths?: string;
+    improvements?: string;
+    suggested_rating?: number; // legacy fallback when no rubric is set
+    rubric_scores?: RubricScore[];
+}
+
 export async function suggestFeedback(
     rating: number,
     criteria: string,
     submissionContent: string,
     taskDescription?: string | null,
     reflection?: string | null,
-): Promise<{ strengths?: string; improvements?: string; suggested_rating?: number }> {
+    rubricCriteria?: RubricCriterion[] | null,
+): Promise<SuggestFeedbackResult> {
     const { data, error } = await supabase.functions.invoke(
         "suggest-feedback",
         {
@@ -81,6 +91,7 @@ export async function suggestFeedback(
                 submission_content: submissionContent,
                 task_description: taskDescription ?? null,
                 reflection: reflection ?? null,
+                rubric_criteria: rubricCriteria ?? null,
             },
         },
     );
@@ -96,5 +107,8 @@ export async function suggestFeedback(
         strengths: data.strengths,
         improvements: data.improvements,
         suggested_rating: data.suggested_rating,
+        rubric_scores: Array.isArray(data.rubric_scores)
+            ? data.rubric_scores
+            : undefined,
     };
 }

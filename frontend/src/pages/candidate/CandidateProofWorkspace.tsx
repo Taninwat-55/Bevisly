@@ -217,12 +217,41 @@ export default function CandidateProofWorkspace() {
           <div className="flex-1 overflow-y-auto p-6 prose prose-invert prose-sm max-w-none prose-headings:text-slate-200 prose-p:text-slate-400 prose-code:text-orange-400 prose-code:bg-[#2d2d30] prose-code:px-1 prose-code:py-0.5 prose-code:rounded">
             <ReactMarkdown>{DOMPurify.sanitize(task.description || "*No description provided.*")}</ReactMarkdown>
 
+            {Array.isArray(task.rubric_criteria) && task.rubric_criteria.length > 0 && (
+              <div className="mt-8 pt-8 border-t border-[#3e3e42] not-prose">
+                <div className="flex items-center justify-between mb-2">
+                  <h4 className="text-xs font-bold text-slate-300 uppercase tracking-wider">
+                    Scoring Contract
+                  </h4>
+                  <span className="text-[10px] uppercase tracking-wider text-slate-500">
+                    {task.rubric_locked_at ? "Locked" : "Set by employer"}
+                  </span>
+                </div>
+                <p className="text-xs text-slate-500 mb-3">
+                  The employer will score your submission against these criteria. Weights show how much each one contributes.
+                </p>
+                <ul className="space-y-2">
+                  {task.rubric_criteria.map((c) => (
+                    <li
+                      key={c.name}
+                      className="flex items-start gap-3 bg-[#252526] border border-[#3e3e42] rounded px-3 py-2"
+                    >
+                      <span className="shrink-0 inline-flex items-center justify-center min-w-[40px] h-6 px-2 rounded bg-orange-500/10 text-orange-400 text-[11px] font-bold">
+                        {c.weight}%
+                      </span>
+                      <div className="min-w-0">
+                        <p className="font-semibold text-sm text-slate-200">{c.name}</p>
+                        <p className="text-xs text-slate-400 mt-0.5">{c.description}</p>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
             <div className="mt-8 pt-8 border-t border-[#3e3e42]">
               <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">Constraints</h4>
               <div className="flex gap-2 flex-wrap">
-                <div className={`text-xs px-2 py-1 rounded border ${task.ai_tools_allowed ? 'border-green-900 bg-green-900/20 text-green-400' : 'border-red-900 bg-red-900/20 text-red-400'}`}>
-                  {task.ai_tools_allowed ? "AI Types: Allowed" : "No AI Tools"}
-                </div>
                 <div className="text-xs px-2 py-1 rounded border border-blue-900 bg-blue-900/20 text-blue-400">
                   Format: {task.submission_type}
                 </div>

@@ -184,7 +184,7 @@ export async function getProofTaskDetails(
   const { data, error } = await supabase
     .from("proof_tasks")
     .select(
-      "id, job_id, title, description, expected_time, submission_format, ai_tools_allowed, attachments, recommended_platform, submission_type, jobs ( company )",
+      "id, job_id, title, description, expected_time, submission_format, ai_tools_allowed, attachments, recommended_platform, submission_type, rubric_criteria, rubric_locked_at, jobs ( company )",
     )
     .eq("id", proof_task_id)
     .maybeSingle();
@@ -278,10 +278,10 @@ export async function getSubmissionById(submission_id: string) {
       resume_url,
       rejection_email_sent,
       created_at,
-      proof_tasks ( id, title, description ),
+      proof_tasks ( id, title, description, rubric_criteria, rubric_locked_at ),
       jobs ( id, title, company ),
-      profiles:user_id ( full_name, email, resume_url ), 
-      feedback ( stars, strengths, improvements )
+      profiles:user_id ( full_name, email, resume_url ),
+      feedback ( stars, strengths, improvements, rubric_scores )
 `)
     .eq("id", submission_id)
     .single();

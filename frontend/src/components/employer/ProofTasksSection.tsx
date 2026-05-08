@@ -1,15 +1,46 @@
-import { useState } from "react";
-import { Trash2, UploadCloud, Paperclip, Clock, Github, Code2 } from "lucide-react";
+import { useEffect, useState } from "react";
+import {
+  Trash2,
+  UploadCloud,
+  Paperclip,
+  Clock,
+  Github,
+  Code2,
+  Lock,
+  Plus,
+  AlertCircle,
+  Sparkles,
+} from "lucide-react";
 import { supabase } from "@/lib/supabaseClient";
 import toast from "react-hot-toast";
-import type { ProofTask } from "@/types";
+import type { ProofTask, RubricCriterion } from "@/types";
 import MarkdownEditor from "@/components/common/MarkdownEditor";
 import { useAuth } from "@/hooks/useAuth";
+
+const DEFAULT_RUBRIC: RubricCriterion[] = [
+  { name: "", weight: 34, description: "" },
+  { name: "", weight: 33, description: "" },
+  { name: "", weight: 33, description: "" },
+];
+
+export type RubricFieldError = {
+  nameMissing?: boolean;
+  descriptionMissing?: boolean;
+};
+
+export type RubricErrors = {
+  countOutOfRange?: boolean;
+  weightSumWrong?: boolean;
+  fields?: RubricFieldError[];
+};
+
+export type ProofTaskRubricErrors = Record<number, RubricErrors>;
 
 interface ProofTasksSectionProps {
   proofTasks: ProofTask[];
   onChange: (tasks: ProofTask[]) => void;
   errors?: string;
+  rubricErrors?: ProofTaskRubricErrors;
 }
 
 const TIME_OPTIONS = [
@@ -20,6 +51,7 @@ export default function ProofTasksSection({
   proofTasks,
   onChange,
   errors,
+  rubricErrors,
 }: ProofTasksSectionProps) {
   const { user } = useAuth();
   const [uploading, setUploading] = useState(false);
@@ -84,7 +116,17 @@ export default function ProofTasksSection({
         </h2>
         <button
           type="button"
-          onClick={() => onChange([...proofTasks, { id: "", title: "", submission_type: "link" } as ProofTask])}
+          onClick={() =>
+            onChange([
+              ...proofTasks,
+              {
+                id: "",
+                title: "",
+                submission_type: "link",
+                rubric_criteria: DEFAULT_RUBRIC.map((c) => ({ ...c })),
+              } as ProofTask,
+            ])
+          }
           className="text-sm text-[var(--color-employer)] hover:underline"
         >
           + Add Task
@@ -173,6 +215,13 @@ export default function ProofTasksSection({
               rows={5}
             />
 
+            {/* Scoring Rubric */}
+            <RubricEditor
+              task={task}
+              onChange={(criteria) => handleChange(index, "rubric_criteria", criteria)}
+              errors={rubricErrors?.[index]}
+            />
+
             {/* Attachments & Time */}
             <div className="grid sm:grid-cols-2 gap-5">
               <div>
@@ -217,7 +266,16 @@ export default function ProofTasksSection({
         <div className="text-center py-8 border border-dashed border-[var(--color-border)] rounded-xl">
           <button
             type="button"
-            onClick={() => onChange([{ id: "", title: "", submission_type: "link" } as ProofTask])}
+            onClick={() =>
+              onChange([
+                {
+                  id: "",
+                  title: "",
+                  submission_type: "link",
+                  rubric_criteria: DEFAULT_RUBRIC.map((c) => ({ ...c })),
+                } as ProofTask,
+              ])
+            }
             className="text-sm font-medium text-[var(--color-employer)] hover:underline"
           >
             + Add a Proof Task
@@ -226,5 +284,222 @@ export default function ProofTasksSection({
       )}
       {errors && <p className="text-[var(--color-error)] text-xs mt-2">{errors}</p>}
     </section>
+  );
+}
+
+export { DEFAULT_RUBRIC };
+
+interface RubricEditorProps {
+  task: ProofTask;
+  onChange: (criteria: RubricCriterion[]) => void;
+  errors?: RubricErrors;
+  aiSuggested?: boolean;
+}
+
+export function RubricEditor({ task, onChange, errors, aiSuggested }: RubricEditorProps) {
+  const isLocked = !!task.rubric_locked_at;
+  const hasStored = Array.isArray(task.rubric_criteria) && task.rubric_criteria.length > 0;
+  const criteria = hasStored ? task.rubric_criteria! : DEFAULT_RUBRIC.map((c) => ({ ...c }));
+
+  // Persist defaults to form state on first render so the visible 3 rows
+  // are actually saved when the user submits without touching the rubric.
+  useEffect(() => {
+    if (!isLocked && !hasStored) {
+      onChange(DEFAULT_RUBRIC.map((c) => ({ ...c })));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const totalWeight = criteria.reduce((sum, c) => sum + (Number(c.weight) || 0), 0);
+  const weightOk = totalWeight === 100;
+  const countOk = criteria.length >= 3 && criteria.length <= 5;
+  const hasError =
+    !!errors &&
+    (errors.countOutOfRange ||
+      errors.weightSumWrong ||
+      (errors.fields ?? []).some((f) => f.nameMissing || f.descriptionMissing));
+
+  const updateRow = (idx: number, patch: Partial<RubricCriterion>) => {
+    const next = criteria.map((c, i) => (i === idx ? { ...c, ...patch } : c));
+    onChange(next);
+  };
+
+  const removeRow = (idx: number) => {
+    if (criteria.length <= 3) {
+      toast.error("A rubric needs at least 3 criteria.");
+      return;
+    }
+    onChange(criteria.filter((_, i) => i !== idx));
+  };
+
+  const addRow = () => {
+    if (criteria.length >= 5) {
+      toast.error("A rubric can have at most 5 criteria.");
+      return;
+    }
+    onChange([...criteria, { name: "", weight: 0, description: "" }]);
+  };
+
+  return (
+    <div
+      className={`border rounded-xl p-4 transition-colors ${
+        hasError
+          ? "border-[var(--color-error)] bg-[var(--color-error)]/5"
+          : "border-[var(--color-border)] bg-[var(--color-surface)]/40"
+      }`}
+    >
+      <div className="flex items-center justify-between mb-1">
+        <label className="text-sm font-semibold text-[var(--color-text)] flex items-center gap-2">
+          Scoring Rubric
+          <span className="text-[10px] font-bold uppercase tracking-widest px-1.5 py-0.5 rounded-md bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300 border border-amber-200 dark:border-amber-800">
+            Required
+          </span>
+          {isLocked && (
+            <span className="inline-flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded-md bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-200">
+              <Lock size={10} /> Locked
+            </span>
+          )}
+        </label>
+        <span
+          className={`text-xs font-medium ${
+            weightOk
+              ? "text-emerald-600 dark:text-emerald-400"
+              : "text-[var(--color-error)]"
+          }`}
+        >
+          Total weight: {totalWeight} / 100
+        </span>
+      </div>
+      <p className="text-xs text-[var(--color-text-muted)] mb-3">
+        {isLocked
+          ? "First candidate has submitted. Rubric is locked for fairness."
+          : "Define how this task will be scored. 3–5 criteria, each with a name, a weight (must sum to 100), and a one-line description of what 'good' looks like. Locks once the first candidate submits."}
+      </p>
+
+      {aiSuggested && !isLocked && (
+        <div className="mb-3 flex items-start gap-2 p-2.5 rounded-lg bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800 text-xs text-purple-900 dark:text-purple-200">
+          <Sparkles size={14} className="mt-0.5 shrink-0 text-purple-500" />
+          <p>
+            <span className="font-semibold">Suggested by AI</span> — review,
+            edit, or replace before posting. The rubric is your contract with
+            the candidate, so it should reflect how <em>you</em> evaluate work.
+          </p>
+        </div>
+      )}
+
+      {hasError && (
+        <div className="mb-3 flex items-start gap-2 p-2.5 rounded-lg bg-[var(--color-error)]/10 border border-[var(--color-error)]/30 text-xs text-[var(--color-error)]">
+          <AlertCircle size={14} className="mt-0.5 shrink-0" />
+          <div className="space-y-1">
+            {errors?.countOutOfRange && (
+              <p>Add or remove rows so you have 3–5 criteria.</p>
+            )}
+            {errors?.weightSumWrong && (
+              <p>Weights must add up to exactly 100. Currently {totalWeight}.</p>
+            )}
+            {(errors?.fields ?? []).some(
+              (f) => f.nameMissing || f.descriptionMissing,
+            ) && (
+              <p>Fill in the highlighted name and description fields below.</p>
+            )}
+          </div>
+        </div>
+      )}
+
+      <div className="space-y-2">
+        {criteria.map((c, idx) => {
+          const fieldError = errors?.fields?.[idx];
+          const nameBad = !!fieldError?.nameMissing;
+          const descBad = !!fieldError?.descriptionMissing;
+          return (
+            <div
+              key={idx}
+              className="grid grid-cols-12 gap-2 items-start bg-[var(--color-bg)]/60 rounded-lg p-2"
+            >
+              <div className="col-span-3 flex flex-col gap-0.5">
+                <input
+                  type="text"
+                  disabled={isLocked}
+                  value={c.name}
+                  onChange={(e) => updateRow(idx, { name: e.target.value })}
+                  placeholder="e.g. Code clarity"
+                  aria-invalid={nameBad}
+                  className={`border rounded p-1.5 text-sm bg-[var(--color-bg)] text-[var(--color-text)] focus:outline-none focus:ring-2 focus:ring-[var(--color-employer)] disabled:opacity-60 ${
+                    nameBad
+                      ? "border-[var(--color-error)]"
+                      : "border-[var(--color-border)]"
+                  }`}
+                />
+                {nameBad && (
+                  <span className="text-[10px] text-[var(--color-error)]">
+                    Name required
+                  </span>
+                )}
+              </div>
+              <input
+                type="number"
+                min={1}
+                max={100}
+                disabled={isLocked}
+                value={c.weight ?? 0}
+                onChange={(e) =>
+                  updateRow(idx, { weight: Number(e.target.value) || 0 })
+                }
+                className="col-span-2 self-start border border-[var(--color-border)] rounded p-1.5 text-sm bg-[var(--color-bg)] text-[var(--color-text)] focus:outline-none focus:ring-2 focus:ring-[var(--color-employer)] disabled:opacity-60"
+              />
+              <div className="col-span-6 flex flex-col gap-0.5">
+                <input
+                  type="text"
+                  disabled={isLocked}
+                  value={c.description}
+                  onChange={(e) =>
+                    updateRow(idx, { description: e.target.value })
+                  }
+                  placeholder="What 'good' looks like"
+                  aria-invalid={descBad}
+                  className={`border rounded p-1.5 text-sm bg-[var(--color-bg)] text-[var(--color-text)] focus:outline-none focus:ring-2 focus:ring-[var(--color-employer)] disabled:opacity-60 ${
+                    descBad
+                      ? "border-[var(--color-error)]"
+                      : "border-[var(--color-border)]"
+                  }`}
+                />
+                {descBad && (
+                  <span className="text-[10px] text-[var(--color-error)]">
+                    Description required
+                  </span>
+                )}
+              </div>
+              <button
+                type="button"
+                disabled={isLocked || criteria.length <= 3}
+                onClick={() => removeRow(idx)}
+                className="col-span-1 self-start flex justify-center items-center text-[var(--color-text-muted)] hover:text-[var(--color-error)] disabled:opacity-30 disabled:cursor-not-allowed transition"
+                title="Remove criterion"
+              >
+                <Trash2 size={14} />
+              </button>
+            </div>
+          );
+        })}
+      </div>
+
+      {!isLocked && (
+        <div className="flex items-center justify-between mt-3">
+          <button
+            type="button"
+            onClick={addRow}
+            disabled={criteria.length >= 5}
+            className="inline-flex items-center gap-1 text-xs font-medium text-[var(--color-employer)] hover:underline disabled:opacity-40 disabled:no-underline"
+          >
+            <Plus size={12} /> Add criterion
+          </button>
+          {!countOk && (
+            <span className="text-xs text-[var(--color-error)]">
+              Need 3–5 criteria
+            </span>
+          )}
+        </div>
+      )}
+    </div>
   );
 }

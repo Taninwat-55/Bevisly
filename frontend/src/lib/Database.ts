@@ -34,6 +34,7 @@ export type Database = {
       }
       companies: {
         Row: {
+          avg_review_days: number | null
           created_at: string | null
           culture: string | null
           description: string | null
@@ -48,6 +49,7 @@ export type Database = {
           website_url: string | null
         }
         Insert: {
+          avg_review_days?: number | null
           created_at?: string | null
           culture?: string | null
           description?: string | null
@@ -62,6 +64,7 @@ export type Database = {
           website_url?: string | null
         }
         Update: {
+          avg_review_days?: number | null
           created_at?: string | null
           culture?: string | null
           description?: string | null
@@ -179,6 +182,7 @@ export type Database = {
           improvements: string | null
           rating: number | null
           reviewer_id: string | null
+          rubric_scores: Json | null
           stars: number | null
           strengths: string | null
           submission_id: string | null
@@ -192,6 +196,7 @@ export type Database = {
           improvements?: string | null
           rating?: number | null
           reviewer_id?: string | null
+          rubric_scores?: Json | null
           stars?: number | null
           strengths?: string | null
           submission_id?: string | null
@@ -205,6 +210,7 @@ export type Database = {
           improvements?: string | null
           rating?: number | null
           reviewer_id?: string | null
+          rubric_scores?: Json | null
           stars?: number | null
           strengths?: string | null
           submission_id?: string | null
@@ -625,6 +631,8 @@ export type Database = {
           instructions: string | null
           job_id: string | null
           recommended_platform: string | null
+          rubric_criteria: Json | null
+          rubric_locked_at: string | null
           submission_format: string | null
           submission_type: string | null
           title: string
@@ -641,6 +649,8 @@ export type Database = {
           instructions?: string | null
           job_id?: string | null
           recommended_platform?: string | null
+          rubric_criteria?: Json | null
+          rubric_locked_at?: string | null
           submission_format?: string | null
           submission_type?: string | null
           title: string
@@ -657,6 +667,8 @@ export type Database = {
           instructions?: string | null
           job_id?: string | null
           recommended_platform?: string | null
+          rubric_criteria?: Json | null
+          rubric_locked_at?: string | null
           submission_format?: string | null
           submission_type?: string | null
           title?: string
@@ -896,6 +908,10 @@ export type Database = {
       }
       check_invite_code: { Args: { invite_code: string }; Returns: boolean }
       claim_invite_code: { Args: { invite_code: string }; Returns: undefined }
+      compute_avg_review_days: {
+        Args: { p_company_id: string }
+        Returns: number
+      }
       compute_bevisly_score: { Args: { p_user_id: string }; Returns: number }
       compute_reliability_score: {
         Args: { p_user_id: string }

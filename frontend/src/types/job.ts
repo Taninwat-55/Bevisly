@@ -52,5 +52,7 @@ export interface Job {
     ai_tools_allowed?: boolean | null;
     duration_minutes?: number | null;
     attachments?: string[] | null;
+    rubric_criteria?: { name: string; weight: number; description: string }[] | null;
+    rubric_locked_at?: string | null;
   }[];
 }

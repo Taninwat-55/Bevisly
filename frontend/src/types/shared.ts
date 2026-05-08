@@ -1,4 +1,24 @@
 /**
+ * One row of a proof task's scoring rubric.
+ * Locked once the first candidate submits (see proof_tasks.rubric_locked_at).
+ */
+export type RubricCriterion = {
+  name: string;
+  weight: number; // 1-100; criteria for one task must sum to 100
+  description: string;
+};
+
+/**
+ * Per-criterion score recorded inside `feedback.rubric_scores`.
+ * `name` matches a RubricCriterion.name on the parent proof_task.
+ */
+export type RubricScore = {
+  name: string;
+  score: number; // 1-5
+  note?: string | null;
+};
+
+/**
  * Shared type used by both candidate and employer flows.
  * Mirrors `proof_tasks` table shape used in both.
  */
@@ -16,6 +36,8 @@ export type ProofTask = {
   attachments?: string[] | null;
   credits?: number | null;
   company_name?: string | null;
+  rubric_criteria?: RubricCriterion[] | null;
+  rubric_locked_at?: string | null;
 };
 
 // Shape of a feedback record from the `feedback` table.
@@ -26,6 +48,7 @@ export type Feedback = {
   strengths: string | null;
   improvements: string | null;
   stars: number | null;
+  rubric_scores?: RubricScore[] | null;
   created_at: string | null;
 };
 

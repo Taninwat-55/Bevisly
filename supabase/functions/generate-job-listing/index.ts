@@ -104,6 +104,12 @@ Deno.serve(async (req) => {
       The Requirements should be clear bullet points.
       The Proof Task should be a realistic challenge (45-60 mins) to verify the core skills implied by the input.
 
+      Each Proof Task MUST include a "rubric_criteria" array of exactly 3 weighted scoring criteria:
+        - "name": short label (2–4 words), e.g. "Code clarity", "Problem decomposition", "UX polish"
+        - "weight": integer 1–100; the three weights MUST sum to exactly 100
+        - "description": one-line plain-English description of what 'good' looks like for that criterion
+      Pick criteria that match the actual skill being tested by the task.
+
       Return ONLY a JSON object with this exact structure (no markdown formatting):
       {
         "title": "Extracted Job Title",
@@ -114,7 +120,12 @@ Deno.serve(async (req) => {
             "title": "Task Title",
             "description": "Detailed instructions...",
             "expected_time": "45-60 mins",
-            "submission_format": "github_repo" 
+            "submission_format": "github_repo",
+            "rubric_criteria": [
+              { "name": "Code clarity", "weight": 30, "description": "Readable structure, clear naming" },
+              { "name": "Problem decomposition", "weight": 40, "description": "Breaks the problem into clean steps" },
+              { "name": "Edge-case handling", "weight": 30, "description": "Anticipates failure modes and inputs" }
+            ]
           }
         ]
       }

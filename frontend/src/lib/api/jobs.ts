@@ -84,7 +84,9 @@ export async function getJobWithTasks(job_id: string) {
         expected_time,
         submission_format,
         ai_tools_allowed,
-        attachments
+        attachments,
+        rubric_criteria,
+        rubric_locked_at
       ),
       employer:profiles!jobs_employer_id_fkey ( avatar_url, is_verified )
     `)
@@ -126,7 +128,7 @@ export async function getEmployerJobs(
       pay_period,
       created_at,
       featured,
-      proof_tasks ( id, title, expected_time, ai_tools_allowed )
+      proof_tasks ( id, title, expected_time, ai_tools_allowed, rubric_criteria, rubric_locked_at )
     `)
     .eq("employer_id", employer_id)
     .order("created_at", { ascending: false });
@@ -175,7 +177,7 @@ export async function getCompanyJobs(
       pay_period,
       created_at,
       featured,
-      proof_tasks ( id, title, expected_time, ai_tools_allowed )
+      proof_tasks ( id, title, expected_time, ai_tools_allowed, rubric_criteria, rubric_locked_at )
     `)
     .eq("company_id", company_id)
     .order("created_at", { ascending: false });
@@ -271,8 +273,8 @@ export async function createJobWithTasks(
       submission_format: task.submission_format,
       submission_type: task.submission_type ?? "link",
       recommended_platform: task.recommended_platform ?? null,
-      ai_tools_allowed: task.ai_tools_allowed ?? false,
       attachments: task.attachments ?? [],
+      rubric_criteria: task.rubric_criteria ?? null,
     }));
 
     const { error: proofError } = await supabase
@@ -318,26 +320,70 @@ export async function updateJobWithTasks(
 
   if (jobError) throw jobError;
 
-  // 2️⃣ Refresh proof tasks
+  // 2️⃣ Reconcile proof tasks (UPSERT-by-id, never delete a locked rubric)
   if (values.proof_tasks?.length) {
-    await supabase.from("proof_tasks").delete().eq("job_id", job_id);
-
-    const inserts = values.proof_tasks.map((t) => ({
-      job_id,
-      title: t.title,
-      description: t.description,
-      duration_minutes: t.duration_minutes || 30,
-      expected_time: t.expected_time || "30 mins",
-      submission_format: t.submission_format,
-      submission_type: t.submission_type ?? "link",
-      recommended_platform: t.recommended_platform ?? null,
-      ai_tools_allowed: t.ai_tools_allowed ?? false,
-    }));
-
-    const { error: insertError } = await supabase
+    // Fetch existing tasks to know which are locked
+    const { data: existing, error: fetchError } = await supabase
       .from("proof_tasks")
-      .insert(inserts);
-    if (insertError) throw insertError;
+      .select("id, rubric_locked_at")
+      .eq("job_id", job_id);
+    if (fetchError) throw fetchError;
+
+    const lockedById = new Map<string, string | null>(
+      (existing ?? []).map((t) => [t.id, t.rubric_locked_at as string | null]),
+    );
+    const incomingIds = new Set(
+      values.proof_tasks.filter((t) => t.id).map((t) => t.id as string),
+    );
+
+    // Delete tasks that are no longer in the form. (RLS / FK will surface an
+    // error if a task that has submissions is removed — that's the right
+    // signal to the user.)
+    const toDelete = (existing ?? [])
+      .map((t) => t.id as string)
+      .filter((id) => !incomingIds.has(id));
+    if (toDelete.length) {
+      const { error: delError } = await supabase
+        .from("proof_tasks")
+        .delete()
+        .in("id", toDelete);
+      if (delError) throw delError;
+    }
+
+    // Update existing or insert new
+    for (const t of values.proof_tasks) {
+      const basePayload = {
+        job_id,
+        title: t.title,
+        description: t.description,
+        duration_minutes: t.duration_minutes || 30,
+        expected_time: t.expected_time || "30 mins",
+        submission_format: t.submission_format,
+        submission_type: t.submission_type ?? "link",
+        recommended_platform: t.recommended_platform ?? null,
+        attachments: t.attachments ?? [],
+      };
+
+      if (t.id && lockedById.has(t.id)) {
+        // Existing task: only allow rubric edit if not locked
+        const isLocked = !!lockedById.get(t.id);
+        const updatePayload = isLocked
+          ? basePayload
+          : { ...basePayload, rubric_criteria: t.rubric_criteria ?? null };
+
+        const { error: updateError } = await supabase
+          .from("proof_tasks")
+          .update(updatePayload)
+          .eq("id", t.id);
+        if (updateError) throw updateError;
+      } else {
+        // New task: persist rubric on insert
+        const { error: insertError } = await supabase
+          .from("proof_tasks")
+          .insert({ ...basePayload, rubric_criteria: t.rubric_criteria ?? null });
+        if (insertError) throw insertError;
+      }
+    }
   }
 
   return true;

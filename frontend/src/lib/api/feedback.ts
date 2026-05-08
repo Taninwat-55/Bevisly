@@ -1,5 +1,5 @@
 import { supabase } from "../supabaseClient";
-import type { Feedback } from "@/types";
+import type { Feedback, RubricScore } from "@/types";
 
 /**
  * Fetch feedback for a specific submission (for employer or admin review)
@@ -26,6 +26,7 @@ export async function createFeedback(entry: {
   strengths: string;
   improvements: string;
   stars: number;
+  rubric_scores?: RubricScore[] | null;
 }): Promise<Feedback> {
   const { data, error } = await supabase
     .from("feedback")

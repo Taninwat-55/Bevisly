@@ -1,4 +1,4 @@
-import type { ProofTask } from "./shared";
+import type { ProofTask, RubricCriterion, RubricScore } from "./shared";
 
 // Type representing a single job posted by an employer.
 export type EmployerJob = {
@@ -61,13 +61,20 @@ export type EmployerSubmission = {
   text_response?: string | null; // For text answers
   video_url?: string | null;
   reflection: string | null;
-  proof_tasks: { id: string; title: string | null; description?: string | null } | null;
+  proof_tasks: {
+    id: string;
+    title: string | null;
+    description?: string | null;
+    rubric_criteria?: RubricCriterion[] | null;
+    rubric_locked_at?: string | null;
+  } | null;
 
   jobs?: { title: string | null; company: string | null } | null;
   feedback?: {
     stars: number | null;
     strengths: string | null;
     improvements: string | null;
+    rubric_scores?: RubricScore[] | null;
   }[] | null;
 
   // Talent Manager fields

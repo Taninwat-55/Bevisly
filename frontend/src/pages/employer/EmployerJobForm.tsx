@@ -14,6 +14,11 @@ import {
 } from "lucide-react";
 import { POPULAR_JOB_TITLES } from "@/data/popularJobTitles";
 import { useCompany } from "@/hooks/useCompany";
+import {
+  RubricEditor,
+  type ProofTaskRubricErrors,
+  type RubricFieldError,
+} from "@/components/employer/ProofTasksSection";
 
 const FREE_TIER_JOB_LIMIT = 2;
 
@@ -72,6 +77,26 @@ export default function EmployerJobForm({
   }, [companyName, values.company]);
 
   const [loading, setLoading] = useState(false);
+  const [rubricErrors, setRubricErrors] = useState<ProofTaskRubricErrors>({});
+
+  // Tasks whose rubrics arrived already-filled in create mode came from the
+  // AI job generator. Track them so the editor can flag the rubric as a
+  // draft. Cleared per-task as soon as the employer edits any rubric field.
+  const [aiRubricTaskIds, setAiRubricTaskIds] = useState<Set<string>>(() => {
+    if (mode !== "create") return new Set();
+    const ids = new Set<string>();
+    (defaultValues?.proof_tasks ?? []).forEach((t) => {
+      const r = t.rubric_criteria;
+      if (
+        t.id &&
+        Array.isArray(r) &&
+        r.some((c) => c.name?.trim() && c.description?.trim())
+      ) {
+        ids.add(t.id);
+      }
+    });
+    return ids;
+  });
   // Handlers
   const handleChange = (field: string, value: unknown) => {
     setValues((prev) => ({ ...prev, [field]: value }));
@@ -91,13 +116,56 @@ export default function EmployerJobForm({
     if (!values.location?.trim()) missingFields.push("Location");
     if (!values.description?.trim()) missingFields.push("Job Description");
     
+    const nextRubricErrors: ProofTaskRubricErrors = {};
+    let firstFailingTaskIndex: number | null = null;
+
     values.proof_tasks?.forEach((task, index) => {
       if (!task.title?.trim()) missingFields.push(`Task Title (Task ${index + 1})`);
       if (!task.description?.trim()) missingFields.push(`Task Instructions (Task ${index + 1})`);
+
+      // Skip rubric validation if this task's rubric is already locked
+      if (task.rubric_locked_at) return;
+
+      const rubric = task.rubric_criteria ?? [];
+      const countOutOfRange = rubric.length < 3 || rubric.length > 5;
+      const totalWeight = rubric.reduce((sum, c) => sum + (Number(c.weight) || 0), 0);
+      const weightSumWrong = !countOutOfRange && totalWeight !== 100;
+      const fields: RubricFieldError[] = rubric.map((c) => ({
+        nameMissing: !c.name?.trim(),
+        descriptionMissing: !c.description?.trim(),
+      }));
+      const anyFieldMissing = fields.some(
+        (f) => f.nameMissing || f.descriptionMissing,
+      );
+
+      if (countOutOfRange || weightSumWrong || anyFieldMissing) {
+        nextRubricErrors[index] = {
+          countOutOfRange,
+          weightSumWrong,
+          fields,
+        };
+        if (firstFailingTaskIndex === null) firstFailingTaskIndex = index;
+      }
     });
+
+    setRubricErrors(nextRubricErrors);
 
     if (missingFields.length > 0) {
       toast.error(`Please fill in: ${missingFields.join(", ")}`);
+      return;
+    }
+
+    if (Object.keys(nextRubricErrors).length > 0) {
+      toast.error(
+        "Scoring rubric needs attention. See the highlighted task below.",
+      );
+      // Scroll the first failing rubric into view
+      if (firstFailingTaskIndex !== null) {
+        const node = document.getElementById(
+          `proof-task-${firstFailingTaskIndex}`,
+        );
+        node?.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
       return;
     }
 
@@ -397,7 +465,11 @@ export default function EmployerJobForm({
                         description: "",
                         expected_time: "2-4 hours",
                         submission_format: "github_repo",
-                        ai_tools_allowed: true,
+                        rubric_criteria: [
+                          { name: "", weight: 34, description: "" },
+                          { name: "", weight: 33, description: "" },
+                          { name: "", weight: 33, description: "" },
+                        ],
                       };
                       handleChange("proof_tasks", [...(values.proof_tasks || []), newTask]);
                     }}
@@ -419,7 +491,11 @@ export default function EmployerJobForm({
             )}
 
             {values.proof_tasks?.map((task, index) => (
-              <div key={task.id || index} className="p-5 bg-[var(--color-bg)] rounded-[var(--radius-card)] border border-[var(--color-border)] space-y-5 animate-fade-in-up">
+              <div
+                key={task.id || index}
+                id={`proof-task-${index}`}
+                className="p-5 bg-[var(--color-bg)] rounded-[var(--radius-card)] border border-[var(--color-border)] space-y-5 animate-fade-in-up scroll-mt-24"
+              >
                 <div className="flex justify-between items-start">
                   <h4 className="font-semibold text-[var(--color-text)] text-sm uppercase tracking-wider">Task Details</h4>
                   <div className="flex items-center gap-2">
@@ -496,18 +572,28 @@ export default function EmployerJobForm({
                   />
                 </div>
 
-                <div className="flex items-center gap-2 pt-2">
-                  <input
-                    type="checkbox"
-                    id={`ai_tools_${index}`}
-                    checked={task.ai_tools_allowed ?? false}
-                    onChange={(e) => handleTaskChange(index, "ai_tools_allowed", e.target.checked)}
-                    className="rounded border-[var(--color-border)] text-[var(--color-brand-primary)]"
-                  />
-                  <label htmlFor={`ai_tools_${index}`} className="text-sm text-[var(--color-text)]">
-                    Allow AI Tools (ChatGPT, Copilot, etc.) usage
-                  </label>
-                </div>
+                <RubricEditor
+                  task={task}
+                  aiSuggested={!!task.id && aiRubricTaskIds.has(task.id)}
+                  onChange={(criteria) => {
+                    handleTaskChange(index, "rubric_criteria", criteria);
+                    if (rubricErrors[index]) {
+                      setRubricErrors((prev) => {
+                        const next = { ...prev };
+                        delete next[index];
+                        return next;
+                      });
+                    }
+                    if (task.id && aiRubricTaskIds.has(task.id)) {
+                      setAiRubricTaskIds((prev) => {
+                        const next = new Set(prev);
+                        next.delete(task.id!);
+                        return next;
+                      });
+                    }
+                  }}
+                  errors={rubricErrors[index]}
+                />
               </div>
             ))}
           </Card>

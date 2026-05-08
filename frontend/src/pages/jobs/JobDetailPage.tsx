@@ -517,7 +517,40 @@ export default function JobDetailPage() {
                   <div className="prose prose-invert max-w-none text-[var(--color-text-muted)] leading-relaxed mb-8">
                     <ReactMarkdown>{DOMPurify.sanitize(proof.description || "No description provided.")}</ReactMarkdown>
                   </div>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-4 rounded-2xl bg-[var(--color-bg)]/50 border border-[var(--color-border)]">
+
+                  {Array.isArray(proof.rubric_criteria) && proof.rubric_criteria.length > 0 && (
+                    <div className="mb-6 p-5 rounded-2xl bg-[var(--color-bg)]/50 border border-[var(--color-border)]">
+                      <div className="flex items-center justify-between mb-1">
+                        <h5 className="text-xs font-bold uppercase tracking-wider text-[var(--color-text)]">
+                          How this proof will be scored
+                        </h5>
+                        <span className="text-[10px] uppercase tracking-wider text-[var(--color-text-muted)]">
+                          {proof.rubric_locked_at ? "Locked rubric" : "Scoring contract"}
+                        </span>
+                      </div>
+                      <p className="text-xs text-[var(--color-text-muted)] mb-4">
+                        The employer evaluates submissions against these criteria. Weights show how much each criterion contributes to the overall score.
+                      </p>
+                      <ul className="space-y-2">
+                        {proof.rubric_criteria.map((c: { name: string; weight: number; description: string }) => (
+                          <li
+                            key={c.name}
+                            className="flex items-start gap-3 p-3 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)]"
+                          >
+                            <span className="shrink-0 inline-flex items-center justify-center min-w-[44px] h-7 px-2 rounded-md bg-[var(--color-brand-primary)]/10 text-[var(--color-brand-primary)] text-xs font-bold">
+                              {c.weight}%
+                            </span>
+                            <div className="min-w-0">
+                              <p className="font-semibold text-sm text-[var(--color-text)]">{c.name}</p>
+                              <p className="text-xs text-[var(--color-text-muted)] mt-0.5">{c.description}</p>
+                            </div>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
+                  <div className="grid grid-cols-3 gap-4 p-4 rounded-2xl bg-[var(--color-bg)]/50 border border-[var(--color-border)]">
                     <div className="flex flex-col items-center justify-center p-3">
                       <span className="text-[10px] uppercase text-[var(--color-text-muted)] font-bold mb-1">Est. Time</span>
                       <span className="text-sm font-bold text-[var(--color-text)]">{proof.expected_time || "TBD"}</span>
@@ -525,12 +558,6 @@ export default function JobDetailPage() {
                     <div className="flex flex-col items-center justify-center p-3 border-l border-[var(--color-border)]">
                       <span className="text-[10px] uppercase text-[var(--color-text-muted)] font-bold mb-1">Format</span>
                       <span className="text-sm font-bold text-[var(--color-text)] capitalize">{proof.submission_format?.replace("_", " ") || "TBD"}</span>
-                    </div>
-                    <div className="flex flex-col items-center justify-center p-3 border-l border-[var(--color-border)]">
-                      <span className="text-[10px] uppercase text-[var(--color-text-muted)] font-bold mb-1">AI Tools</span>
-                      <span className={`text-sm font-bold ${proof.ai_tools_allowed ? "text-emerald-500" : "text-amber-500"}`}>
-                        {proof.ai_tools_allowed !== null ? (proof.ai_tools_allowed ? "Allowed" : "Restricted") : "TBD"}
-                      </span>
                     </div>
                     <div className="flex flex-col items-center justify-center p-3 border-l border-[var(--color-border)]">
                       <span className="text-[10px] uppercase text-[var(--color-text-muted)] font-bold mb-1">Type</span>
