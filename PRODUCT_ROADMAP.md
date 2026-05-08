@@ -1,7 +1,7 @@
 # Bevisly — Product Roadmap
 
 > Living document. No deadlines — ship when it's right.
-> Last updated: 2026-05-04
+> Last updated: 2026-05-08
 
 ---
 
@@ -67,6 +67,15 @@ Inspired by Bitcoin's proof-of-work model: effort produces something verifiable 
 | 5 | **Stripe Payment Integration** | Subscription checkout for Free/Pro plans, webhook updates `profiles.subscription_tier` in Supabase, Stripe Customer Portal for billing management, Pro feature gating. | 🔴 |
 | 6 | **Rejection Email Visual Feedback** | When employer drags a candidate to the Rejected column, the auto-rejection email already sends — but the employer gets no visual confirmation. Show a toast notification and a "Email sent ✓" indicator on the card so employers know it fired. | 🟢 |
 | 7 | **AI Framing & Disclaimers (Anti-Bias Hygiene)** | Cheap, defensive copy + UX changes so we never *appear* to be an "AI hiring decision" tool. Three concrete items: (a) rename "AI suggested rating" → "AI evidence summary" everywhere it appears in the employer review flow; (b) add a one-line disclaimer under every AI-generated rating: *"Suggested by AI based on submission content. Final decision is yours."*; (c) add a one-paragraph "How Bevisly uses AI" section to the `/docs` page and link it from the AI suggestion UI. Protects the brand before any employer or journalist asks "is this an AI hiring tool?" | 🟢 |
+| 8 | **Locked Rubric Before Submissions Open** | Employer must define 3–5 weighted rubric criteria when creating a proof task (e.g. "Code clarity", "Problem decomposition", "UX polish"). Once the first candidate submits, the rubric locks for that task — changes require a new task version. All AI suggestions and human ratings score against the locked rubric, not a vague 1–5 star. **Why pre-launch:** without locked rubrics, employers improvise scoring post-hoc and the validation question "is the proof system fair and repeatable across employers?" becomes unanswerable. Promoted from post-launch Phase 1 of feature #19 on 2026-05-08. | 🔴 |
+
+### Reprioritization Rationale (2026-05-08)
+
+The pre-launch filter is **not** "what fits in our engineering budget." In an AI-era build loop, build cost has collapsed and that filter would let the wrong things in or out. The correct filter is: **"What's absent at launch would distort the validation signal we're trying to collect?"**
+
+- **Locked Rubric** passes that filter — without it, we can't tell whether the proof system actually produces fair, repeatable signal across employers. That's the whole thing we're validating.
+- **AI Framing & Disclaimers** passes — if our AI surface looks like an "AI hiring decision" tool, we validate the wrong product (and risk press/regulatory exposure).
+- **Blind first review, override justification, consistency dashboard, AI self-audit** do *not* pass — they need volume of real decisions to be useful, and we don't have that yet. They stay in feature #19 for post-launch.
 
 ### Pre-Launch Checks (non-feature)
 - [ ] Full end-to-end user flow walkthrough as both candidate and employer on the production URL
@@ -369,11 +378,7 @@ Once employers are actually using Bevisly to make hire/reject decisions at volum
 
 Build in this order — each one is a small, shippable feature:
 
-**Phase 1 — Locked Rubric Before Submissions Open**
-- When an employer creates a proof task, they must define 3–5 rubric criteria (e.g. "Code clarity", "Problem decomposition", "UX polish"). Each gets a weight.
-- Once the first candidate submits, the rubric locks. Changing it after the fact requires creating a new task version.
-- All AI suggestions and human ratings score against the locked rubric, not a vague 1–5 star.
-- Why: stops employers from moving the goalposts mid-funnel, which is one of the main vectors for unconscious bias.
+**Phase 1 — Locked Rubric Before Submissions Open** ⬆️ **Promoted to Pre-Launch on 2026-05-08.** See pre-launch row #8 for the live spec. Kept here as a reference anchor for the remaining phases.
 
 **Phase 2 — Blind First Review**
 - During the first review pass, hide candidate name, photo, university, and demographic-adjacent fields. Show only the submission and the rubric.
@@ -393,7 +398,7 @@ Build in this order — each one is a small, shippable feature:
 - Weekly internal job that re-runs the AI evidence summary on a sample of past submissions and flags drift, inconsistency, or hallucination.
 - Not user-facing. Operational hygiene so we can confidently say "we audit our AI."
 
-**Why post-launch and not pre-launch:** None of this is useful until we have real employers making real decisions at volume. Building it before launch is premature optimization — we'd be guessing at the failure modes instead of observing them.
+**Why post-launch (Phases 2–5):** These need real employer decisions at volume to be useful — they observe and correct patterns we don't have data on yet. Phase 1 (Locked Rubric) was promoted to pre-launch on 2026-05-08 because it's a precondition for the validation signal itself, not an optimization on top of it. See pre-launch Reprioritization Rationale for the framing.
 
 ---
 

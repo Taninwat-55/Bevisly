@@ -164,7 +164,10 @@ Cheap defensive copy + UX so we never *appear* to be an "AI hiring decision" too
 - Add a one-line disclaimer under every AI-generated rating: *"Suggested by AI based on submission content. Final decision is yours."*
 - Add a one-paragraph "How Bevisly uses AI" section to the `/docs` page; link it from the AI suggestion UI.
 
-This is the bare minimum to ship before cold outreach. The deeper Fairness & Evidence Layer (locked rubrics, blind first review, override justification, consistency dashboard, AI self-audit) is post-launch — see `PRODUCT_ROADMAP.md` feature #19.
+### ⬜ Locked Rubric Before Submissions Open
+Employer defines 3–5 weighted rubric criteria when creating a proof task (e.g. "Code clarity", "Problem decomposition", "UX polish"). Once the first candidate submits, the rubric locks for that task — changes require a new task version. All AI suggestions and human ratings score against the locked rubric, not a vague 1–5 star. **Why pre-launch:** without it, the validation question "is the proof system fair and repeatable across employers?" can't be answered — employers improvise scoring post-hoc and the signal is meaningless. Promoted from post-launch on 2026-05-08.
+
+The remaining Fairness & Evidence Layer phases (blind first review, override justification, consistency dashboard, AI self-audit) stay post-launch — see `PRODUCT_ROADMAP.md` feature #19.
 
 ---
 
@@ -173,7 +176,7 @@ This is the bare minimum to ship before cold outreach. The deeper Fairness & Evi
 Features to build after launch and initial traction. Full list in `PRODUCT_ROADMAP.md`.
 
 ### ⬜ Fairness & Evidence Layer
-Five-phase build that operationalises the Product Principles once we have real employer usage data: locked rubrics, blind first review, required justification on override, employer consistency dashboard with fairness alerts, and weekly AI self-audit. See `PRODUCT_ROADMAP.md` feature #19.
+Four remaining phases that operationalise the Product Principles once we have real employer usage data: blind first review, required justification on override, employer consistency dashboard with fairness alerts, and weekly AI self-audit. (Phase 1 — Locked Rubric — was promoted to pre-launch on 2026-05-08.) See `PRODUCT_ROADMAP.md` feature #19.
 
 ### ⬜ AI Chatbot
 In-app AI assistant powered by Gemini. Dual-purpose: helps candidates refine applications, understand proof task requirements, and prep for interviews; helps employers draft job descriptions and proof tasks faster. Surfaced as a chat widget available across both dashboards.

@@ -8,6 +8,7 @@ import { generateJobListing } from "@/lib/api/ai";
 import toast from "react-hot-toast";
 import AILoadingState from "@/components/common/AILoadingState";
 import ContactModal from "@/components/common/ContactModal";
+import PlatformStats from "@/components/landing/PlatformStats";
 import ReactMarkdown, { type Components } from "react-markdown";
 import DOMPurify from "dompurify";
 
@@ -372,6 +373,9 @@ export default function LandingPage() {
             </div>
           </div>
         </section>
+
+        {/* ── PLATFORM STATS (gated, hidden until thresholds met) ─── */}
+        <PlatformStats />
 
         {/* ── FEATURES GRID (Bento) ────────────────────────────── */}
         <section id="features" className="py-24 bg-[var(--color-bg)]">
