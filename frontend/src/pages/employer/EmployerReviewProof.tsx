@@ -108,6 +108,7 @@ interface ScorecardProps {
   onSuggestAI: () => void;
   isSuggesting: boolean;
   canAIEvaluate: boolean;
+  aiSuggested: boolean;
 }
 
 function Scorecard({
@@ -121,6 +122,7 @@ function Scorecard({
   onSuggestAI,
   isSuggesting,
   canAIEvaluate,
+  aiSuggested,
 }: ScorecardProps) {
   return (
     <div className="glass-panel rounded-2xl p-6 space-y-6">
@@ -214,9 +216,9 @@ function Scorecard({
           rows={3}
         />
       </div>
-      {/* AI Disclaimer */}
-      {(strengths || improvements) && !isLocked && (
-        <p className="text-[10px] text-[var(--color-text-muted)] italic leading-snug">
+      {/* AI Disclaimer — only shown when current content originated from AI */}
+      {aiSuggested && !isLocked && (
+        <p className="text-xs text-[var(--color-text-muted)] italic leading-snug">
           Suggested by AI based on submission content. Final decision is yours.
         </p>
       )}
@@ -284,6 +286,8 @@ export default function EmployerReviewProof({
   const [stars, setStars] = useState<number>(0);
   const [loading, setLoading] = useState(false);
   const [suggestingAI, setSuggestingAI] = useState(false);
+  const [strengthsFromAI, setStrengthsFromAI] = useState(false);
+  const [improvementsFromAI, setImprovementsFromAI] = useState(false);
   const [fetching, setFetching] = useState(true);
   const [currentIndex, setCurrentIndex] = useState<number>(0);
 
@@ -356,8 +360,14 @@ export default function EmployerReviewProof({
 
       if (result && (result.strengths || result.improvements)) {
         setStars(result.suggested_rating || stars || 3);
-        if (result.strengths) setStrengths(result.strengths);
-        if (result.improvements) setImprovements(result.improvements);
+        if (result.strengths) {
+          setStrengths(result.strengths);
+          setStrengthsFromAI(true);
+        }
+        if (result.improvements) {
+          setImprovements(result.improvements);
+          setImprovementsFromAI(true);
+        }
         toast.success("AI evidence summary ready. Review and edit before submitting.", {
           id: toastId,
         });
@@ -782,13 +792,20 @@ export default function EmployerReviewProof({
           stars={stars}
           setStars={setStars}
           strengths={strengths}
-          setStrengths={setStrengths}
+          setStrengths={(v) => {
+            setStrengths(v);
+            setStrengthsFromAI(false);
+          }}
           improvements={improvements}
-          setImprovements={setImprovements}
+          setImprovements={(v) => {
+            setImprovements(v);
+            setImprovementsFromAI(false);
+          }}
           isLocked={!!isReviewed || user?.role === "demo_admin"}
           onSuggestAI={handleSuggestFeedback}
           isSuggesting={suggestingAI}
           canAIEvaluate={canAIEvaluate}
+          aiSuggested={strengthsFromAI || improvementsFromAI}
         />
 
         {/* Action Bar */}
