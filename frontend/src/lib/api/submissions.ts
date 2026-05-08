@@ -232,6 +232,7 @@ export async function getCandidateFeedback(user_id: string) {
       id,
       created_at,
       status,
+      is_public,
       submission_link,       
       reflection,            
       jobs (title, company),

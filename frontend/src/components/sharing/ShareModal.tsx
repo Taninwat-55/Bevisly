@@ -60,7 +60,7 @@ export default function ShareModal({
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
                         onClick={onClose}
-                        className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50"
+                        className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[60]"
                     />
 
                     {/* Modal */}
@@ -69,7 +69,7 @@ export default function ShareModal({
                         animate={{ opacity: 1, scale: 1, y: 0 }}
                         exit={{ opacity: 0, scale: 0.9, y: 20 }}
                         transition={{ type: "spring", damping: 25, stiffness: 300 }}
-                        className="fixed inset-x-4 top-1/2 -translate-y-1/2 mx-auto max-w-md z-50"
+                        className="fixed inset-x-4 top-1/2 -translate-y-1/2 mx-auto max-w-md z-[60]"
                     >
                         <div className="glass-panel rounded-3xl p-6 relative overflow-hidden">
                             {/* Confetti Background Effect */}

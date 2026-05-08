@@ -108,7 +108,7 @@ We already have a Leaderboard and a Credits system. The next step is a single, m
 ---
 
 ### 2. Verified Proof Certificates (Digital Badges)
-**Status:** 🔴
+**Status:** 🟢
 
 When a candidate completes a proof task and receives a rating, they earn a shareable **Verified Proof Certificate** — not just a card on their profile. Think Coursera or Credly, but for real employer-set tasks.
 

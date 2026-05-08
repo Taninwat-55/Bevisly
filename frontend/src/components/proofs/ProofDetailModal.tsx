@@ -1,7 +1,9 @@
-import { Fragment } from "react";
+import { Fragment, useState } from "react";
+import { createPortal } from "react-dom";
 import { Dialog, Transition } from "@headlessui/react";
-import { X, Star, CheckCircle, ArrowRight, Globe, Lock } from "lucide-react";
+import { X, Star, CheckCircle, ArrowRight, Globe, Lock, Share2, ExternalLink } from "lucide-react";
 import type { ProofCard } from "@/hooks/useProofs";
+import ShareModal from "@/components/sharing/ShareModal";
 
 interface ProofDetailModalProps {
   card: ProofCard | null;
@@ -11,6 +13,7 @@ interface ProofDetailModalProps {
 }
 
 export default function ProofDetailModal({ card, isOpen, onClose, username }: ProofDetailModalProps) {
+  const [showShare, setShowShare] = useState(false);
   if (!card) return null;
 
   const strengthLines = card.strengths
@@ -21,6 +24,7 @@ export default function ProofDetailModal({ card, isOpen, onClose, username }: Pr
     : [];
 
   return (
+    <>
     <Transition appear show={isOpen} as={Fragment}>
       <Dialog as="div" className="relative z-50" onClose={onClose}>
         <Transition.Child
@@ -198,11 +202,48 @@ export default function ProofDetailModal({ card, isOpen, onClose, username }: Pr
                     </div>
                   </div>
                 </div>
+
+                {/* Share / Certificate actions */}
+                {card.is_public && card.submission_id && (
+                  <div className="px-6 pb-5 pt-2 flex flex-col sm:flex-row gap-3">
+                    <button
+                      onClick={() => setShowShare(true)}
+                      className="flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-[var(--color-brand-primary)] text-white text-sm font-semibold hover:bg-blue-700 transition-colors shadow-[var(--shadow-glow-cta)]"
+                    >
+                      <Share2 size={15} />
+                      Share this Achievement
+                    </button>
+                    <a
+                      href={`/proof/${card.submission_id}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl border border-[var(--color-border)] text-[var(--color-text)] text-sm font-medium hover:bg-[var(--color-bg)] transition-colors"
+                    >
+                      <ExternalLink size={15} />
+                      View Certificate
+                    </a>
+                  </div>
+                )}
+
               </Dialog.Panel>
             </Transition.Child>
           </div>
         </div>
       </Dialog>
     </Transition>
+
+    {/* Share Modal — portaled to escape Dialog focus trap */}
+    {card.is_public && createPortal(
+      <ShareModal
+        isOpen={showShare}
+        onClose={() => setShowShare(false)}
+        taskTitle={card.task_title || card.job_title || "Proof Task"}
+        companyName={card.company_name || "Bevisly"}
+        rating={card.rating ?? undefined}
+        username={username}
+      />,
+      document.body
+    )}
+    </>
   );
 }

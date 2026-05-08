@@ -1,9 +1,10 @@
 import { useParams, Link } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Helmet } from "react-helmet-async";
 import { supabase } from "@/lib/supabaseClient";
-import { BadgeCheck, Star, Share2, Loader2, Lock, ArrowLeft } from "lucide-react";
+import { BadgeCheck, Star, Share2, Loader2, Lock, ArrowLeft, Download } from "lucide-react";
 import toast from "react-hot-toast";
+import html2canvas from "html2canvas";
 
 type PublicProof = {
   submission_id: string;
@@ -45,6 +46,7 @@ export default function PublicProofView() {
   const [proof, setProof] = useState<PublicProof | null>(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
+  const certificateRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!id) return;
@@ -70,6 +72,24 @@ export default function PublicProofView() {
   const handleShare = async () => {
     await navigator.clipboard.writeText(window.location.href);
     toast.success("Link copied!");
+  };
+
+  const handleDownloadPNG = async () => {
+    if (!certificateRef.current) return;
+    try {
+      const canvas = await html2canvas(certificateRef.current, {
+        backgroundColor: null,
+        scale: 2,
+        useCORS: true,
+      });
+      const link = document.createElement("a");
+      link.download = `bevisly-proof-${proof?.submission_id?.slice(0, 8)?.toUpperCase() || "cert"}.png`;
+      link.href = canvas.toDataURL("image/png");
+      link.click();
+      toast.success("Certificate downloaded!");
+    } catch {
+      toast.error("Failed to generate image. Try again.");
+    }
   };
 
   if (loading) {
@@ -118,15 +138,15 @@ export default function PublicProofView() {
 
       <div className="min-h-screen bg-[var(--color-bg)] flex flex-col items-center justify-center px-4 py-16">
         {/* Certificate card */}
-        <div className="w-full max-w-[540px] rounded-2xl overflow-hidden shadow-2xl">
+        <div ref={certificateRef} className="w-full max-w-[540px] rounded-2xl overflow-hidden shadow-2xl">
           {/* Gradient header bar */}
-          <div className="h-2 bg-gradient-to-r from-violet-600 via-purple-500 to-blue-500" />
+          <div className="h-2 bg-gradient-to-r from-[var(--color-brand-secondary)] via-[var(--color-brand-primary)] to-blue-500" />
 
           <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-b-2xl p-8 flex flex-col gap-6">
             {/* Badge + brand */}
             <div className="flex flex-col items-center gap-3 text-center">
               <div className="relative">
-                <div className="w-16 h-16 rounded-full bg-gradient-to-br from-violet-600 to-blue-500 flex items-center justify-center shadow-lg">
+                <div className="w-16 h-16 rounded-full bg-gradient-to-br from-[var(--color-brand-secondary)] to-[var(--color-brand-primary)] flex items-center justify-center shadow-lg">
                   <BadgeCheck size={36} className="text-white" strokeWidth={1.75} />
                 </div>
               </div>
@@ -193,7 +213,7 @@ export default function PublicProofView() {
               {profileUrl && (
                 <Link
                   to={profileUrl}
-                  className="flex-1 text-center py-2.5 px-4 rounded-lg bg-gradient-to-r from-violet-600 to-blue-500 text-white text-sm font-semibold hover:opacity-90 transition"
+                  className="flex-1 text-center py-2.5 px-4 rounded-lg bg-[var(--color-brand-primary)] text-white text-sm font-semibold hover:bg-blue-700 transition"
                 >
                   View Full Profile →
                 </Link>
@@ -203,6 +223,12 @@ export default function PublicProofView() {
                 className="flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg border border-[var(--color-border)] text-[var(--color-text)] text-sm font-medium hover:bg-[var(--color-bg)] transition"
               >
                 <Share2 size={14} /> Copy Link
+              </button>
+              <button
+                onClick={handleDownloadPNG}
+                className="flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg border border-[var(--color-border)] text-[var(--color-text)] text-sm font-medium hover:bg-[var(--color-bg)] transition"
+              >
+                <Download size={14} /> Download PNG
               </button>
             </div>
 

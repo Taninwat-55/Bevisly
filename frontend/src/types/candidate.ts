@@ -29,6 +29,7 @@ export type CandidateFeedbackEntry = {
   id: string;
   created_at: string | null;
   status: string | null;
+  is_public?: boolean;
   submission_link?: string | null;
   reflection?: string | null;
   jobs: { title: string | null; company: string | null } | null;
