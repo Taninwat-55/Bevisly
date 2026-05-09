@@ -20,6 +20,7 @@ import type { ProofTask } from "@/types/shared";
 import ReactMarkdown from 'react-markdown';
 import DOMPurify from 'dompurify';
 import { Button } from "@/components/ui/Button";
+import MarkdownEditorIDE from "@/components/common/MarkdownEditorIDE";
 import SuccessCelebration from "@/components/common/SuccessCelebration";
 
 // -- IDE Components -----------------------------------------
@@ -257,10 +258,20 @@ export default function CandidateProofWorkspace() {
 
         {/* LEFT PANE: Task Description */}
         <div className="w-1/3 min-w-[320px] max-w-[600px] border-r border-[#3e3e42] flex flex-col bg-[#1e1e1e]">
-          <div className="h-9 flex items-center px-4 bg-[#252526] border-b border-[#3e3e42] text-xs font-medium text-slate-400">
-            TASK.md
+          <div className="h-9 flex items-center justify-between px-4 bg-[#252526] border-b border-[#3e3e42]">
+            <div className="flex items-center gap-1.5 text-xs">
+              <FileText size={12} className="text-slate-500" />
+              <span className="font-medium text-slate-300">TASK.md</span>
+            </div>
+            <span className="text-[10px] text-slate-600 font-mono">read-only</span>
           </div>
-          <div className="flex-1 overflow-y-auto p-6 prose prose-invert prose-sm max-w-none prose-headings:text-slate-200 prose-p:text-slate-400 prose-code:text-orange-400 prose-code:bg-[#2d2d30] prose-code:px-1 prose-code:py-0.5 prose-code:rounded">
+          <div className="flex-1 overflow-y-auto p-6 prose prose-invert prose-sm max-w-none
+            prose-p:text-slate-300 prose-p:leading-7 prose-p:mb-3
+            prose-strong:text-slate-100 prose-strong:font-semibold
+            prose-ul:my-3 prose-ul:pl-5 prose-li:text-slate-300 prose-li:mb-1
+            prose-code:text-orange-400 prose-code:bg-[#2d2d30] prose-code:px-1 prose-code:py-0.5 prose-code:rounded
+            prose-headings:text-slate-200">
+            <p className="text-[10px] font-mono uppercase tracking-widest text-slate-600 mb-4 not-prose">task description</p>
             <ReactMarkdown>{DOMPurify.sanitize(task.description || "*No description provided.*")}</ReactMarkdown>
 
             {Array.isArray(task.rubric_criteria) && task.rubric_criteria.length > 0 && (
@@ -301,6 +312,11 @@ export default function CandidateProofWorkspace() {
                 <div className="text-xs px-2 py-1 rounded border border-blue-900 bg-blue-900/20 text-blue-400">
                   Format: {task.submission_type}
                 </div>
+                {task.expected_time && (
+                  <div className="text-xs px-2 py-1 rounded border border-slate-700 bg-slate-800/40 text-slate-400">
+                    Est. {task.expected_time}
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -383,12 +399,12 @@ export default function CandidateProofWorkspace() {
                   <label className="text-xs font-medium text-slate-400 uppercase tracking-wider mb-2 block">
                     Implementation Notes / Reflection
                   </label>
-                  <textarea
-                    className="w-full h-48 bg-[#252526] border border-[#3e3e42] rounded p-3 text-sm text-slate-300 focus:border-blue-500 outline-none resize-y font-mono"
-                    placeholder="// Describe your approach, trade-offs, and design decisions..."
+                  <MarkdownEditorIDE
                     value={reflection}
-                    onChange={(e) => setReflection(e.target.value)}
+                    onChange={setReflection}
                     disabled={isLocked}
+                    placeholder="Describe your approach, trade-offs, and design decisions…"
+                    minHeight="12rem"
                   />
                 </div>
               </div>
@@ -396,13 +412,13 @@ export default function CandidateProofWorkspace() {
 
             {activeTab === 'code' && (
               <div className="h-full flex flex-col">
-                <textarea
-                  className="flex-1 bg-[#1e1e1e] border-none outline-none text-slate-300 font-mono text-sm resize-none p-0 leading-relaxed"
-                  placeholder="// Write your solution code or text response here..."
+                <MarkdownEditorIDE
                   value={textSubmission}
-                  onChange={(e) => setTextSubmission(e.target.value)}
+                  onChange={setTextSubmission}
                   disabled={isLocked}
-                  spellCheck={false}
+                  placeholder="Write your solution, explanation, or approach here…"
+                  className="flex-1"
+                  minHeight="100%"
                 />
               </div>
             )}

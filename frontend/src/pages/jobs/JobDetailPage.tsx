@@ -515,7 +515,11 @@ export default function JobDetailPage() {
                 <div className="absolute -inset-1 bg-gradient-to-r from-[var(--color-brand-primary)]/10 to-purple-500/10 rounded-3xl blur opacity-75 group-hover:opacity-100 transition-opacity" />
                 <div className="relative glass-panel p-8 rounded-3xl border border-[var(--color-border)] bg-[var(--color-surface)] shadow-xl">
                   <h4 className="text-2xl font-bold text-[var(--color-text)] mb-4">{proof.title}</h4>
-                  <div className="prose prose-invert max-w-none text-[var(--color-text-muted)] leading-relaxed mb-8">
+                  <div className="prose prose-invert max-w-none mb-8
+                    prose-p:text-[var(--color-text-muted)] prose-p:leading-7 prose-p:mb-4
+                    prose-strong:text-[var(--color-text)] prose-strong:font-semibold
+                    prose-ul:my-4 prose-ul:pl-5 prose-li:text-[var(--color-text-muted)] prose-li:mb-1.5
+                    prose-h3:text-[var(--color-text)] prose-h3:font-semibold prose-h4:text-[var(--color-text)]">
                     <ReactMarkdown>{DOMPurify.sanitize(proof.description || "No description provided.")}</ReactMarkdown>
                   </div>
 
