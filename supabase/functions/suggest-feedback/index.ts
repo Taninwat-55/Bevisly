@@ -61,13 +61,13 @@ Deno.serve(async (req) => {
         const responseShape = hasRubric
             ? `{
   "rubric_scores": [
-    { "name": "<criterion name verbatim>", "score": 4, "note": "Evidence-based note (≤25 words)" }
+    { "name": "<criterion name verbatim>", "score": <integer 1-5 based on rubric>, "note": "Evidence-based note (≤25 words)" }
   ],
   "strengths": "1–3 specific strengths across the whole submission (max 60 words)",
   "improvements": "1–3 specific, constructive suggestions (max 60 words)"
 }`
             : `{
-  "suggested_rating": 4,
+  "suggested_rating": <integer 1-5 based on calibration below>,
   "strengths": "What the candidate did well... (max 60 words)",
   "improvements": "What could be improved... (max 60 words)"
 }`;
@@ -93,6 +93,14 @@ Evaluate whether the submission fulfills the task requirements. Consider:
 ${hasRubric
     ? "- Score each rubric criterion independently. Cite specific evidence from the submission for each score."
     : "- Provide a single 1–5 rating and a strengths/improvements summary."}
+
+## Rating Calibration (use the full 1–5 scale)
+- 5 — Exceptional: exceeds requirements, polished, demonstrates novel insight or rigor.
+- 4 — Strong: meets all requirements with only minor gaps.
+- 3 — Adequate: meets core requirements but has notable weaknesses or omissions.
+- 2 — Weak: significant gaps, misunderstandings, or missing requirements.
+- 1 — Incomplete: off-topic, mostly missing, or fundamentally wrong.
+Score strictly based on evidence in the submission. Do NOT default to 4 — calibrate honestly across 1–5.
 
 Return ONLY a valid JSON object exactly in this shape:
 ${responseShape}

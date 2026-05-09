@@ -1,4 +1,5 @@
 import { useEffect, useState, useRef } from "react";
+import { createPortal } from "react-dom";
 import { useParams, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import { supabase } from "@/lib/supabaseClient";
@@ -613,6 +614,7 @@ export default function JobDetailPage() {
       </AnimatePresence>
 
         {/* Fast-Pass Modal */}
+        {createPortal(
         <AnimatePresence>
           {showFastPass && fastPassMatch && (
             <motion.div
@@ -708,9 +710,12 @@ export default function JobDetailPage() {
               </motion.div>
             </motion.div>
           )}
-        </AnimatePresence>
+        </AnimatePresence>,
+        document.body
+        )}
 
         {/* Confirmation Modal */}
+        {createPortal(
         <AnimatePresence>
           {showConfirm && proof && (
             <motion.div
@@ -775,7 +780,9 @@ export default function JobDetailPage() {
               </motion.div>
             </motion.div>
           )}
-        </AnimatePresence>
+        </AnimatePresence>,
+        document.body
+        )}
     </div>
   );
 }

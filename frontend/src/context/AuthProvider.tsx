@@ -254,9 +254,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     localStorage.setItem = function (key, value) {
       originalSetItem.apply(this, [key, value]);
       if (key === "overrideRole") {
-        setUser((u) =>
-          u ? { ...u, role: value as SessionUser["role"] } : null
-        );
+        // Force re-render so effectiveUser picks up new override; do NOT mutate user.role.
+        setOverrideVersion((v) => v + 1);
       }
     };
     return () => {
@@ -271,8 +270,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     : null;
 
   const setOverride = (role: SessionUser["role"]) => {
-    localStorage.setItem("overrideRole", role ?? "");
-    setUser((u) => (u ? { ...u, role } : null));
+    if (role) {
+      localStorage.setItem("overrideRole", role);
+    } else {
+      localStorage.removeItem("overrideRole");
+    }
+    // Force re-render directly so effectiveUser picks up the new override.
+    // Do NOT mutate user.role — it stays pinned to DB role.
+    setOverrideVersion((v) => v + 1);
   };
 
   // Session Timeout Logic (2 hours)

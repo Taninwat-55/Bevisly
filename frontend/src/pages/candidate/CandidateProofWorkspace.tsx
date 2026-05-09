@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
+import { createPortal } from "react-dom";
 import { useParams, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import {
@@ -419,7 +420,7 @@ export default function CandidateProofWorkspace() {
         </div>
       </div>
       {/* ── Confirmation Modal ────────────────────────────── */}
-      {showConfirmModal && (
+      {showConfirmModal && createPortal(
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
           <div className="w-full max-w-md bg-[#252526] border border-[#3e3e42] rounded-lg shadow-2xl animate-in fade-in zoom-in-95 duration-200">
 
@@ -488,7 +489,8 @@ export default function CandidateProofWorkspace() {
             </div>
 
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
     </div>

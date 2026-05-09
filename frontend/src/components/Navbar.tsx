@@ -64,7 +64,7 @@ export default function Navbar() {
             : "bg-transparent h-20"
         }`}
       >
-        <div className="max-w-7xl mx-auto px-6 h-full grid grid-cols-3 items-center">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-full flex md:grid md:grid-cols-3 items-center justify-between gap-2">
           {/* ─── Left: Hamburger + Logo ─── */}
           <div className="flex items-center gap-3">
             <button
@@ -141,7 +141,7 @@ export default function Navbar() {
           {/* ─── Right: Theme + Auth ─── */}
           <div className="flex justify-end items-center gap-3">
             <button
-              className="p-2 rounded-xl text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[var(--color-surface)] transition-colors"
+              className="hidden md:inline-flex p-2 rounded-xl text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[var(--color-surface)] transition-colors"
               title="Change Language (Coming Soon)"
             >
               <Languages size={20} />
@@ -152,13 +152,14 @@ export default function Navbar() {
                 <Button
                   variant="outline"
                   size="sm"
+                  className="hidden md:flex"
                   onClick={() => navigate("/auth")}
                 >
                   Sign In
                 </Button>
                 <Button
                   size="sm"
-                  className="shadow-glow-primary hidden sm:flex"
+                  className="shadow-glow-primary hidden md:flex"
                   onClick={() => navigate("/auth?tab=signup")}
                 >
                   Sign Up Free
@@ -169,7 +170,7 @@ export default function Navbar() {
                 <Button
                   size="sm"
                   onClick={goToDashboard}
-                  className="hidden sm:flex"
+                  className="hidden md:flex"
                 >
                   Dashboard
                 </Button>
