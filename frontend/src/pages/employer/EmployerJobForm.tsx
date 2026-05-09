@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import { createJobWithTasks } from "@/lib/api/jobs";
@@ -10,12 +10,14 @@ import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import type { EmployerJobFormValues } from "@/types/employer";
 import {
-  Briefcase, MapPin, DollarSign, BrainCircuit, ArrowRight, Calendar, Plus, Trash2
+  Briefcase, MapPin, DollarSign, BrainCircuit, ArrowRight, Calendar, Plus, Trash2,
+  ChevronRight, CheckCircle2,
 } from "lucide-react";
 import { POPULAR_JOB_TITLES } from "@/data/popularJobTitles";
 import { useCompany } from "@/hooks/useCompany";
 import {
   RubricEditor,
+  FollowUpQuestionsEditor,
   type ProofTaskRubricErrors,
   type RubricFieldError,
 } from "@/components/employer/ProofTasksSection";
@@ -40,17 +42,18 @@ export default function EmployerJobForm({
   onSuccess,
 }: EmployerJobFormProps) {
   const navigate = useNavigate();
-  const { company } = useCompany(); // Hook for checking limits
+  const { company, loading: companyLoading } = useCompany();
+  const formRef = useRef<HTMLDivElement>(null);
 
-  // Auto-fill company name from the real company record
   const companyName = company?.name ?? defaultValues?.company ?? "";
 
-  // State
+  const [step, setStep] = useState<1 | 2>(1);
+
   const [values, setValues] = useState<EmployerJobFormValues>({
     title: defaultValues?.title ?? "",
     description: defaultValues?.description ?? "",
     requirements: defaultValues?.requirements ?? "",
-    company: defaultValues?.company ?? companyName,
+    company: defaultValues?.company ?? "",
     location: defaultValues?.location ?? "",
     payment_amount: defaultValues?.payment_amount ?? null,
     paid: defaultValues?.paid ?? true,
@@ -67,21 +70,21 @@ export default function EmployerJobForm({
     proof_tasks: defaultValues?.proof_tasks ?? [],
   });
 
-
-  
-  // Sync company name into form state once the async hook resolves
+  // Sync company name from context into form state.
+  // In create mode: always update when context resolves (field is readonly, user can't override).
+  // In edit mode: only fill if form is currently empty (don't overwrite user edits).
   useEffect(() => {
-    if (companyName && !values.company) {
-      setValues((prev) => ({ ...prev, company: companyName }));
+    if (mode === "create" && company?.name) {
+      setValues((prev) => ({ ...prev, company: company.name }));
+    } else if (mode === "edit" && company?.name && !values.company) {
+      setValues((prev) => ({ ...prev, company: company.name }));
     }
-  }, [companyName, values.company]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [company?.name, mode]);
 
   const [loading, setLoading] = useState(false);
   const [rubricErrors, setRubricErrors] = useState<ProofTaskRubricErrors>({});
 
-  // Tasks whose rubrics arrived already-filled in create mode came from the
-  // AI job generator. Track them so the editor can flag the rubric as a
-  // draft. Cleared per-task as soon as the employer edits any rubric field.
   const [aiRubricTaskIds, setAiRubricTaskIds] = useState<Set<string>>(() => {
     if (mode !== "create") return new Set();
     const ids = new Set<string>();
@@ -97,7 +100,7 @@ export default function EmployerJobForm({
     });
     return ids;
   });
-  // Handlers
+
   const handleChange = (field: string, value: unknown) => {
     setValues((prev) => ({ ...prev, [field]: value }));
   };
@@ -108,14 +111,34 @@ export default function EmployerJobForm({
     handleChange("proof_tasks", newTasks);
   };
 
+  function scrollToTop() {
+    formRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
+  function advanceToStep2() {
+    const errors: string[] = [];
+    if (!values.title?.trim()) errors.push("Job Title");
+    // Company name is auto-filled from context in create mode — user can't edit it, so skip client-side validation
+    if (mode === "edit" && !values.company?.trim()) errors.push("Company Name");
+    if (!values.location?.trim()) errors.push("Location");
+    if (!values.description?.trim()) errors.push("Job Description");
+    if (errors.length > 0) {
+      toast.error(`Please fill in: ${errors.join(", ")}`);
+      return;
+    }
+    setStep(2);
+    scrollToTop();
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const missingFields: string[] = [];
     if (!values.title?.trim()) missingFields.push("Job Title");
-    if (!values.company?.trim()) missingFields.push("Company Name");
+    // In create mode, company is auto-resolved server-side via company_id lookup
+    if (mode === "edit" && !values.company?.trim()) missingFields.push("Company Name");
     if (!values.location?.trim()) missingFields.push("Location");
     if (!values.description?.trim()) missingFields.push("Job Description");
-    
+
     const nextRubricErrors: ProofTaskRubricErrors = {};
     let firstFailingTaskIndex: number | null = null;
 
@@ -123,7 +146,6 @@ export default function EmployerJobForm({
       if (!task.title?.trim()) missingFields.push(`Task Title (Task ${index + 1})`);
       if (!task.description?.trim()) missingFields.push(`Task Instructions (Task ${index + 1})`);
 
-      // Skip rubric validation if this task's rubric is already locked
       if (task.rubric_locked_at) return;
 
       const rubric = task.rubric_criteria ?? [];
@@ -134,16 +156,10 @@ export default function EmployerJobForm({
         nameMissing: !c.name?.trim(),
         descriptionMissing: !c.description?.trim(),
       }));
-      const anyFieldMissing = fields.some(
-        (f) => f.nameMissing || f.descriptionMissing,
-      );
+      const anyFieldMissing = fields.some((f) => f.nameMissing || f.descriptionMissing);
 
       if (countOutOfRange || weightSumWrong || anyFieldMissing) {
-        nextRubricErrors[index] = {
-          countOutOfRange,
-          weightSumWrong,
-          fields,
-        };
+        nextRubricErrors[index] = { countOutOfRange, weightSumWrong, fields };
         if (firstFailingTaskIndex === null) firstFailingTaskIndex = index;
       }
     });
@@ -156,14 +172,9 @@ export default function EmployerJobForm({
     }
 
     if (Object.keys(nextRubricErrors).length > 0) {
-      toast.error(
-        "Scoring rubric needs attention. See the highlighted task below.",
-      );
-      // Scroll the first failing rubric into view
+      toast.error("Scoring rubric needs attention. See the highlighted task below.");
       if (firstFailingTaskIndex !== null) {
-        const node = document.getElementById(
-          `proof-task-${firstFailingTaskIndex}`,
-        );
+        const node = document.getElementById(`proof-task-${firstFailingTaskIndex}`);
         node?.scrollIntoView({ behavior: "smooth", block: "center" });
       }
       return;
@@ -178,17 +189,19 @@ export default function EmployerJobForm({
         toast.error("Salary amounts cannot be negative");
         return;
       }
-      if (values.salary_min !== null && values.salary_max !== null && Number(values.salary_min) > Number(values.salary_max)) {
+      if (
+        values.salary_min !== null &&
+        values.salary_max !== null &&
+        Number(values.salary_min) > Number(values.salary_max)
+      ) {
         toast.error("Minimum salary cannot be greater than maximum salary");
         return;
       }
     }
 
-    // 🔒 GUARD: Freemium Limit Check
-    const isFreeTier = !company?.subscription_tier || company.subscription_tier === 'free';
+    const isFreeTier = !company?.subscription_tier || company.subscription_tier === "free";
     const activeJobs = company?.active_jobs_count || 0;
 
-    // Only block if creating a NEW job (editing ignores specific increment logic for now, though conceptually active count stays same)
     if (mode === "create" && isFreeTier && activeJobs >= FREE_TIER_JOB_LIMIT) {
       toast.error(`Free Tier limit reached (${FREE_TIER_JOB_LIMIT} active jobs). Please upgrade to post more.`);
       return;
@@ -215,244 +228,305 @@ export default function EmployerJobForm({
   };
 
   return (
-    <div className="max-w-4xl mx-auto">
-      
-      {/* Form */}
-      <div className="space-y-6">
-        <form onSubmit={handleSubmit} className="space-y-8">
+    <div ref={formRef} className="max-w-4xl mx-auto">
 
-          {/* 1. Basic Info */}
-          <Card className="p-6 md:p-8 space-y-6">
-            <div className="flex items-center gap-3 mb-2">
-              <div className="w-10 h-10 rounded-full bg-blue-500/10 flex items-center justify-center text-blue-600">
-                <Briefcase size={20} />
-              </div>
-              <div>
-                <h2 className="text-lg font-bold text-[var(--color-text)]">Job Details</h2>
-                <p className="text-sm text-[var(--color-text-muted)]">Basic information about the role.</p>
-              </div>
-            </div>
+      {/* Step Indicator */}
+      <div className="flex items-center gap-3 mb-6 px-1">
+        <button
+          type="button"
+          onClick={() => { setStep(1); scrollToTop(); }}
+          className="flex items-center gap-2 text-sm font-medium transition-colors"
+        >
+          <span
+            className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold transition-colors ${
+              step === 1
+                ? "bg-[var(--color-brand-primary)] text-white"
+                : "bg-emerald-500 text-white"
+            }`}
+          >
+            {step === 1 ? "1" : <CheckCircle2 size={14} />}
+          </span>
+          <span className={step === 1 ? "text-[var(--color-text)]" : "text-[var(--color-text-muted)]"}>
+            Job Details
+          </span>
+        </button>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-              <div className="md:col-span-2">
-                <Input
-                  label="Job Title"
-                  placeholder="e.g. Senior Frontend Engineer"
-                  value={values.title ?? ""}
-                  onChange={(e) => handleChange("title", e.target.value)}
-                  required
-                  list="job-titles-list"
-                />
-                <datalist id="job-titles-list">
-                    {POPULAR_JOB_TITLES.map(t => (
-                        <option key={t} value={t} />
+        <ChevronRight size={14} className="text-[var(--color-border)]" />
+
+        <div className="flex items-center gap-2 text-sm font-medium">
+          <span
+            className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold transition-colors ${
+              step === 2
+                ? "bg-[var(--color-brand-primary)] text-white"
+                : "bg-[var(--color-border)] text-[var(--color-text-muted)]"
+            }`}
+          >
+            2
+          </span>
+          <span className={step === 2 ? "text-[var(--color-text)]" : "text-[var(--color-text-muted)]"}>
+            Proof Task
+          </span>
+          <span className="text-[10px] font-bold uppercase tracking-widest px-1.5 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-500 border border-slate-200 dark:border-slate-700">
+            Optional
+          </span>
+        </div>
+      </div>
+
+      <form onSubmit={handleSubmit} className="space-y-8">
+
+        {/* ── STEP 1: JOB DETAILS ── */}
+        {step === 1 && (
+          <>
+            {/* Basic Info */}
+            <Card className="p-6 md:p-8 space-y-6">
+              <div className="flex items-center gap-3 mb-2">
+                <div className="w-10 h-10 rounded-full bg-blue-500/10 flex items-center justify-center text-blue-600">
+                  <Briefcase size={20} />
+                </div>
+                <div>
+                  <h2 className="text-lg font-bold text-[var(--color-text)]">Job Details</h2>
+                  <p className="text-sm text-[var(--color-text-muted)]">Basic information about the role.</p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <div className="md:col-span-2">
+                  <Input
+                    label="Job Title"
+                    placeholder="e.g. Senior Frontend Engineer"
+                    value={values.title ?? ""}
+                    onChange={(e) => handleChange("title", e.target.value)}
+                    required
+                    list="job-titles-list"
+                  />
+                  <datalist id="job-titles-list">
+                    {POPULAR_JOB_TITLES.map((t) => (
+                      <option key={t} value={t} />
                     ))}
-                </datalist>
-              </div>
+                  </datalist>
+                </div>
 
-              <div className="relative">
+                <div className="relative">
+                  <Input
+                    label="Company Name"
+                    placeholder={companyLoading ? "Loading..." : "e.g. Acme Corp"}
+                    value={mode === "create" ? (company?.name ?? "") : values.company}
+                    onChange={(e) => mode === "edit" ? handleChange("company", e.target.value) : undefined}
+                    required
+                    readOnly={mode === "create"}
+                    className={mode === "create" ? "bg-[var(--color-surface-hover)] cursor-default" : ""}
+                  />
+                  {mode === "create" && (
+                    <p className="text-xs text-[var(--color-text-muted)] mt-1">
+                      {companyLoading
+                        ? "Fetching your company name..."
+                        : <>Auto-filled from your company settings. To change it, go to <button type="button" onClick={() => navigate("/employer/settings")} className="text-[var(--color-brand-primary)] hover:underline">Settings</button>.</>
+                      }
+                    </p>
+                  )}
+                </div>
+
                 <Input
-                  label="Company Name"
-                  placeholder="e.g. Acme Corp"
-                  value={values.company || companyName}
-                  onChange={(e) => mode === "edit" ? handleChange("company", e.target.value) : undefined}
+                  label="Location"
+                  placeholder="e.g. Remote, London, NYC"
+                  value={values.location ?? ""}
+                  onChange={(e) => handleChange("location", e.target.value)}
+                  leftIcon={<MapPin size={16} />}
                   required
-                  readOnly={mode === "create"}
-                  className={mode === "create" ? "bg-[var(--color-surface-hover)] cursor-default" : ""}
                 />
-                {mode === "create" && companyName && (
-                  <p className="text-xs text-[var(--color-text-muted)] mt-1">
-                    Auto-filled from your company profile. Change it in <button type="button" onClick={() => navigate('/employer/settings')} className="text-[var(--color-brand-primary)] hover:underline">Settings</button>.
-                  </p>
-                )}
-              </div>
 
-              <Input
-                label="Location"
-                placeholder="e.g. Remote, London, NYC"
-                value={values.location ?? ""}
-                onChange={(e) => handleChange("location", e.target.value)}
-                leftIcon={<MapPin size={16} />}
-                required
-              />
+                <div className="space-y-1.5">
+                  <label className="text-sm font-medium text-[var(--color-text)]">Job Type</label>
+                  <select
+                    className="w-full h-10 px-3 rounded-[var(--radius-input)] border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text)] text-sm focus:ring-2 focus:ring-[var(--color-brand-primary)]/20 outline-none"
+                    value={values.job_type ?? "Full-time"}
+                    onChange={(e) => handleChange("job_type", e.target.value)}
+                  >
+                    <option>Full-time</option>
+                    <option>Part-time</option>
+                    <option>Contract</option>
+                    <option>Internship</option>
+                    <option>Freelance</option>
+                    <option>Volunteer</option>
+                  </select>
+                </div>
 
-              <div className="space-y-1.5">
-                <label className="text-sm font-medium text-[var(--color-text)]">Job Type</label>
-                <select
-                  className="w-full h-10 px-3 rounded-[var(--radius-input)] border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text)] text-sm focus:ring-2 focus:ring-[var(--color-brand-primary)]/20 outline-none"
-                  value={values.job_type ?? "Full-time"}
-                  onChange={(e) => handleChange("job_type", e.target.value)}
-                >
-                  <option>Full-time</option>
-                  <option>Part-time</option>
-                  <option>Contract</option>
-                  <option>Internship</option>
-                  <option>Freelance</option>
-                  <option>Volunteer</option>
-                </select>
-              </div>
+                <div className="space-y-1.5">
+                  <label className="text-sm font-medium text-[var(--color-text)]">Work Mode</label>
+                  <select
+                    className="w-full h-10 px-3 rounded-[var(--radius-input)] border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text)] text-sm focus:ring-2 focus:ring-[var(--color-brand-primary)]/20 outline-none"
+                    value={values.work_mode ?? "Remote"}
+                    onChange={(e) => handleChange("work_mode", e.target.value)}
+                  >
+                    <option>Remote</option>
+                    <option>On-site</option>
+                    <option>Hybrid</option>
+                  </select>
+                </div>
 
-              <div className="space-y-1.5">
-                <label className="text-sm font-medium text-[var(--color-text)]">Work Mode</label>
-                <select
-                  className="w-full h-10 px-3 rounded-[var(--radius-input)] border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text)] text-sm focus:ring-2 focus:ring-[var(--color-brand-primary)]/20 outline-none"
-                  value={values.work_mode ?? "Remote"}
-                  onChange={(e) => handleChange("work_mode", e.target.value)}
-                >
-                  <option>Remote</option>
-                  <option>On-site</option>
-                  <option>Hybrid</option>
-                </select>
-              </div>
-
-               {/* Dates - Moved here for better UX */}
-              <div className="space-y-1.5">
-                   <Input
+                <div className="space-y-1.5">
+                  <Input
                     label="Start Date (Optional)"
                     type="date"
                     value={values.start_date ?? ""}
                     onChange={(e) => handleChange("start_date", e.target.value)}
                     leftIcon={<Calendar size={16} />}
                   />
-              </div>
+                </div>
 
-               <div className="space-y-1.5">
-                 <Input
-                    label="Deadline (Optional)"
+                <div className="space-y-1.5">
+                  <Input
+                    label="Application Deadline (Optional)"
                     type="date"
                     value={values.application_deadline ?? ""}
                     onChange={(e) => handleChange("application_deadline", e.target.value)}
                     leftIcon={<Calendar size={16} />}
                   />
-               </div>
-            </div>
-
-            <Textarea
-              label="Job Description"
-              placeholder="Describe the role, responsibilities, and ideal candidate..."
-              value={values.description ?? ""}
-              onChange={(e) => handleChange("description", e.target.value)}
-              className="min-h-[150px]"
-              required
-            />
-
-            <Textarea
-              label="Requirements"
-              placeholder="- 3+ years of React experience&#10;- Strong TypeScript skills..."
-              value={values.requirements ?? ""}
-              onChange={(e) => handleChange("requirements", e.target.value)}
-              className="min-h-[120px]"
-            />
-          </Card>
-
-          {/* 2. Compensation */}
-          <Card className="p-6 md:p-8 space-y-6">
-            <div className="flex items-center gap-3 mb-2">
-              <div className="w-10 h-10 rounded-full bg-emerald-500/10 flex items-center justify-center text-emerald-600">
-                <DollarSign size={20} />
+                </div>
               </div>
 
+              <Textarea
+                label="Job Description"
+                placeholder="Describe the role, responsibilities, and ideal candidate..."
+                value={values.description ?? ""}
+                onChange={(e) => handleChange("description", e.target.value)}
+                className="min-h-[150px]"
+                required
+              />
 
-              <div>
-                <h2 className="text-lg font-bold text-[var(--color-text)]">Compensation</h2>
-                <p className="text-sm text-[var(--color-text-muted)]">Salary range and currency.</p>
+              <Textarea
+                label="Requirements"
+                placeholder="- 3+ years of React experience&#10;- Strong TypeScript skills..."
+                value={values.requirements ?? ""}
+                onChange={(e) => handleChange("requirements", e.target.value)}
+                className="min-h-[120px]"
+              />
+            </Card>
+
+            {/* Compensation */}
+            <Card className="p-6 md:p-8 space-y-6">
+              <div className="flex items-center gap-3 mb-2">
+                <div className="w-10 h-10 rounded-full bg-emerald-500/10 flex items-center justify-center text-emerald-600">
+                  <DollarSign size={20} />
+                </div>
+                <div>
+                  <h2 className="text-lg font-bold text-[var(--color-text)]">Compensation</h2>
+                  <p className="text-sm text-[var(--color-text-muted)]">Salary range and currency.</p>
+                </div>
               </div>
-            </div>
 
-            <div className="space-y-4">
+              <div className="space-y-4">
+                <div className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    id="is_unpaid"
+                    checked={!values.paid}
+                    onChange={(e) => {
+                      const isUnpaid = e.target.checked;
+                      setValues((prev) => ({
+                        ...prev,
+                        paid: !isUnpaid,
+                        salary_min: isUnpaid ? null : prev.salary_min,
+                        salary_max: isUnpaid ? null : prev.salary_max,
+                      }));
+                    }}
+                    className="rounded border-[var(--color-border)] text-[var(--color-brand-primary)] focus:ring-[var(--color-brand-primary)]/20"
+                  />
+                  <label htmlFor="is_unpaid" className="text-sm text-[var(--color-text)] font-medium">
+                    This is an unpaid / volunteer position
+                  </label>
+                </div>
+
+                {values.paid && (
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-5 animate-fade-in">
+                    <div className="space-y-1.5 col-span-2 md:col-span-1">
+                      <label className="text-sm font-medium text-[var(--color-text)]">Currency</label>
+                      <select
+                        className="w-full h-10 px-3 rounded-[var(--radius-input)] border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text)] text-sm"
+                        value={values.payment_currency ?? "USD"}
+                        onChange={(e) => handleChange("payment_currency", e.target.value)}
+                      >
+                        <option value="USD">USD ($)</option>
+                        <option value="EUR">EUR (€)</option>
+                        <option value="GBP">GBP (£)</option>
+                        <option value="SEK">SEK (kr)</option>
+                        <option value="NOK">NOK (kr)</option>
+                        <option value="DKK">DKK (kr)</option>
+                        <option value="ISK">ISK (kr)</option>
+                      </select>
+                    </div>
+
+                    <div className="space-y-1.5 col-span-2 md:col-span-1">
+                      <label className="text-sm font-medium text-[var(--color-text)]">Display As</label>
+                      <select
+                        className="w-full h-10 px-3 rounded-[var(--radius-input)] border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text)] text-sm"
+                        value={values.pay_period ?? "monthly"}
+                        onChange={(e) => handleChange("pay_period", e.target.value)}
+                      >
+                        <option value="monthly">Monthly</option>
+                        <option value="yearly">Annual</option>
+                      </select>
+                    </div>
+
+                    <Input
+                      label={`Min Salary (${values.pay_period === "yearly" ? "Annual" : "Monthly"})`}
+                      type="number"
+                      placeholder="e.g. 50000"
+                      value={values.salary_min ?? ""}
+                      onChange={(e) => handleChange("salary_min", e.target.value)}
+                    />
+
+                    <Input
+                      label={`Max Salary (${values.pay_period === "yearly" ? "Annual" : "Monthly"})`}
+                      type="number"
+                      placeholder="e.g. 80000"
+                      value={values.salary_max ?? ""}
+                      onChange={(e) => handleChange("salary_max", e.target.value)}
+                    />
+                  </div>
+                )}
+              </div>
+
               <div className="flex items-center gap-2">
                 <input
                   type="checkbox"
-                  id="is_unpaid"
-                  checked={!values.paid}
-                  onChange={(e) => {
-                    const isUnpaid = e.target.checked;
-                    setValues(prev => ({
-                      ...prev,
-                      paid: !isUnpaid,
-                      // Optional: clear values if unpaid, or keep them hidden
-                      salary_min: isUnpaid ? null : prev.salary_min,
-                      salary_max: isUnpaid ? null : prev.salary_max
-                    }));
-                  }}
+                  id="show_salary"
+                  checked={values.show_salary_range ?? false}
+                  onChange={(e) => handleChange("show_salary_range", e.target.checked)}
                   className="rounded border-[var(--color-border)] text-[var(--color-brand-primary)] focus:ring-[var(--color-brand-primary)]/20"
                 />
-                <label htmlFor="is_unpaid" className="text-sm text-[var(--color-text)] font-medium">
-                  This is an unpaid / volunteer position
+                <label htmlFor="show_salary" className="text-sm text-[var(--color-text)]">
+                  Display salary range publicly on job post
                 </label>
               </div>
+            </Card>
 
-              {values.paid && (
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-5 animate-fade-in">
-                  <div className="space-y-1.5 col-span-2 md:col-span-1">
-                    <label className="text-sm font-medium text-[var(--color-text)]">Currency</label>
-                    <select
-                      className="w-full h-10 px-3 rounded-[var(--radius-input)] border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text)] text-sm"
-                      value={values.payment_currency ?? "USD"}
-                      onChange={(e) => handleChange("payment_currency", e.target.value)}
-                    >
-                      <option value="USD">USD ($)</option>
-                      <option value="EUR">EUR (€)</option>
-                      <option value="GBP">GBP (£)</option>
-                      <option value="SEK">SEK (kr)</option>
-                      <option value="NOK">NOK (kr)</option>
-                      <option value="DKK">DKK (kr)</option>
-                      <option value="ISK">ISK (kr)</option>
-                    </select>
-                  </div>
-
-                  <div className="space-y-1.5 col-span-2 md:col-span-1">
-                    <label className="text-sm font-medium text-[var(--color-text)]">Display As</label>
-                    <select
-                      className="w-full h-10 px-3 rounded-[var(--radius-input)] border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text)] text-sm"
-                      value={values.pay_period ?? "monthly"}
-                      onChange={(e) => handleChange("pay_period", e.target.value)}
-                    >
-                      <option value="monthly">Monthly</option>
-                      <option value="yearly">Annual</option>
-                    </select>
-                  </div>
-
-                  <Input
-                    label={`Min Salary (${values.pay_period === 'yearly' ? 'Annual' : 'Monthly'})`}
-                    type="number"
-                    placeholder="e.g. 50000"
-                    value={values.salary_min ?? ""}
-                    onChange={(e) => handleChange("salary_min", e.target.value)}
-                  />
-
-                  <Input
-                    label={`Max Salary (${values.pay_period === 'yearly' ? 'Annual' : 'Monthly'})`}
-                    type="number"
-                    placeholder="e.g. 80000"
-                    value={values.salary_max ?? ""}
-                    onChange={(e) => handleChange("salary_max", e.target.value)}
-                  />
-                </div>
-              )}
+            {/* Step 1 Nav */}
+            <div className="flex items-center justify-end pt-4">
+              <Button
+                type="button"
+                size="lg"
+                className="px-8"
+                onClick={advanceToStep2}
+                rightIcon={<ArrowRight size={18} />}
+              >
+                Next: Proof Task
+              </Button>
             </div>
+          </>
+        )}
 
-            <div className="flex items-center gap-2">
-              <input
-                type="checkbox"
-                id="show_salary"
-                checked={values.show_salary_range ?? false}
-                onChange={(e) => handleChange("show_salary_range", e.target.checked)}
-                className="rounded border-[var(--color-border)] text-[var(--color-brand-primary)] focus:ring-[var(--color-brand-primary)]/20"
-              />
-              <label htmlFor="show_salary" className="text-sm text-[var(--color-text)]">
-                Display salary range publicly on job post
-              </label>
-            </div>
-          </Card>
-
-          {/* 3. Proof Tasks (The Core Value) */}
-          <Card className="p-6 md:p-8 space-y-6 border-l-4 border-l-[var(--color-brand-primary)] shadow-glow-primary">
+        {/* ── STEP 2: PROOF TASK ── */}
+        {step === 2 && (
+          <>
+            <Card className="p-6 md:p-8 space-y-6 border-l-4 border-l-[var(--color-brand-primary)] shadow-glow-primary">
               <div>
                 <div className="flex items-center justify-between">
                   <h2 className="text-lg font-bold text-[var(--color-text)] flex items-center gap-2">
                     Proof Task
-                    <span className="text-[10px] font-bold uppercase tracking-widest px-1.5 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-500 border border-slate-200 dark:border-slate-700">Optional</span>
+                    <span className="text-[10px] font-bold uppercase tracking-widest px-1.5 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-500 border border-slate-200 dark:border-slate-700">
+                      Optional
+                    </span>
                   </h2>
                   <Button
                     type="button"
@@ -463,8 +537,9 @@ export default function EmployerJobForm({
                         id: crypto.randomUUID(),
                         title: "",
                         description: "",
-                        expected_time: "2-4 hours",
-                        submission_format: "github_repo",
+                        expected_time: "1–2 hours",
+                        submission_format: "link",
+                        submission_type: "link",
                         rubric_criteria: [
                           { name: "", weight: 34, description: "" },
                           { name: "", weight: 33, description: "" },
@@ -478,27 +553,50 @@ export default function EmployerJobForm({
                     Add Task
                   </Button>
                 </div>
-                <p className="text-sm text-[var(--color-text-muted)]">The practical challenge candidates must solve.</p>
-              </div>
-
-            {(!values.proof_tasks || values.proof_tasks.length === 0) && (
-              <div className="text-center py-10 border-2 border-dashed border-[var(--color-border)] rounded-2xl bg-[var(--color-bg)]/50">
-                <BrainCircuit size={40} className="mx-auto text-slate-300 dark:text-slate-700 mb-3" />
-                <p className="text-[var(--color-text-muted)] text-sm max-w-xs mx-auto">
-                  No proof tasks added. Candidates will only submit their profile and resume.
+                <p className="text-sm text-[var(--color-text-muted)] mt-1">
+                  The practical challenge candidates must solve. Includes a scoring rubric and optional follow-up questions.
                 </p>
               </div>
-            )}
 
-            {values.proof_tasks?.map((task, index) => (
-              <div
-                key={task.id || index}
-                id={`proof-task-${index}`}
-                className="p-5 bg-[var(--color-bg)] rounded-[var(--radius-card)] border border-[var(--color-border)] space-y-5 animate-fade-in-up scroll-mt-24"
-              >
-                <div className="flex justify-between items-start">
-                  <h4 className="font-semibold text-[var(--color-text)] text-sm uppercase tracking-wider">Task Details</h4>
-                  <div className="flex items-center gap-2">
+              {(!values.proof_tasks || values.proof_tasks.length === 0) && (
+                <div className="text-center py-10 border-2 border-dashed border-[var(--color-border)] rounded-2xl bg-[var(--color-bg)]/50">
+                  <BrainCircuit size={40} className="mx-auto text-slate-300 dark:text-slate-700 mb-3" />
+                  <p className="text-[var(--color-text-muted)] text-sm max-w-xs mx-auto mb-4">
+                    No proof task added. Candidates will only submit their profile and resume.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const newTask: ProofTask = {
+                        id: crypto.randomUUID(),
+                        title: "",
+                        description: "",
+                        expected_time: "1–2 hours",
+                        submission_format: "link",
+                        submission_type: "link",
+                        rubric_criteria: [
+                          { name: "", weight: 34, description: "" },
+                          { name: "", weight: 33, description: "" },
+                          { name: "", weight: 33, description: "" },
+                        ],
+                      };
+                      handleChange("proof_tasks", [newTask]);
+                    }}
+                    className="text-sm font-medium text-[var(--color-brand-primary)] hover:underline"
+                  >
+                    + Add a proof task
+                  </button>
+                </div>
+              )}
+
+              {values.proof_tasks?.map((task, index) => (
+                <div
+                  key={task.id || index}
+                  id={`proof-task-${index}`}
+                  className="p-5 bg-[var(--color-bg)] rounded-[var(--radius-card)] border border-[var(--color-border)] space-y-5 animate-fade-in-up scroll-mt-24"
+                >
+                  <div className="flex justify-between items-start">
+                    <h4 className="font-semibold text-[var(--color-text)] text-sm uppercase tracking-wider">Task Details</h4>
                     <Button
                       type="button"
                       variant="ghost"
@@ -512,114 +610,109 @@ export default function EmployerJobForm({
                       <Trash2 size={14} />
                     </Button>
                   </div>
-                </div>
 
-                <Input
-                  label="Task Title"
-                  placeholder="e.g. Build a Responsive Dashboard Component"
-                  value={task.title ?? ""}
-                  onChange={(e) => handleTaskChange(index, "title", e.target.value)}
-                  required
-                />
+                  <Input
+                    label="Task Title"
+                    placeholder="e.g. Build a Responsive Dashboard Component"
+                    value={task.title ?? ""}
+                    onChange={(e) => handleTaskChange(index, "title", e.target.value)}
+                    required
+                  />
 
-                <Textarea
-                  label="Task Instructions"
-                  placeholder="Provide clear, step-by-step instructions for the candidate..."
-                  value={task.description ?? ""}
-                  onChange={(e) => handleTaskChange(index, "description", e.target.value)}
-                  className="min-h-[150px] font-mono text-sm"
-                  required
-                />
+                  <div className="space-y-1">
+                    <Textarea
+                      label="Task Instructions"
+                      placeholder="Provide clear, step-by-step instructions for the candidate..."
+                      value={task.description ?? ""}
+                      onChange={(e) => handleTaskChange(index, "description", e.target.value)}
+                      className="min-h-[150px] font-mono text-sm"
+                      required
+                    />
+                    <p className="text-xs text-[var(--color-text-muted)]">
+                      Candidates can submit via link, file upload, or text — any format that best shows their work.
+                    </p>
+                  </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-1.5">
-                    <label className="text-sm font-medium text-[var(--color-text)]">Submission Format</label>
+                    <label className="text-sm font-medium text-[var(--color-text)]">Estimated Time</label>
                     <select
                       className="w-full h-10 px-3 rounded-[var(--radius-input)] border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text)] text-sm"
-                      value={task.submission_format ?? "github_repo"}
-                      onChange={(e) => {
-                        const fmt = e.target.value;
-                        let type: "link" | "file" | "text" | "github_repo" = "link"; // Default to link
-                        
-                        if (fmt === "github_repo") type = "github_repo";
-                        else if (fmt === "file_upload") type = "file";
-                        else if (fmt === "text_response") type = "text";
-                        else if (fmt === "loom_video" || fmt === "figma_link") type = "link";
-                        
-                        const newTasks = [...(values.proof_tasks || [])];
-                        newTasks[index] = { 
-                          ...newTasks[index], 
-                          submission_format: fmt,
-                          submission_type: type
-                        };
-                        handleChange("proof_tasks", newTasks);
-                      }}
+                      value={task.expected_time ?? "1–2 hours"}
+                      onChange={(e) => handleTaskChange(index, "expected_time", e.target.value)}
                     >
-                      <option value="github_repo">GitHub Repository</option>
-                      <option value="file_upload">File Upload (PDF/Zip)</option>
-                      <option value="text_response">Text / Code Snippet</option>
-                      <option value="loom_video">Video Walkthrough (Loom/YouTube)</option>
-                      <option value="link">Valid URL</option>
-                      <option value="figma_link">Figma Link</option>
+                      <option value="&lt; 30 min">&lt; 30 min</option>
+                      <option value="~1 hour">~1 hour</option>
+                      <option value="1–2 hours">1–2 hours</option>
+                      <option value="2–4 hours">2–4 hours</option>
+                      <option value="Half day">Half day</option>
+                      <option value="Full day">Full day</option>
                     </select>
                   </div>
 
-                  <Input
-                    label="Estimated Time"
-                    placeholder="e.g. 2-4 hours"
-                    value={task.expected_time ?? ""}
-                    onChange={(e) => handleTaskChange(index, "expected_time", e.target.value)}
+                  <RubricEditor
+                    task={task}
+                    aiSuggested={!!task.id && aiRubricTaskIds.has(task.id)}
+                    onChange={(criteria) => {
+                      handleTaskChange(index, "rubric_criteria", criteria);
+                      if (rubricErrors[index]) {
+                        setRubricErrors((prev) => {
+                          const next = { ...prev };
+                          delete next[index];
+                          return next;
+                        });
+                      }
+                      if (task.id && aiRubricTaskIds.has(task.id)) {
+                        setAiRubricTaskIds((prev) => {
+                          const next = new Set(prev);
+                          next.delete(task.id!);
+                          return next;
+                        });
+                      }
+                    }}
+                    errors={rubricErrors[index]}
+                  />
+
+                  <FollowUpQuestionsEditor
+                    questions={task.follow_up_questions ?? []}
+                    onChange={(qs) => handleTaskChange(index, "follow_up_questions", qs)}
                   />
                 </div>
+              ))}
+            </Card>
 
-                <RubricEditor
-                  task={task}
-                  aiSuggested={!!task.id && aiRubricTaskIds.has(task.id)}
-                  onChange={(criteria) => {
-                    handleTaskChange(index, "rubric_criteria", criteria);
-                    if (rubricErrors[index]) {
-                      setRubricErrors((prev) => {
-                        const next = { ...prev };
-                        delete next[index];
-                        return next;
-                      });
-                    }
-                    if (task.id && aiRubricTaskIds.has(task.id)) {
-                      setAiRubricTaskIds((prev) => {
-                        const next = new Set(prev);
-                        next.delete(task.id!);
-                        return next;
-                      });
-                    }
-                  }}
-                  errors={rubricErrors[index]}
-                />
+            {/* Step 2 Nav */}
+            <div className="flex items-center justify-between pt-4">
+              <Button
+                type="button"
+                variant="outline"
+                size="lg"
+                onClick={() => { setStep(1); scrollToTop(); }}
+              >
+                ← Back
+              </Button>
+
+              <div className="flex flex-col items-end gap-2">
+                <Button
+                  type="submit"
+                  size="lg"
+                  className="px-8"
+                  isLoading={loading}
+                  rightIcon={!loading ? <ArrowRight size={18} /> : undefined}
+                >
+                  {submitLabel || "Publish Job"}
+                </Button>
+
+                {mode === "create" && (!company?.subscription_tier || company.subscription_tier === "free") && (
+                  <p className="text-xs text-right text-[var(--color-text-muted)]">
+                    Free Tier: {company?.active_jobs_count || 0} / {FREE_TIER_JOB_LIMIT} active jobs used.
+                  </p>
+                )}
               </div>
-            ))}
-          </Card>
+            </div>
+          </>
+        )}
 
-          {/* Submit Action */}
-          <div className="flex flex-col items-end gap-2 pt-4">
-            <Button
-              type="submit"
-              size="lg"
-              className="w-full md:w-auto px-8"
-              isLoading={loading}
-              rightIcon={!loading && <ArrowRight size={18} />}
-            >
-              {submitLabel || "Post Job Now"}
-            </Button>
-
-            {/* Limit Warning */}
-            {mode === "create" && (!company?.subscription_tier || company.subscription_tier === "free") && (
-              <p className="text-xs text-right text-[var(--color-text-muted)]">
-                Free Tier: {(company?.active_jobs_count || 0)} / {FREE_TIER_JOB_LIMIT} active jobs used.
-              </p>
-            )}
-
-          </div>
-        </form>
-      </div>
+      </form>
     </div>
   );
 }

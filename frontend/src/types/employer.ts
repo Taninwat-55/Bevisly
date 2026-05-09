@@ -1,4 +1,4 @@
-import type { ProofTask, RubricCriterion, RubricScore } from "./shared";
+import type { ProofTask, RubricCriterion, RubricScore, FollowUpAnswer } from "./shared";
 
 // Type representing a single job posted by an employer.
 export type EmployerJob = {
@@ -61,12 +61,15 @@ export type EmployerSubmission = {
   text_response?: string | null; // For text answers
   video_url?: string | null;
   reflection: string | null;
+  follow_up_answers?: FollowUpAnswer[] | null;
+  discussion_requested_at?: string | null;
   proof_tasks: {
     id: string;
     title: string | null;
     description?: string | null;
     rubric_criteria?: RubricCriterion[] | null;
     rubric_locked_at?: string | null;
+    follow_up_questions?: string[] | null;
   } | null;
 
   jobs?: { title: string | null; company: string | null } | null;

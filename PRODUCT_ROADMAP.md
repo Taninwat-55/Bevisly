@@ -188,7 +188,7 @@ Instead of only traditional job postings, companies can post **Bounties** — sm
 ---
 
 ### 6. Submission Follow-up Questions (Anti-AI Authenticity Layer)
-**Status:** 🔴
+**Status:** 🟢
 
 AI detectors are unreliable and ethically risky — don't try to detect AI use, make human thinking visible alongside the output.
 

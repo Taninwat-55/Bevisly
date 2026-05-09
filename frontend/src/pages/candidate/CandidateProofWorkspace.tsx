@@ -8,6 +8,7 @@ import {
   completeProof,
   saveDraft,
   checkSubmissionStatus,
+  submitFollowUpAnswers,
 } from "@/lib/api/submissions";
 import {
   Loader2, Clock, Upload, Link as LinkIcon,
@@ -74,6 +75,12 @@ export default function CandidateProofWorkspace() {
   const [consentChecked, setConsentChecked] = useState(false);
   const [showCelebration, setShowCelebration] = useState(false);
 
+  // Follow-up Q&A state
+  const [submissionId, setSubmissionId] = useState<string | null>(null);
+  const [showFollowUpModal, setShowFollowUpModal] = useState(false);
+  const [followUpAnswers, setFollowUpAnswers] = useState<string[]>([]);
+  const [submittingFollowUp, setSubmittingFollowUp] = useState(false);
+
   useEffect(() => {
     if (!proof_task_id) return;
     const init = async () => {
@@ -84,7 +91,8 @@ export default function CandidateProofWorkspace() {
         setTask(taskData);
 
         if (taskData.job_id) {
-          await startProof(taskData.job_id, taskData.id);
+          const sid = await startProof(taskData.job_id, taskData.id);
+          if (sid) setSubmissionId(sid);
           const existing = await checkSubmissionStatus(taskData.job_id);
           if (existing) {
             setLink(existing.submission_link || "");
@@ -128,7 +136,7 @@ export default function CandidateProofWorkspace() {
     setSubmitting(true);
     toast.loading("Deploying proof...", { id: "submit" });
     try {
-      await completeProof({
+      const result = await completeProof({
         job_id: task.job_id,
         submission_link: link || undefined,
         text_response: textSubmission || undefined,
@@ -136,13 +144,50 @@ export default function CandidateProofWorkspace() {
         video_url: videoLink || undefined,
         file: file || undefined,
       });
+      if (result?.id) setSubmissionId(result.id);
       toast.success("Proof Deployed Successfully", { id: "submit" });
-      setShowCelebration(true);
+
+      const questions = task.follow_up_questions?.filter(Boolean) ?? [];
+      if (questions.length > 0) {
+        setFollowUpAnswers(questions.map(() => ""));
+        setShowFollowUpModal(true);
+      } else {
+        setShowCelebration(true);
+      }
     } catch (err: unknown) {
       toast.error(err instanceof Error ? err.message : "Submission failed", { id: "submit" });
     } finally {
       setSubmitting(false);
     }
+  }
+
+  async function handleSubmitFollowUp() {
+    const questions = task?.follow_up_questions?.filter(Boolean) ?? [];
+    if (!submissionId || questions.length === 0) {
+      setShowFollowUpModal(false);
+      setShowCelebration(true);
+      return;
+    }
+    setSubmittingFollowUp(true);
+    try {
+      const answers = questions.map((q, i) => ({
+        question: q,
+        answer: followUpAnswers[i] ?? "",
+      }));
+      await submitFollowUpAnswers(submissionId, answers);
+      setShowFollowUpModal(false);
+      setShowCelebration(true);
+    } catch {
+      toast.error("Failed to save answers. You can skip for now.");
+      setShowFollowUpModal(false);
+      setShowCelebration(true);
+    } finally {
+      setSubmittingFollowUp(false);
+    }
+  }
+
+  function countWords(text: string): number {
+    return text.trim() === "" ? 0 : text.trim().split(/\s+/).length;
   }
 
   if (loading) return (
@@ -494,6 +539,69 @@ export default function CandidateProofWorkspace() {
       )}
 
     </div>
+
+      {/* Follow-up Questions Modal */}
+      {showFollowUpModal && task?.follow_up_questions && createPortal(
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 overflow-y-auto">
+          <div className="w-full max-w-lg bg-[#252526] border border-[#3e3e42] rounded-lg shadow-2xl animate-in fade-in zoom-in-95 duration-200 my-auto">
+            <div className="flex items-center justify-between p-4 border-b border-[#3e3e42]">
+              <div>
+                <h3 className="text-base font-semibold text-white">Step 2: Follow-up Questions</h3>
+                <p className="text-xs text-slate-400 mt-0.5">Answer in your own words. 150 words max each. AI wrote the work — only you know why.</p>
+              </div>
+            </div>
+
+            <div className="p-6 space-y-6">
+              {task.follow_up_questions.filter(Boolean).map((question, idx) => {
+                const words = countWords(followUpAnswers[idx] ?? "");
+                const overLimit = words > 150;
+                return (
+                  <div key={idx}>
+                    <label className="block text-sm font-medium text-slate-200 mb-2">
+                      {idx + 1}. {question}
+                    </label>
+                    <textarea
+                      className={`w-full bg-[#1e1e1e] border rounded px-3 py-2 text-sm text-slate-200 focus:outline-none resize-none transition-colors ${overLimit ? "border-red-500 focus:border-red-500" : "border-[#3e3e42] focus:border-blue-500"}`}
+                      rows={4}
+                      placeholder="Write your answer here..."
+                      value={followUpAnswers[idx] ?? ""}
+                      onChange={(e) => {
+                        const next = [...followUpAnswers];
+                        next[idx] = e.target.value;
+                        setFollowUpAnswers(next);
+                      }}
+                    />
+                    <p className={`text-xs mt-1 text-right ${overLimit ? "text-red-400" : "text-slate-500"}`}>
+                      {words} / 150 words
+                    </p>
+                  </div>
+                );
+              })}
+            </div>
+
+            <div className="p-4 bg-[#1e1e1e] border-t border-[#3e3e42] flex justify-between items-center rounded-b-lg gap-3">
+              <button
+                onClick={() => {
+                  setShowFollowUpModal(false);
+                  setShowCelebration(true);
+                }}
+                className="text-sm text-slate-400 hover:text-slate-200 transition-colors"
+              >
+                Skip for now
+              </button>
+              <Button
+                className={`bg-green-600 hover:bg-green-700 text-white border-none ${task.follow_up_questions.filter(Boolean).some((_, i) => countWords(followUpAnswers[i] ?? "") > 150) ? "opacity-50 cursor-not-allowed" : ""}`}
+                onClick={handleSubmitFollowUp}
+                disabled={submittingFollowUp || task.follow_up_questions.filter(Boolean).some((_, i) => countWords(followUpAnswers[i] ?? "") > 150)}
+                leftIcon={submittingFollowUp ? <Loader2 size={14} className="animate-spin" /> : undefined}
+              >
+                Submit Answers
+              </Button>
+            </div>
+          </div>
+        </div>,
+        document.body
+      )}
 
       {/* Success Celebration */}
       <SuccessCelebration

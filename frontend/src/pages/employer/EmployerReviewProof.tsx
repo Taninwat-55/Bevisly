@@ -10,6 +10,7 @@ import {
   updateSubmissionStatus,
   getSubmissionById,
   getSubmissionsByJob,
+  requestDiscussion,
 } from "@/lib/api/submissions";
 import { useAuth } from "@/hooks/useAuth";
 import type { EmployerSubmission, RubricCriterion, RubricScore } from "@/types";
@@ -29,6 +30,8 @@ import {
   CheckCircle2,
   Clock,
   Paperclip,
+  MessageSquare,
+  CalendarCheck,
 } from "lucide-react";
 import { distributeCredits } from "@/lib/api/credits";
 import { Star, Sparkles } from "lucide-react";
@@ -406,6 +409,8 @@ export default function EmployerReviewProof({
   const [scoresFromAI, setScoresFromAI] = useState(false);
   const [fetching, setFetching] = useState(true);
   const [currentIndex, setCurrentIndex] = useState<number>(0);
+  const [requestingDiscussion, setRequestingDiscussion] = useState(false);
+  const [discussionRequested, setDiscussionRequested] = useState(false);
 
   const rubricCriteria = submission?.proof_tasks?.rubric_criteria ?? null;
   const hasRubric = Array.isArray(rubricCriteria) && rubricCriteria.length > 0;
@@ -428,6 +433,9 @@ export default function EmployerReviewProof({
           if (Array.isArray(data.feedback[0].rubric_scores)) {
             setRubricScores(data.feedback[0].rubric_scores);
           }
+        }
+        if (data.discussion_requested_at) {
+          setDiscussionRequested(true);
         }
 
         if (data?.job_id && submissionsCache.current.length === 0) {
@@ -596,6 +604,20 @@ export default function EmployerReviewProof({
       toast.error("Failed to submit feedback.");
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function handleRequestDiscussion() {
+    if (!submission?.id || discussionRequested) return;
+    setRequestingDiscussion(true);
+    try {
+      await requestDiscussion(submission.id);
+      setDiscussionRequested(true);
+      toast.success("Proof Discussion requested. The candidate will be notified.");
+    } catch {
+      toast.error("Failed to send discussion request.");
+    } finally {
+      setRequestingDiscussion(false);
     }
   }
 
@@ -941,6 +963,96 @@ export default function EmployerReviewProof({
                 </ReactMarkdown>
               </div>
             </div>
+          </div>
+        )}
+
+        {/* Follow-up Answers */}
+        {Array.isArray(submission.follow_up_answers) && submission.follow_up_answers.length > 0 && (
+          <div className="glass-panel rounded-2xl p-6 space-y-4">
+            <div className="flex items-center gap-2">
+              <MessageSquare size={16} className="text-[var(--color-employer)]" />
+              <h3 className="text-xs font-bold uppercase tracking-wider text-[var(--color-employer)]">
+                Follow-up Answers
+              </h3>
+            </div>
+            <p className="text-xs text-[var(--color-text-muted)]">
+              The candidate answered these after submitting. AI can write the plan — this is their reasoning in their own voice.
+            </p>
+            <div className="space-y-4">
+              {submission.follow_up_answers.map((item, idx) => (
+                <div key={idx} className="p-4 bg-[var(--color-bg)] border border-[var(--color-border)] rounded-xl space-y-2">
+                  <p className="text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wide">
+                    Q{idx + 1}. {item.question}
+                  </p>
+                  <p className="text-sm text-[var(--color-text)] leading-relaxed whitespace-pre-wrap">
+                    {item.answer || <span className="italic text-[var(--color-text-muted)]">No answer provided.</span>}
+                  </p>
+                </div>
+              ))}
+            </div>
+
+            {/* Request Proof Discussion */}
+            <div className="pt-2 border-t border-[var(--color-border)] flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-[var(--color-text)]">Proof Discussion</p>
+                <p className="text-xs text-[var(--color-text-muted)]">
+                  Request a 15-minute call to discuss their submission directly.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={handleRequestDiscussion}
+                disabled={requestingDiscussion || discussionRequested}
+                className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all ${
+                  discussionRequested
+                    ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 cursor-default"
+                    : "bg-[var(--color-employer)] text-white hover:brightness-110 disabled:opacity-50"
+                }`}
+              >
+                {requestingDiscussion ? (
+                  <Loader2 size={14} className="animate-spin" />
+                ) : discussionRequested ? (
+                  <CheckCircle2 size={14} />
+                ) : (
+                  <CalendarCheck size={14} />
+                )}
+                {discussionRequested ? "Requested" : "Request Discussion"}
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Request Discussion standalone (when no follow-up answers yet) */}
+        {(!submission.follow_up_answers || submission.follow_up_answers.length === 0) && (
+          <div className="glass-panel rounded-2xl p-4 flex items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <CalendarCheck size={18} className="text-[var(--color-employer)] shrink-0" />
+              <div>
+                <p className="text-sm font-medium text-[var(--color-text)]">Proof Discussion</p>
+                <p className="text-xs text-[var(--color-text-muted)]">
+                  Request a 15-minute call to talk through the submission with the candidate.
+                </p>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={handleRequestDiscussion}
+              disabled={requestingDiscussion || discussionRequested}
+              className={`shrink-0 flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all ${
+                discussionRequested
+                  ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 cursor-default"
+                  : "border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text)] hover:bg-[var(--color-bg)] disabled:opacity-50"
+              }`}
+            >
+              {requestingDiscussion ? (
+                <Loader2 size={14} className="animate-spin" />
+              ) : discussionRequested ? (
+                <CheckCircle2 size={14} />
+              ) : (
+                <CalendarCheck size={14} />
+              )}
+              {discussionRequested ? "Requested" : "Request Discussion"}
+            </button>
           </div>
         )}
 

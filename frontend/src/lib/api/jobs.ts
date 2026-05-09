@@ -275,6 +275,7 @@ export async function createJobWithTasks(
       recommended_platform: task.recommended_platform ?? null,
       attachments: task.attachments ?? [],
       rubric_criteria: task.rubric_criteria ?? null,
+      follow_up_questions: task.follow_up_questions?.length ? task.follow_up_questions : null,
     }));
 
     const { error: proofError } = await supabase
@@ -362,6 +363,7 @@ export async function updateJobWithTasks(
         submission_type: t.submission_type ?? "link",
         recommended_platform: t.recommended_platform ?? null,
         attachments: t.attachments ?? [],
+        follow_up_questions: t.follow_up_questions?.length ? t.follow_up_questions : null,
       };
 
       if (t.id && lockedById.has(t.id)) {
