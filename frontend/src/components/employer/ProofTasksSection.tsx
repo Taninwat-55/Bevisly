@@ -294,7 +294,6 @@ export default function ProofTasksSection({
   );
 }
 
-export { DEFAULT_RUBRIC };
 
 interface RubricEditorProps {
   task: ProofTask;

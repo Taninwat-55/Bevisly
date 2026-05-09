@@ -130,7 +130,7 @@ export default function PublicProfilePage() {
         };
 
         fetchData();
-    }, [username, id]);
+    }, [username, id, user?.id]);
 
     // Loading state
     if (loading) {

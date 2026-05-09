@@ -125,7 +125,7 @@ function upsertScore(
   return next;
 }
 
-export function computeWeightedOverall(
+function computeWeightedOverall(
   criteria: RubricCriterion[],
   scores: RubricScore[],
 ): number {
