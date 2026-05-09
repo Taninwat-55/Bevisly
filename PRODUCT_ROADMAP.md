@@ -228,7 +228,7 @@ Candidates spend hours on proof tasks for jobs with hidden salaries. This is exp
 ---
 
 ### 9. Task Time Expectation Label
-**Status:** 🔴
+**Status:** 🟢
 
 Unpaid take-home tasks that consume 6–8+ hours are one of the biggest candidate pain points in modern hiring. Simple fix, high trust signal.
 

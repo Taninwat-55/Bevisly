@@ -167,6 +167,15 @@ Cheap defensive copy + UX so we never *appear* to be an "AI hiring decision" too
 ### ⬜ Locked Rubric Before Submissions Open
 Employer defines 3–5 weighted rubric criteria when creating a proof task (e.g. "Code clarity", "Problem decomposition", "UX polish"). Once the first candidate submits, the rubric locks for that task — changes require a new task version. All AI suggestions and human ratings score against the locked rubric, not a vague 1–5 star. **Why pre-launch:** without it, the validation question "is the proof system fair and repeatable across employers?" can't be answered — employers improvise scoring post-hoc and the signal is meaningless. Promoted from post-launch on 2026-05-08.
 
+### ⬜ Paid Promotion / Featured Job (Placeholder)
+Wiring for employers on paid plans to mark a job as "Featured" — placeholder UI/data is enough for now; placement (search results? landing page? brand page?) is still undecided. **Why pre-launch:** the pricing page already implies paid plans get a visibility boost, so the promise needs at least basic plumbing before the first paid employer asks "where's my featured job?".
+
+### ⬜ Time Estimation Label
+Employer-set estimated time-to-complete on every proof task. Helps candidates self-select before committing hours and reduces mid-task drop-off — and lets us flag tasks that demand unreasonable unpaid effort. **Why pre-launch:** without it, candidates start tasks blind, abandon halfway, and first-employer feedback gets polluted by misleading drop-off rates.
+
+### ⬜ Pay Transparency
+Required salary range (min/max) on every job listing. **Why pre-launch:** strong positioning vs. legacy job boards ("every Bevisly job shows real pay") and aligns with EU pay-transparency expectations.
+
 The remaining Fairness & Evidence Layer phases (blind first review, override justification, consistency dashboard, AI self-audit) stay post-launch — see `PRODUCT_ROADMAP.md` feature #19.
 
 ---

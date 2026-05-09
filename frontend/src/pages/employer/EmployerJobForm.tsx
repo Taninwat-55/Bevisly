@@ -11,7 +11,7 @@ import { Card } from "@/components/ui/Card";
 import type { EmployerJobFormValues } from "@/types/employer";
 import {
   Briefcase, MapPin, DollarSign, BrainCircuit, ArrowRight, Calendar, Plus, Trash2,
-  ChevronRight, CheckCircle2,
+  ChevronRight, CheckCircle2, AlertTriangle,
 } from "lucide-react";
 import { POPULAR_JOB_TITLES } from "@/data/popularJobTitles";
 import { useCompany } from "@/hooks/useCompany";
@@ -646,6 +646,15 @@ export default function EmployerJobForm({
                       <option value="Half day">Half day</option>
                       <option value="Full day">Full day</option>
                     </select>
+                    <p className="text-xs text-[var(--color-text-muted)]">
+                      Bevisly recommends 1–3 hours max to maximise candidate quality.
+                    </p>
+                    {(task.expected_time === "Half day" || task.expected_time === "Full day") && (
+                      <p className="text-xs text-amber-600 dark:text-amber-400 flex items-center gap-1">
+                        <AlertTriangle size={12} />
+                        Tasks over 4 hours see significantly higher drop-off. Consider breaking it into smaller stages.
+                      </p>
+                    )}
                   </div>
 
                   <RubricEditor

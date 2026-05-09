@@ -589,7 +589,18 @@ export default function JobDetailPage() {
             <div className="max-w-4xl mx-auto flex items-center justify-between gap-4">
               <div className="min-w-0">
                 <p className="text-sm font-bold text-[var(--color-text)] truncate">{job.title}</p>
-                <p className="text-xs text-[var(--color-text-muted)] truncate">{job.company} · {job.location || "Remote"}</p>
+                <div className="flex items-center gap-2 text-xs text-[var(--color-text-muted)] truncate">
+                  <span>{job.company} · {job.location || "Remote"}</span>
+                  {proof?.expected_time && (
+                    <>
+                      <span className="w-1 h-1 rounded-full bg-[var(--color-text-muted)] shrink-0" />
+                      <span className="flex items-center gap-1 shrink-0">
+                        <Clock size={10} />
+                        {proof.expected_time}
+                      </span>
+                    </>
+                  )}
+                </div>
               </div>
               {role === "employer" ? (
                 <button
