@@ -37,15 +37,21 @@ export default function JobCard({ job, compact = false, isSaved, onToggleSave }:
 
     // Format salary
     const formatSalary = () => {
-        if (!job.paid) return "Unpaid / Equity";
+        const type = job.compensation_type;
         const periodLabel = job.pay_period === 'yearly' ? '/yr' : job.pay_period === 'hourly' ? '/hr' : '/mo';
-        if (job.salary_min && job.salary_max) {
-            return `${job.payment_currency} ${job.salary_min.toLocaleString()} - ${job.salary_max.toLocaleString()}${periodLabel}`;
-        }
-        if (job.payment_amount) {
-            return `${job.payment_currency} ${job.payment_amount.toLocaleString()}${periodLabel}`;
-        }
-        return "Competitive";
+        const equityStr = job.equity_min && job.equity_max
+            ? `${job.equity_min}%–${job.equity_max}% equity`
+            : null;
+        const salaryStr = job.salary_min && job.salary_max
+            ? `${job.payment_currency} ${job.salary_min.toLocaleString()}–${job.salary_max.toLocaleString()}${periodLabel}`
+            : job.payment_amount
+                ? `${job.payment_currency} ${job.payment_amount.toLocaleString()}${periodLabel}`
+                : null;
+
+        if (type === 'volunteer' || (!type && !job.paid)) return "Volunteer / Unpaid";
+        if (type === 'equity_only') return equityStr || "Equity";
+        if (type === 'salary_and_equity') return [salaryStr, equityStr].filter(Boolean).join(' + ') || "Competitive";
+        return salaryStr || "Competitive";
     };
 
     const tasksCount = job.proof_tasks?.length || 0;

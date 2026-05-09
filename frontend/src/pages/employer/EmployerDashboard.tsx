@@ -456,7 +456,10 @@ export default function EmployerDashboard() {
                     <div className="p-6">
                       <EmployerJobForm
                         mode="create"
-                        defaultValues={postJobData}
+                        defaultValues={{
+                          ...postJobData,
+                          company: postJobData?.company || company?.name || user?.company_name || undefined,
+                        }}
                         submitLabel="Publish Job"
                         onSuccess={async () => {
                           setIsPostingJob(false);

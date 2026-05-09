@@ -387,7 +387,10 @@ export default function EmployerTalentBoardPage() {
                 <div className="p-6">
                   <EmployerJobForm
                     mode="edit"
-                    defaultValues={editJobData}
+                    defaultValues={{
+                      ...editJobData,
+                      company: editJobData?.company || user?.company_name || undefined,
+                    }}
                     onSubmit={async (values) => {
                       if (!selectedJobId) return;
                       await updateJobWithTasks(selectedJobId, values);

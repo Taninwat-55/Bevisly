@@ -285,20 +285,26 @@ export default function JobDetailPage() {
                 <span>{job.location || "Remote"}</span>
               </div>
               <div className="flex flex-wrap gap-2 mt-5">
-                {job.paid && (
-                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[var(--color-surface)] border border-[var(--color-border)] text-[var(--color-text-muted)] text-xs font-medium">
-                    <DollarSign size={12} /> {(() => {
-                      const periodLabel = job.pay_period === 'yearly' ? '/yr' : job.pay_period === 'hourly' ? '/hr' : '/mo';
-                      if (job.salary_min && job.salary_max) {
-                        return `${job.salary_min.toLocaleString()} – ${job.salary_max.toLocaleString()} ${job.payment_currency}${periodLabel}`;
-                      }
-                      if (job.payment_amount) {
-                        return `${job.payment_amount.toLocaleString()} ${job.payment_currency}${periodLabel}`;
-                      }
-                      return "Competitive";
-                    })()}
-                  </span>
-                )}
+                {(() => {
+                  const type = job.compensation_type;
+                  const periodLabel = job.pay_period === 'yearly' ? '/yr' : job.pay_period === 'hourly' ? '/hr' : '/mo';
+                  const equityStr = job.equity_min && job.equity_max ? `${job.equity_min}%–${job.equity_max}% equity` : null;
+                  const salaryStr = job.salary_min && job.salary_max
+                    ? `${job.salary_min.toLocaleString()}–${job.salary_max.toLocaleString()} ${job.payment_currency}${periodLabel}`
+                    : job.payment_amount ? `${job.payment_amount.toLocaleString()} ${job.payment_currency}${periodLabel}` : null;
+
+                  let label: string | null = null;
+                  if (type === 'volunteer' || (!type && !job.paid)) label = null;
+                  else if (type === 'equity_only') label = equityStr;
+                  else if (type === 'salary_and_equity') label = [salaryStr, equityStr].filter(Boolean).join(' + ');
+                  else label = salaryStr;
+
+                  return label ? (
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[var(--color-surface)] border border-[var(--color-border)] text-[var(--color-text-muted)] text-xs font-medium">
+                      <DollarSign size={12} /> {label}
+                    </span>
+                  ) : null;
+                })()}
                 {job.expires_at && (
                   <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-600 text-xs font-medium">
                     <Clock size={13} /> Expires {new Date(job.expires_at).toLocaleDateString()}
@@ -320,11 +326,20 @@ export default function JobDetailPage() {
             <DollarSign size={15} className="text-[var(--color-text-muted)]" />
             <span className="text-[10px] uppercase text-[var(--color-text-muted)] font-bold tracking-wider">Salary</span>
             <span className="text-sm font-bold text-[var(--color-text)] text-center leading-tight">
-              {job.salary_min && job.salary_max
-                ? `${job.salary_min.toLocaleString()}–${job.salary_max.toLocaleString()} ${job.payment_currency}${job.pay_period === 'yearly' ? '/yr' : '/mo'}`
-                : job.payment_amount
-                  ? `${job.payment_amount.toLocaleString()} ${job.payment_currency}${job.pay_period === 'yearly' ? '/yr' : '/mo'}`
-                  : "Competitive"}
+              {(() => {
+                const type = job.compensation_type;
+                const periodLabel = job.pay_period === 'yearly' ? '/yr' : '/mo';
+                const equityStr = job.equity_min && job.equity_max ? `${job.equity_min}%–${job.equity_max}% equity` : null;
+                const salaryStr = job.salary_min && job.salary_max
+                  ? `${job.salary_min.toLocaleString()}–${job.salary_max.toLocaleString()} ${job.payment_currency}${periodLabel}`
+                  : job.payment_amount
+                    ? `${job.payment_amount.toLocaleString()} ${job.payment_currency}${periodLabel}`
+                    : null;
+                if (type === 'volunteer' || (!type && !job.paid)) return "Volunteer / Unpaid";
+                if (type === 'equity_only') return equityStr || "Equity";
+                if (type === 'salary_and_equity') return [salaryStr, equityStr].filter(Boolean).join(' + ') || "Competitive";
+                return salaryStr || "Competitive";
+              })()}
             </span>
           </div>
           <div className="flex flex-col items-center justify-center py-4 px-3 gap-1">

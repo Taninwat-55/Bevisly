@@ -216,7 +216,7 @@ Candidates face scams and fake job postings on open platforms. A verified employ
 ---
 
 ### 8. Pay Transparency (Required Salary Range)
-**Status:** 🔴
+**Status:** 🟢
 
 Candidates spend hours on proof tasks for jobs with hidden salaries. This is exploitative and a top complaint in hiring research.
 

@@ -56,10 +56,13 @@ export default function EmployerJobForm({
     location: defaultValues?.location ?? "",
     payment_amount: defaultValues?.payment_amount ?? null,
     paid: defaultValues?.paid ?? true,
+    compensation_type: defaultValues?.compensation_type ?? "salary",
     payment_currency: defaultValues?.payment_currency ?? "EUR",
-    show_salary_range: defaultValues?.show_salary_range ?? false,
+    show_salary_range: true,
     salary_min: defaultValues?.salary_min ?? null,
     salary_max: defaultValues?.salary_max ?? null,
+    equity_min: defaultValues?.equity_min ?? null,
+    equity_max: defaultValues?.equity_max ?? null,
     pay_period: defaultValues?.pay_period ?? "monthly",
     job_type: defaultValues?.job_type ?? "Full-time",
     department: defaultValues?.department ?? "Engineering",
@@ -121,6 +124,12 @@ export default function EmployerJobForm({
     if (mode === "edit" && !values.company?.trim()) errors.push("Company Name");
     if (!values.location?.trim()) errors.push("Location");
     if (!values.description?.trim()) errors.push("Job Description");
+    const needsSalary = values.compensation_type === "salary" || values.compensation_type === "salary_and_equity";
+    const needsEquity = values.compensation_type === "equity_only" || values.compensation_type === "salary_and_equity";
+    if (needsSalary && !values.salary_min) errors.push("Min Salary");
+    if (needsSalary && !values.salary_max) errors.push("Max Salary");
+    if (needsEquity && !values.equity_min) errors.push("Min Equity %");
+    if (needsEquity && !values.equity_max) errors.push("Max Equity %");
     if (errors.length > 0) {
       toast.error(`Please fill in: ${errors.join(", ")}`);
       return;
@@ -137,6 +146,12 @@ export default function EmployerJobForm({
     if (mode === "edit" && !values.company?.trim()) missingFields.push("Company Name");
     if (!values.location?.trim()) missingFields.push("Location");
     if (!values.description?.trim()) missingFields.push("Job Description");
+    const needsSalary = values.compensation_type === "salary" || values.compensation_type === "salary_and_equity";
+    const needsEquity = values.compensation_type === "equity_only" || values.compensation_type === "salary_and_equity";
+    if (needsSalary && !values.salary_min) missingFields.push("Min Salary");
+    if (needsSalary && !values.salary_max) missingFields.push("Max Salary");
+    if (needsEquity && !values.equity_min) missingFields.push("Min Equity %");
+    if (needsEquity && !values.equity_max) missingFields.push("Max Equity %");
 
     const nextRubricErrors: ProofTaskRubricErrors = {};
     let firstFailingTaskIndex: number | null = null;
@@ -179,7 +194,7 @@ export default function EmployerJobForm({
       return;
     }
 
-    if (values.paid) {
+    if (needsSalary) {
       if (values.salary_min !== null && Number(values.salary_min) < 0) {
         toast.error("Salary amounts cannot be negative");
         return;
@@ -197,6 +212,23 @@ export default function EmployerJobForm({
         return;
       }
     }
+    if (needsEquity) {
+      if (values.equity_min !== null && Number(values.equity_min) < 0) {
+        toast.error("Equity percentage cannot be negative");
+        return;
+      }
+      if (
+        values.equity_min !== null &&
+        values.equity_max !== null &&
+        Number(values.equity_min) > Number(values.equity_max)
+      ) {
+        toast.error("Minimum equity cannot be greater than maximum equity");
+        return;
+      }
+    }
+
+    // Derive `paid` from compensation_type before saving
+    values.paid = needsSalary;
 
     const isFreeTier = !company?.subscription_tier || company.subscription_tier === "free";
     const activeJobs = company?.active_jobs_count || 0;
@@ -271,14 +303,14 @@ export default function EmployerJobForm({
         </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-8">
+      <form onSubmit={handleSubmit} className="space-y-6">
 
         {/* ── STEP 1: JOB DETAILS ── */}
         {step === 1 && (
           <>
             {/* Basic Info */}
             <Card className="p-6 md:p-8 space-y-6">
-              <div className="flex items-center gap-3 mb-2">
+              <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-full bg-blue-500/10 flex items-center justify-center text-blue-600">
                   <Briefcase size={20} />
                 </div>
@@ -309,14 +341,14 @@ export default function EmployerJobForm({
                   <Input
                     label="Company Name"
                     placeholder={companyLoading ? "Loading..." : "e.g. Acme Corp"}
-                    value={mode === "create" ? (company?.name ?? "") : values.company}
+                    value={values.company ?? ""}
                     onChange={(e) => mode === "edit" ? handleChange("company", e.target.value) : undefined}
                     required
                     readOnly={mode === "create"}
                     className={mode === "create" ? "bg-[var(--color-surface-hover)] cursor-default" : ""}
                   />
                   {mode === "create" && (
-                    <p className="text-xs text-[var(--color-text-muted)] mt-1">
+                    <p className="text-xs text-[var(--color-text-muted)] mt-1.5">
                       {companyLoading
                         ? "Fetching your company name..."
                         : <>Auto-filled from your company settings. To change it, go to <button type="button" onClick={() => navigate("/employer/settings")} className="text-[var(--color-brand-primary)] hover:underline">Settings</button>.</>
@@ -404,45 +436,82 @@ export default function EmployerJobForm({
 
             {/* Compensation */}
             <Card className="p-6 md:p-8 space-y-6">
-              <div className="flex items-center gap-3 mb-2">
+              <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-full bg-emerald-500/10 flex items-center justify-center text-emerald-600">
                   <DollarSign size={20} />
                 </div>
                 <div>
                   <h2 className="text-lg font-bold text-[var(--color-text)]">Compensation</h2>
-                  <p className="text-sm text-[var(--color-text-muted)]">Salary range and currency.</p>
+                  <p className="text-sm text-[var(--color-text-muted)]">Salary transparency is required on Bevisly. Candidates see your real numbers.</p>
                 </div>
               </div>
 
-              <div className="space-y-4">
-                <div className="flex items-center gap-2">
-                  <input
-                    type="checkbox"
-                    id="is_unpaid"
-                    checked={!values.paid}
-                    onChange={(e) => {
-                      const isUnpaid = e.target.checked;
-                      setValues((prev) => ({
-                        ...prev,
-                        paid: !isUnpaid,
-                        salary_min: isUnpaid ? null : prev.salary_min,
-                        salary_max: isUnpaid ? null : prev.salary_max,
-                      }));
-                    }}
-                    className="rounded border-[var(--color-border)] text-[var(--color-brand-primary)] focus:ring-[var(--color-brand-primary)]/20"
-                  />
-                  <label htmlFor="is_unpaid" className="text-sm text-[var(--color-text)] font-medium">
-                    This is an unpaid / volunteer position
-                  </label>
+              {/* Compensation type */}
+              <div className="space-y-1.5">
+                <label className="text-sm font-medium text-[var(--color-text)]">Compensation type</label>
+                <div className="flex flex-wrap gap-2">
+                  {(
+                    [
+                      { value: "salary", label: "Salary" },
+                      { value: "salary_and_equity", label: "Salary + Equity" },
+                      { value: "equity_only", label: "Equity only" },
+                      { value: "volunteer", label: "Volunteer / Unpaid" },
+                    ] as const
+                  ).map(({ value, label }) => (
+                    <button
+                      key={value}
+                      type="button"
+                      onClick={() =>
+                        setValues((prev) => ({
+                          ...prev,
+                          compensation_type: value,
+                          salary_min: value === "equity_only" || value === "volunteer" ? null : prev.salary_min,
+                          salary_max: value === "equity_only" || value === "volunteer" ? null : prev.salary_max,
+                          equity_min: value === "salary" || value === "volunteer" ? null : prev.equity_min,
+                          equity_max: value === "salary" || value === "volunteer" ? null : prev.equity_max,
+                        }))
+                      }
+                      className={`px-4 py-1.5 rounded-full text-sm font-medium border transition-all whitespace-nowrap ${
+                        values.compensation_type === value
+                          ? "bg-[var(--color-brand-primary)] text-white border-[var(--color-brand-primary)]"
+                          : "bg-[var(--color-surface)] text-[var(--color-text-muted)] border-[var(--color-border)] hover:text-[var(--color-text)] hover:border-[var(--color-brand-primary)]/50 hover:bg-[var(--color-brand-primary)]/5"
+                      }`}
+                    >
+                      {label}
+                    </button>
+                  ))}
                 </div>
+              </div>
 
-                {values.paid && (
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-5 animate-fade-in">
-                    <div className="space-y-1.5 col-span-2 md:col-span-1">
+              {/* Salary fields */}
+              {(values.compensation_type === "salary" || values.compensation_type === "salary_and_equity") && (
+                <div className="space-y-4 animate-fade-in">
+                  <div className="space-y-1.5">
+                    <label className="text-sm font-medium text-[var(--color-text)]">Pay period</label>
+                    <div className="inline-flex rounded-xl border border-[var(--color-border)] bg-[var(--color-surface-alt)] p-1 gap-1">
+                      {(["monthly", "yearly"] as const).map((period) => (
+                        <button
+                          key={period}
+                          type="button"
+                          onClick={() => handleChange("pay_period", period)}
+                          className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-all ${
+                            values.pay_period === period
+                              ? "bg-[var(--color-surface)] text-[var(--color-text)] shadow-sm border border-[var(--color-border)]"
+                              : "text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
+                          }`}
+                        >
+                          {period === "monthly" ? "Monthly" : "Yearly"}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div className="space-y-1.5">
                       <label className="text-sm font-medium text-[var(--color-text)]">Currency</label>
                       <select
                         className="w-full h-10 px-3 rounded-[var(--radius-input)] border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text)] text-sm"
-                        value={values.payment_currency ?? "USD"}
+                        value={values.payment_currency ?? "EUR"}
                         onChange={(e) => handleChange("payment_currency", e.target.value)}
                       >
                         <option value="USD">USD ($)</option>
@@ -454,54 +523,68 @@ export default function EmployerJobForm({
                         <option value="ISK">ISK (kr)</option>
                       </select>
                     </div>
-
-                    <div className="space-y-1.5 col-span-2 md:col-span-1">
-                      <label className="text-sm font-medium text-[var(--color-text)]">Display As</label>
-                      <select
-                        className="w-full h-10 px-3 rounded-[var(--radius-input)] border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text)] text-sm"
-                        value={values.pay_period ?? "monthly"}
-                        onChange={(e) => handleChange("pay_period", e.target.value)}
-                      >
-                        <option value="monthly">Monthly</option>
-                        <option value="yearly">Annual</option>
-                      </select>
-                    </div>
-
                     <Input
-                      label={`Min Salary (${values.pay_period === "yearly" ? "Annual" : "Monthly"})`}
+                      label="Min salary *"
                       type="number"
-                      placeholder="e.g. 50000"
+                      placeholder={values.pay_period === "yearly" ? "e.g. 400000" : "e.g. 35000"}
                       value={values.salary_min ?? ""}
                       onChange={(e) => handleChange("salary_min", e.target.value)}
                     />
-
                     <Input
-                      label={`Max Salary (${values.pay_period === "yearly" ? "Annual" : "Monthly"})`}
+                      label="Max salary *"
                       type="number"
-                      placeholder="e.g. 80000"
+                      placeholder={values.pay_period === "yearly" ? "e.g. 500000" : "e.g. 45000"}
                       value={values.salary_max ?? ""}
                       onChange={(e) => handleChange("salary_max", e.target.value)}
                     />
                   </div>
-                )}
-              </div>
+                </div>
+              )}
 
-              <div className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  id="show_salary"
-                  checked={values.show_salary_range ?? false}
-                  onChange={(e) => handleChange("show_salary_range", e.target.checked)}
-                  className="rounded border-[var(--color-border)] text-[var(--color-brand-primary)] focus:ring-[var(--color-brand-primary)]/20"
-                />
-                <label htmlFor="show_salary" className="text-sm text-[var(--color-text)]">
-                  Display salary range publicly on job post
-                </label>
-              </div>
+              {/* Divider between salary and equity when showing both */}
+              {values.compensation_type === "salary_and_equity" && (
+                <hr className="border-[var(--color-border)]" />
+              )}
+
+              {/* Equity fields */}
+              {(values.compensation_type === "equity_only" || values.compensation_type === "salary_and_equity") && (
+                <div className="space-y-4 animate-fade-in">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <Input
+                      label="Min equity (%) *"
+                      type="number"
+                      placeholder="e.g. 0.1"
+                      value={values.equity_min ?? ""}
+                      onChange={(e) => handleChange("equity_min", e.target.value)}
+                    />
+                    <Input
+                      label="Max equity (%) *"
+                      type="number"
+                      placeholder="e.g. 0.5"
+                      value={values.equity_max ?? ""}
+                      onChange={(e) => handleChange("equity_max", e.target.value)}
+                    />
+                  </div>
+                  <p className="text-xs text-[var(--color-text-muted)]">
+                    Typical early-stage employee equity is 0.01%–2%. Be specific — candidates use this to evaluate the offer.
+                  </p>
+                </div>
+              )}
+
+              {/* Volunteer note */}
+              {values.compensation_type === "volunteer" && (
+                <div className="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface-alt)] px-5 py-4 text-sm text-[var(--color-text-muted)] animate-fade-in">
+                  This position offers no monetary compensation or equity. Candidates will see it clearly labelled as <strong className="text-[var(--color-text)]">Volunteer / Unpaid</strong> on the listing.
+                </div>
+              )}
+
+              <p className="text-xs text-[var(--color-text-muted)] italic">
+                Compensation details are always displayed publicly on your job post.
+              </p>
             </Card>
 
             {/* Step 1 Nav */}
-            <div className="flex items-center justify-end pt-4">
+            <div className="flex items-center justify-end pt-2">
               <Button
                 type="button"
                 size="lg"
@@ -592,10 +675,12 @@ export default function EmployerJobForm({
                 <div
                   key={task.id || index}
                   id={`proof-task-${index}`}
-                  className="p-5 bg-[var(--color-bg)] rounded-[var(--radius-card)] border border-[var(--color-border)] space-y-5 animate-fade-in-up scroll-mt-24"
+                  className="p-6 bg-[var(--color-bg)] rounded-[var(--radius-card)] border border-[var(--color-border)] space-y-6 animate-fade-in-up scroll-mt-24"
                 >
-                  <div className="flex justify-between items-start">
-                    <h4 className="font-semibold text-[var(--color-text)] text-sm uppercase tracking-wider">Task Details</h4>
+                  <div className="flex items-center">
+                    {(values.proof_tasks?.length ?? 0) > 1 && (
+                      <span className="text-xs font-semibold uppercase tracking-widest text-[var(--color-text-muted)]">Task {index + 1}</span>
+                    )}
                     <Button
                       type="button"
                       variant="ghost"
@@ -604,7 +689,7 @@ export default function EmployerJobForm({
                         const newTasks = values.proof_tasks?.filter((_, i) => i !== index);
                         handleChange("proof_tasks", newTasks);
                       }}
-                      className="text-red-500 hover:text-red-600 hover:bg-red-50"
+                      className="ml-auto text-red-500 hover:text-red-600 hover:bg-red-50"
                     >
                       <Trash2 size={14} />
                     </Button>
@@ -635,7 +720,7 @@ export default function EmployerJobForm({
                   <div className="space-y-1.5">
                     <label className="text-sm font-medium text-[var(--color-text)]">Estimated Time</label>
                     <select
-                      className="w-full h-10 px-3 rounded-[var(--radius-input)] border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text)] text-sm"
+                      className="w-full h-10 px-3 rounded-[var(--radius-input)] border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text)] text-sm focus:ring-2 focus:ring-[var(--color-brand-primary)]/20 focus:outline-none"
                       value={task.expected_time ?? "1–2 hours"}
                       onChange={(e) => handleTaskChange(index, "expected_time", e.target.value)}
                     >
@@ -689,7 +774,7 @@ export default function EmployerJobForm({
             </Card>
 
             {/* Step 2 Nav */}
-            <div className="flex items-center justify-between pt-4">
+            <div className="flex items-center justify-between pt-2">
               <Button
                 type="button"
                 variant="outline"

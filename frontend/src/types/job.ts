@@ -8,15 +8,18 @@ export interface Job {
   paid?: boolean | null;
   apply_url?: string | null;
 
-  // Salary-related fields
+  // Compensation fields
+  compensation_type?: "salary" | "salary_and_equity" | "equity_only" | "volunteer" | null;
   show_salary_range?: boolean | null;
   salary_min?: number | null;
   salary_max?: number | null;
   pay_period?: "hourly" | "monthly" | "yearly" | null;
-  application_deadline?: string | null;
-  start_date?: string | null;
   payment_currency?: string | null;
   payment_amount?: number | null;
+  equity_min?: number | null;
+  equity_max?: number | null;
+  application_deadline?: string | null;
+  start_date?: string | null;
 
   // Employer-related (optional for candidates)
   job_type?: string | null;

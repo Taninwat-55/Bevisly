@@ -412,7 +412,7 @@ export function RubricEditor({ task, onChange, errors, aiSuggested }: RubricEdit
         </div>
       )}
 
-      <div className="space-y-2">
+      <div className="space-y-3">
         {criteria.map((c, idx) => {
           const fieldError = errors?.fields?.[idx];
           const nameBad = !!fieldError?.nameMissing;
@@ -420,7 +420,7 @@ export function RubricEditor({ task, onChange, errors, aiSuggested }: RubricEdit
           return (
             <div
               key={idx}
-              className="grid grid-cols-12 gap-2 items-start bg-[var(--color-bg)]/60 rounded-lg p-2"
+              className="grid grid-cols-12 gap-3 items-start bg-[var(--color-bg)]/60 rounded-lg p-3"
             >
               <div className="col-span-3 flex flex-col gap-0.5">
                 <input
@@ -547,9 +547,9 @@ export function FollowUpQuestionsEditor({ questions, onChange }: FollowUpQuestio
         Candidates answer these after submitting (150 words max each). AI can write the plan — it can't explain your specific decisions in your own voice.
       </p>
 
-      <div className="space-y-2">
+      <div className="space-y-3">
         {questions.map((q, idx) => (
-          <div key={idx} className="flex gap-2 items-start">
+          <div key={idx} className="flex gap-3 items-start">
             <input
               type="text"
               value={q}

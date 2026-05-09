@@ -9,11 +9,14 @@ export type EmployerJob = {
   company: string | null;
   location: string | null;
   paid: boolean | null;
+  compensation_type?: "salary" | "salary_and_equity" | "equity_only" | "volunteer" | null;
   payment_amount?: number | null;
   payment_currency?: string | null;
   show_salary_range?: boolean | null;
   salary_min?: number | null;
   salary_max?: number | null;
+  equity_min?: number | null;
+  equity_max?: number | null;
   pay_period?: "hourly" | "monthly" | "yearly" | null;
   job_type?: string | null;
   department?: string | null;
@@ -124,11 +127,14 @@ export interface EmployerJobFormValues {
   company: string;
   location: string;
   paid: boolean;
+  compensation_type: "salary" | "salary_and_equity" | "equity_only" | "volunteer";
   payment_amount?: number | null;
   payment_currency?: string | null;
-  show_salary_range?: boolean; // toggle for salary visibility
+  show_salary_range?: boolean;
   salary_min?: number | null;
   salary_max?: number | null;
+  equity_min?: number | null;
+  equity_max?: number | null;
   pay_period?: "hourly" | "monthly" | "yearly" | null;
   job_type?: string;
   department?: string;
