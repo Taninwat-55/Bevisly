@@ -61,9 +61,9 @@ export default function FeedbackButton() {
       >
         <button
           onClick={() => setOpen(true)}
-          className="flex items-center gap-3 pl-4 pr-6 py-3.5 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-white/20 dark:border-white/5 shadow-2xl rounded-l-2xl group transition-all"
+          className="flex items-center gap-3 pl-4 pr-6 py-3.5 bg-[var(--color-surface)] border border-[var(--color-border)] shadow-md rounded-l-xl group transition-colors"
         >
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-teal-500 flex items-center justify-center text-white shadow-lg group-hover:scale-110 transition-transform">
+          <div className="w-8 h-8 rounded-lg bg-[var(--color-brand-primary)] flex items-center justify-center text-white">
             <MessageSquare size={18} />
           </div>
           <span className="font-bold text-sm text-[var(--color-text)] whitespace-nowrap">
@@ -88,7 +88,7 @@ export default function FeedbackButton() {
               initial={{ opacity: 0, scale: 0.9, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 20 }}
-              className="glass-panel w-full max-w-md overflow-hidden relative border border-white/10 dark:border-white/5 shadow-2xl backdrop-blur-2xl bg-white/90 dark:bg-slate-900/90 rounded-[2rem] p-8 flex flex-col gap-6"
+              className="bg-[var(--color-surface)] w-full max-w-md overflow-hidden relative border border-[var(--color-border)] shadow-xl rounded-2xl p-8 flex flex-col gap-6"
             >
               <button
                 onClick={() => setOpen(false)}
@@ -162,7 +162,7 @@ export default function FeedbackButton() {
                 <button
                   onClick={handleSubmit}
                   disabled={loading}
-                  className="w-full h-12 bg-gradient-to-r from-blue-600 to-teal-600 hover:from-blue-500 hover:to-teal-500 text-white font-bold rounded-2xl transition-all shadow-lg shadow-blue-500/25 active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-2"
+                  className="w-full h-12 bg-[var(--color-brand-primary)] hover:bg-[var(--color-brand-primary-hover)] text-white font-bold rounded-lg transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
                 >
                   {loading ? (
                     <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />

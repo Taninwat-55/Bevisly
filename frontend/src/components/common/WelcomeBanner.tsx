@@ -108,16 +108,13 @@ export default function WelcomeBanner({ role, userName, onDismiss }: WelcomeBann
           transition={{ type: "spring", damping: 25, stiffness: 200 }}
           className="overflow-hidden mb-8"
         >
-          <div className="relative rounded-3xl border border-[var(--color-border)] bg-[var(--color-surface)] shadow-xl overflow-hidden">
-            <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-gradient-to-br from-[var(--color-brand-primary)]/8 to-[var(--color-brand-secondary)]/8 rounded-full blur-[80px] -z-10 translate-x-1/3 -translate-y-1/3" />
-            <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-gradient-to-tr from-emerald-500/5 to-blue-500/5 rounded-full blur-[60px] -z-10 -translate-x-1/4 translate-y-1/4" />
-
-            <div className="h-1 bg-gradient-to-r from-[var(--color-brand-primary)] via-[var(--color-brand-secondary)] to-[var(--color-accent)]" />
+          <div className="relative rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] shadow-sm overflow-hidden">
+            <div className="h-0.5 bg-[var(--color-brand-primary)]" />
 
             <div className="p-8 lg:p-10">
               <div className="flex items-start justify-between gap-4 mb-8">
                 <div>
-                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[var(--color-brand-primary)]/10 border border-[var(--color-brand-primary)]/20 text-[var(--color-brand-primary)] text-xs font-semibold mb-3">
+                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-md bg-[var(--color-brand-subtle)] border border-[var(--color-brand-subtle-border)] text-[var(--color-brand-primary)] text-xs font-semibold mb-3">
                     Getting Started
                   </div>
                   <h2 className="text-2xl lg:text-3xl font-bold font-display text-[var(--color-text)] mb-2">
@@ -151,7 +148,7 @@ export default function WelcomeBanner({ role, userName, onDismiss }: WelcomeBann
                     className="relative p-5 rounded-2xl bg-[var(--color-bg)] border border-[var(--color-border)] hover:border-[var(--color-brand-primary)]/30 hover:shadow-md transition-all group flex flex-col"
                   >
                     <div className="absolute -top-3 -left-2">
-                      <div className={`w-7 h-7 rounded-lg bg-gradient-to-br ${step.color} text-white text-xs font-bold flex items-center justify-center shadow-md`}>
+                      <div className="w-7 h-7 rounded-lg bg-[var(--color-brand-primary)] text-white text-xs font-bold flex items-center justify-center">
                         {step.number}
                       </div>
                     </div>
@@ -163,7 +160,7 @@ export default function WelcomeBanner({ role, userName, onDismiss }: WelcomeBann
                     )}
 
                     <div className="flex items-start gap-4 mt-2 flex-1">
-                      <div className={`shrink-0 w-11 h-11 rounded-xl ${step.iconBg} flex items-center justify-center`}>
+                      <div className="shrink-0 w-11 h-11 rounded-lg bg-[var(--color-brand-subtle)] text-[var(--color-brand-primary)] flex items-center justify-center">
                         <step.icon size={20} />
                       </div>
                       <div className="flex-1">

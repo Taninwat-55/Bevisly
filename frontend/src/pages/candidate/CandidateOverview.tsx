@@ -117,7 +117,7 @@ export default function CandidateDashboard() {
               </p>
             </div>
             <div className="flex items-center gap-3">
-              <Button onClick={() => window.location.href = '/candidate/jobs'} size="lg" className="shadow-glow-primary">
+              <Button onClick={() => navigate('/candidate/jobs')} size="lg" className="">
                 Find Work
               </Button>
             </div>
@@ -236,7 +236,7 @@ export default function CandidateDashboard() {
                  <p className="text-[var(--color-text-muted)] max-w-md mx-auto mb-6">
                      No roles to show yet — browse open positions and complete a proof task to get matched with top companies.
                  </p>
-                 <Button onClick={() => window.location.href = '/candidate/jobs'} size="lg" className="shadow-glow-primary bg-[var(--color-brand-primary)] text-white hover:bg-blue-700">
+                 <Button onClick={() => navigate('/candidate/jobs')} size="lg">
                      Go Find Your First Role →
                  </Button>
               </div>

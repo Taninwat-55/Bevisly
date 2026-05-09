@@ -229,8 +229,7 @@ export default function CandidateProfile() {
       {/* ── Header / Hero Card ────────────────────────────── */}
       <div className="relative rounded-3xl overflow-hidden bg-[var(--color-surface)] border border-[var(--color-border)] shadow-xl group">
         {/* Banner Pattern */}
-        <div className="h-32 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 relative">
-          <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20" />
+        <div className="h-32 bg-[var(--color-brand-primary)] relative">
           <div className="absolute top-4 right-4 flex gap-2">
             <Button
               size="sm"

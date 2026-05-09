@@ -141,10 +141,8 @@ export default function EmployerDashboard() {
         />
 
         {/* ── Hero Section ── */}
-        <div className="relative group overflow-hidden rounded-2xl md:rounded-3xl p-6 md:p-8 lg:p-10 border border-[var(--color-border)] bg-[var(--color-surface)] shadow-2xl mb-8">
-          <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-gradient-to-br from-[var(--color-brand-primary)]/10 to-[var(--color-brand-secondary)]/10 rounded-full blur-[100px] -z-10 translate-x-1/3 -translate-y-1/3" />
-
-          <div className="relative z-10">
+        <div className="rounded-2xl p-6 md:p-8 lg:p-10 border border-[var(--color-border)] bg-[var(--color-surface)] shadow-sm mb-8">
+          <div>
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
               <div>
                 <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold font-display text-[var(--color-text)] mb-2">
@@ -179,7 +177,7 @@ export default function EmployerDashboard() {
                       setIsPostingJob(true);
                     }}
                     size="lg"
-                    className="bg-[var(--color-brand-primary)] hover:bg-blue-700 border-0 text-white font-bold"
+                    className=""
                     leftIcon={<Plus size={18} strokeWidth={3} />}
                   >
                     Post a Job
@@ -288,7 +286,7 @@ export default function EmployerDashboard() {
                   setIsPostingJob(true);
                 }}
                 size="lg"
-                className="bg-[var(--color-brand-primary)] hover:bg-blue-700 border-0 text-white font-bold"
+                className=""
                 leftIcon={<Plus size={18} strokeWidth={3} />}
               >
                 Post Your First Role
@@ -324,7 +322,7 @@ export default function EmployerDashboard() {
                     </p>
                   </div>
                   <div className="mt-4 flex items-center justify-between">
-                    <div className="flex items-center gap-1.5 text-sm font-medium text-blue-600 dark:text-blue-400">
+                    <div className="flex items-center gap-1.5 text-sm font-medium text-[var(--color-brand-primary)]">
                       <Users size={16} />
                       <span>{submissions.filter((s) => s.job_id === job.id).length} Candidates</span>
                     </div>
@@ -361,7 +359,7 @@ export default function EmployerDashboard() {
                     ? "max-w-2xl"
                     : postJobData
                     ? "max-w-4xl"
-                    : "max-w-2xl bg-gradient-to-br from-slate-900 via-slate-900 to-slate-800"
+                    : "max-w-2xl bg-[var(--color-bg)]"
                 }`}
               >
                 {postJobCreationMode === "select" ? (
@@ -383,7 +381,7 @@ export default function EmployerDashboard() {
                         <div className="flex-1 min-w-0">
                           <h3 className="text-xl font-bold text-[var(--color-text)] mb-1 flex items-center gap-2">
                             Auto-Generate with AI
-                            <span className="text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full bg-indigo-500/10 text-indigo-500 border border-indigo-500/20">
+                            <span className="text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-md bg-[var(--color-brand-subtle)] text-[var(--color-brand-primary)] border border-[var(--color-brand-subtle-border)]">
                               Recommended
                             </span>
                           </h3>
@@ -505,21 +503,18 @@ function MetricCard({
   subValue?: React.ReactNode;
   color?: "blue" | "purple" | "emerald" | "amber";
 }) {
-  const colorStyles = {
-    blue: "from-blue-500/20 to-indigo-500/20 text-blue-600 border-blue-500/20",
-    purple: "from-purple-500/20 to-pink-500/20 text-purple-600 border-purple-500/20",
-    emerald: "from-emerald-500/20 to-teal-500/20 text-emerald-600 border-emerald-500/20",
-    amber: "from-amber-500/20 to-orange-500/20 text-amber-600 border-amber-500/20",
+  const iconColorClass = {
+    blue: "text-[var(--color-brand-primary)]",
+    purple: "text-[var(--color-brand-primary)]",
+    emerald: "text-[var(--color-success)]",
+    amber: "text-[var(--color-score-accent)]",
   };
 
   return (
-    <Card className="relative overflow-hidden p-6 flex flex-col justify-between gap-4 hover:-translate-y-1 transition-all duration-300 cursor-default group border border-[var(--color-border)]/50 bg-gradient-to-b from-[var(--color-surface)] to-[var(--color-bg)] shadow-sm hover:shadow-xl hover:shadow-blue-500/5">
+    <Card className="relative p-6 flex flex-col justify-between gap-4 cursor-default border border-[var(--color-border)] bg-[var(--color-surface)] shadow-sm hover:shadow-md transition-shadow duration-150">
       <div className="flex items-start justify-between">
-        <div className={`p-3 rounded-2xl bg-gradient-to-br ${colorStyles[color]} shadow-inner ring-1 ring-inset ring-white/10`}>
+        <div className={`p-2.5 rounded-lg bg-[var(--color-bg-subtle)] border border-[var(--color-border)] ${iconColorClass[color]}`}>
           {icon}
-        </div>
-        <div className="text-xs font-bold px-2 py-1 rounded-full bg-[var(--color-bg)] border border-[var(--color-border)] opacity-0 group-hover:opacity-100 transition-opacity text-[var(--color-text-muted)]">
-          Last 30d
         </div>
       </div>
       <div>
@@ -529,7 +524,6 @@ function MetricCard({
         </p>
         {subValue && <div>{subValue}</div>}
       </div>
-      <div className={`absolute -right-4 -bottom-4 w-24 h-24 rounded-full blur-3xl opacity-10 bg-gradient-to-br ${colorStyles[color]}`} />
     </Card>
   );
 }

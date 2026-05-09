@@ -19,7 +19,7 @@ export default function MobileBottomNav({ links }: MobileBottomNavProps) {
   const displayLinks = links.slice(0, 5);
 
   return (
-    <div className="md:hidden fixed bottom-0 inset-x-0 bg-[var(--color-surface)]/95 backdrop-blur-xl border-t border-[var(--color-border)] z-40 pb-[env(safe-area-inset-bottom)] shadow-[0_-4px_24px_rgba(0,0,0,0.04)] dark:shadow-[0_-4px_24px_rgba(0,0,0,0.2)]">
+    <div className="md:hidden fixed bottom-0 inset-x-0 bg-[var(--color-surface)] border-t border-[var(--color-border)] z-40 pb-[env(safe-area-inset-bottom)]">
       <div className="flex items-center justify-around h-16">
         {displayLinks.map((link) => {
           const Icon = link.icon;

@@ -224,7 +224,7 @@ export default function EditProfileModal({
                   <div className="flex flex-col items-center gap-4 py-4 border-b border-[var(--color-border)]">
                     <div className="relative group">
                       <div
-                        className="w-24 h-24 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-3xl font-bold text-white shadow-lg overflow-hidden cursor-pointer"
+                        className="w-24 h-24 rounded-full bg-[var(--color-brand-primary)] flex items-center justify-center text-3xl font-bold text-white overflow-hidden cursor-pointer"
                         onClick={() => fileInputRef.current?.click()}
                       >
                         {avatarUrl ? (

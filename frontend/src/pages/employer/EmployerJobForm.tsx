@@ -601,7 +601,7 @@ export default function EmployerJobForm({
         {/* ── STEP 2: PROOF TASK ── */}
         {step === 2 && (
           <>
-            <Card className="p-6 md:p-8 space-y-6 border-l-4 border-l-[var(--color-brand-primary)] shadow-glow-primary">
+            <Card className="p-6 md:p-8 space-y-6 border-l-4 border-l-[var(--color-brand-primary)] shadow-sm">
               <div>
                 <div className="flex items-center justify-between">
                   <h2 className="text-lg font-bold text-[var(--color-text)] flex items-center gap-2">

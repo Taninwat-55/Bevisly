@@ -158,7 +158,7 @@ export default function CandidateProfileDrawer({ userId, onClose }: CandidatePro
             className="fixed top-0 right-0 z-[70] h-full w-full max-w-md bg-[var(--color-bg)] border-l border-[var(--color-border)] shadow-2xl flex flex-col"
           >
             {/* Sticky header */}
-            <div className="shrink-0 flex items-center justify-between px-6 py-4 border-b border-[var(--color-border)] bg-[var(--color-bg)]/80 backdrop-blur-md">
+            <div className="shrink-0 flex items-center justify-between px-6 py-4 border-b border-[var(--color-border)] bg-[var(--color-surface)]">
               <span className="text-sm font-semibold text-[var(--color-text-muted)] uppercase tracking-wider">Candidate Profile</span>
               <button
                 onClick={onClose}
@@ -184,7 +184,7 @@ export default function CandidateProfileDrawer({ userId, onClose }: CandidatePro
 
                   {/* Identity */}
                   <div className="flex items-start gap-4">
-                    <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center text-white text-2xl font-bold shrink-0 overflow-hidden shadow-lg">
+                    <div className="w-16 h-16 rounded-xl bg-[var(--color-brand-primary)] flex items-center justify-center text-white text-2xl font-bold shrink-0 overflow-hidden">
                       {profile.avatar_url ? (
                         <img src={profile.avatar_url} alt="Avatar" className="w-full h-full object-cover" />
                       ) : (

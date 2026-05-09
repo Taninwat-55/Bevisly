@@ -255,13 +255,9 @@ export default function AuthPage() {
       {/* ── LEFT SIDE: Brand / Marketing ───────────────────────────── */}
       <div className="hidden lg:flex flex-col justify-between relative overflow-hidden bg-[var(--color-slate-900)] text-white p-12">
         {/* Background Effects */}
-        <div className="absolute top-0 left-0 w-full h-full bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 pointer-events-none" />
-        <div className="absolute top-[-20%] right-[-10%] w-[600px] h-[600px] bg-[var(--color-brand-primary)]/30 rounded-full blur-[120px]" />
-        <div className="absolute bottom-[-20%] left-[-10%] w-[600px] h-[600px] bg-[var(--color-brand-secondary)]/20 rounded-full blur-[120px]" />
-
         <div className="relative z-10">
           <Link to="/" className="inline-flex items-center gap-3 mb-12 hover:opacity-80 transition-opacity group">
-            <div className="w-10 h-10 rounded-xl bg-[var(--color-brand-primary)] flex items-center justify-center font-bold text-lg shadow-glow-primary group-hover:scale-105 transition-transform">
+            <div className="w-10 h-10 rounded-xl bg-[var(--color-brand-primary)] flex items-center justify-center font-bold text-lg">
               B
             </div>
             <span className="text-2xl font-bold font-display tracking-tight">Bevisly</span>
@@ -270,7 +266,7 @@ export default function AuthPage() {
           <div className="max-w-md">
             <h2 className="text-4xl md:text-5xl font-bold font-display mb-6 leading-tight">
               Prove your skills. <br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-teal-400">
+              <span className="text-indigo-300">
                 Land the job.
               </span>
             </h2>
@@ -284,8 +280,8 @@ export default function AuthPage() {
                 "Real-world proof tasks",
                 "Direct access to top employers"
               ].map((feature, i) => (
-                <div key={i} className="flex items-center gap-3 p-4 rounded-xl bg-white/5 border border-white/10 backdrop-blur-sm">
-                  <CheckCircle2 className="text-teal-400 shrink-0" size={20} />
+                <div key={i} className="flex items-center gap-3 p-4 rounded-xl bg-white/5 border border-white/10">
+                  <CheckCircle2 className="text-indigo-400 shrink-0" size={20} />
                   <span className="font-medium">{feature}</span>
                 </div>
               ))}
@@ -460,7 +456,7 @@ export default function AuthPage() {
 
             <Button
               type="submit"
-              className="w-full text-lg h-12 shadow-glow-primary"
+              className="w-full text-lg h-12"
               isLoading={formLoading}
               rightIcon={!formLoading && <ArrowRight size={18} />}
             >

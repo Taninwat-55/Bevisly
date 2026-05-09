@@ -95,7 +95,7 @@ export default function MobileNavDrawer({
                     navigate("/employer?post=true");
                     onClose();
                   }}
-                  className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-[var(--color-brand-primary)] hover:bg-blue-700 text-white font-bold tracking-tight shadow-[var(--shadow-glow-cta)]"
+                  className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-[var(--color-brand-primary)] hover:bg-[var(--color-brand-primary-hover)] text-white font-bold tracking-tight"
                 >
                   <Plus size={18} strokeWidth={3} />
                   Post Job
@@ -148,7 +148,7 @@ export default function MobileNavDrawer({
                     ? "border-emerald-400 dark:border-emerald-500 shadow-emerald-500/20"
                     : user?.subscription_tier === "starter"
                     ? "border-blue-400 dark:border-blue-500 shadow-blue-500/20"
-                    : "border-[var(--color-border)] bg-gradient-to-tr from-slate-200 to-slate-100 dark:from-slate-700 dark:to-slate-800"
+                    : "border-[var(--color-border)] bg-[var(--color-surface-hover)]"
                   }
                 `}>
                   {user?.avatar_url ? (

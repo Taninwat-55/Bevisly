@@ -92,7 +92,7 @@ export default function UserMenu() {
                   className="w-8 h-8 rounded-full object-cover"
                 />
               ) : (
-                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-sm font-bold text-white">
+                <div className="w-8 h-8 rounded-full bg-[var(--color-brand-primary)] flex items-center justify-center text-sm font-bold text-white">
                   {user?.full_name?.[0]?.toUpperCase() || user?.company_name?.[0]?.toUpperCase() || user?.email?.[0]?.toUpperCase()}
                 </div>
               )}

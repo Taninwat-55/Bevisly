@@ -20,14 +20,17 @@ import {
   MessageCircle,
   Database,
   Languages,
+  X,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 
 interface SidebarProps {
   role?: "admin" | "demo_admin";
+  mobileOpen?: boolean;
+  onMobileClose?: () => void;
 }
 
-export default function Sidebar({ role }: SidebarProps) {
+export default function Sidebar({ role, mobileOpen, onMobileClose }: SidebarProps) {
   const { user, signOut } = useAuth();
   const [isSidebarOpen, setSidebarOpen] = useState(true);
   const rawRole = role || user?.role || "admin";
@@ -45,8 +48,9 @@ export default function Sidebar({ role }: SidebarProps) {
     "p-2 text-[var(--color-text-muted)] hover:text-[var(--color-brand-primary)] hover:bg-[var(--color-brand-primary)]/10 rounded-lg transition-all";
 
   return (
+    <>
     <aside
-      className={`relative hidden md:flex flex-col glass-panel border-r border-[var(--glass-border)] backdrop-blur-xl transition-all duration-300 ${
+      className={`relative hidden md:flex flex-col bg-[var(--color-surface)] border-r border-[var(--color-border)] transition-all duration-300 ${
         isSidebarOpen ? "w-[280px]" : "w-[80px]"
       }`}
     >
@@ -55,7 +59,7 @@ export default function Sidebar({ role }: SidebarProps) {
         to="/"
         className={`h-20 flex items-center ${isSidebarOpen ? "px-8" : "justify-center"} border-b border-[var(--color-border)]/50 hover:bg-[var(--color-surface-hover)] transition-colors`}
       >
-        <div className="w-10 h-10 rounded-xl bg-[var(--color-brand-primary)] flex items-center justify-center text-white font-bold text-lg shadow-glow-primary shrink-0">
+        <div className="w-10 h-10 rounded-xl bg-[var(--color-brand-primary)] flex items-center justify-center text-white font-bold text-lg shrink-0">
           B
         </div>
         {isSidebarOpen && (
@@ -116,7 +120,7 @@ export default function Sidebar({ role }: SidebarProps) {
           className={`flex items-center gap-3 group overflow-hidden ${isSidebarOpen ? "flex-1" : ""}`}
           title="Account Settings"
         >
-          <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-slate-200 to-slate-100 dark:from-slate-700 dark:to-slate-800 flex items-center justify-center border border-[var(--color-border)] shrink-0 group-hover:border-[var(--color-brand-primary)] transition-all shadow-sm group-hover:shadow-glow-primary/20">
+          <div className="w-10 h-10 rounded-full bg-[var(--color-surface-hover)] flex items-center justify-center border border-[var(--color-border)] shrink-0 group-hover:border-[var(--color-brand-primary)] transition-colors">
             <span className="font-semibold text-[var(--color-text)]">
               {user?.avatar_url ? (
                 <img src={user.avatar_url} alt="User" className="w-full h-full object-cover rounded-full" />
@@ -170,5 +174,76 @@ export default function Sidebar({ role }: SidebarProps) {
         )}
       </button>
     </aside>
+
+    {/* ─── Mobile Drawer ─── */}
+    {mobileOpen && (
+      <div className="fixed inset-0 z-[60] md:hidden flex">
+        <div className="absolute inset-0 bg-black/40" onClick={onMobileClose} />
+        <div className="relative z-10 w-[280px] h-full flex flex-col bg-[var(--color-surface)] border-r border-[var(--color-border)] shadow-xl">
+          {/* Header */}
+          <div className="h-14 flex items-center justify-between px-5 border-b border-[var(--color-border)]/50">
+            <Link to="/" onClick={onMobileClose} className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-lg bg-[var(--color-brand-primary)] flex items-center justify-center text-white font-bold text-lg">
+                B
+              </div>
+              <span className="text-xl font-bold font-display tracking-tight text-[var(--color-text)]">
+                Bevisly
+              </span>
+            </Link>
+            <button
+              onClick={onMobileClose}
+              className="p-1.5 rounded-lg text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[var(--color-surface-hover)] transition-colors"
+            >
+              <X size={20} />
+            </button>
+          </div>
+
+          {/* Nav Links */}
+          <nav className="flex-1 py-6 px-3 space-y-1 overflow-y-auto">
+            {links.map(({ to, label, icon: Icon, end }) => (
+              <NavLink
+                key={to}
+                to={to}
+                end={end}
+                onClick={onMobileClose}
+                className={({ isActive }) =>
+                  `flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 text-sm font-medium
+                  ${isActive
+                    ? "text-[var(--color-brand-primary)] bg-[var(--color-brand-primary)]/10 font-semibold"
+                    : "text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[var(--color-surface-hover)]"
+                  }`
+                }
+              >
+                <Icon size={18} className="shrink-0" />
+                <span>{label}</span>
+              </NavLink>
+            ))}
+          </nav>
+
+          {/* Footer */}
+          <div className="p-4 border-t border-[var(--color-border)]/50 flex items-center gap-3">
+            <div className="w-9 h-9 rounded-full bg-[var(--color-surface-hover)] flex items-center justify-center border border-[var(--color-border)] shrink-0 text-sm font-semibold text-[var(--color-text)]">
+              {user?.full_name?.[0]?.toUpperCase() || user?.email?.[0]?.toUpperCase() || "A"}
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold text-[var(--color-text)] truncate">
+                {user?.full_name || user?.email}
+              </p>
+              <p className="text-[10px] text-[var(--color-text-muted)] uppercase tracking-wider">
+                {rawRole === "demo_admin" ? "Demo Admin" : "Admin"}
+              </p>
+            </div>
+            <button
+              onClick={() => { if (confirm("Sign out?")) signOut(); }}
+              className="p-1.5 text-[var(--color-text-muted)] hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-all"
+              title="Sign Out"
+            >
+              <LogOut size={16} />
+            </button>
+          </div>
+        </div>
+      </div>
+    )}
+  </>
   );
 }

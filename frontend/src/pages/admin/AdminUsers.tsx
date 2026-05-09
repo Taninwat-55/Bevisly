@@ -196,7 +196,7 @@ export default function AdminUsers() {
                         toast.success(`Invite link for ${email} copied to clipboard!`);
                       }
                     }}
-                    className="flex items-center gap-2 px-4 py-2 bg-[var(--color-brand-primary)] text-white rounded-xl text-sm font-bold hover:brightness-110 transition shadow-glow-primary"
+                    className="flex items-center gap-2 px-4 py-2 bg-[var(--color-brand-primary)] text-white rounded-lg text-sm font-bold hover:bg-[var(--color-brand-primary-hover)] transition-colors"
                   >
                     <PlusCircle size={18} />
                     <span>Invite</span>

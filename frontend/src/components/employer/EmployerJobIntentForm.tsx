@@ -86,7 +86,7 @@ export default function EmployerJobIntentForm({
           <Button
             type="submit"
             disabled={isGenerating}
-            className="w-full h-12 text-base font-semibold bg-[var(--color-brand-primary)] hover:bg-blue-700 shadow-[var(--shadow-glow-cta)] border-0"
+            className="w-full h-12 text-base font-semibold"
           >
             {isGenerating ? (
               <>

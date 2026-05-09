@@ -59,11 +59,9 @@ export default function JobCard({ job, compact = false, isSaved, onToggleSave }:
 
     return (
         <div
-            className={`group relative flex flex-col glass-panel rounded-2xl border border-[var(--color-border)] hover:border-[var(--color-brand-primary)]/50 transition-all duration-300 hover:shadow-glow-primary overflow-hidden ${compact ? 'p-5' : 'p-6'} cursor-pointer`}
+            className={`group relative flex flex-col bg-[var(--color-surface)] rounded-xl border border-[var(--color-border)] hover:border-[var(--color-border-strong)] hover:shadow-md transition-all duration-150 overflow-hidden ${compact ? 'p-5' : 'p-6'} cursor-pointer`}
             onClick={handleCardClick}
         >
-            {/* Decorative gradient blob */}
-            <div className="absolute top-0 right-0 w-32 h-32 bg-[var(--color-brand-primary)]/5 rounded-full blur-3xl -z-10 group-hover:bg-[var(--color-brand-primary)]/10 transition-colors" />
 
             {/* Wishlist Button (Optional) */}
             {onToggleSave && (
@@ -95,7 +93,7 @@ export default function JobCard({ job, compact = false, isSaved, onToggleSave }:
                 )}
                 <div className="flex-1 min-w-0 pt-0.5">
                     <h3
-                        className="font-bold font-display text-lg text-[var(--color-text)] leading-tight group-hover:text-[var(--color-brand-primary)] transition-colors truncate"
+                        className="font-bold font-display text-lg text-[var(--color-text)] leading-tight truncate"
                         title={job.title}
                     >
                         {job.title}
@@ -124,7 +122,7 @@ export default function JobCard({ job, compact = false, isSaved, onToggleSave }:
                     <DollarSign size={12} />
                     {formatSalary()}
                 </div>
-                <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-emerald-500/10 border border-emerald-500/20 text-xs font-medium text-emerald-600 dark:text-emerald-400">
+                <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-[var(--color-brand-subtle)] border border-[var(--color-brand-subtle-border)] text-xs font-medium text-[var(--color-brand-primary)]">
                     <ShieldCheck size={12} />
                     {tasksCount} Proof Task{tasksCount !== 1 ? 's' : ''}
                 </div>
@@ -147,7 +145,7 @@ export default function JobCard({ job, compact = false, isSaved, onToggleSave }:
                 <Button
                     size="sm"
                     variant="ghost"
-                    className="text-[var(--color-brand-primary)] hover:bg-[var(--color-brand-primary)]/10 p-0 px-3 h-8"
+                    className="text-[var(--color-brand-primary)] p-0 px-3 h-8"
                     rightIcon={<ArrowRight size={14} />}
                 >
                     View Role

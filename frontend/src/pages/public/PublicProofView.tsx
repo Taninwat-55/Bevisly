@@ -213,7 +213,7 @@ export default function PublicProofView() {
               {profileUrl && (
                 <Link
                   to={profileUrl}
-                  className="flex-1 text-center py-2.5 px-4 rounded-lg bg-[var(--color-brand-primary)] text-white text-sm font-semibold hover:bg-blue-700 transition"
+                  className="flex-1 text-center py-2.5 px-4 rounded-lg bg-[var(--color-brand-primary)] text-white text-sm font-semibold hover:bg-[var(--color-brand-primary-hover)] transition-colors"
                 >
                   View Full Profile →
                 </Link>

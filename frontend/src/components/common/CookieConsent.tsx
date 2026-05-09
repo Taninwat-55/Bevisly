@@ -28,11 +28,8 @@ export default function CookieConsent() {
           exit={{ opacity: 0, y: 20, scale: 0.95 }}
           className="fixed bottom-6 left-6 right-6 md:left-auto md:right-6 md:max-w-md z-[100]"
         >
-          <div className="glass-panel overflow-hidden relative border border-white/10 dark:border-white/5 shadow-2xl backdrop-blur-2xl bg-white/80 dark:bg-slate-900/80 rounded-3xl p-6 flex flex-col md:flex-row gap-5">
-            {/* Ambient Background Glow */}
-            <div className="absolute top-[-50%] left-[-20%] w-32 h-32 bg-blue-500/20 rounded-full blur-[40px] pointer-events-none" />
-            
-            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-500/10 to-teal-500/10 border border-blue-500/20 flex items-center justify-center text-blue-500 shrink-0 shadow-inner">
+          <div className="bg-[var(--color-surface)] border border-[var(--color-border)] shadow-lg rounded-xl p-6 flex flex-col md:flex-row gap-5">
+            <div className="w-10 h-10 rounded-lg bg-[var(--color-brand-subtle)] border border-[var(--color-brand-subtle-border)] flex items-center justify-center text-[var(--color-brand-primary)] shrink-0">
               <ShieldCheck size={24} />
             </div>
 
@@ -50,12 +47,12 @@ export default function CookieConsent() {
               <div className="flex items-center gap-3">
                 <button
                   onClick={accept}
-                  className="px-6 py-2.5 bg-gradient-to-r from-blue-600 to-teal-600 hover:from-blue-500 hover:to-teal-500 text-white text-xs font-bold rounded-xl transition-all shadow-lg shadow-blue-500/20 active:scale-95"
+                  className="px-6 py-2.5 bg-[var(--color-brand-primary)] hover:bg-[var(--color-brand-primary-hover)] text-white text-xs font-bold rounded-lg transition-colors"
                 >
                   Accept All
                 </button>
                 <button
-                  onClick={() => setVisible(false)}
+                  onClick={() => { localStorage.setItem("bevisly_cookie_consent", "dismissed"); setVisible(false); }}
                   className="px-4 py-2.5 text-xs font-medium text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-slate-100 dark:hover:bg-white/5 rounded-xl transition-all"
                 >
                   Dismiss
@@ -63,8 +60,8 @@ export default function CookieConsent() {
               </div>
             </div>
 
-            <button 
-              onClick={() => setVisible(false)}
+            <button
+              onClick={() => { localStorage.setItem("bevisly_cookie_consent", "dismissed"); setVisible(false); }}
               className="absolute top-4 right-4 p-1 text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors"
             >
               <X size={16} />

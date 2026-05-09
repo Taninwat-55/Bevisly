@@ -58,9 +58,9 @@ export default function Navbar() {
   return (
     <>
       <header
-        className={`fixed top-0 inset-x-0 z-50 transition-all duration-300 ${
+        className={`fixed top-0 inset-x-0 z-50 transition-all duration-200 ${
           scrolled || !isLanding
-            ? "bg-[var(--color-bg)]/80 backdrop-blur-md h-16"
+            ? "bg-[var(--color-bg)] border-b border-[var(--color-border)] h-16"
             : "bg-transparent h-20"
         }`}
       >
@@ -104,20 +104,13 @@ export default function Navbar() {
 
           {/* ─── Center: Nav ─── */}
           <nav className="hidden md:flex justify-center items-center">
-            {/* ── Floating Pill ── */}
-            <div
-              className={`flex items-center gap-1 px-2 py-1.5 rounded-full bg-[var(--color-surface)]/80 backdrop-blur-md border transition-all duration-300 ${
-                scrolled
-                  ? "border-[var(--color-border)] shadow-md"
-                  : "border-[var(--color-border)]/60 shadow-sm"
-              }`}
-            >
+            <div className="flex items-center gap-0.5">
               {navLinks.map((link) =>
                 link.href !== undefined ? (
                   <a
                     key={link.label}
                     href={link.href}
-                    className="px-4 py-2 rounded-full text-sm font-medium text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[var(--color-brand-primary)]/10 transition-all duration-200"
+                    className="px-4 py-2 rounded-md text-sm font-medium text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[var(--color-surface-hover)] transition-colors duration-150"
                   >
                     {link.label}
                   </a>
@@ -125,10 +118,10 @@ export default function Navbar() {
                   <Link
                     key={link.label}
                     to={link.to}
-                    className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
+                    className={`px-4 py-2 rounded-md text-sm font-medium transition-colors duration-150 ${
                       isActiveRoute(link.to)
-                        ? "bg-[var(--color-brand-primary)]/15 text-[var(--color-brand-primary)]"
-                        : "text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[var(--color-brand-primary)]/10"
+                        ? "text-[var(--color-text)] bg-[var(--color-surface-hover)] font-semibold"
+                        : "text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[var(--color-surface-hover)]"
                     }`}
                   >
                     {link.label}
@@ -139,7 +132,7 @@ export default function Navbar() {
           </nav>
 
           {/* ─── Right: Theme + Auth ─── */}
-          <div className="flex justify-end items-center gap-3">
+          <div className="flex justify-end items-center gap-2">
             <button
               className="hidden md:inline-flex p-2 rounded-xl text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[var(--color-surface)] transition-colors"
               title="Change Language (Coming Soon)"
@@ -149,31 +142,27 @@ export default function Navbar() {
             <ThemeToggle />
             {!user ? (
               <>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="hidden md:flex"
-                  onClick={() => navigate("/auth")}
-                >
-                  Sign In
-                </Button>
-                <Button
-                  size="sm"
-                  className="shadow-glow-primary hidden md:flex"
-                  onClick={() => navigate("/auth?tab=signup")}
-                >
-                  Sign Up Free
-                </Button>
+                <div className="hidden md:flex items-center gap-2">
+                  <Button variant="outline" size="sm" onClick={() => navigate("/auth")}>
+                    Sign In
+                  </Button>
+                  <Button size="sm" onClick={() => navigate("/auth?tab=signup")}>
+                    Sign Up Free
+                  </Button>
+                </div>
+                <div className="md:hidden">
+                  <Button size="sm" onClick={() => navigate("/auth?tab=signup")}>
+                    Sign Up
+                  </Button>
+                </div>
               </>
             ) : (
               <>
-                <Button
-                  size="sm"
-                  onClick={goToDashboard}
-                  className="hidden md:flex"
-                >
-                  Dashboard
-                </Button>
+                <div className="hidden md:flex">
+                  <Button size="sm" onClick={goToDashboard}>
+                    Dashboard
+                  </Button>
+                </div>
                 <UserMenu />
               </>
             )}
@@ -186,13 +175,9 @@ export default function Navbar() {
         <div className="fixed inset-0 z-[60] md:hidden flex flex-col">
           {/* Backdrop (also closes on tap) */}
           <div
-            className="absolute inset-0 bg-[var(--color-bg)]/95 backdrop-blur-xl"
+            className="absolute inset-0 bg-[var(--color-bg)]"
             onClick={closeMobile}
           />
-
-          {/* Decorative orbs */}
-          <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-[var(--color-brand-primary)]/15 rounded-full blur-[100px] pointer-events-none" />
-          <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-[var(--color-brand-secondary)]/10 rounded-full blur-[80px] pointer-events-none" />
 
           {/* Content */}
           <div className="relative z-10 flex flex-col h-full px-8 py-6">
@@ -258,7 +243,7 @@ export default function Navbar() {
                 <>
                   <Button
                     size="lg"
-                    className="w-full shadow-glow-primary"
+                    className="w-full"
                     onClick={() => {
                       navigate("/auth?tab=signup");
                       closeMobile();

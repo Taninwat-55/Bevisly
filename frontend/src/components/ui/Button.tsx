@@ -25,16 +25,16 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         ref
     ) => {
         // Base styles
-        const baseStyles = "inline-flex items-center justify-center rounded-lg font-semibold transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98]";
+        const baseStyles = "inline-flex items-center justify-center rounded-lg font-semibold transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-[var(--color-brand-primary)] focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed";
 
         // Variants
         const variants = {
-            primary: "bg-[var(--color-brand-primary)] text-white hover:bg-blue-700 shadow-[var(--shadow-glow-cta)] border border-transparent hover:-translate-y-0.5",
-            secondary: "bg-[var(--color-slate-800)] text-white hover:bg-[var(--color-slate-700)] shadow-md border border-transparent hover:-translate-y-0.5",
-            outline: "bg-transparent border border-[var(--color-border)] text-[var(--color-text)] hover:bg-black/5 dark:hover:bg-[var(--color-slate-800)]",
-            ghost: "bg-transparent text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-black/5 dark:hover:bg-[var(--color-slate-800)]",
-            danger: "bg-[var(--color-error)] text-white hover:bg-red-600 shadow-sm border border-transparent",
-            glass: "glass-panel text-[var(--color-text)] hover:bg-white/80 dark:hover:bg-black/50 border-[var(--glass-border)]",
+            primary: "bg-[var(--color-brand-primary)] text-white hover:bg-[var(--color-brand-primary-hover)] border border-transparent shadow-sm",
+            secondary: "bg-[var(--color-slate-800)] text-white hover:bg-[var(--color-slate-700)] border border-transparent shadow-sm",
+            outline: "bg-transparent border border-[var(--color-border-strong)] text-[var(--color-text)] hover:bg-[var(--color-surface-hover)] dark:hover:bg-[var(--color-surface-hover)]",
+            ghost: "bg-transparent text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[var(--color-surface-hover)] dark:hover:bg-[var(--color-surface-hover)]",
+            danger: "bg-[var(--color-error)] text-white hover:bg-red-700 border border-transparent shadow-sm",
+            glass: "bg-[var(--color-surface)] text-[var(--color-text)] border border-[var(--color-border)] hover:bg-[var(--color-surface-hover)]",
         };
 
         // Sizes

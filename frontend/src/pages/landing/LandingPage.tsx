@@ -116,17 +116,13 @@ export default function LandingPage() {
       </Helmet>
       <main>
         {/* ── HERO SECTION ────────────────────────────── */}
-        <section className="relative pt-16 pb-20 md:pt-32 md:pb-32 overflow-hidden">
-          {/* Background Elements */}
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[500px] bg-[var(--color-brand-primary)]/20 rounded-full blur-[120px] -z-10" />
-          <div className="absolute bottom-0 right-0 w-[800px] h-[600px] bg-[var(--color-brand-secondary)]/10 rounded-full blur-[100px] -z-10" />
-          <div className="absolute inset-0 bg-noise opacity-[0.03] z-0 mix-blend-overlay pointer-events-none" />
+        <section className="relative pt-16 pb-20 md:pt-32 md:pb-32 overflow-hidden border-b border-[var(--color-border)]">
 
           <div className="max-w-7xl mx-auto px-6 relative z-10">
             <div className="text-center max-w-4xl mx-auto mb-12">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[var(--color-surface)] border border-[var(--color-border)] shadow-sm mb-8 animate-fade-in-up">
-                <span className="w-2 h-2 rounded-full bg-[var(--color-brand-primary)] animate-pulse" />
-                <span className="text-sm font-medium text-[var(--color-text-muted)]">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-md bg-[var(--color-brand-subtle)] border border-[var(--color-brand-subtle-border)] mb-8 animate-fade-in-up">
+                <span className="w-2 h-2 rounded-full bg-[var(--color-brand-primary)]" />
+                <span className="text-sm font-medium text-[var(--color-brand-primary)]">
                   Now hiring junior talent for top Nordic companies
                 </span>
               </div>
@@ -146,9 +142,9 @@ export default function LandingPage() {
               </p>
 
               <div className="max-w-2xl mx-auto relative animate-fade-in-up" style={{ animationDelay: "0.3s" }}>
-                <form 
+                <form
                   onSubmit={handleGenerateProofTask}
-                  className={`relative flex items-center w-full shadow-[0_0_40px_rgba(var(--color-brand-primary),0.15)] rounded-2xl bg-[var(--color-surface)] border-2 transition-colors overflow-hidden ${isGenerating ? 'border-[var(--color-brand-primary)] opacity-80 pointer-events-none' : 'border-[var(--color-brand-primary)]/30 focus-within:border-[var(--color-brand-primary)]'}`}
+                  className={`relative flex items-center w-full rounded-xl bg-[var(--color-surface)] border transition-colors overflow-hidden shadow-sm ${isGenerating ? 'border-[var(--color-brand-primary)] opacity-80 pointer-events-none' : 'border-[var(--color-border-strong)] focus-within:border-[var(--color-brand-primary)]'}`}
                 >
                   <Search className={`absolute left-4 md:left-6 transition-colors ${isGenerating ? 'text-[var(--color-brand-primary)]' : 'text-[var(--color-text-muted)]'}`} size={24} />
                   <input 
@@ -159,10 +155,10 @@ export default function LandingPage() {
                      placeholder="e.g. Junior Frontend Developer for 3-month contract..."
                      className="w-full bg-transparent border-none py-5 pl-14 md:pl-16 pr-32 md:pr-48 text-lg md:text-xl text-[var(--color-text)] outline-none placeholder:text-[var(--color-text-muted)] disabled:opacity-50"
                   />
-                  <button 
+                  <button
                      type="submit"
                      disabled={isGenerating || !rawInput.trim()}
-                     className="absolute right-2 top-2 bottom-2 bg-[var(--color-brand-primary)] text-white font-bold px-4 md:px-8 rounded-xl hover:bg-blue-700 disabled:opacity-50 transition-colors flex items-center gap-2 shadow-glow-primary"
+                     className="absolute right-2 top-2 bottom-2 bg-[var(--color-brand-primary)] text-white font-bold px-4 md:px-8 rounded-lg hover:bg-[var(--color-brand-primary-hover)] disabled:opacity-50 transition-colors flex items-center gap-2"
                   >
                      {isGenerating ? (
                         <>
@@ -188,7 +184,7 @@ export default function LandingPage() {
             {/* Hero Visual / Mockup */}
             <div ref={magicBoxRef} className="relative mx-auto max-w-5xl mt-16 animate-scale-in" style={{ animationDelay: "0.4s" }}>
               <div className="glass-panel p-2 rounded-2xl md:rounded-[2rem] shadow-2xl border-gradient-primary bg-slate-900/50 backdrop-blur-xl">
-                <div className="bg-slate-950 rounded-xl md:rounded-[1.5rem] overflow-hidden border border-slate-800 aspect-[16/9] relative flex flex-col">
+                <div className="bg-slate-950 rounded-xl md:rounded-[1.5rem] overflow-hidden border border-slate-800 min-h-[320px] sm:aspect-[16/9] relative flex flex-col">
                   {/* Mock Window Header */}
                   <div className="h-12 border-b border-slate-800 flex items-center px-6 gap-2 bg-slate-900/50">
                     <div className="flex gap-2">
@@ -277,7 +273,7 @@ export default function LandingPage() {
 
                         {/* CTA - Bottom Right */}
                         <div className="absolute bottom-4 right-4 z-30">
-                            <Button size="md" className="shadow-glow-primary shadow-lg" onClick={() => navigate('/auth?tab=signup&role=employer')}>
+                            <Button size="md" onClick={() => navigate('/auth?tab=signup&role=employer')}>
                                 Post This Role &amp; Find Junior Talent <ArrowRight className="ml-2 w-4 h-4" />
                             </Button>
                         </div>
@@ -305,7 +301,7 @@ export default function LandingPage() {
                         </div>
 
                         {/* Mock Main Area */}
-                        <div className="flex-1 p-6 md:p-8 flex flex-col gap-6 font-mono text-xs md:text-sm text-slate-400">
+                        <div className="flex-1 p-4 sm:p-6 md:p-8 flex flex-col gap-6 font-mono text-xs md:text-sm text-slate-400">
                           <div className="flex justify-between items-start">
                             <div>
                               <div className="bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 px-3 py-1 rounded-full inline-flex items-center gap-2 mb-2">
@@ -314,12 +310,12 @@ export default function LandingPage() {
                               </div>
                               <h3 className="text-slate-100 text-lg md:text-xl font-bold font-sans">Submit & Verify Task</h3>
                             </div>
-                            <div className="bg-blue-600 text-white px-4 py-2 rounded-lg font-sans font-medium text-xs shadow-glow-primary">
+                            <div className="bg-[var(--color-brand-primary)] text-white px-4 py-2 rounded-lg font-sans font-medium text-xs">
                               98/100 Score
                             </div>
                           </div>
 
-                          <div className="grid grid-cols-2 gap-4">
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div className="p-4 rounded-xl border border-slate-800 bg-slate-900/50 space-y-2">
                               <div className="h-2 w-12 bg-slate-700 rounded" />
                               <div className="h-2 w-24 bg-slate-600 rounded" />
@@ -392,36 +388,29 @@ export default function LandingPage() {
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {/* Feature 1: Large Box */}
-              <div className="md:col-span-2 glass-panel p-8 rounded-2xl relative overflow-hidden group hover:shadow-glow-primary transition-all duration-300">
-                <div className="relative z-10">
-                  <div className="w-12 h-12 rounded-xl bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 mb-6">
-                    <CheckCircle />
-                  </div>
-                  <h3 className="text-2xl font-bold font-display text-[var(--color-text)] mb-2">AI Writes the Proof Task</h3>
-                  <p className="text-[var(--color-text-muted)] max-w-sm">
-                    Describe the role in plain English. Bevisly's AI generates a job-relevant 30-minute task, ready to send to candidates. No task design experience needed.
-                  </p>
+              <div className="md:col-span-2 p-8 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] relative overflow-hidden">
+                <div className="w-12 h-12 rounded-lg bg-[var(--color-brand-subtle)] flex items-center justify-center text-[var(--color-brand-primary)] mb-6">
+                  <CheckCircle />
                 </div>
-                {/* Abstract Line Decoration */}
-                <div className="absolute right-0 bottom-0 w-64 h-64 bg-gradient-to-tl from-[var(--color-brand-primary)]/10 to-transparent rounded-full blur-3xl group-hover:blur-2xl transition-all" />
+                <h3 className="text-2xl font-bold font-display text-[var(--color-text)] mb-2">AI Writes the Proof Task</h3>
+                <p className="text-[var(--color-text-muted)] max-w-sm">
+                  Describe the role in plain English. Bevisly's AI generates a job-relevant 30-minute task, ready to send to candidates. No task design experience needed.
+                </p>
               </div>
 
               {/* Feature 2: Tall Box */}
-              <div className="glass-panel p-8 rounded-2xl md:row-span-2 relative overflow-hidden group hover:shadow-glow-secondary transition-all duration-300">
-                <div className="relative z-10">
-                  <div className="w-12 h-12 rounded-xl bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center text-[var(--color-brand-secondary)] mb-6">
-                    <Play />
-                  </div>
-                  <h3 className="text-2xl font-bold font-display text-[var(--color-text)] mb-2">Review Real Work, Not Resumes</h3>
-                  <p className="text-[var(--color-text-muted)]">
-                    Candidates submit actual deliverables — code, designs, writing, analysis. You review what they built, guided by AI evidence summaries. Humans decide. AI helps.
-                  </p>
+              <div className="p-8 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] md:row-span-2 relative overflow-hidden">
+                <div className="w-12 h-12 rounded-lg bg-[var(--color-brand-subtle)] flex items-center justify-center text-[var(--color-brand-primary)] mb-6">
+                  <Play />
                 </div>
-                <div className="absolute inset-x-0 bottom-0 h-48 bg-gradient-to-t from-[var(--color-brand-secondary)]/10 to-transparent" />
+                <h3 className="text-2xl font-bold font-display text-[var(--color-text)] mb-2">Review Real Work, Not Resumes</h3>
+                <p className="text-[var(--color-text-muted)]">
+                  Candidates submit actual deliverables — code, designs, writing, analysis. You review what they built, guided by AI evidence summaries. Humans decide. AI helps.
+                </p>
               </div>
 
               {/* Feature 3: Standard Box */}
-              <div className="glass-panel p-8 rounded-2xl group hover:-translate-y-1 transition-all duration-300">
+              <div className="p-8 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)]">
                 <h3 className="text-xl font-bold font-display text-[var(--color-text)] mb-2">Employer-Reviewed, AI-Assisted</h3>
                 <p className="text-[var(--color-text-muted)] text-sm">
                   Transparent scoring. You see the rubric, the AI notes, and the raw submission. No black boxes — every decision rests with your team.
@@ -429,7 +418,7 @@ export default function LandingPage() {
               </div>
 
               {/* Feature 4: Standard Box */}
-              <div className="glass-panel p-8 rounded-2xl group hover:-translate-y-1 transition-all duration-300">
+              <div className="p-8 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)]">
                 <h3 className="text-xl font-bold font-display text-[var(--color-text)] mb-2">Team Collaboration</h3>
                 <p className="text-[var(--color-text-muted)] text-sm">
                   Invite your team, share feedback, and make hiring decisions together in one unified dashboard.
@@ -439,17 +428,15 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* ── PROBLEM / SOLUTION (Dark Contrast) - EMPLOYERS ────────────────────────────── */}
-        <section id="employers" className="py-24 bg-gray-100 dark:bg-[#0B0C10] text-gray-900 dark:text-white relative overflow-hidden">
-          <div className="absolute top-0 left-0 w-full h-full bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-10 pointer-events-none" />
-
-          <div className="max-w-7xl mx-auto px-6 relative z-10 grid md:grid-cols-2 gap-16 items-center">
+        {/* ── PROBLEM / SOLUTION - EMPLOYERS ────────────────────────────── */}
+        <section id="employers" className="py-24 bg-[var(--color-bg-subtle)] border-t border-[var(--color-border)]">
+          <div className="max-w-7xl mx-auto px-6 grid md:grid-cols-2 gap-16 items-center">
             <div>
-              <div className="inline-block px-3 py-1 rounded-full border border-gray-300 dark:border-white/20 bg-gray-200 dark:bg-white/5 text-sm font-medium text-gray-600 dark:text-white/80 mb-6">
+              <div className="inline-block px-3 py-1 rounded-md border border-[var(--color-brand-subtle-border)] bg-[var(--color-brand-subtle)] text-sm font-medium text-[var(--color-brand-primary)] mb-6">
                 For Employers
               </div>
-              <h2 className="text-4xl md:text-5xl font-bold font-display mb-6">Stop screening CVs.<br />Start reviewing proof.</h2>
-              <p className="text-blue-700 dark:text-blue-100 text-lg leading-relaxed mb-8">
+              <h2 className="text-4xl md:text-5xl font-bold font-display text-[var(--color-text)] mb-6">Stop screening CVs.<br />Start reviewing proof.</h2>
+              <p className="text-[var(--color-text-muted)] text-lg leading-relaxed mb-8">
                 Junior roles get flooded with applications. Bevisly cuts through by replacing the CV with a 30-minute proof task. AI writes it for you. Review submissions in 10 minutes.
               </p>
               <Button variant="primary" size="lg" onClick={() => navigate('/auth?tab=signup&role=employer')}>
@@ -457,32 +444,31 @@ export default function LandingPage() {
               </Button>
             </div>
 
-            <div className="space-y-4">
+            <div className="space-y-3">
               {/* Comparison Item 1 */}
-              <div className="flex items-start gap-4 p-4 rounded-xl bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10">
-                <div className="w-8 h-8 rounded-full bg-red-500/20 flex items-center justify-center text-red-500 shrink-0">✕</div>
+              <div className="flex items-start gap-4 p-4 rounded-lg bg-[var(--color-surface)] border border-[var(--color-border)]">
+                <div className="w-7 h-7 rounded-md bg-red-50 dark:bg-red-900/20 flex items-center justify-center text-red-500 shrink-0 text-sm font-bold">✕</div>
                 <div>
-                  <h4 className="font-bold text-gray-900 dark:text-white">CV Screening</h4>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">Hundreds of applications with identical buzzwords. No signal on who can actually do the work.</p>
+                  <h4 className="font-semibold text-[var(--color-text)]">CV Screening</h4>
+                  <p className="text-sm text-[var(--color-text-muted)] mt-0.5">Hundreds of applications with identical buzzwords. No signal on who can actually do the work.</p>
                 </div>
               </div>
 
-              {/* Comparison Item 2 */}
-              <div className="flex items-start gap-4 p-4 rounded-xl bg-blue-600/20 border border-blue-500/50 relative overflow-hidden">
-                <div className="absolute inset-0 bg-blue-600/10 animate-pulse" />
-                <div className="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-white shrink-0 relative z-10">✓</div>
-                <div className="relative z-10">
-                  <h4 className="font-bold text-gray-900 dark:text-white">Proof-First Review</h4>
-                  <p className="text-sm text-blue-700 dark:text-blue-100">Candidates submit a 30-minute task. You review real deliverables. Shortlist the top 3 in a single afternoon.</p>
+              {/* Comparison Item 2 — highlighted */}
+              <div className="flex items-start gap-4 p-4 rounded-lg bg-[var(--color-brand-subtle)] border border-[var(--color-brand-subtle-border)]">
+                <div className="w-7 h-7 rounded-md bg-[var(--color-brand-primary)] flex items-center justify-center text-white shrink-0 text-sm font-bold">✓</div>
+                <div>
+                  <h4 className="font-semibold text-[var(--color-text)]">Proof-First Review</h4>
+                  <p className="text-sm text-[var(--color-text-muted)] mt-0.5">Candidates submit a 30-minute task. You review real deliverables. Shortlist the top 3 in a single afternoon.</p>
                 </div>
               </div>
 
               {/* Comparison Item 3 */}
-              <div className="flex items-start gap-4 p-4 rounded-xl bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10">
-                <div className="w-8 h-8 rounded-full bg-red-500/20 flex items-center justify-center text-red-500 shrink-0">✕</div>
+              <div className="flex items-start gap-4 p-4 rounded-lg bg-[var(--color-surface)] border border-[var(--color-border)]">
+                <div className="w-7 h-7 rounded-md bg-red-50 dark:bg-red-900/20 flex items-center justify-center text-red-500 shrink-0 text-sm font-bold">✕</div>
                 <div>
-                  <h4 className="font-bold text-gray-900 dark:text-white">Keyword Filtering</h4>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">ATS systems that reject strong junior candidates for lacking the right phrasing.</p>
+                  <h4 className="font-semibold text-[var(--color-text)]">Keyword Filtering</h4>
+                  <p className="text-sm text-[var(--color-text-muted)] mt-0.5">ATS systems that reject strong junior candidates for lacking the right phrasing.</p>
                 </div>
               </div>
             </div>
@@ -494,42 +480,42 @@ export default function LandingPage() {
         <section id="candidates" className="py-24 bg-[var(--color-bg)] border-t border-[var(--color-border)]">
           <div className="max-w-7xl mx-auto px-6">
             <div className="text-center mb-16">
-              <div className="inline-block px-3 py-1 rounded-full bg-[var(--color-candidate)]/10 text-[var(--color-candidate)] text-sm font-medium mb-4">
+              <div className="inline-block px-3 py-1 rounded-md border border-[var(--color-brand-subtle-border)] bg-[var(--color-brand-subtle)] text-sm font-medium text-[var(--color-brand-primary)] mb-4">
                 For Junior Talent
               </div>
               <h2 className="text-3xl md:text-5xl font-bold font-display text-[var(--color-text)] mb-4">
                 Your skills deserve more <br />
-                <span className="text-[var(--color-candidate)]">than a resume.</span>
+                <span className="text-[var(--color-brand-primary)]">than a resume.</span>
               </h2>
               <p className="text-[var(--color-text-muted)] text-lg max-w-2xl mx-auto">
                 Build a proof portfolio before you even apply. 30-minute tasks, verified feedback, credentials that live forever on your public profile.
               </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              <div className="p-6 rounded-2xl bg-[var(--color-surface)] border border-[var(--color-border)] hover:border-[var(--color-candidate)]/50 transition-colors">
-                <div className="w-12 h-12 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 mb-4 font-bold text-xl">1</div>
-                <h3 className="text-xl font-bold mb-2">Find a Role (or Practice)</h3>
-                <p className="text-[var(--color-text-muted)]">Browse proof-based junior roles — or complete a practice proof task to start building your portfolio before you even apply.</p>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="p-6 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)]">
+                <div className="w-10 h-10 rounded-lg bg-[var(--color-brand-subtle)] flex items-center justify-center text-[var(--color-brand-primary)] mb-5 font-bold text-base">1</div>
+                <h3 className="text-lg font-bold text-[var(--color-text)] mb-2">Find a Role (or Practice)</h3>
+                <p className="text-sm text-[var(--color-text-muted)] leading-relaxed">Browse proof-based junior roles — or complete a practice proof task to start building your portfolio before you even apply.</p>
               </div>
-              <div className="p-6 rounded-2xl bg-[var(--color-surface)] border border-[var(--color-border)] hover:border-[var(--color-candidate)]/50 transition-colors">
-                <div className="w-12 h-12 rounded-full bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center text-purple-600 mb-4 font-bold text-xl">2</div>
-                <h3 className="text-xl font-bold mb-2">Complete the Proof Task</h3>
-                <p className="text-[var(--color-text-muted)]">30 minutes. Real work. Submit your deliverable — no cover letter, no keyword stuffing.</p>
+              <div className="p-6 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)]">
+                <div className="w-10 h-10 rounded-lg bg-[var(--color-brand-subtle)] flex items-center justify-center text-[var(--color-brand-primary)] mb-5 font-bold text-base">2</div>
+                <h3 className="text-lg font-bold text-[var(--color-text)] mb-2">Complete the Proof Task</h3>
+                <p className="text-sm text-[var(--color-text-muted)] leading-relaxed">30 minutes. Real work. Submit your deliverable — no cover letter, no keyword stuffing.</p>
               </div>
-              <div className="p-6 rounded-2xl bg-[var(--color-surface)] border border-[var(--color-border)] hover:border-[var(--color-candidate)]/50 transition-colors">
-                <div className="w-12 h-12 rounded-full bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center text-emerald-600 mb-4 font-bold text-xl">3</div>
-                <h3 className="text-xl font-bold mb-2">Earn a Verified Credential</h3>
-                <p className="text-[var(--color-text-muted)]">Employer-reviewed feedback added to your proof portfolio. Reuse it. Share it. Keep it forever.</p>
+              <div className="p-6 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)]">
+                <div className="w-10 h-10 rounded-lg bg-[var(--color-brand-subtle)] flex items-center justify-center text-[var(--color-brand-primary)] mb-5 font-bold text-base">3</div>
+                <h3 className="text-lg font-bold text-[var(--color-text)] mb-2">Earn a Verified Credential</h3>
+                <p className="text-sm text-[var(--color-text-muted)] leading-relaxed">Employer-reviewed feedback added to your proof portfolio. Reuse it. Share it. Keep it forever.</p>
               </div>
             </div>
           </div>
         </section>
 
         {/* ── PRACTICE PROOFS SECTION ────────────────────────────── */}
-        <section className="py-24 bg-[var(--color-surface)] border-t border-[var(--color-border)]">
+        <section className="py-24 bg-[var(--color-bg-subtle)] border-t border-[var(--color-border)]">
           <div className="max-w-4xl mx-auto px-6 text-center">
-            <div className="inline-block px-3 py-1 rounded-full bg-[var(--color-brand-primary)]/10 text-[var(--color-brand-primary)] text-sm font-medium mb-6">
+            <div className="inline-block px-3 py-1 rounded-md border border-[var(--color-brand-subtle-border)] bg-[var(--color-brand-subtle)] text-sm font-medium text-[var(--color-brand-primary)] mb-6">
               Practice Proofs — No Application Required
             </div>
             <h2 className="text-3xl md:text-5xl font-bold font-display text-[var(--color-text)] mb-6">
@@ -552,7 +538,7 @@ export default function LandingPage() {
         <section className="py-24 bg-[var(--color-bg)] border-t border-[var(--color-border)]">
           <div className="max-w-7xl mx-auto px-6">
             <div className="text-center mb-16">
-              <div className="inline-block px-3 py-1 rounded-full bg-[var(--color-brand-primary)]/10 text-[var(--color-brand-primary)] text-sm font-medium mb-6">
+              <div className="inline-block px-3 py-1 rounded-md border border-[var(--color-brand-subtle-border)] bg-[var(--color-brand-subtle)] text-sm font-medium text-[var(--color-brand-primary)] mb-6">
                 Employer-Reviewed, AI-Assisted
               </div>
               <h2 className="text-3xl md:text-5xl font-bold font-display text-[var(--color-text)] mb-4">
@@ -560,19 +546,19 @@ export default function LandingPage() {
                 <span className="text-[var(--color-brand-primary)]">Humans decide.</span>
               </h2>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              <div className="p-8 rounded-2xl bg-[var(--color-surface)] border border-[var(--color-border)] hover:border-[var(--color-brand-primary)]/30 transition-colors">
-                <div className="w-12 h-12 rounded-xl bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 mb-6 font-bold text-xl">1</div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="p-8 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)]">
+                <div className="w-10 h-10 rounded-lg bg-[var(--color-brand-subtle)] flex items-center justify-center text-[var(--color-brand-primary)] mb-6 font-bold text-base">1</div>
                 <h3 className="text-xl font-bold font-display text-[var(--color-text)] mb-3">You define what good looks like</h3>
                 <p className="text-[var(--color-text-muted)]">Set a rubric when posting the role. AI uses your criteria to evaluate each submission consistently.</p>
               </div>
-              <div className="p-8 rounded-2xl bg-[var(--color-surface)] border border-[var(--color-border)] hover:border-[var(--color-brand-primary)]/30 transition-colors">
-                <div className="w-12 h-12 rounded-xl bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center text-purple-600 mb-6 font-bold text-xl">2</div>
+              <div className="p-8 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)]">
+                <div className="w-10 h-10 rounded-lg bg-[var(--color-brand-subtle)] flex items-center justify-center text-[var(--color-brand-primary)] mb-6 font-bold text-base">2</div>
                 <h3 className="text-xl font-bold font-display text-[var(--color-text)] mb-3">AI highlights what matters</h3>
                 <p className="text-[var(--color-text-muted)]">Surfaces notable moments in each submission — what they did well, what they skipped. No black boxes.</p>
               </div>
-              <div className="p-8 rounded-2xl bg-[var(--color-surface)] border border-[var(--color-border)] hover:border-[var(--color-brand-primary)]/30 transition-colors">
-                <div className="w-12 h-12 rounded-xl bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center text-emerald-600 mb-6 font-bold text-xl">3</div>
+              <div className="p-8 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)]">
+                <div className="w-10 h-10 rounded-lg bg-[var(--color-brand-subtle)] flex items-center justify-center text-[var(--color-brand-primary)] mb-6 font-bold text-base">3</div>
                 <h3 className="text-xl font-bold font-display text-[var(--color-text)] mb-3">You make every decision</h3>
                 <p className="text-[var(--color-text-muted)]">No automated rejections. Shortlist who you want. Every candidate gets clear feedback either way.</p>
               </div>
@@ -632,11 +618,9 @@ export default function LandingPage() {
           </div>
         </section>
 
-        <section className="py-32 relative overflow-hidden bg-[var(--color-surface)]">
-          <div className="absolute inset-0 bg-gradient-to-br from-[var(--color-brand-primary)]/5 to-[var(--color-brand-secondary)]/5" />
-
-          <div className="max-w-4xl mx-auto px-6 text-center relative z-10">
-            <h2 className="text-4xl md:text-6xl font-bold font-display text-[var(--color-text)] mb-6 tracking-tight">
+        <section className="py-32 bg-[var(--color-bg-subtle)] border-t border-[var(--color-border)]">
+          <div className="max-w-4xl mx-auto px-6 text-center">
+            <h2 className="text-4xl md:text-5xl font-bold font-display text-[var(--color-text)] mb-6 tracking-tight">
               Ready to hire your next <br />
               <span className="text-[var(--color-brand-primary)]">junior with confidence?</span>
             </h2>
@@ -645,10 +629,10 @@ export default function LandingPage() {
             </p>
 
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-              <Button size="lg" className="h-16 px-10 text-xl rounded-2xl shadow-glow-primary hover:scale-105 transition-transform" onClick={() => navigate('/auth?tab=signup&role=employer')}>
+              <Button size="lg" className="px-10" onClick={() => navigate('/auth?tab=signup&role=employer')}>
                 Post Your First Role
               </Button>
-              <Button variant="outline" size="lg" className="h-16 px-10 text-xl rounded-2xl" onClick={() => navigate('/jobs')}>
+              <Button variant="outline" size="lg" className="px-10" onClick={() => navigate('/jobs')}>
                 Browse Proof Tasks
               </Button>
             </div>

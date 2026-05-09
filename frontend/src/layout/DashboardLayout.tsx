@@ -138,14 +138,14 @@ export default function DashboardLayout({
         <motion.aside
           initial={false}
           animate={{ width: isSidebarOpen ? 280 : 80 }}
-          className="fixed inset-y-0 left-0 z-40 hidden md:flex flex-col glass-panel border-r border-[var(--glass-border)] transition-all duration-300 backdrop-blur-xl"
+          className="fixed inset-y-0 left-0 z-40 hidden md:flex flex-col bg-[var(--color-surface)] border-r border-[var(--color-border)] transition-all duration-300"
         >
           {/* Brand */}
           <Link
             to="/"
             className={`h-20 flex items-center ${isSidebarOpen ? "px-8" : "justify-center"} border-b border-[var(--color-border)]/50 hover:bg-[var(--color-surface-hover)] transition-colors`}
           >
-            <div className="w-10 h-10 rounded-xl bg-[var(--color-brand-primary)] flex items-center justify-center text-white font-bold text-lg shadow-glow-primary shrink-0">
+            <div className="w-10 h-10 rounded-xl bg-[var(--color-brand-primary)] flex items-center justify-center text-white font-bold text-lg shrink-0">
               B
             </div>
             {isSidebarOpen && (
@@ -168,14 +168,13 @@ export default function DashboardLayout({
                 onClick={() => navigate("/employer?post=true")}
                 className={`
                   relative flex items-center justify-center gap-2 rounded-xl
-                  bg-[var(--color-brand-primary)] hover:bg-blue-700
+                  bg-[var(--color-brand-primary)] hover:bg-[var(--color-brand-primary-hover)]
                   text-white font-bold tracking-tight
                   transition-all duration-300 group overflow-hidden
                   ${!isSidebarOpen ? "w-12 h-12" : "w-full py-3.5"}
                 `}
                 title="Post a new job"
               >
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-in-out" />
                 <Plus size={isSidebarOpen ? 18 : 22} strokeWidth={3} className="relative z-10" />
                 {isSidebarOpen && (
                   <motion.span
@@ -277,7 +276,7 @@ export default function DashboardLayout({
                     ? "border-emerald-400 dark:border-emerald-500 shadow-emerald-500/20 group-hover:shadow-emerald-500/40"
                     : user?.subscription_tier === "starter"
                     ? "border-blue-400 dark:border-blue-500 shadow-blue-500/20 group-hover:shadow-blue-500/40"
-                    : "border-[var(--color-border)] group-hover:border-[var(--color-brand-primary)] group-hover:shadow-glow-primary/20 bg-gradient-to-tr from-slate-200 to-slate-100 dark:from-slate-700 dark:to-slate-800"
+                    : "border-[var(--color-border)] group-hover:border-[var(--color-brand-primary)] bg-[var(--color-surface-hover)]"
                   }
                 `}>
                   <span className="font-semibold text-[var(--color-text)] flex items-center justify-center w-full h-full rounded-full overflow-hidden">
@@ -375,7 +374,7 @@ export default function DashboardLayout({
 
         {/* Mobile header (hamburger + logo — shown when sidebar is hidden) */}
         {showSidebar && (
-          <header className="h-14 glass-panel border-b border-[var(--glass-border)] sticky top-0 z-30 px-3 flex items-center gap-2 md:hidden">
+          <header className="h-14 bg-[var(--color-surface)] border-b border-[var(--color-border)] sticky top-0 z-30 px-3 flex items-center gap-2 md:hidden">
             <button
               onClick={() => setMobileDrawerOpen(true)}
               className="p-2 -ml-1 rounded-lg text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[var(--color-surface-hover)] transition-colors"
@@ -384,7 +383,7 @@ export default function DashboardLayout({
               <Menu size={22} />
             </button>
             <Link to="/" className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-lg bg-[var(--color-brand-primary)] flex items-center justify-center text-white font-bold text-sm shadow-glow-primary shrink-0">
+              <div className="w-8 h-8 rounded-lg bg-[var(--color-brand-primary)] flex items-center justify-center text-white font-bold text-sm shrink-0">
                 B
               </div>
               <span className="text-lg font-bold font-display text-[var(--color-text)] tracking-tight">
@@ -403,7 +402,7 @@ export default function DashboardLayout({
       </div>
 
       {/* ── Floating Pill (top-right) ─────────────── */}
-      <div className="fixed top-4 right-4 z-50 flex items-center gap-1 px-2 py-1.5 rounded-full bg-[var(--color-surface)]/80 backdrop-blur-md border border-[var(--color-border)] shadow-lg">
+      <div className="fixed top-4 right-4 z-50 flex items-center gap-1 px-2 py-1.5 rounded-full bg-[var(--color-surface)] border border-[var(--color-border)] shadow-md">
         <button
           className="p-1.5 text-[var(--color-text-muted)] hover:text-[var(--color-text)] rounded-full transition-colors"
           title="Change Language (Coming Soon)"

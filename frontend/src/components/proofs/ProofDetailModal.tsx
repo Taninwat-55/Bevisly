@@ -208,7 +208,7 @@ export default function ProofDetailModal({ card, isOpen, onClose, username }: Pr
                   <div className="px-6 pb-5 pt-2 flex flex-col sm:flex-row gap-3">
                     <button
                       onClick={() => setShowShare(true)}
-                      className="flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-[var(--color-brand-primary)] text-white text-sm font-semibold hover:bg-blue-700 transition-colors shadow-[var(--shadow-glow-cta)]"
+                      className="flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg bg-[var(--color-brand-primary)] text-white text-sm font-semibold hover:bg-[var(--color-brand-primary-hover)] transition-colors"
                     >
                       <Share2 size={15} />
                       Share this Achievement
