@@ -45,7 +45,6 @@ export default function EmployerJobForm({
   const { company, loading: companyLoading } = useCompany();
   const formRef = useRef<HTMLDivElement>(null);
 
-  const companyName = company?.name ?? defaultValues?.company ?? "";
 
   const [step, setStep] = useState<1 | 2>(1);
 
