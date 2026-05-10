@@ -6,7 +6,7 @@
 
 <p align="center">
   <strong>Proof-Based Hiring Platform</strong><br/>
-  Transforming real work into verified experience
+  Candidates prove skills with real tasks. Employers hire based on evidence, not résumés.
 </p>
 
 <p align="center">
@@ -14,89 +14,83 @@
   <a href="#tech-stack">Tech Stack</a> •
   <a href="#getting-started">Getting Started</a> •
   <a href="#architecture">Architecture</a> •
-  <a href="#contributing">Contributing</a>
+  <a href="#roadmap">Roadmap</a>
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Release-v0.1.0_MVP-6C5CE7?style=flat-square" alt="Release v0.1.0 MVP" />
-  <img src="https://img.shields.io/badge/Status-v0.2.0_In_Development-4A90E2?style=flat-square" alt="v0.2.0 In Development" />
+  <img src="https://img.shields.io/badge/Status-Pre--Launch-F59E0B?style=flat-square" alt="Pre-Launch" />
+  <img src="https://img.shields.io/badge/React-19.x-61DAFB?logo=react&style=flat-square" alt="React 19" />
+  <img src="https://img.shields.io/badge/TypeScript-5.x-3178C6?logo=typescript&style=flat-square" alt="TypeScript" />
+  <img src="https://img.shields.io/badge/Supabase-PostgreSQL-3FCF8E?logo=supabase&style=flat-square" alt="Supabase" />
+  <img src="https://img.shields.io/badge/Tailwind-v4-06B6D4?logo=tailwindcss&style=flat-square" alt="Tailwind v4" />
 </p>
-
-<p align="center">
-  <img src="https://img.shields.io/badge/React-18.x-61DAFB?logo=react" alt="React" />
-  <img src="https://img.shields.io/badge/TypeScript-5.x-3178C6?logo=typescript" alt="TypeScript" />
-  <img src="https://img.shields.io/badge/Supabase-PostgreSQL-3FCF8E?logo=supabase" alt="Supabase" />
-  <img src="https://img.shields.io/badge/Vite-5.x-646CFF?logo=vite" alt="Vite" />
-</p>
-
----
-
-## 🚀 Roadmap
-
-Bevisly **v0.1.0** (MVP) is live. The following features are planned for completion before public launch outreach:
-
-| # | Feature | Description | Status |
-|---|---------|-------------|--------|
-| 1 | **Practice Proofs** | AI-generated practice tasks candidates can attempt immediately after signup — graded by AI, counts toward Leaderboard | Planned |
-| 2 | **Application Status Tracker** | Pizza-tracker style timeline on candidate dashboard showing real-time hiring stage updates from employer Kanban | Planned |
-| 3 | **Verified Skills from Proofs** | AI extracts skills from completed proof tasks and adds them as "Verified Skills" (distinct from self-claimed) on the candidate profile | Planned |
-| 4 | **Stripe Integration** | Subscription checkout, webhook to update plan tier in DB, Stripe Customer Portal for billing management | Planned |
 
 ---
 
 ## Overview
 
-**Bevisly** is a proof-of-skill platform that creates a fair bridge between
-learning and employment. Through short, real-world proof tasks, candidates build
-credibility while employers hire based on verified ability — not just résumés.
+**Bevisly** is a proof-of-skill hiring platform that bridges the gap between learning and employment. Instead of filtering by résumés, employers post real-world proof tasks — candidates complete them and submit. Structured rubrics, AI-assisted review, and accountability scores replace guesswork on both sides.
+
+**Positioning:** *"Bevisly does not replace human judgment. It makes human judgment more structured, evidence-based, and auditable."*
 
 ### The Problem We Solve
 
-| Traditional Hiring       | Bevisly Approach              |
-| ------------------------ | ----------------------------- |
-| Résumés & keywords       | Verified skill demonstrations |
-| Interview anxiety        | Async proof submissions       |
-| Bias-prone screening     | Objective work samples        |
-| Time-consuming processes | Streamlined evaluation        |
+| Traditional Hiring | Bevisly Approach |
+|--------------------|-----------------|
+| Résumés and keywords | Verified skill demonstrations |
+| Bias-prone screening | Rubric-based objective evaluation |
+| Employer ghosting after effort | Employer Responsibility Score with accountability |
+| No proof of effort for candidates | Public Proof Vault — a verifiable portfolio |
+| Vague "culture fit" decisions | AI evidence summaries tied to submission content |
 
 ---
 
 ## Features
 
-### For Candidates 💜
+### For Candidates
 
-- **Dashboard** — Track completed proofs, ratings, and credits
-- **Proof Workspace** — Submit work samples with reflections
-- **Public Profile** — SEO-friendly portfolio at `bevisly.com/@username`
-- **LinkedIn Sharing** — Share verified achievements with your network
-- **Leaderboard** — Compete and showcase your proof credits
+- **Proof Workspace** — Complete real-world tasks set by employers, submit with reflections
+- **Public Profile** — Portfolio at `bevisly.com/@username` — SEO-friendly, shareable
+- **Bevisly Score** — Unified performance score calculated from completed proofs
+- **Featured Proofs** — Pin your best submissions to the top of your profile
+- **Candidate Reliability Score** — Accountability metric visible to employers
+- **Proof Vault** — Verified, shareable proof of completed tasks
+- **Saved Jobs** — Bookmark jobs to apply later
+- **Leaderboard** — Ranked public standings across the candidate pool
+- **LinkedIn Sharing** — One-click sharing of verified achievements
 
-### For Employers 💙
+### For Employers
 
-- **Talent Board** — Kanban-style candidate pipeline management
-- **Proof Tasks** — Define real-world skill assessments
-- **Scorecard Reviews** — Structured feedback with category ratings
-- **Talent Pool** — Browse verified candidates with proven skills
-- **Side-by-Side Review** — Compare requirements vs submissions
+- **Job Listings** — Post jobs with required salary range (pay transparency) and proof task time estimates
+- **Proof Tasks** — Define real-world assessments with weighted rubric criteria
+- **AI Feedback Suggestion** — Gemini generates an evidence-based rating suggestion and feedback draft; final decision is always the employer's
+- **Talent Board** — Kanban-style candidate pipeline (Applied → Reviewing → Interview → Hired/Rejected)
+- **Employer Brand Page** — Public company page at `/company/:slug` showcasing open roles and ratings
+- **Employer Responsibility Score** — Anti-ghosting accountability score, visible to candidates
+- **Candidate Invitation System** — Invite specific candidates directly to apply
+- **Fast Pass Applications** — Expedited flow for qualifying candidates
+- **Side-by-Side Review** — Compare proof task requirements against candidate submission in one view
 
-### For Admins 🔧
+### For Admins
 
 - **User Management** — Role assignments and oversight
-- **Platform Analytics** — System-wide metrics and insights
+- **Platform Analytics** — System-wide metrics
 - **Data Viewer** — Direct database inspection tools
+- **Feedback Review** — Moderation and quality checks on employer feedback
 
 ---
 
 ## Tech Stack
 
-| Layer           | Technology                           |
-| --------------- | ------------------------------------ |
-| **Frontend**    | React 18 + TypeScript + Vite         |
-| **Styling**     | CSS Variables + Glassmorphism Design |
-| **State**       | React Context + React Router v6      |
-| **Backend**     | Supabase (PostgreSQL + Auth + RLS)   |
-| **UI/UX**       | Framer Motion + Lucide Icons         |
-| **Drag & Drop** | @dnd-kit/core + @dnd-kit/sortable    |
+| Layer | Technology |
+|-------|-----------|
+| **Frontend** | React 19, React Router v7, TypeScript, Vite |
+| **Styling** | Tailwind CSS v4 |
+| **Backend** | Supabase (Auth, PostgreSQL, Storage, Realtime) |
+| **Edge Functions** | Deno (Supabase Edge Runtime) |
+| **Email** | Resend (via `send-email` / `notify` edge functions) |
+| **AI** | Gemini 2.5 Flash (feedback suggestions, job/task generation) |
+| **Testing** | Vitest (unit), Playwright (e2e) |
 
 ---
 
@@ -105,8 +99,9 @@ credibility while employers hire based on verified ability — not just résumé
 ### Prerequisites
 
 - Node.js 18+
-- npm or yarn
+- npm
 - Supabase account
+- Supabase CLI (`npm install -g supabase`)
 
 ### Installation
 
@@ -129,42 +124,61 @@ VITE_SUPABASE_URL=https://your-project.supabase.co
 VITE_SUPABASE_ANON_KEY=your-anon-key
 ```
 
+Edge functions require additional vars set in Supabase dashboard:
+- `RESEND_API_KEY`
+- `GEMINI_API_KEY`
+
 ### Development
 
 ```bash
-npm run dev
+# Frontend
+cd frontend && npm run dev          # http://localhost:5173
+
+# Edge functions (from repo root)
+supabase functions serve
 ```
 
-Visit `http://localhost:5173`
+---
+
+## Scripts
+
+| Command | Description |
+|---------|-------------|
+| `npm run dev` | Start development server |
+| `npm run build` | Build for production |
+| `npm run preview` | Preview production build |
+| `npm run lint` | Run ESLint |
+| `npm run typecheck` | Run TypeScript checks |
+| `npm test` | Run unit tests (Vitest) |
+| `npm run e2e` | Run end-to-end tests (Playwright) |
+| `npm run gen:types` | Regenerate TypeScript types from Supabase schema |
 
 ---
 
 ## Architecture
 
 ```
-frontend/src/
-├── components/
-│   ├── common/          # Shared UI components
-│   ├── employer/        # Employer-specific components
-│   ├── landing/         # Marketing page sections
-│   ├── proofs/          # Proof card & modal components
-│   ├── sharing/         # Social sharing components
-│   └── talent/          # Talent board & Kanban
-├── pages/
-│   ├── admin/           # Admin dashboard pages
-│   ├── auth/            # Authentication pages
-│   ├── candidate/       # Candidate portal pages
-│   ├── employer/        # Employer portal pages
-│   ├── jobs/            # Job listing & detail
-│   ├── public/          # Public profile & leaderboard
-│   └── shared/          # Cross-role pages
-├── lib/
-│   └── api/             # Supabase API functions
-├── hooks/               # Custom React hooks
-├── context/             # Auth context provider
-├── layout/              # Layout wrappers
-├── routes/              # React Router config
-└── types/               # TypeScript definitions
+bevis-mvp/
+├── frontend/
+│   └── src/
+│       ├── components/        # UI components (common, employer, jobs, profile, proofs, ui)
+│       ├── context/           # React context providers
+│       ├── hooks/             # Custom hooks
+│       ├── layout/            # CandidateLayout, DashboardLayout, AdminLayout, PublicLayout
+│       ├── lib/               # Supabase client, utilities, API functions
+│       ├── pages/             # Route-level pages by role (admin, auth, candidate, employer, jobs, landing, public, shared)
+│       ├── routes/            # Routes.tsx, ProtectedRoute.tsx
+│       └── types/             # TypeScript definitions
+└── supabase/
+    ├── functions/
+    │   ├── notify/            # Submission status webhook → Resend email
+    │   ├── send-email/        # Generic email sender
+    │   ├── suggest-feedback/  # AI feedback generation (Gemini)
+    │   ├── generate-job-listing/   # AI job listing generation
+    │   └── generate-proof-task/    # AI proof task generation
+    ├── migrations/            # SQL migrations (timestamp-prefixed)
+    ├── email-templates/       # HTML email templates
+    └── config.toml            # Supabase config (project_id: bevis-mvp)
 ```
 
 ---
@@ -173,79 +187,60 @@ frontend/src/
 
 ### Core Tables
 
-| Table         | Purpose                             |
-| ------------- | ----------------------------------- |
-| `profiles`    | User data, roles, credits, username |
-| `jobs`        | Employer job listings               |
-| `proof_tasks` | Skill assessment definitions        |
-| `submissions` | Candidate work samples              |
-| `feedback`    | Employer reviews & ratings          |
-| `proof_cards` | Verified achievement records        |
+| Table | Purpose |
+|-------|---------|
+| `profiles` | User data, roles, scores, username, subscription tier |
+| `jobs` | Employer job listings (with salary range, work mode) |
+| `proof_tasks` | Skill assessment definitions with rubric |
+| `submissions` | Candidate work samples |
+| `feedback` | Employer reviews and ratings |
+| `proof_cards` | Verified achievement records |
+| `applications` | Job applications and pipeline stage |
+| `company_pages` | Employer brand page content |
 
 ### Row Level Security
 
-- **Candidates**: Access own submissions and public data
-- **Employers**: Access own jobs and related submissions
-- **Admins**: Full platform access
+- **Candidates** — access own submissions and public data
+- **Employers** — access own jobs and related submissions
+- **Admins** — full platform access
 
 ---
 
-## Design System
+## Roadmap
 
-### Color Tokens
+### Pre-Launch (In Progress)
 
-| Role      | Primary Color   | Usage          |
-| --------- | --------------- | -------------- |
-| Candidate | `#6C5CE7`       | Purple accents |
-| Employer  | `#4A90E2`       | Blue accents   |
-| Neutral   | System defaults | Shared UI      |
+| Feature | Description | Status |
+|---------|-------------|--------|
+| **Stripe Integration** | Subscription checkout, webhook → `subscription_tier` in DB, Customer Portal | Planned |
+| **AI Framing & Disclaimers** | Rename "AI rating" → "AI evidence summary", add disclaimers, update `/docs` | Done |
+| **Locked Rubric** | Rubric locks once first submission is received; prevents post-hoc scoring changes | Done |
+| **Paid Promotion** | Placeholder UI for employers to mark jobs as "Featured" on paid plans | Done |
 
-### UI Features
+### Post-Launch
 
-- **Glassmorphism** — Modern frosted glass aesthetic
-- **Dark Mode** — Full theme support
-- **Responsive** — Mobile-first design
-- **Animations** — Smooth transitions via Framer Motion
-
----
-
-## Scripts
-
-| Command             | Description              |
-| ------------------- | ------------------------ |
-| `npm run dev`       | Start development server |
-| `npm run build`     | Build for production     |
-| `npm run preview`   | Preview production build |
-| `npm run lint`      | Run ESLint               |
-| `npm run typecheck` | Run TypeScript checks    |
+- **AI Chatbot** — In-app assistant for candidates (task prep) and employers (job/task drafting)
+- **Fairness & Evidence Layer** — Blind first review, override justification, consistency dashboard, AI self-audit
 
 ---
 
-## Contributing
+## Branch Strategy
 
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit changes (`git commit -m 'Add amazing feature'`)
-4. Push to branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
-### Branch Strategy
-
-| Branch      | Purpose               |
-| ----------- | --------------------- |
-| `main`      | Production-ready code |
-| `dev`       | Active development    |
-| `feature/*` | New features          |
-| `fix/*`     | Bug fixes             |
+| Branch | Purpose |
+|--------|---------|
+| `main` | Production-ready code |
+| `dev` | Active development |
+| `feature/*` | New features |
+| `fix/*` | Bug fixes |
 
 ---
 
 ## License
 
-© 2025 Bevisly — All rights reserved.
+© 2026 Bevisly — All rights reserved.
 
 ---
 
 <p align="center">
-  Built with 💜 by <a href="https://github.com/Taninwat-55">Taninwat "Ice" Kaewpankan</a>
+  Built by <a href="https://github.com/Taninwat-55">Taninwat "Ice" Kaewpankan</a>
 </p>

@@ -140,10 +140,11 @@ supabase migration new <migration-name>
 
 ## Current Task
 
-Pre-launch sprint work is complete. Next step: Stripe integration before cold outreach.
+Only Stripe integration remains before cold outreach begins.
 
 - **Sprint #1 (done):** Bevisly Score + Featured Proofs — unified score and pinned proof highlights on candidate profiles.
 - **Sprint #2 (done):** Responsibility Score + Employer Brand Page — anti-ghosting accountability scores (employer + candidate) via DB triggers, public `/company/:slug` brand pages, score badges on job cards and profiles, Docs & Help page, navbar/footer polish.
+- **Sprint #3 (done):** AI Framing & Disclaimers, Locked Rubric, Paid Promotion placeholder, Pay Transparency, Time Estimation Label.
 
 ---
 
@@ -158,23 +159,20 @@ Wire up Stripe before sending cold emails — a pricing page with no working che
 - "Manage Billing" button → Stripe Customer Portal
 - Gate Pro features behind subscription check
 
-### ⬜ AI Framing & Disclaimers (Anti-Bias Hygiene)
-Cheap defensive copy + UX so we never *appear* to be an "AI hiring decision" tool. Three concrete items:
-- Rename "AI suggested rating" → "AI evidence summary" everywhere it appears in the employer review flow.
-- Add a one-line disclaimer under every AI-generated rating: *"Suggested by AI based on submission content. Final decision is yours."*
-- Add a one-paragraph "How Bevisly uses AI" section to the `/docs` page; link it from the AI suggestion UI.
+### ✅ AI Framing & Disclaimers (Anti-Bias Hygiene)
+Renamed "AI suggested rating" → "AI evidence summary", added one-line disclaimer under every AI-generated rating, added "How Bevisly uses AI" section to `/docs`.
 
-### ⬜ Locked Rubric Before Submissions Open
-Employer defines 3–5 weighted rubric criteria when creating a proof task (e.g. "Code clarity", "Problem decomposition", "UX polish"). Once the first candidate submits, the rubric locks for that task — changes require a new task version. All AI suggestions and human ratings score against the locked rubric, not a vague 1–5 star. **Why pre-launch:** without it, the validation question "is the proof system fair and repeatable across employers?" can't be answered — employers improvise scoring post-hoc and the signal is meaningless. Promoted from post-launch on 2026-05-08.
+### ✅ Locked Rubric Before Submissions Open
+Employer defines 3–5 weighted rubric criteria when creating a proof task. Once the first candidate submits, the rubric locks — changes require a new task version. All AI suggestions and human ratings score against the locked rubric.
 
-### ⬜ Paid Promotion / Featured Job (Placeholder)
-Wiring for employers on paid plans to mark a job as "Featured" — placeholder UI/data is enough for now; placement (search results? landing page? brand page?) is still undecided. **Why pre-launch:** the pricing page already implies paid plans get a visibility boost, so the promise needs at least basic plumbing before the first paid employer asks "where's my featured job?".
+### ✅ Paid Promotion / Featured Job (Placeholder)
+Placeholder UI/data for employers on paid plans to mark a job as "Featured". Placement TBD post-launch.
 
-### ⬜ Time Estimation Label
-Employer-set estimated time-to-complete on every proof task. Helps candidates self-select before committing hours and reduces mid-task drop-off — and lets us flag tasks that demand unreasonable unpaid effort. **Why pre-launch:** without it, candidates start tasks blind, abandon halfway, and first-employer feedback gets polluted by misleading drop-off rates.
+### ✅ Time Estimation Label
+Employer-set estimated time-to-complete on every proof task. Helps candidates self-select before committing hours.
 
-### ⬜ Pay Transparency
-Required salary range (min/max) on every job listing. **Why pre-launch:** strong positioning vs. legacy job boards ("every Bevisly job shows real pay") and aligns with EU pay-transparency expectations.
+### ✅ Pay Transparency
+Required salary range (min/max) on every job listing. Aligns with EU pay-transparency expectations.
 
 The remaining Fairness & Evidence Layer phases (blind first review, override justification, consistency dashboard, AI self-audit) stay post-launch — see `PRODUCT_ROADMAP.md` feature #19.
 
@@ -186,6 +184,9 @@ Features to build after launch and initial traction. Full list in `PRODUCT_ROADM
 
 ### ⬜ Fairness & Evidence Layer
 Four remaining phases that operationalise the Product Principles once we have real employer usage data: blind first review, required justification on override, employer consistency dashboard with fairness alerts, and weekly AI self-audit. (Phase 1 — Locked Rubric — was promoted to pre-launch on 2026-05-08.) See `PRODUCT_ROADMAP.md` feature #19.
+
+### ⬜ Career Compass (AI Self-Discovery)
+Candidate-facing AI session that reads their proof history, employer ratings, and a short intake form to deliver three things: career direction (role types that fit them based on demonstrated strengths), proof readiness (how ready they are for specific roles with a percentage score), and skills gap analysis (what's in their way, grounded in real submission data). Powered by Gemini. Private to the candidate — never shared with employers. Gated behind minimum profile completeness. Post-launch because output quality scales with real proof data. Full spec in `PRODUCT_ROADMAP.md` feature #21.
 
 ### ⬜ AI Chatbot
 In-app AI assistant powered by Gemini. Dual-purpose: helps candidates refine applications, understand proof task requirements, and prep for interviews; helps employers draft job descriptions and proof tasks faster. Surfaced as a chat widget available across both dashboards.

@@ -415,6 +415,92 @@ An in-app AI assistant (powered by Gemini) surfaced as a chat widget across both
 
 ---
 
+### 21. Career Compass (AI Self-Discovery for Candidates)
+**Status:** 🔴
+
+Most career tools tell you what jobs exist. Career Compass tells you where *you* fit — and what's in your way. It's a structured AI session that reads a candidate's entire Bevisly history and helps them answer three questions: Where should I go? Am I ready to get there? What's stopping me?
+
+**What makes it Bevisly-native:** Other tools rely on self-reported data. Career Compass reads actual proof submissions, employer ratings, and verified skills — evidence, not claims. A candidate who scored well on "problem decomposition" across three proofs gets told that, with specifics. That's insight no CV-based tool can produce.
+
+---
+
+**Step 1 — Intake form (candidate fills in before first session)**
+
+The AI needs context the profile doesn't capture. A short one-time form asks:
+- What kind of work energises you most?
+- What's your target role or field in 1 year? In 3 years?
+- What feels like your biggest blocker right now? (skills, experience, confidence, location, salary, etc.)
+- How do you prefer to work? (team size, remote vs. office, structured vs. flexible)
+
+Answers are saved to the candidate's profile and can be updated any time. Updating triggers a prompt to rerun the analysis.
+
+---
+
+**Step 2 — AI analysis (runs on demand)**
+
+The `career-compass` edge function (Gemini 2.5 Flash) reads:
+- Profile fields: bio, claimed skills, education, work experience
+- Verified skills extracted from completed proofs
+- All proof submissions and their employer ratings and written feedback
+- Bevisly Score and score trajectory over time
+- Intake form answers
+
+---
+
+**Step 3 — Structured report output**
+
+Not a chat interface — a structured four-section report:
+
+**Section 1 — Profile Snapshot**
+"Here's what we know about you from your proofs and profile." Summarises the candidate's demonstrated strengths in plain language, grounded in specific proofs. Acts as a mirror — candidates often don't recognise their own pattern until it's named for them.
+
+**Section 2 — Career Direction**
+Three role types the AI recommends based on demonstrated strengths and stated interests. Each one includes: why it fits (linked to specific proofs or ratings), a Bevisly Readiness percentage, and 2–3 real open roles on the platform that match right now.
+
+**Section 3 — Proof Readiness Breakdown**
+For each recommended role type: "What employers in this field consistently score on" vs. "What your proofs demonstrate." A clear gap/match comparison per rubric criterion — not abstract, always tied to real submission data.
+
+**Section 4 — Next Actions**
+Concrete, prioritised steps: complete this practice proof, fill in this profile field, apply for these two specific open roles. Every action is grounded in the gap identified — no generic advice.
+
+---
+
+**UX rules:**
+- **Completeness gate:** Bio filled + at least 1 proof submission required before the tool unlocks. Empty profiles get a prompt to complete those first — generic output on an empty profile erodes trust.
+- **Rerun button:** Candidate can rerun the analysis any time after adding proofs or updating their profile. Each run is a fresh analysis, not cached from the last session.
+- **Honest labelling:** *"Career Compass is powered by Gemini. These are evidence-based suggestions, not verdicts."* One-line disclaimer on every output.
+- **Privacy:** Analysis is private to the candidate. Never surfaced to employers.
+- **Follow-up:** After reading the report, the candidate can type a follow-up question (e.g. "What if I want to pivot to UX instead?") — Gemini responds in-context using the same session data.
+
+---
+
+**Placement:**
+- Dedicated page at `/candidate/career-compass`
+- Linked from candidate sidebar
+- Featured as the primary empty-state CTA for new candidates who have no proofs yet ("Start by understanding where you stand")
+
+---
+
+**Tech:**
+- New edge function: `career-compass` (Deno, Gemini 2.5 Flash)
+- Reads: `profiles`, `proof_submissions`, `employer_ratings`, `verified_skills` tables
+- Input: intake form answers + user ID
+- Output: structured JSON (snapshot, direction array, readiness breakdown, next actions)
+- Frontend: structured report UI with cards per section and expandable details — not a generic chat interface
+
+---
+
+**Relationship to other features:**
+- **Feature #11 (Skill Gap Feedback Loop):** Passive — surfaces insights after rejections. Career Compass is active — candidate asks for it on their own terms. They serve different emotional moments and both should exist.
+- **Feature #20 (AI Chatbot):** The chatbot is general-purpose Q&A across both dashboards. Career Compass is a structured, guided self-discovery flow with a defined input/output shape. Launch separately — they solve different problems. Longer-term, Career Compass could be surfaced as a deep-link mode within the chatbot.
+
+---
+
+**Why post-launch:**
+Output quality scales with proof history. A new candidate with zero submissions gets advice too generic to be useful, which erodes trust in the feature. This is most powerful once candidates have completed at least 2–3 proofs — then the analysis becomes genuinely personal and evidence-grounded. Build after the first wave of candidates has real proof data on the platform.
+
+---
+
 ## 💡 Ideas Backlog (Unfiltered)
 
 Ideas captured but not yet scoped or prioritized. Nothing here is committed.
