@@ -265,6 +265,13 @@ export default function JobDetailPage() {
                 {job.title}
               </h1>
               <div className="flex items-center gap-2 text-[var(--color-text-muted)]">
+                {(companyProfile?.logo_url ?? job.company_logo) && (
+                  <img
+                    src={(companyProfile?.logo_url ?? job.company_logo)!}
+                    alt={job.company ?? ""}
+                    className="w-5 h-5 rounded-full object-cover border border-[var(--color-border)] shrink-0"
+                  />
+                )}
                 {companyProfile?.slug ? (
                   <a
                     href={`/company/${companyProfile.slug}`}

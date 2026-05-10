@@ -157,7 +157,7 @@ export async function getEmployerSubmissionsWithFeedback(
       proof_tasks ( id, title ),
       jobs ( id, title ),
       feedback ( stars ),
-      profiles:user_id ( full_name, email )
+      profiles:user_id ( full_name, email, avatar_url )
     `,
     )
     .in("job_id", ids)
@@ -718,7 +718,7 @@ export async function sendRejectionFeedbackEmail(
         user_id,
         job_id,
         feedback ( stars, strengths, improvements ),
-        profiles:user_id ( full_name, email ),
+        profiles:user_id ( full_name, email, avatar_url ),
         jobs:job_id ( title, employer_id, employer:employer_id ( email ) )
       `
       )
@@ -875,7 +875,7 @@ export async function sendOfferEmail(submissionId: string): Promise<void> {
         offer_email_sent,
         user_id,
         job_id,
-        profiles:user_id ( full_name, email ),
+        profiles:user_id ( full_name, email, avatar_url ),
         jobs:job_id ( title, company, employer_id, employer:employer_id ( email ) )
       `
       )

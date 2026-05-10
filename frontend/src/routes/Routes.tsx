@@ -52,6 +52,7 @@ const PricingPage = lazy(() => import("@/pages/public/PricingPage"));
 const JobDetailPage = lazy(() => import("@/pages/jobs/JobDetailPage"));
 const JobListingPage = lazy(() => import("@/pages/jobs/JobListingPage"));
 const CompanyBrandPage = lazy(() => import("@/pages/public/CompanyBrandPage"));
+const CompaniesPage = lazy(() => import("@/pages/public/CompaniesPage"));
 
 export const router = createBrowserRouter([
   // Public Pages with shared layout
@@ -66,6 +67,7 @@ export const router = createBrowserRouter([
       { path: "/@:username", element: <ProfilePage /> }, // SEO-friendly username URLs
       { path: "/proof/:id", element: <PublicProofView /> }, // Shareable proof certificate
       { path: "/company/:slug", element: <CompanyBrandPage /> },
+      { path: "/companies", element: <CompaniesPage /> },
       { path: "/learn-more", element: <LearnMorePage /> },
       { path: "/pricing", element: <PricingPage /> },
       { path: "/privacy", element: <PrivacyPolicy /> },

@@ -94,6 +94,7 @@ export type EmployerSubmission = {
   profiles?: {
     full_name: string | null;
     email: string | null;
+    avatar_url?: string | null;
     resume_url?: string | null;
   } | null;
 

@@ -396,6 +396,28 @@ export default function EmployerJobForm({
                 </div>
 
                 <div className="space-y-1.5">
+                  <label className="text-sm font-medium text-[var(--color-text)]">Department</label>
+                  <select
+                    className="w-full h-10 px-3 rounded-[var(--radius-input)] border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text)] text-sm focus:ring-2 focus:ring-[var(--color-brand-primary)]/20 outline-none"
+                    value={values.department ?? "Engineering"}
+                    onChange={(e) => handleChange("department", e.target.value)}
+                  >
+                    <option>Frontend</option>
+                    <option>Backend</option>
+                    <option>Full-Stack</option>
+                    <option>Mobile</option>
+                    <option>Data & ML</option>
+                    <option>DevOps</option>
+                    <option>Design</option>
+                    <option>Product</option>
+                    <option>Sales</option>
+                    <option>Marketing</option>
+                    <option>Operations</option>
+                    <option>Other</option>
+                  </select>
+                </div>
+
+                <div className="space-y-1.5">
                   <Input
                     label="Start Date (Optional)"
                     type="date"

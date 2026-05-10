@@ -20,7 +20,8 @@ import {
   Languages,
   Menu,
   Shield,
-  Crown
+  Crown,
+  Heart,
 } from "lucide-react";
 import MobileNavDrawer from "@/components/MobileNavDrawer";
 import MobileBottomNav from "@/components/MobileBottomNav";
@@ -118,6 +119,7 @@ export default function DashboardLayout({
         : [
             { label: "Dashboard", path: "/candidate", icon: LayoutDashboard },
             { label: "Find Jobs", path: "/candidate/jobs", icon: Briefcase },
+            { label: "Saved Jobs", path: "/jobs?saved=true", icon: Heart },
             { label: "My Proofs", path: "/candidate/proofs", icon: FileCheck, featured: true },
             { label: "Practice", path: "/candidate/practice", icon: Zap },
             { label: "Leaderboard", path: "/leaderboard", icon: Trophy },

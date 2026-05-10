@@ -14,7 +14,7 @@ type NavLink = RouteLink | AnchorLink;
 const navLinks: NavLink[] = [
   { label: "Home", to: "/" },
   { label: "Jobs", to: "/jobs" },
-  { label: "About", to: "/about" },
+  { label: "Companies", to: "/companies" },
   { label: "Pricing", to: "/pricing" },
   { label: "Help", to: "/docs" },
 ];

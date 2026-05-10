@@ -4,7 +4,7 @@
  */
 
 import { useState, useMemo, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useJobs } from "@/hooks/useJobs";
 import { getEmployerJobs, getSavedJobIds, toggleSavedJob } from "@/lib/api/jobs";
@@ -43,11 +43,28 @@ function hasProofTasks(
   return Array.isArray((job as { proof_tasks?: unknown }).proof_tasks);
 }
 
+/* ─── Constants ─────────────────────────────── */
+const DEPARTMENTS = [
+  "Frontend", "Backend", "Full-Stack", "Mobile",
+  "Data & ML", "DevOps", "Design", "Product",
+  "Sales", "Marketing", "Operations", "Other",
+];
+
+const WORK_MODES = ["Remote", "Hybrid", "On-site"];
+const WORK_MODE_MAP: Record<string, string> = { "Remote": "remote", "Hybrid": "hybrid", "On-site": "onsite" };
+
+const JOB_TYPES = ["Full-time", "Part-time", "Contract", "Internship", "Freelance"];
+const JOB_TYPE_MAP: Record<string, string> = {
+  "Full-time": "fulltime", "Part-time": "parttime",
+  "Contract": "contract", "Internship": "internship", "Freelance": "freelance",
+};
+
 /* ─── Component ─────────────────────────────── */
 export default function JobListingPage() {
   const { user } = useAuth();
   const role: SessionUser["role"] = user?.role ?? null;
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [savedJobIds, setSavedJobIds] = useState<string[]>([]);
 
   // Candidate/public jobs
@@ -71,6 +88,8 @@ export default function JobListingPage() {
   const [companies, setCompanies] = useState<string[]>([]);
   const [locations, setLocations] = useState<string[]>([]);
   const [categories, setCategories] = useState<string[]>([]);
+  const [workModes, setWorkModes] = useState<string[]>([]);
+  const [jobTypes, setJobTypes] = useState<string[]>([]);
 
   /* ─── Pagination State ─────────────────────────────── */
   const ITEMS_PER_PAGE = 12;
@@ -79,7 +98,14 @@ export default function JobListingPage() {
   // Reset to page 1 when filters change
   useEffect(() => {
     setCurrentPage(1);
-  }, [query, filters, companies, locations, categories, role]);
+  }, [query, filters, companies, locations, categories, workModes, jobTypes, role]);
+
+  // Pre-apply saved filter when arriving via ?saved=true
+  useEffect(() => {
+    if (searchParams.get("saved") === "true") {
+      setFilters(f => ({ ...f, savedOnly: true }));
+    }
+  }, []);
 
   /* ─── Fetch employer jobs ─────────────────────────────── */
   useEffect(() => {
@@ -181,17 +207,6 @@ export default function JobListingPage() {
     [jobs]
   );
 
-  const allCategories = useMemo(() => {
-    const departments = jobs
-      .map((j) => j.department ?? undefined)
-      .filter((d): d is string => !!d);
-
-    const proofTitles = jobs.flatMap((j) =>
-      hasProofTasks(j) ? j.proof_tasks.map((p) => p.title) : []
-    );
-
-    return Array.from(new Set([...departments, ...proofTitles]));
-  }, [jobs]);
 
   /* ─── Filtering Logic ─────────────────────────────── */
   const filteredJobs = useMemo(() => {
@@ -214,12 +229,17 @@ export default function JobListingPage() {
         companies.length > 0 ? companies.includes(job.company || "") : true;
       const categoryMatch =
         categories.length > 0
-          ? hasProofTasks(job) &&
-          job.proof_tasks.some((p) =>
-            categories.some((c) =>
-              p.title.toLowerCase().includes(c.toLowerCase())
-            )
-          )
+          ? categories.some(c => job.department?.toLowerCase().includes(c.toLowerCase()))
+          : true;
+
+      const workModeMatch =
+        workModes.length > 0
+          ? workModes.some(m => WORK_MODE_MAP[m] === job.work_mode)
+          : true;
+
+      const jobTypeMatch =
+        jobTypes.length > 0
+          ? jobTypes.some(t => JOB_TYPE_MAP[t] === job.job_type)
           : true;
 
       const savedMatch = filters.savedOnly
@@ -233,10 +253,12 @@ export default function JobListingPage() {
         savedMatch &&
         locationMatch &&
         companyMatch &&
-        categoryMatch
+        categoryMatch &&
+        workModeMatch &&
+        jobTypeMatch
       );
     });
-  }, [jobs, debouncedQuery, filters, locations, companies, categories, savedJobIds]);
+  }, [jobs, debouncedQuery, filters, locations, companies, categories, workModes, jobTypes, savedJobIds]);
 
   /* ─── Pagination Logic (Computed) ─────────────────────────────── */
   const totalPages = Math.ceil(filteredJobs.length / ITEMS_PER_PAGE);
@@ -269,6 +291,8 @@ export default function JobListingPage() {
     setCompanies([]);
     setLocations([]);
     setCategories([]);
+    setWorkModes([]);
+    setJobTypes([]);
   };
 
   /* ─── Empty/Loading States ─────────────────────────────── */
@@ -357,10 +381,12 @@ export default function JobListingPage() {
                 />
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 <MultiSelectFilter label="Companies" options={allCompanies} selected={companies} onChange={setCompanies} />
                 <MultiSelectFilter label="Locations" options={allLocations} selected={locations} onChange={setLocations} />
-                <MultiSelectFilter label="Role Type" options={allCategories} selected={categories} onChange={setCategories} />
+                <MultiSelectFilter label="Role Type" options={DEPARTMENTS} selected={categories} onChange={setCategories} />
+                <MultiSelectFilter label="Work Mode" options={WORK_MODES} selected={workModes} onChange={setWorkModes} />
+                <MultiSelectFilter label="Job Type" options={JOB_TYPES} selected={jobTypes} onChange={setJobTypes} />
               </div>
 
               <div className="flex flex-wrap justify-between items-center text-sm pt-2 border-t border-[var(--color-border)]/50">
@@ -373,7 +399,7 @@ export default function JobListingPage() {
                     </button>
                   )}
                 </div>
-                {(!!query || Object.values(filters).some(Boolean) || companies.length > 0 || locations.length > 0 || categories.length > 0) && (
+                {(!!query || Object.values(filters).some(Boolean) || companies.length > 0 || locations.length > 0 || categories.length > 0 || workModes.length > 0 || jobTypes.length > 0) && (
                   <button onClick={handleClearAll} className="flex items-center gap-1 text-[var(--color-text-muted)] hover:text-[var(--color-error)] transition mt-2 font-medium px-2 py-1 hover:bg-red-50 dark:hover:bg-red-900/10 rounded-lg"><XCircle size={16} /> Clear Filters</button>
                 )}
               </div>

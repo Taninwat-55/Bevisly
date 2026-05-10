@@ -186,6 +186,10 @@ export default function UserSettings() {
       await updateProfileData(user.id, { avatar_url: publicUrl });
       setAvatarUrl(publicUrl);
       await refreshProfile?.();
+      if (user.role === "employer" && currentCompanyRecord?.id) {
+        await supabase.from("companies").update({ logo_url: publicUrl }).eq("id", currentCompanyRecord.id);
+        await refreshCompany?.();
+      }
       toast.success("Photo updated!");
     } catch {
       toast.error("Failed to upload image");
@@ -200,6 +204,10 @@ export default function UserSettings() {
       await updateProfileData(user.id, { avatar_url: null });
       setAvatarUrl(null);
       await refreshProfile?.();
+      if (user.role === "employer" && currentCompanyRecord?.id) {
+        await supabase.from("companies").update({ logo_url: null }).eq("id", currentCompanyRecord.id);
+        await refreshCompany?.();
+      }
       toast.success("Photo removed");
     } catch {
       toast.error("Failed to remove photo");
