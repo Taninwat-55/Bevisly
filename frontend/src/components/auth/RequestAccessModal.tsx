@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { X, Building, User, Mail, Globe, Send, CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
@@ -41,9 +41,9 @@ export default function RequestAccessModal({ isOpen, onClose }: RequestAccessMod
       if (error) throw error;
       
       setSuccess(true);
-    } catch (err: any) {
+    } catch (err) {
       console.error(err);
-      toast.error(err.message || "Failed to submit request.");
+      toast.error(err instanceof Error ? err.message : "Failed to submit request.");
     } finally {
       setLoading(false);
     }

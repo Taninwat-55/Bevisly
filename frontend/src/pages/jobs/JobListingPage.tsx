@@ -105,7 +105,7 @@ export default function JobListingPage() {
     if (searchParams.get("saved") === "true") {
       setFilters(f => ({ ...f, savedOnly: true }));
     }
-  }, []);
+  }, [searchParams]);
 
   /* ─── Fetch employer jobs ─────────────────────────────── */
   useEffect(() => {

@@ -100,9 +100,9 @@ export default function AdminInviteModal({ isOpen, onClose }: InviteModalProps) 
       
       toast.success(`Invite sent to ${entry.email}!`, { id: "approve" });
       loadWaitlist(); // Refresh waitlist
-    } catch (err: any) {
+    } catch (err) {
       console.error(err);
-      toast.error(err.message || "Failed to approve request", { id: "approve" });
+      toast.error(err instanceof Error ? err.message : "Failed to approve request", { id: "approve" });
     }
   };
 

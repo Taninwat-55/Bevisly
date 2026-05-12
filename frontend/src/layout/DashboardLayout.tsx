@@ -21,7 +21,6 @@ import {
   Menu,
   Shield,
   Crown,
-  Heart,
 } from "lucide-react";
 import MobileNavDrawer from "@/components/MobileNavDrawer";
 import MobileBottomNav from "@/components/MobileBottomNav";

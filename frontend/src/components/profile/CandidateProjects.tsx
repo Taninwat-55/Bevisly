@@ -25,23 +25,23 @@ export default function CandidateProjects({ userId, isOwner }: CandidateProjects
   const [editingProject, setEditingProject] = useState<CandidateProject | null>(null);
 
   useEffect(() => {
+    const loadProjects = async () => {
+      setLoading(true);
+      try {
+        const data = await getCandidateProjects(userId);
+        setProjects(data);
+      } catch (err) {
+        console.error(err);
+        toast.error("Failed to load projects");
+      } finally {
+        setLoading(false);
+      }
+    };
+
     if (userId) {
       loadProjects();
     }
   }, [userId]);
-
-  const loadProjects = async () => {
-    setLoading(true);
-    try {
-      const data = await getCandidateProjects(userId);
-      setProjects(data);
-    } catch (err) {
-      console.error(err);
-      toast.error("Failed to load projects");
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleOpenAdd = () => {
     setEditingProject(null);
@@ -187,7 +187,7 @@ function ProjectFormModal({
 }: { 
   isOpen: boolean; 
   onClose: () => void; 
-  onSave: (data: any) => Promise<void>;
+  onSave: (data: Omit<CandidateProject, "id" | "user_id" | "created_at">) => Promise<void>;
   initialData: CandidateProject | null;
 }) {
   const [title, setTitle] = useState("");
