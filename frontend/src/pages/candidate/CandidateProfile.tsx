@@ -3,6 +3,7 @@ import { supabase } from "@/lib/supabaseClient";
 import { useAuth } from "@/hooks/useAuth";
 import { useCandidateStats } from "@/hooks/useCandidateStats";
 import ProofCardsGrid from "@/components/proofs/ProofCardsGrid";
+import CandidateProjects from "@/components/profile/CandidateProjects";
 import toast from "react-hot-toast";
 import { Button } from "@/components/ui/Button";
 import {
@@ -21,7 +22,9 @@ import {
   Linkedin,
   Github,
   Globe,
-  Languages
+  Languages,
+  Video,
+  Camera,
 } from "lucide-react";
 import { uploadResume, getProfileResume } from "@/lib/api/profiles";
 import EditProfileModal from "@/components/profile/EditProfileModal";
@@ -39,6 +42,8 @@ export default function CandidateProfile() {
   const [linkedin, setLinkedin] = useState<string>("");
   const [github, setGithub] = useState<string>("");
   const [website, setWebsite] = useState<string>("");
+  const [videoIntroUrl, setVideoIntroUrl] = useState<string>("");
+  const [bannerUrl, setBannerUrl] = useState<string | null>(null);
 
   const [username, setUsername] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
@@ -46,9 +51,9 @@ export default function CandidateProfile() {
   const [uploading, setUploading] = useState(false);
   const [resumeUpdatedAt, setResumeUpdatedAt] = useState<string | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  
+
   const [verifiedSkills, setVerifiedSkills] = useState<string[]>([]);
-  
+
   const resumeInputRef = useRef<HTMLInputElement>(null);
 
   /* Fetch profile info */
@@ -58,50 +63,80 @@ export default function CandidateProfile() {
     // 1. Fetch profile basic info
     const { data: profileData } = await supabase
       .from("profiles")
-      .select("created_at, full_name, skills, languages, work_status, bio, linkedin_url, github_url, website_url, username")
+      .select(
+        "created_at, full_name, skills, languages, work_status, bio, linkedin_url, github_url, website_url, video_intro_url, banner_url, username",
+      )
       .eq("id", user.id)
       .single();
 
     if (profileData) {
       if (profileData.created_at)
-        setJoined(new Date(profileData.created_at).toLocaleDateString(undefined, { month: 'long', year: 'numeric' }));
+        setJoined(
+          new Date(profileData.created_at).toLocaleDateString(undefined, {
+            month: "long",
+            year: "numeric",
+          }),
+        );
       setFullName(profileData.full_name || "");
       setSkills(profileData.skills || []);
-      setLanguages((profileData as Record<string, unknown>).languages as string[] || []);
+      setLanguages(
+        ((profileData as Record<string, unknown>).languages as string[]) || [],
+      );
       setWorkStatus(profileData.work_status || "open");
       setBio(profileData.bio || "");
       setLinkedin(profileData.linkedin_url || "");
       setGithub(profileData.github_url || "");
       setWebsite(profileData.website_url || "");
-      setUsername((profileData as Record<string, unknown>).username as string | null ?? null);
+      setVideoIntroUrl(profileData.video_intro_url || "");
+      setBannerUrl(profileData.banner_url || null);
+      setUsername(
+        ((profileData as Record<string, unknown>).username as string | null) ??
+          null,
+      );
     }
 
     // 2. Fetch verified skills (from high-rated proofs)
     const { data: submissions } = await supabase
       .from("submissions")
-      .select(`
+      .select(
+        `
         id,
         status,
         feedback ( stars ),
         jobs ( required_skills )
-      `)
+      `,
+      )
       .eq("user_id", user.id)
       .eq("status", "reviewed");
 
     if (submissions) {
       const verified = new Set<string>();
-      submissions.forEach((s: { 
-        feedback: { stars: number } | { stars: number }[] | null; 
-        jobs: { required_skills: string[] | null } | { required_skills: string[] | null }[] | null 
-      }) => {
-        const feedbackArr = Array.isArray(s.feedback) ? s.feedback : (s.feedback ? [s.feedback] : []);
-        const maxStars = Math.max(0, ...feedbackArr.map((f: { stars: number }) => f?.stars ?? 0));
-        
-        const job = Array.isArray(s.jobs) ? s.jobs[0] : s.jobs;
-        if (maxStars >= 4 && job?.required_skills) {
-          job.required_skills.forEach((skill: string) => verified.add(skill.toLowerCase()));
-        }
-      });
+      submissions.forEach(
+        (s: {
+          feedback: { stars: number } | { stars: number }[] | null;
+          jobs:
+            | { required_skills: string[] | null }
+            | { required_skills: string[] | null }[]
+            | null;
+        }) => {
+          const feedbackArr = Array.isArray(s.feedback)
+            ? s.feedback
+            : s.feedback
+              ? [s.feedback]
+              : [];
+          const maxStars = Math.max(
+            0,
+            ...feedbackArr.map((f: { stars: number }) => f?.stars ?? 0),
+          );
+
+          const job = Array.isArray(s.jobs) ? s.jobs[0] : s.jobs;
+          if (maxStars >= 4 && job?.required_skills) {
+            job.required_skills.forEach((skill: string) =>
+              verified.add(skill.toLowerCase()),
+            );
+          }
+        },
+      );
       setVerifiedSkills(Array.from(verified));
     }
   }, [user?.id]);
@@ -118,11 +153,11 @@ export default function CandidateProfile() {
         setResumeUrl(res?.resume_url || null);
         setResumeUpdatedAt(res?.resume_updated_at || null);
       })
-      .catch(() => { });
+      .catch(() => {});
   }, [user?.id]);
-  
+
   const handleProfileUpdate = () => {
-    fetchProfile(); 
+    fetchProfile();
   };
 
   // Listen to user object changes to update name immediately
@@ -158,6 +193,45 @@ export default function CandidateProfile() {
     resumeInputRef.current?.click();
   };
 
+  const handleBannerUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !user?.id) return;
+
+    if (!file.type.startsWith("image/")) {
+      toast.error("Please select an image file");
+      return;
+    }
+
+    try {
+      toast.loading("Uploading banner...", { id: "bannerUpload" });
+      const fileExt = file.name.split(".").pop();
+      const filePath = `${user.id}/banner-${Date.now()}.${fileExt}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from("avatars") // Reusing avatars bucket for simplicity
+        .upload(filePath, file, { upsert: true });
+
+      if (uploadError) throw uploadError;
+
+      const {
+        data: { publicUrl },
+      } = supabase.storage.from("avatars").getPublicUrl(filePath);
+
+      await supabase
+        .from("profiles")
+        .update({ banner_url: publicUrl })
+        .eq("id", user.id);
+
+      setBannerUrl(publicUrl);
+      toast.success("Banner updated", { id: "bannerUpload" });
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to upload banner", { id: "bannerUpload" });
+    } finally {
+      e.target.value = "";
+    }
+  };
+
   /* Copy public link */
   const handleCopyLink = () => {
     const url = username
@@ -183,33 +257,33 @@ export default function CandidateProfile() {
       a.remove();
       window.URL.revokeObjectURL(url);
     } catch {
-      window.open(resumeUrl, '_blank');
+      window.open(resumeUrl, "_blank");
     }
   };
 
   const getWorkStatusBadge = () => {
     switch (workStatus) {
-      case 'open':
-            return (
-                <span className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 text-xs font-semibold">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                    Open to Work
-                </span>
-            );
-      case 'partial':
-            return (
-                <span className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 text-xs font-semibold">
-                    <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
-                    Casually Looking
-                </span>
-            );
-      case 'closed':
-            return (
-                <span className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 text-xs font-semibold">
-                    <span className="w-1.5 h-1.5 rounded-full bg-slate-500" />
-                    Not Open to Work
-                </span>
-            );
+      case "open":
+        return (
+          <span className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 text-xs font-semibold">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+            Open to Work
+          </span>
+        );
+      case "partial":
+        return (
+          <span className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 text-xs font-semibold">
+            <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
+            Casually Looking
+          </span>
+        );
+      case "closed":
+        return (
+          <span className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 text-xs font-semibold">
+            <span className="w-1.5 h-1.5 rounded-full bg-slate-500" />
+            Not Open to Work
+          </span>
+        );
       default:
         return null;
     }
@@ -225,12 +299,33 @@ export default function CandidateProfile() {
 
   return (
     <div className="space-y-8 pb-12">
-
       {/* ── Header / Hero Card ────────────────────────────── */}
       <div className="relative rounded-3xl overflow-hidden bg-[var(--color-surface)] border border-[var(--color-border)] shadow-xl group">
         {/* Banner Pattern */}
-        <div className="h-32 bg-[var(--color-brand-primary)] relative">
-          <div className="absolute top-4 right-4 flex gap-2">
+        <div
+          className="h-48 bg-[var(--color-brand-primary)] relative"
+          style={
+            bannerUrl
+              ? {
+                  backgroundImage: "url(" + bannerUrl + ")",
+                  backgroundSize: "cover",
+                  backgroundPosition: "center",
+                }
+              : {}
+          }
+        >
+          <div className="absolute top-4 right-4 flex gap-2 z-10">
+            <label className="cursor-pointer">
+              <input
+                type="file"
+                className="hidden"
+                accept="image/*"
+                onChange={handleBannerUpload}
+              />
+              <div className="h-9 px-3 flex items-center justify-center gap-2 rounded-lg bg-black/40 hover:bg-black/60 text-white backdrop-blur-md transition-colors text-sm font-medium border border-white/20">
+                <Camera size={14} /> Update Banner
+              </div>
+            </label>
             <Button
               size="sm"
               className="bg-white/10 hover:bg-white/20 text-white border-white/20 backdrop-blur-md"
@@ -254,83 +349,143 @@ export default function CandidateProfile() {
           {/* Avatar */}
           <div className="relative">
             <div className="w-28 h-28 rounded-2xl bg-white dark:bg-zinc-900 p-1 shadow-2xl overflow-hidden">
-               {user?.avatar_url ? (
-                  <img src={user.avatar_url} alt="Profile" className="w-full h-full object-cover rounded-xl bg-white dark:bg-zinc-800" />
-               ) : (
-                  <div className="w-full h-full rounded-xl bg-gradient-to-br from-slate-200 to-slate-300 dark:from-slate-700 dark:to-slate-800 flex items-center justify-center text-4xl font-bold text-[var(--color-text-muted)]">
-                    {user?.email?.[0]?.toUpperCase()}
-                  </div>
-               )}
+              {user?.avatar_url ? (
+                <img
+                  src={user.avatar_url}
+                  alt="Profile"
+                  className="w-full h-full object-cover rounded-xl bg-white dark:bg-zinc-800"
+                />
+              ) : (
+                <div className="w-full h-full rounded-xl bg-gradient-to-br from-slate-200 to-slate-300 dark:from-slate-700 dark:to-slate-800 flex items-center justify-center text-4xl font-bold text-[var(--color-text-muted)]">
+                  {user?.email?.[0]?.toUpperCase()}
+                </div>
+              )}
             </div>
-            {workStatus === 'open' && (
-                <div className="absolute bottom-2 -right-2 bg-green-500 w-5 h-5 rounded-full border-[3px] border-white dark:border-zinc-900" title="Online" />
+            {workStatus === "open" && (
+              <div
+                className="absolute bottom-2 -right-2 bg-green-500 w-5 h-5 rounded-full border-[3px] border-white dark:border-zinc-900"
+                title="Online"
+              />
             )}
           </div>
 
           {/* Info */}
           <div className="flex-1 mt-4 md:mt-14 text-center md:text-left">
-             <div>
-                <h1 className="text-3xl font-bold font-display text-[var(--color-text)] flex items-center justify-center md:justify-start gap-2">
-                  {fullName || "Anonymous Candidate"}
-                  {proofsCompleted > 0 && <ShieldCheck className="text-blue-500" size={24} />}
-                </h1>
-                
-                <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 text-sm text-[var(--color-text-muted)] mt-2 mb-3">
-                  <span className="flex items-center gap-1.5"><Mail size={14} /> {user?.email}</span>
-                  <span className="flex items-center gap-1.5"><Calendar size={14} /> Joined {joined}</span>
-                  {getWorkStatusBadge()}
-                </div>
+            <div>
+              <h1 className="text-3xl font-bold font-display text-[var(--color-text)] flex items-center justify-center md:justify-start gap-2">
+                {fullName || "Anonymous Candidate"}
+                {proofsCompleted > 0 && (
+                  <ShieldCheck className="text-blue-500" size={24} />
+                )}
+              </h1>
 
-                {/* Social Links */}
-                <div className="flex justify-center md:justify-start gap-2">
-                    {linkedin && (
-                        <a href={linkedin} target="_blank" rel="noopener noreferrer" className="p-2 rounded-full bg-[var(--color-bg)] border border-[var(--color-border)] text-[#0077b5] hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors" title="LinkedIn">
-                            <Linkedin size={18} />
-                        </a>
-                    )}
-                    {github && (
-                        <a href={github} target="_blank" rel="noopener noreferrer" className="p-2 rounded-full bg-[var(--color-bg)] border border-[var(--color-border)] text-[var(--color-text)] hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors" title="GitHub">
-                            <Github size={18} />
-                        </a>
-                    )}
-                    {website && (
-                        <a href={website} target="_blank" rel="noopener noreferrer" className="p-2 rounded-full bg-[var(--color-bg)] border border-[var(--color-border)] text-purple-500 hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-colors" title="Website">
-                            <Globe size={18} />
-                        </a>
-                    )}
-                </div>
-             </div>
+              <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 text-sm text-[var(--color-text-muted)] mt-2 mb-3">
+                <span className="flex items-center gap-1.5">
+                  <Mail size={14} /> {user?.email}
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <Calendar size={14} /> Joined {joined}
+                </span>
+                {getWorkStatusBadge()}
+              </div>
 
+              {/* Social Links */}
+              <div className="flex justify-center md:justify-start gap-2">
+                {linkedin && (
+                  <a
+                    href={linkedin}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="p-2 rounded-full bg-[var(--color-bg)] border border-[var(--color-border)] text-[#0077b5] hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
+                    title="LinkedIn"
+                  >
+                    <Linkedin size={18} />
+                  </a>
+                )}
+                {github && (
+                  <a
+                    href={github}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="p-2 rounded-full bg-[var(--color-bg)] border border-[var(--color-border)] text-[var(--color-text)] hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                    title="GitHub"
+                  >
+                    <Github size={18} />
+                  </a>
+                )}
+                {website && (
+                  <a
+                    href={website}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="p-2 rounded-full bg-[var(--color-bg)] border border-[var(--color-border)] text-purple-500 hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-colors"
+                    title="Website"
+                  >
+                    <Globe size={18} />
+                  </a>
+                )}
+              </div>
+            </div>
+
+            {/* Video Intro (If available) */}
+            {videoIntroUrl && (
+              <div className="mt-4 md:mt-0 md:ml-auto flex justify-center md:justify-end">
+                <a
+                  href={videoIntroUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 px-4 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-600 dark:text-red-400 rounded-xl transition-colors border border-red-500/20"
+                >
+                  <Video size={18} />
+                  <span className="font-semibold text-sm">
+                    Watch Video Intro
+                  </span>
+                </a>
+              </div>
+            )}
           </div>
 
           {/* Quick Stats */}
           <div className="flex gap-6 md:border-l md:border-[var(--color-border)] md:pl-8 mb-2 md:mt-14">
             <div className="text-center">
-              <div className="text-2xl font-bold text-[var(--color-text)]">{proofsCompleted}</div>
-              <div className="text-xs text-[var(--color-text-muted)] uppercase tracking-wider font-medium">Proofs</div>
+              <div className="text-2xl font-bold text-[var(--color-text)]">
+                {proofsCompleted}
+              </div>
+              <div className="text-xs text-[var(--color-text-muted)] uppercase tracking-wider font-medium">
+                Proofs
+              </div>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-[var(--color-text)]">{avgScore || "-"}</div>
-              <div className="text-xs text-[var(--color-text-muted)] uppercase tracking-wider font-medium">Rating</div>
+              <div className="text-2xl font-bold text-[var(--color-text)]">
+                {avgScore || "-"}
+              </div>
+              <div className="text-xs text-[var(--color-text-muted)] uppercase tracking-wider font-medium">
+                Rating
+              </div>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-[var(--color-text)]">{credits}</div>
-              <div className="text-xs text-[var(--color-text-muted)] uppercase tracking-wider font-medium">Credits</div>
+              <div className="text-2xl font-bold text-[var(--color-text)]">
+                {credits}
+              </div>
+              <div className="text-xs text-[var(--color-text-muted)] uppercase tracking-wider font-medium">
+                Credits
+              </div>
             </div>
           </div>
         </div>
       </div>
-
       {/* ── Bio Section ── */}
       {bio && (
         <div className="glass-panel p-6 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] shadow-sm">
-             <h3 className="text-sm font-bold uppercase tracking-wider text-[var(--color-text-muted)] mb-3">About Me</h3>
-             <p className="text-[var(--color-text)] leading-relaxed whitespace-pre-line">{bio}</p>
+          <h3 className="text-sm font-bold uppercase tracking-wider text-[var(--color-text-muted)] mb-3">
+            About Me
+          </h3>
+          <p className="text-[var(--color-text)] leading-relaxed whitespace-pre-line">
+            {bio}
+          </p>
         </div>
       )}
-
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-
         {/* ── Left Column: Skills & Resume ────────────────────────────── */}
         <div className="space-y-8">
           {/* Skills Card */}
@@ -341,24 +496,39 @@ export default function CandidateProfile() {
             <div className="flex flex-wrap gap-2">
               {skills.length > 0 ? (
                 skills.map((skill) => {
-                  const isVerified = verifiedSkills.includes(skill.toLowerCase());
+                  const isVerified = verifiedSkills.includes(
+                    skill.toLowerCase(),
+                  );
                   return (
                     <div
                       key={skill}
                       className={`px-3 py-1.5 rounded-lg text-sm font-medium border flex items-center gap-2 transition-all shadow-sm
-                        ${isVerified
-                          ? "bg-amber-50 dark:bg-amber-900/20 border-amber-300/50 dark:border-amber-700/50 text-amber-700 dark:text-amber-300 ring-1 ring-amber-400/20"
-                          : "bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-300"
+                        ${
+                          isVerified
+                            ? "bg-amber-50 dark:bg-amber-900/20 border-amber-300/50 dark:border-amber-700/50 text-amber-700 dark:text-amber-300 ring-1 ring-amber-400/20"
+                            : "bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-300"
                         }`}
-                      title={isVerified ? "Skill verified via Bevisly Proof Task" : undefined}
+                      title={
+                        isVerified
+                          ? "Skill verified via Bevisly Proof Task"
+                          : undefined
+                      }
                     >
-                      {isVerified && <BadgeCheck size={14} className="text-amber-500" fill="currentColor" />}
+                      {isVerified && (
+                        <BadgeCheck
+                          size={14}
+                          className="text-amber-500"
+                          fill="currentColor"
+                        />
+                      )}
                       {skill}
                     </div>
                   );
                 })
               ) : (
-                <p className="text-sm text-[var(--color-text-muted)]">No skills added yet.</p>
+                <p className="text-sm text-[var(--color-text-muted)]">
+                  No skills added yet.
+                </p>
               )}
             </div>
 
@@ -369,11 +539,13 @@ export default function CandidateProfile() {
               </p>
             )}
 
-            {(languages.length > 0) && (
+            {languages.length > 0 && (
               <>
                 <div className="mt-5 mb-3 flex items-center gap-2">
                   <Languages size={15} className="text-emerald-500" />
-                  <span className="text-xs font-semibold uppercase tracking-wider text-[var(--color-text-muted)]">Languages</span>
+                  <span className="text-xs font-semibold uppercase tracking-wider text-[var(--color-text-muted)]">
+                    Languages
+                  </span>
                 </div>
                 <div className="flex flex-wrap gap-2">
                   {languages.map((lang) => (
@@ -388,7 +560,12 @@ export default function CandidateProfile() {
               </>
             )}
 
-            <Button variant="ghost" size="sm" className="w-full mt-4 text-[var(--color-text-muted)]" onClick={() => setIsEditModalOpen(true)}>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="w-full mt-4 text-[var(--color-text-muted)]"
+              onClick={() => setIsEditModalOpen(true)}
+            >
               + Add / Edit Skills & Languages
             </Button>
           </div>
@@ -406,61 +583,85 @@ export default function CandidateProfile() {
                     <FileText size={20} />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="font-medium text-[var(--color-text)] truncate">Resume.pdf</p>
-                    <p className="text-xs text-[var(--color-text-muted)]">{resumeUpdatedAt ? new Date(resumeUpdatedAt).toLocaleDateString() : 'Just now'}</p>
+                    <p className="font-medium text-[var(--color-text)] truncate">
+                      Resume.pdf
+                    </p>
+                    <p className="text-xs text-[var(--color-text-muted)]">
+                      {resumeUpdatedAt
+                        ? new Date(resumeUpdatedAt).toLocaleDateString()
+                        : "Just now"}
+                    </p>
                   </div>
-                  <button onClick={handleDownloadCV} className="p-2 hover:bg-[var(--color-surface-hover)] rounded-full text-[var(--color-text-muted)] transition">
+                  <button
+                    onClick={handleDownloadCV}
+                    className="p-2 hover:bg-[var(--color-surface-hover)] rounded-full text-[var(--color-text-muted)] transition"
+                  >
                     <Download size={18} />
                   </button>
                 </div>
               </div>
             ) : (
               <div className="text-center py-8 border-2 border-dashed border-[var(--color-border)] rounded-xl mb-4 bg-[var(--color-bg)]/50">
-                <UploadCloud className="mx-auto text-[var(--color-text-muted)] mb-2" size={24} />
-                <p className="text-sm text-[var(--color-text-muted)]">No resume uploaded</p>
+                <UploadCloud
+                  className="mx-auto text-[var(--color-text-muted)] mb-2"
+                  size={24}
+                />
+                <p className="text-sm text-[var(--color-text-muted)]">
+                  No resume uploaded
+                </p>
               </div>
             )}
 
             <div>
-              <Button 
-                variant="outline" 
-                className="w-full" 
-                isLoading={uploading} 
+              <Button
+                variant="outline"
+                className="w-full"
+                isLoading={uploading}
                 leftIcon={<UploadCloud size={16} />}
                 onClick={handleTriggerUpload}
               >
-                {uploading ? "Uploading..." : resumeUrl ? "Update Resume" : "Upload Resume"}
+                {uploading
+                  ? "Uploading..."
+                  : resumeUrl
+                    ? "Update Resume"
+                    : "Upload Resume"}
               </Button>
-              <input 
+              <input
                 ref={resumeInputRef}
-                type="file" 
-                className="hidden" 
-                accept=".pdf,.docx" 
-                onChange={handleUploadCV} 
-                disabled={uploading} 
+                type="file"
+                className="hidden"
+                accept=".pdf,.docx"
+                onChange={handleUploadCV}
+                disabled={uploading}
               />
             </div>
           </div>
         </div>
+        {/* ── Right Column: Proofs & Projects ────────────────────────────── */}
+        <div className="lg:col-span-2 space-y-12">
+          <div>
+            <div className="mb-6">
+              <h2 className="heading-md flex items-center gap-2 text-[var(--color-text)] font-semibold">
+                <Award size={20} className="text-amber-400" /> Verified Proofs
+                Vault
+              </h2>
+              <p className="text-sm text-[var(--color-text-muted)] mt-1">
+                Employer-verified proof of your capabilities — make proofs
+                public to share with recruiters.
+              </p>
+            </div>
 
-        {/* ── Right Column: Proofs ────────────────────────────── */}
-        <div className="lg:col-span-2">
-          <div className="mb-6">
-            <h2 className="heading-md flex items-center gap-2 text-[var(--color-text)] font-semibold">
-              <Award size={20} className="text-amber-400" /> Verified Proofs Vault
-            </h2>
-            <p className="text-sm text-[var(--color-text-muted)] mt-1">
-              Employer-verified proof of your capabilities — make proofs public to share with recruiters.
-            </p>
+            <div className="bg-[var(--color-surface)]/50 rounded-2xl">
+              <ProofCardsGrid allowTogglePublic={true} username={username} />
+            </div>
+          </div> {/* 1. Closes the "Verified Proofs Vault" div */}
+
+          {/* Projects Section */}
+          <div className="bg-[var(--color-surface)]/50 rounded-2xl p-6 border border-[var(--color-border)]">
+            <CandidateProjects userId={user?.id || ""} isOwner={true} />
           </div>
-
-          <div className="bg-[var(--color-surface)]/50 rounded-2xl">
-            <ProofCardsGrid allowTogglePublic={true} username={username} />
-          </div>
-        </div>
-
-      </div>
-
+        </div> {/* 2. Closes the "Right Column" (lg:col-span-2) div */}
+      </div> {/* 3. Closes the "Main Grid" (grid-cols-1) div */}
       <EditProfileModal
         isOpen={isEditModalOpen}
         onClose={() => setIsEditModalOpen(false)}
@@ -473,6 +674,7 @@ export default function CandidateProfile() {
         currentLinkedin={linkedin}
         currentGithub={github}
         currentWebsite={website}
+        currentVideoIntro={videoIntroUrl}
         onUpdate={handleProfileUpdate}
       />
     </div>

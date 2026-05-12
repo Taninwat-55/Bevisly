@@ -197,6 +197,7 @@ const ALLOWED_TABLES = [
   'saved_jobs',
   'credit_transactions',
   'feedback_messages',
+  'invitations',
 ];
 
 export async function getTableData(table: string, limit = 25, offset = 0) {

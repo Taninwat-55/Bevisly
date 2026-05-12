@@ -102,6 +102,8 @@ export const router = createBrowserRouter([
           { path: "practice", element: <PracticeTasksPage /> },
           { path: "practice/:id", element: <PracticeWorkspace /> },
           { path: "settings", element: <UserSettings /> },
+          { path: "leaderboard", element: <LeaderboardPage isWorkspaceView={true} /> },
+          { path: "profile", element: <ProfilePage isWorkspaceView={true} /> },
         ],
       },
     ],

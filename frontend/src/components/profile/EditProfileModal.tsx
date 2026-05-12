@@ -20,6 +20,7 @@ interface EditProfileModalProps {
   currentLinkedin?: string;
   currentGithub?: string;
   currentWebsite?: string;
+  currentVideoIntro?: string;
   onUpdate: () => void;
 }
 
@@ -35,6 +36,7 @@ export default function EditProfileModal({
   currentLinkedin = "",
   currentGithub = "",
   currentWebsite = "",
+  currentVideoIntro = "",
   onUpdate,
 }: EditProfileModalProps) {
   const { user, refreshProfile } = useAuth();
@@ -47,6 +49,7 @@ export default function EditProfileModal({
   const [linkedin, setLinkedin] = useState(currentLinkedin);
   const [github, setGithub] = useState(currentGithub);
   const [website, setWebsite] = useState(currentWebsite);
+  const [videoIntro, setVideoIntro] = useState(currentVideoIntro);
   
   const [newSkill, setNewSkill] = useState("");
   const [newLanguage, setNewLanguage] = useState("");
@@ -63,9 +66,9 @@ export default function EditProfileModal({
     setWorkStatus(currentWorkStatus || "open");
     setBio(currentBio || "");
     setLinkedin(currentLinkedin || "");
-    setGithub(currentGithub || "");
     setWebsite(currentWebsite || "");
-  }, [currentName, currentAvatarUrl, currentSkills, currentLanguages, currentWorkStatus, currentBio, currentLinkedin, currentGithub, currentWebsite, isOpen]);
+    setVideoIntro(currentVideoIntro || "");
+  }, [currentName, currentAvatarUrl, currentSkills, currentLanguages, currentWorkStatus, currentBio, currentLinkedin, currentGithub, currentWebsite, currentVideoIntro, isOpen]);
 
   const handleAvatarUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -158,10 +161,10 @@ export default function EditProfileModal({
         skills: skills,
         languages: languages,
         work_status: workStatus,
-        bio: bio,
         linkedin_url: linkedin,
         github_url: github,
         website_url: website,
+        video_intro_url: videoIntro,
       });
       
       await refreshProfile?.(); 
@@ -304,13 +307,33 @@ export default function EditProfileModal({
                      </select>
                   </div>
 
-                  {/* Social Links */}
+                  {/* Social & Media Links */}
                   <div className="space-y-3">
                     <label className="block text-sm font-medium text-[var(--color-text)] flex items-center gap-2">
                         <LinkIcon size={16} className="text-[var(--color-text-muted)]" />
-                        Social Links
+                        Links & Media
                     </label>
                     
+                    <div className="flex items-center gap-2">
+                        <div className="w-8 flex justify-center text-[var(--color-text-muted)]"><Globe size={18} /></div>
+                        <input
+                            type="url"
+                            value={website}
+                            onChange={(e) => setWebsite(e.target.value)}
+                            placeholder="Personal Website / Portfolio URL"
+                            className="flex-1 px-3 py-2 rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] text-[var(--color-text)] text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+                        />
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <div className="w-8 flex justify-center text-red-500"><Camera size={18} /></div>
+                        <input
+                            type="url"
+                            value={videoIntro}
+                            onChange={(e) => setVideoIntro(e.target.value)}
+                            placeholder="Video Intro URL (YouTube, Loom, etc.)"
+                            className="flex-1 px-3 py-2 rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] text-[var(--color-text)] text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+                        />
+                    </div>
                     <div className="flex items-center gap-2">
                         <div className="w-8 flex justify-center text-[var(--color-text-muted)]"><Linkedin size={18} /></div>
                         <input
@@ -328,16 +351,6 @@ export default function EditProfileModal({
                             value={github}
                             onChange={(e) => setGithub(e.target.value)}
                             placeholder="GitHub URL"
-                            className="flex-1 px-3 py-2 rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] text-[var(--color-text)] text-sm focus:ring-2 focus:ring-blue-500 outline-none"
-                        />
-                    </div>
-                    <div className="flex items-center gap-2">
-                        <div className="w-8 flex justify-center text-[var(--color-text-muted)]"><Globe size={18} /></div>
-                        <input
-                            type="url"
-                            value={website}
-                            onChange={(e) => setWebsite(e.target.value)}
-                            placeholder="Personal Website URL"
                             className="flex-1 px-3 py-2 rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] text-[var(--color-text)] text-sm focus:ring-2 focus:ring-blue-500 outline-none"
                         />
                     </div>

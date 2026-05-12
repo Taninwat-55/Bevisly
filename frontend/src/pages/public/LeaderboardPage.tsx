@@ -12,7 +12,7 @@ type ProfileLite = {
   avatar_url?: string | null;
 };
 
-export default function PublicLeaderboard() {
+export default function PublicLeaderboard({ isWorkspaceView = false }: { isWorkspaceView?: boolean }) {
   const [leaders, setLeaders] = useState<ProfileLite[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -52,7 +52,7 @@ export default function PublicLeaderboard() {
         <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-teal-400/20 rounded-full blur-[100px] translate-y-1/2 -translate-x-1/4 pointer-events-none" />
 
         <div className="relative z-10 max-w-5xl mx-auto">
-          <BackButton to="/" className="mb-8" variant="glass" label="Back to Discover" />
+          {!isWorkspaceView && <BackButton to="/" className="mb-8" variant="glass" label="Back" />}
           
           <div className="flex flex-col items-center text-center">
             <motion.div

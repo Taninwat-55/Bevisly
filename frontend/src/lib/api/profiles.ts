@@ -71,6 +71,10 @@ export async function updateProfileData(
     github_url?: string;
     website_url?: string;
     is_public?: boolean;
+    banner_url?: string | null;
+    video_intro_url?: string | null;
+    experience?: any[];
+    education?: any[];
   },
 ) {
   const { error } = await supabase

@@ -12,14 +12,17 @@ import {
   Database,
   ShieldCheck,
   RefreshCcw,
-  Activity
+  Activity,
+  Mail
 } from "lucide-react";
 import { motion } from "framer-motion";
+import AdminInviteModal from "@/components/admin/AdminInviteModal";
 
 export default function AdminDashboard() {
   const { setOverride, user } = useAuth();
   const navigate = useNavigate();
   const isDemoAdmin = user?.role === "demo_admin";
+  const [inviteOpen, setInviteOpen] = useState(false);
 
   const [stats, setStats] = useState<{
     total_users: number;
@@ -122,6 +125,7 @@ export default function AdminDashboard() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           <ToolTile onClick={() => navigate("/admin/users")} icon={Users} label="User Directory" description="Manage access, update roles, and audit profiles." color="blue" />
           <ToolTile onClick={() => navigate("/admin/jobs")} icon={Briefcase} label="Job Oversight" description="Monitor listings, feature roles, and manage moderation." color="orange" />
+          <ToolTile onClick={() => setInviteOpen(true)} icon={Mail} label="Invite Companies" description="Generate invite codes and send branded emails to interested employers." color="emerald" />
           <ToolTile onClick={() => navigate("/admin/data-viewer")} icon={Database} label="Raw Data Terminal" description="Direct database access for auditing and debugging." color="slate" />
         </div>
       </section>
@@ -168,6 +172,9 @@ export default function AdminDashboard() {
           </div>
         </div>
       </section>
+
+      {/* Invite Modal */}
+      <AdminInviteModal isOpen={inviteOpen} onClose={() => setInviteOpen(false)} />
     </div>
   );
 }
@@ -216,13 +223,14 @@ interface ToolTileProps {
   icon: React.ElementType;
   label: string;
   description: string;
-  color: "blue" | "orange" | "slate";
+  color: "blue" | "orange" | "slate" | "emerald";
 }
 
 function ToolTile({ onClick, icon: Icon, label, description, color }: ToolTileProps) {
   const colorMap: Record<ToolTileProps["color"], string> = {
     blue: "text-blue-500 bg-blue-500/10",
     orange: "text-orange-500 bg-orange-500/10",
+    emerald: "text-emerald-500 bg-emerald-500/10",
     slate: "text-[var(--color-text-muted)] bg-[var(--color-bg)]",
   };
 

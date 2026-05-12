@@ -23,6 +23,7 @@ export async function getAllJobs(): Promise<CandidateJob[]> {
       company,
       location,
       paid,
+      featured,
       compensation_type,
       payment_amount,
       payment_currency,
@@ -44,6 +45,7 @@ export async function getAllJobs(): Promise<CandidateJob[]> {
     .eq("status", "active")
     // Use an OR condition to include jobs with no deadline, or jobs whose deadline is in the future
     .or(`expires_at.is.null,expires_at.gt.${now}`)
+    .order("featured", { ascending: false })
     .order("created_at", { ascending: false });
 
   if (error) throw error;

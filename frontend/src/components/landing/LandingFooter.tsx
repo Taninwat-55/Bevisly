@@ -37,8 +37,8 @@ export default function LandingFooter() {
               <Link to="/jobs" className="text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors">
                 Browse Jobs
               </Link>
-              <Link to="/pricing" className="text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors">
-                Pricing
+              <Link to="/companies" className="text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors">
+                Companies
               </Link>
               <Link to="/leaderboard" className="text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors">
                 Leaderboard

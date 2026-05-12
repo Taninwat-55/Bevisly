@@ -1,10 +1,11 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Helmet } from "react-helmet-async";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/Button";
-import { ArrowRight, CheckCircle, Play, Search, Loader2, Star } from "lucide-react";
+import { ArrowRight, CheckCircle, Play, Search, Loader2, Star, Sparkles, MapPin, Building2 } from "lucide-react";
 import type { GeneratedJobListing } from "@/lib/api/ai";
 import { generateJobListing } from "@/lib/api/ai";
+import { getFeaturedJobs } from "@/lib/api/jobs";
 import toast from "react-hot-toast";
 import AILoadingState from "@/components/common/AILoadingState";
 import ContactModal from "@/components/common/ContactModal";
@@ -34,6 +35,15 @@ export default function LandingPage() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedData, setGeneratedData] = useState<GeneratedJobListing | null>(null);
   const magicBoxRef = useRef<HTMLDivElement>(null);
+
+  // Featured Jobs
+  const [featuredJobs, setFeaturedJobs] = useState<{ id: string; title: string; company: string | null; location: string | null; salary_min?: number | null; salary_max?: number | null; pay_period?: string | null; show_salary_range?: boolean | null }[]>([]);
+
+  useEffect(() => {
+    getFeaturedJobs()
+      .then(setFeaturedJobs)
+      .catch(() => { /* silently fail — landing page shouldn't break if no featured jobs */ });
+  }, []);
 
   // 1. JSON-LD Structured Data for GEO
   const structuredData = {
@@ -373,6 +383,63 @@ export default function LandingPage() {
         {/* ── PLATFORM STATS (gated, hidden until thresholds met) ─── */}
         <PlatformStats />
 
+        {/* ── FEATURED JOBS (only show if there are featured jobs) ─── */}
+        {featuredJobs.length > 0 && (
+          <section className="py-20 bg-[var(--color-bg-subtle)] border-t border-[var(--color-border)]">
+            <div className="max-w-7xl mx-auto px-6">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-10">
+                <div>
+                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-md bg-[var(--color-brand-subtle)] border border-[var(--color-brand-subtle-border)] text-sm font-medium text-[var(--color-brand-primary)] mb-3">
+                    <Sparkles size={14} />
+                    Featured Roles
+                  </div>
+                  <h2 className="text-3xl md:text-4xl font-bold font-display text-[var(--color-text)]">
+                    Companies hiring <span className="text-[var(--color-brand-primary)]">right now</span>
+                  </h2>
+                </div>
+                <Button variant="outline" size="md" onClick={() => navigate('/jobs')} className="shrink-0">
+                  View all jobs <ArrowRight className="ml-2 w-4 h-4" />
+                </Button>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {featuredJobs.map((job) => (
+                  <Link
+                    key={job.id}
+                    to={`/jobs/${job.id}`}
+                    className="group flex flex-col p-5 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] hover:border-[var(--color-brand-primary)]/40 hover:shadow-md transition-all duration-150"
+                  >
+                    <div className="flex items-start gap-3 mb-3">
+                      <div className="w-10 h-10 rounded-lg bg-[var(--color-brand-subtle)] border border-[var(--color-brand-subtle-border)] flex items-center justify-center text-[var(--color-brand-primary)] font-bold text-sm shrink-0">
+                        {job.company ? job.company.charAt(0).toUpperCase() : <Building2 size={16} />}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <h3 className="font-bold text-[var(--color-text)] text-base leading-tight truncate group-hover:text-[var(--color-brand-primary)] transition-colors">
+                          {job.title}
+                        </h3>
+                        <p className="text-sm text-[var(--color-text-muted)] truncate mt-0.5">{job.company}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3 mt-auto">
+                      {job.location && (
+                        <span className="inline-flex items-center gap-1 text-xs text-[var(--color-text-muted)]">
+                          <MapPin size={11} /> {job.location}
+                        </span>
+                      )}
+                      {job.show_salary_range && job.salary_min && job.salary_max && (
+                        <span className="text-xs text-[var(--color-text-muted)]">
+                          €{job.salary_min.toLocaleString()}–{job.salary_max.toLocaleString()}
+                          {job.pay_period === 'yearly' ? '/yr' : job.pay_period === 'hourly' ? '/hr' : '/mo'}
+                        </span>
+                      )}
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          </section>
+        )}
+
         {/* ── FEATURES GRID (Bento) ────────────────────────────── */}
         <section id="features" className="py-24 bg-[var(--color-bg)]">
           <div className="max-w-7xl mx-auto px-6">
@@ -566,24 +633,29 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* ── PRICING TEASER ────────────────────────────── */}
-        <section id="pricing" className="py-20 bg-[var(--color-bg)] border-t border-[var(--color-border)]">
+        {/* ── EARLY ACCESS BANNER ────────────────────────────── */}
+        <section id="early-access" className="py-20 bg-[var(--color-bg)] border-t border-[var(--color-border)]">
           <div className="max-w-3xl mx-auto px-6 text-center">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-xs font-bold uppercase tracking-wider mb-6">
+              <Sparkles size={12} />
+              Free During Early Access
+            </div>
             <h2 className="text-3xl md:text-4xl font-bold font-display text-[var(--color-text)] mb-4">
-              Simple, transparent pricing
+              Everything is free. <br />
+              <span className="text-[var(--color-brand-primary)]">While we launch.</span>
             </h2>
-            <p className="text-[var(--color-text-muted)] text-lg mb-2">
-              Free to start. Paid plans from <strong className="text-[var(--color-text)]">$149/month</strong>.
+            <p className="text-[var(--color-text-muted)] text-lg mb-2 max-w-xl mx-auto">
+              We're onboarding our first companies. Post proof-based jobs, review candidates with AI-assisted scoring, and build your employer profile — <strong className="text-[var(--color-text)]">all free</strong>.
             </p>
             <p className="text-sm text-[var(--color-text-muted)] mb-8">
-              14-day free trial on all paid plans · No credit card required · Cancel anytime
+              No credit card · No hidden limits · Be an early adopter and shape the platform with us
             </p>
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
-              <Button size="lg" onClick={() => navigate("/auth?tab=signup")}>
-                Get started free
+              <Button size="lg" onClick={() => navigate("/auth?tab=signup&role=employer")}>
+                Join as Early Employer
               </Button>
-              <Button variant="outline" size="lg" onClick={() => navigate("/pricing")}>
-                See full pricing →
+              <Button variant="outline" size="lg" onClick={() => navigate("/auth?tab=signup")}>
+                Sign Up as Candidate
               </Button>
             </div>
           </div>

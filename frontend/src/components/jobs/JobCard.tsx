@@ -7,7 +7,8 @@ import {
     DollarSign,
     ArrowRight,
     ShieldCheck,
-    Heart
+    Heart,
+    Star
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import type { CandidateJob } from "@/types";
@@ -62,6 +63,17 @@ export default function JobCard({ job, compact = false, isSaved, onToggleSave }:
             className={`group relative flex flex-col bg-[var(--color-surface)] rounded-xl border border-[var(--color-border)] hover:border-[var(--color-border-strong)] hover:shadow-md transition-all duration-150 overflow-hidden ${compact ? 'p-5' : 'p-6'} cursor-pointer`}
             onClick={handleCardClick}
         >
+
+            {/* Featured Badge */}
+            {job.featured && (
+                <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-amber-400 to-amber-500 rounded-t-xl" />
+            )}
+            {job.featured && (
+                <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-400 text-[10px] font-bold uppercase tracking-wider mb-3 self-start">
+                    <Star size={10} className="fill-current" />
+                    Featured
+                </div>
+            )}
 
             {/* Wishlist Button (Optional) */}
             {onToggleSave && (

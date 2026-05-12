@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import MFAChallengeModal from "@/components/auth/MFAChallengeModal";
 import BackButton from "@/components/common/BackButton";
+import RequestAccessModal from "@/components/auth/RequestAccessModal";
 import { Link } from "react-router-dom";
 
 const GoogleIcon = () => (
@@ -34,6 +35,7 @@ export default function AuthPage() {
   const [isLogin, setIsLogin] = useState(true);
   const [formError, setFormError] = useState<string | null>(null);
   const [showMFAChallenge, setShowMFAChallenge] = useState(false);
+  const [showWaitlistModal, setShowWaitlistModal] = useState(false);
 
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
@@ -45,6 +47,7 @@ export default function AuthPage() {
     const params = new URLSearchParams(location.search);
     const tabParam = params.get("tab");
     const roleParam = params.get("role");
+    const inviteParam = params.get("invite");
 
     if (tabParam === "signup") {
       setIsLogin(false);
@@ -54,6 +57,10 @@ export default function AuthPage() {
 
     if (roleParam === "employer" || roleParam === "candidate") {
       setRole(roleParam);
+    }
+
+    if (inviteParam) {
+      setInviteCode(inviteParam);
     }
   }, [location.search]);
 
@@ -420,17 +427,26 @@ export default function AuthPage() {
                           className="overflow-hidden"
                         >
                           <div className="pt-4">
-                            <Input
-                              label="Invitation Code"
-                              type="text"
-                              value={inviteCode}
-                              onChange={(e) => setInviteCode(e.target.value)}
-                              placeholder="ENTER-CODE"
-                              required
-                              className="tracking-widest font-mono"
-                            />
-                          </div>
-                        </motion.div>
+                              <Input
+                                label="Invitation Code"
+                                type="text"
+                                value={inviteCode}
+                                onChange={(e) => setInviteCode(e.target.value)}
+                                placeholder="ENTER-CODE"
+                                required
+                                className="tracking-widest font-mono"
+                              />
+                              <div className="mt-3 text-center">
+                                <button
+                                  type="button"
+                                  onClick={() => setShowWaitlistModal(true)}
+                                  className="text-xs font-medium text-[var(--color-brand-primary)] hover:underline"
+                                >
+                                  Don't have an invite code? Request access.
+                                </button>
+                              </div>
+                            </div>
+                          </motion.div>
                       )}
                     </AnimatePresence>
                   </div>
@@ -555,6 +571,11 @@ export default function AuthPage() {
           await supabase.auth.signOut();
           notify.error("Sign in cancelled.");
         }}
+      />
+
+      <RequestAccessModal 
+        isOpen={showWaitlistModal} 
+        onClose={() => setShowWaitlistModal(false)} 
       />
     </div>
   );

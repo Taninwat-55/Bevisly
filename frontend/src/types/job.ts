@@ -29,6 +29,7 @@ export interface Job {
   company_id?: string | null;
   company_logo?: string | null;
   employer_verified?: boolean;
+  featured?: boolean | null;
 
   // Joined fields
   contact_person?: {

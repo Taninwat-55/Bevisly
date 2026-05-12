@@ -119,13 +119,12 @@ export default function DashboardLayout({
         : [
             { label: "Dashboard", path: "/candidate", icon: LayoutDashboard },
             { label: "Find Jobs", path: "/candidate/jobs", icon: Briefcase },
-            { label: "Saved Jobs", path: "/jobs?saved=true", icon: Heart },
             { label: "My Proofs", path: "/candidate/proofs", icon: FileCheck, featured: true },
             { label: "Practice", path: "/candidate/practice", icon: Zap },
-            { label: "Leaderboard", path: "/leaderboard", icon: Trophy },
+            { label: "Leaderboard", path: "/candidate/leaderboard", icon: Trophy },
             {
               label: "Public Profile",
-              path: user?.username ? `/@${user.username}` : `/candidate/${user?.id}`,
+              path: "/candidate/profile",
               icon: UserCircle,
             },
           ];
