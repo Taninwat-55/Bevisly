@@ -28,7 +28,6 @@ import type { Job } from "@/types/job";
 import type { ProofTask } from "@/types";
 
 // UI Components
-import BackButton from "@/components/common/BackButton";
 import MultiSelectFilter from "@/components/common/MultiSelectFilter";
 import FilterChips from "@/components/common/FilterChips";
 import JobCard from "@/components/jobs/JobCard";
@@ -341,11 +340,10 @@ export default function JobListingPage() {
 
         <div className="relative z-10 max-w-7xl mx-auto flex flex-col md:flex-row md:items-end justify-between gap-6">
           <div>
-            <BackButton to="/" className="mb-6" variant="glass" label="Back to Dashboard" />
             <h1 className="text-4xl font-bold font-display leading-tight mb-2">
               {role === "employer" ? "Manage Your Listings" : "Find Junior Roles with Proof Tasks"}
             </h1>
-            <p className="text-blue-100 max-w-xl text-lg">
+            <p className="text-white/70 max-w-xl text-lg">
               {role === "employer"
                 ? "Track performance and manage proof-based roles."
                 : "Every role includes a practical proof task. Submit real work. Skip the CV black hole."}

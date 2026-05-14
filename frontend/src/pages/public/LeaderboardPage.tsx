@@ -47,10 +47,10 @@ export default function PublicLeaderboard({ isWorkspaceView = false }: { isWorks
     <div className="min-h-screen bg-[var(--color-bg)] transition-colors">
       
       {/* ── Fancy Banner / Header ── */}
-      <div className="relative pt-12 pb-24 px-8 bg-gradient-to-br from-indigo-600 via-blue-600 to-teal-500 text-white shadow-2xl overflow-hidden rounded-b-[4rem]">
+      <div className="relative pt-12 pb-24 px-8 bg-[var(--color-brand-primary)] text-white shadow-2xl overflow-hidden rounded-b-[4rem]">
         <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 mix-blend-overlay" />
         <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-white/10 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/3 pointer-events-none" />
-        <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-teal-400/20 rounded-full blur-[100px] translate-y-1/2 -translate-x-1/4 pointer-events-none" />
+        <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-white/10 rounded-full blur-[100px] translate-y-1/2 -translate-x-1/4 pointer-events-none" />
 
         <div className="relative z-10 max-w-5xl mx-auto">
           {!isWorkspaceView && <BackButton to="/" className="mb-8" variant="glass" label="Back" />}
@@ -67,7 +67,7 @@ export default function PublicLeaderboard({ isWorkspaceView = false }: { isWorks
             <h1 className="text-4xl md:text-5xl font-bold font-display tracking-tight mb-4">
               Top Proven Talent
             </h1>
-            <p className="text-blue-100 max-w-2xl text-lg leading-relaxed">
+            <p className="text-white/70 max-w-2xl text-lg leading-relaxed">
               Every point represents a real task completed and verified by an employer. 
               No fluff, just skills.
             </p>

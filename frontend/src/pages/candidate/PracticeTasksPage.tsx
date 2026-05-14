@@ -60,20 +60,20 @@ export default function PracticeTasksPage() {
   return (
     <div className="space-y-8 pb-10">
       {/* Header */}
-      <div className="relative rounded-3xl overflow-hidden glass-panel border border-[var(--glass-border)] p-8 md:p-10 shadow-2xl">
-        <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-[var(--color-brand-primary)]/10 rounded-full blur-[100px] -z-10 translate-x-1/2 -translate-y-1/2" />
-        <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-[var(--color-brand-secondary)]/10 rounded-full blur-[80px] -z-10 -translate-x-1/3 translate-y-1/3" />
-        <div className="relative z-10 max-w-2xl">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[var(--color-surface)] border border-[var(--color-border)] shadow-sm mb-6">
-            <Zap size={14} className="text-[var(--color-brand-primary)]" />
-            <span className="text-xs font-medium text-[var(--color-text)]">
+      <div className="relative py-12 px-8 bg-[var(--color-brand-primary)] text-white shadow-xl overflow-hidden rounded-b-[3rem] mt-2 mb-8">
+        <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 mix-blend-overlay" />
+        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-white/10 rounded-full blur-[100px] -translate-y-1/2 translate-x-1/3 pointer-events-none" />
+        <div className="relative z-10 max-w-5xl mx-auto">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 border border-white/20 mb-6">
+            <Zap size={14} className="text-white" />
+            <span className="text-xs font-medium text-white">
               AI-Graded Challenges
             </span>
           </div>
-          <h1 className="text-4xl md:text-5xl font-bold font-display text-[var(--color-text)] mb-4 tracking-tight">
+          <h1 className="text-4xl md:text-5xl font-bold font-display text-white mb-4 tracking-tight">
             Practice & Improve
           </h1>
-          <p className="text-lg text-[var(--color-text-muted)] leading-relaxed">
+          <p className="text-white/70 text-lg leading-relaxed max-w-2xl">
             Complete tasks to earn credits and build verified skills. AI grades your work instantly.
           </p>
         </div>

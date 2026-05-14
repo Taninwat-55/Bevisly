@@ -65,12 +65,12 @@ export default function CandidateCredits() {
             </header>
 
             {/* Balance Card */}
-            <div className="p-8 rounded-3xl bg-gradient-to-br from-[var(--color-brand-primary)] to-purple-600 text-white shadow-xl relative overflow-hidden">
+            <div className="p-8 rounded-3xl bg-gradient-to-br from-[var(--color-brand-primary)] to-[var(--color-brand-primary-hover)] text-white shadow-xl relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3" />
 
                 <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
                     <div>
-                        <p className="text-blue-100 font-medium mb-1">Current Balance</p>
+                        <p className="text-white/70 font-medium mb-1">Current Balance</p>
                         <div className="text-5xl font-bold font-display flex items-baseline gap-2">
                             {credits} <span className="text-2xl opacity-80 font-sans">Credits</span>
                         </div>
@@ -79,7 +79,7 @@ export default function CandidateCredits() {
                         <div className="bg-white/20 backdrop-blur-md px-4 py-3 rounded-xl flex items-center gap-3">
                             <TrendingUp size={20} className="text-green-300" />
                             <div>
-                                <p className="text-xs text-blue-100">Monthly Usage</p>
+                                <p className="text-xs text-white/70">Monthly Usage</p>
                                 <p className="font-bold">2 Credits</p>
                             </div>
                         </div>

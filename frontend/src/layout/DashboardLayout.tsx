@@ -17,7 +17,6 @@ import {
   UserCircle,
   Zap,
   Kanban,
-  Languages,
   Menu,
   Shield,
   Crown,
@@ -403,12 +402,6 @@ export default function DashboardLayout({
 
       {/* ── Floating Pill (top-right) ─────────────── */}
       <div className="fixed top-4 right-4 z-50 flex items-center gap-1 px-2 py-1.5 rounded-full bg-[var(--color-surface)] border border-[var(--color-border)] shadow-md">
-        <button
-          className="p-1.5 text-[var(--color-text-muted)] hover:text-[var(--color-text)] rounded-full transition-colors"
-          title="Change Language (Coming Soon)"
-        >
-          <Languages size={17} />
-        </button>
         <ThemeToggle />
         <div className="w-px h-4 bg-[var(--color-border)]" />
         <button

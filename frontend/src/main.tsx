@@ -8,8 +8,6 @@ import { AuthProvider } from "./context/AuthProvider";
 import { ThemeProvider } from "./context/ThemeContext";
 import { ErrorBoundary } from "@/components/common/ErrorBoundary";
 import { CompanyProvider } from "./hooks/useCompany";
-import "./i18n/config";
-
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <HelmetProvider>

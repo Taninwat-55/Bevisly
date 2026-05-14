@@ -34,20 +34,24 @@ export default function CandidateFeedbackView() {
   return (
     <div className="space-y-8 pb-20">
       {/* ── Header Section ────────────────────────────────────────── */}
-      <div className="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-[var(--color-text)] tracking-tight">
-            My Proofs & Feedback
-          </h1>
-          <p className="text-sm text-[var(--color-text-muted)] mt-1">
-            Track your submissions and review feedback from companies.
-          </p>
-        </div>
-        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[var(--color-brand-primary)]/10 text-[var(--color-brand-primary)]">
-          <ShieldCheck size={14} />
-          <span className="text-xs font-semibold uppercase tracking-wider">
-            Verified Proofs
-          </span>
+      <div className="relative py-12 px-8 bg-[var(--color-brand-primary)] text-white shadow-xl overflow-hidden rounded-b-[3rem] mt-2">
+        <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 mix-blend-overlay" />
+        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-white/10 rounded-full blur-[100px] -translate-y-1/2 translate-x-1/3 pointer-events-none" />
+        <div className="relative z-10 max-w-5xl mx-auto flex flex-col md:flex-row md:items-end justify-between gap-4">
+          <div>
+            <h1 className="text-4xl font-bold font-display text-white tracking-tight mb-2">
+              My Proofs & Feedback
+            </h1>
+            <p className="text-white/70 text-lg leading-relaxed">
+              Track your submissions and review feedback from companies.
+            </p>
+          </div>
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 border border-white/20 text-white shrink-0">
+            <ShieldCheck size={14} />
+            <span className="text-xs font-semibold uppercase tracking-wider">
+              Verified Proofs
+            </span>
+          </div>
         </div>
       </div>
 
