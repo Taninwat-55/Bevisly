@@ -132,14 +132,57 @@ export default function JobDetailPage() {
 
   const proof = job.proof_tasks?.[0];
 
+  /* ─── Simple Apply (no proof task) ──────────────────────── */
+  const handleSimpleApply = async () => {
+    if (!user || !job) return;
+    setStarting(true);
+    try {
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("resume_url")
+        .eq("id", user.id)
+        .single();
+
+      if (!profile?.resume_url) {
+        toast.error(
+          "Please upload your CV on your profile before applying.",
+          { duration: 6000 }
+        );
+        navigate("/candidate/profile");
+        return;
+      }
+
+      const { error } = await supabase.from("submissions").insert({
+        user_id: user.id,
+        job_id: job.id,
+        proof_task_id: null,
+        status: "submitted",
+        hiring_stage: "new",
+        resume_url: profile.resume_url,
+        started_at: new Date().toISOString(),
+        completed_at: new Date().toISOString(),
+      });
+
+      if (error) throw error;
+      setExistingStatus("submitted");
+      toast.success("Application sent! The employer will review your profile.");
+    } catch {
+      toast.error("Failed to submit application. Please try again.");
+    } finally {
+      setStarting(false);
+    }
+  };
+
   /* ─── Candidate CTA ─────────────────────────────────────── */
   const handleCTA = async () => {
     if (!user) {
       navigate("/auth");
       return;
     }
+
+    // No proof task — quick apply flow
     if (!proof) {
-      toast.error("No proof task available for this job.");
+      if (!existingStatus) await handleSimpleApply();
       return;
     }
 
@@ -370,7 +413,7 @@ export default function JobDetailPage() {
             <div className="space-y-3">
               <button
                 onClick={() => navigate("/employer")}
-                className="w-full py-4 bg-[var(--color-brand-primary)] hover:bg-[var(--color-brand-primary-dark)] text-white font-bold rounded-2xl transition-all shadow-lg"
+                className="w-full py-4 bg-[var(--color-brand-primary)] hover:bg-[var(--color-brand-primary-hover)] text-white font-bold rounded-2xl transition-all shadow-lg"
               >
                 View Submissions
               </button>
@@ -392,15 +435,18 @@ export default function JobDetailPage() {
               <div className="flex flex-col gap-2 shrink-0 w-full sm:w-auto">
                 <button
                   onClick={handleCTA}
-                  disabled={hasApplied || checkingFastPass}
+                  disabled={hasApplied || checkingFastPass || starting}
                   className={`px-8 py-3.5 rounded-2xl font-bold text-base transition-all active:scale-[0.98] shadow-lg flex items-center justify-center gap-2 whitespace-nowrap
                     ${hasApplied
                       ? "bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 cursor-default"
-                      : "bg-[var(--color-brand-primary)] hover:bg-[var(--color-brand-primary-dark)] text-white disabled:opacity-70"
+                      : "bg-[var(--color-brand-primary)] hover:bg-[var(--color-brand-primary-hover)] text-white disabled:opacity-70"
                     }`}
                 >
-                  {checkingFastPass && <Loader2 size={18} className="animate-spin" />}
-                  {hasApplied ? "View Submission" : checkingFastPass ? "Checking..." : "Start Proof Task"}
+                  {(checkingFastPass || starting) && <Loader2 size={18} className="animate-spin" />}
+                  {hasApplied
+                    ? proof ? "View Submission" : "Applied ✓"
+                    : checkingFastPass || starting ? "Please wait…"
+                    : proof ? "Start Proof Task" : "Apply Now"}
                 </button>
                 {/* {hasApplied && (
                   <button
@@ -424,7 +470,7 @@ export default function JobDetailPage() {
               <Package size={22} className="text-[var(--color-brand-primary)]" />
               About the Role
             </h3>
-            <div className="prose prose-invert max-w-none text-[var(--color-text-muted)] leading-relaxed text-lg">
+            <div className="prose dark:prose-invert max-w-none text-[var(--color-text-muted)] leading-relaxed text-lg">
               {job.description ? (
                 <ReactMarkdown>{DOMPurify.sanitize(job.description)}</ReactMarkdown>
               ) : (
@@ -440,7 +486,7 @@ export default function JobDetailPage() {
                 <CheckCircle size={22} className="text-[var(--color-brand-primary)]" />
                 Requirements
               </h3>
-              <div className="border-l-2 border-[var(--color-brand-primary)] pl-6 py-1 space-y-1 prose prose-invert max-w-none text-[var(--color-text-muted)] leading-relaxed text-base [&_ul]:list-disc [&_ul]:pl-4 [&_ul]:space-y-1 [&_li]:marker:text-[var(--color-brand-primary)]">
+              <div className="border-l-2 border-[var(--color-brand-primary)] pl-6 py-1 space-y-1 prose dark:prose-invert max-w-none text-[var(--color-text-muted)] leading-relaxed text-base [&_ul]:list-disc [&_ul]:pl-4 [&_ul]:space-y-1 [&_li]:marker:text-[var(--color-brand-primary)]">
                 <ReactMarkdown>
                   {(() => {
                     const raw = DOMPurify.sanitize(job.requirements);
@@ -470,7 +516,7 @@ export default function JobDetailPage() {
               <div className="space-y-6">
                 {companyProfile.description && (
                   <div>
-                    <div className="prose prose-invert max-w-none text-[var(--color-text-muted)] leading-relaxed text-base">
+                    <div className="prose dark:prose-invert max-w-none text-[var(--color-text-muted)] leading-relaxed text-base">
                       <ReactMarkdown>{DOMPurify.sanitize(companyProfile.description)}</ReactMarkdown>
                     </div>
                   </div>
@@ -537,7 +583,7 @@ export default function JobDetailPage() {
                 <div className="absolute -inset-1 bg-gradient-to-r from-[var(--color-brand-primary)]/10 to-purple-500/10 rounded-3xl blur opacity-75 group-hover:opacity-100 transition-opacity" />
                 <div className="relative glass-panel p-8 rounded-3xl border border-[var(--color-border)] bg-[var(--color-surface)] shadow-xl">
                   <h4 className="text-2xl font-bold text-[var(--color-text)] mb-4">{proof.title}</h4>
-                  <div className="prose prose-invert max-w-none mb-8
+                  <div className="prose dark:prose-invert max-w-none mb-8
                     prose-p:text-[var(--color-text-muted)] prose-p:leading-7 prose-p:mb-4
                     prose-strong:text-[var(--color-text)] prose-strong:font-semibold
                     prose-ul:my-4 prose-ul:pl-5 prose-li:text-[var(--color-text-muted)] prose-li:mb-1.5
@@ -627,22 +673,25 @@ export default function JobDetailPage() {
               {role === "employer" ? (
                 <button
                   onClick={() => navigate("/employer")}
-                  className="shrink-0 px-6 py-2.5 rounded-xl bg-[var(--color-brand-primary)] hover:bg-[var(--color-brand-primary-dark)] text-white font-bold text-sm transition-all"
+                  className="shrink-0 px-6 py-2.5 rounded-xl bg-[var(--color-brand-primary)] hover:bg-[var(--color-brand-primary-hover)] text-white font-bold text-sm transition-all"
                 >
                   View Submissions
                 </button>
               ) : (
                 <button
                   onClick={handleCTA}
-                  disabled={hasApplied || checkingFastPass}
+                  disabled={hasApplied || checkingFastPass || starting}
                   className={`shrink-0 px-6 py-2.5 rounded-xl font-bold text-sm transition-all flex items-center gap-2
                     ${hasApplied
                       ? "bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 cursor-default"
-                      : "bg-[var(--color-brand-primary)] hover:bg-[var(--color-brand-primary-dark)] text-white disabled:opacity-70"
+                      : "bg-[var(--color-brand-primary)] hover:bg-[var(--color-brand-primary-hover)] text-white disabled:opacity-70"
                     }`}
                 >
-                  {checkingFastPass && <Loader2 size={15} className="animate-spin" />}
-                  {hasApplied ? <><CheckCircle size={15} /> Submitted</> : checkingFastPass ? "Checking..." : "Start Proof Task"}
+                  {(checkingFastPass || starting) && <Loader2 size={15} className="animate-spin" />}
+                  {hasApplied
+                    ? <><CheckCircle size={15} /> {proof ? "Submitted" : "Applied"}</>
+                    : checkingFastPass || starting ? "Please wait…"
+                    : proof ? "Start Proof Task" : "Apply Now"}
                 </button>
               )}
             </div>
@@ -802,7 +851,7 @@ export default function JobDetailPage() {
                   <button
                     onClick={confirmStartProof}
                     disabled={starting}
-                    className="flex-1 px-4 py-2.5 rounded-xl bg-[var(--color-brand-primary)] hover:bg-[var(--color-brand-primary-dark)] text-white font-bold text-sm transition-colors shadow-lg hover:shadow-[var(--color-brand-primary)]/25 disabled:opacity-70 disabled:cursor-not-allowed"
+                    className="flex-1 px-4 py-2.5 rounded-xl bg-[var(--color-brand-primary)] hover:bg-[var(--color-brand-primary-hover)] text-white font-bold text-sm transition-colors shadow-lg hover:shadow-[var(--color-brand-primary)]/25 disabled:opacity-70 disabled:cursor-not-allowed"
                   >
                     {starting ? "Starting..." : "Let's Go!"}
                   </button>

@@ -10,12 +10,13 @@ import {
   rectIntersection,
   type CollisionDetection,
 } from "@dnd-kit/core";
-import { updateHiringStage, sendRejectionFeedbackEmail, sendOfferEmail } from "@/lib/api/submissions";
+import { updateHiringStage, sendRejectionFeedbackEmail, sendOfferEmail, sendInterviewEmail } from "@/lib/api/submissions";
 import toast from "react-hot-toast";
 import type { EmployerSubmission, HiringStage } from "@/types";
 import StageColumn from "./StageColumn";
 import { CandidateCardOverlay } from "./CandidateCard";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import EmailConfirmationSheet, { type PendingEmail } from "./EmailConfirmationSheet";
 
 const STAGES: { key: HiringStage; label: string }[] = [
   { key: "new", label: "New" },
@@ -52,6 +53,7 @@ export default function TalentBoard({
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } })
   );
   const [activeId, setActiveId] = useState<string | null>(null);
+  const [pendingEmail, setPendingEmail] = useState<PendingEmail | null>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -90,9 +92,7 @@ export default function TalentBoard({
     if (!over) return;
 
     const activeId = String(active.id);
-    const destinationStage = over.data.current?.stage as
-      | HiringStage
-      | undefined;
+    const destinationStage = over.data.current?.stage as HiringStage | undefined;
     if (!destinationStage) return;
 
     const dragged = submissions.find((s) => s.id === activeId);
@@ -100,48 +100,81 @@ export default function TalentBoard({
 
     // Optimistic update
     setSubmissions((prev) =>
-      prev.map((s) =>
-        s.id === activeId ? { ...s, hiring_stage: destinationStage } : s
-      )
+      prev.map((s) => s.id === activeId ? { ...s, hiring_stage: destinationStage } : s)
     );
 
-    try {
-      await updateHiringStage(
-        activeId,
-        destinationStage,
-        dragged.employer_notes ?? ""
-      );
-      toast.success(`Moved to ${destinationStage}`);
+    const candidateName = dragged.profiles?.full_name ?? "Candidate";
+    const fromStage = dragged.hiring_stage ?? "new";
 
-      if (destinationStage === "rejected") {
-        toast.promise(sendRejectionFeedbackEmail(activeId), {
-          loading: "Sending rejection email...",
-          success: () => {
-            handleUpdateSubmission(activeId, { rejection_email_sent: true });
-            return "Rejection email sent ✓";
-          },
-          error: "Failed to send rejection email",
-        });
+    try {
+      await updateHiringStage(activeId, destinationStage, dragged.employer_notes ?? "");
+
+      // Notify if moving OUT of a column where email was already sent
+      if (fromStage === "rejected" && dragged.rejection_email_sent) {
+        toast(`${candidateName} moved. Rejection email already sent — it won't repeat.`, { icon: "📋" });
+      } else if (fromStage === "offer_sent" && dragged.offer_email_sent) {
+        toast(`${candidateName} moved. Offer email already sent — it won't repeat.`, { icon: "📋" });
+      } else if (fromStage === "interview" && dragged.interview_email_sent) {
+        toast(`${candidateName} moved. Interview invitation already sent — it won't repeat.`, { icon: "📋" });
+      } else {
+        toast.success(`Moved to ${STAGES.find((s) => s.key === destinationStage)?.label ?? destinationStage}`);
       }
 
-      if (destinationStage === "offer_sent") {
-        toast.promise(sendOfferEmail(activeId), {
-          loading: "Sending offer email...",
-          success: () => {
-            handleUpdateSubmission(activeId, { offer_email_sent: true });
-            return "Offer email sent ✓";
-          },
-          error: "Failed to send offer email",
-        });
+      // For email-triggering stages, show confirmation sheet (or skip if already sent)
+      if (destinationStage === "rejected" || destinationStage === "offer_sent" || destinationStage === "interview") {
+        const alreadySent =
+          (destinationStage === "rejected" && dragged.rejection_email_sent) ||
+          (destinationStage === "offer_sent" && dragged.offer_email_sent) ||
+          (destinationStage === "interview" && dragged.interview_email_sent);
+
+        if (!alreadySent) {
+          setPendingEmail({ submissionId: activeId, candidateName, stage: destinationStage });
+        }
       }
     } catch {
       toast.error("Failed to update stage");
       setSubmissions((prev) =>
-        prev.map((s) =>
-          s.id === activeId ? { ...s, hiring_stage: dragged.hiring_stage } : s
-        )
+        prev.map((s) => s.id === activeId ? { ...s, hiring_stage: dragged.hiring_stage } : s)
       );
     }
+  }
+
+  function handleRequestEmail(submissionId: string, stage: "interview" | "offer_sent" | "rejected") {
+    const sub = submissions.find((s) => s.id === submissionId);
+    const candidateName = sub?.profiles?.full_name ?? sub?.profiles?.email?.split("@")[0] ?? "Candidate";
+    setPendingEmail({ submissionId, candidateName, stage });
+  }
+
+  async function handleEmailSend(note: string) {
+    if (!pendingEmail) return;
+    const { submissionId, candidateName, stage } = pendingEmail;
+    setPendingEmail(null);
+
+    const sendFn = stage === "rejected" ? sendRejectionFeedbackEmail
+      : stage === "offer_sent" ? sendOfferEmail
+      : sendInterviewEmail;
+
+    const flagField = stage === "rejected" ? "rejection_email_sent"
+      : stage === "offer_sent" ? "offer_email_sent"
+      : "interview_email_sent";
+
+    const emailLabel = stage === "rejected" ? "Rejection email"
+      : stage === "offer_sent" ? "Offer email"
+      : "Interview invitation";
+
+    toast.promise(sendFn(submissionId, note), {
+      loading: `Sending ${emailLabel.toLowerCase()}…`,
+      success: () => {
+        handleUpdateSubmission(submissionId, { [flagField]: true } as Partial<EmployerSubmission>);
+        return `${emailLabel} sent to ${candidateName} ✓`;
+      },
+      error: (err: unknown) =>
+        err instanceof Error ? err.message : `Failed to send ${emailLabel.toLowerCase()}`,
+    });
+  }
+
+  function handleEmailSkip() {
+    setPendingEmail(null);
   }
 
   // 🧭 Scroll awareness for arrows/fade
@@ -205,6 +238,7 @@ export default function TalentBoard({
               submissions={grouped[key]}
               onReview={onReview}
               onUpdateSubmission={handleUpdateSubmission}
+              onRequestEmail={handleRequestEmail}
             />
           ))}
         </div>
@@ -221,6 +255,12 @@ export default function TalentBoard({
             document.body
           )}
       </DndContext>
+
+      <EmailConfirmationSheet
+        pending={pendingEmail}
+        onSend={handleEmailSend}
+        onSkip={handleEmailSkip}
+      />
     </div>
   );
 }

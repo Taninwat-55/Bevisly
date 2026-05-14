@@ -354,11 +354,11 @@ export default function EmployerDashboard() {
                 animate={{ x: 0 }}
                 exit={{ x: "100%" }}
                 transition={{ type: "spring", damping: 30, stiffness: 300 }}
-                className={`fixed top-0 right-0 z-50 h-full w-full bg-[var(--color-bg)] border-l border-[var(--color-border)] shadow-2xl overflow-y-auto ${
-                  postJobCreationMode === "select"
-                    ? "max-w-2xl"
+                className={`fixed top-0 right-0 z-50 h-full w-full border-l border-[var(--color-border)] shadow-2xl overflow-y-auto ${
+                  postJobCreationMode === "ai" && !postJobData
+                    ? "max-w-2xl bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900"
                     : postJobData
-                    ? "max-w-4xl"
+                    ? "max-w-4xl bg-[var(--color-bg)]"
                     : "max-w-2xl bg-[var(--color-bg)]"
                 }`}
               >

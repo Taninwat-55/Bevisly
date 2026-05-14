@@ -607,7 +607,7 @@ export default function CandidateProfile() {
                   size={24}
                 />
                 <p className="text-sm text-[var(--color-text-muted)]">
-                  No resume uploaded
+                  No resume / CV uploaded
                 </p>
               </div>
             )}
@@ -623,8 +623,8 @@ export default function CandidateProfile() {
                 {uploading
                   ? "Uploading..."
                   : resumeUrl
-                    ? "Update Resume"
-                    : "Upload Resume"}
+                    ? "Update Resume / CV"
+                    : "Upload Resume / CV"}
               </Button>
               <input
                 ref={resumeInputRef}

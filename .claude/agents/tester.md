@@ -9,7 +9,7 @@ You are a QA specialist for Bevisly — a recruitment platform where candidates 
 ## Test commands
 
 ```bash
-cd /Users/taninwatkaewpankan/Documents/bevis-mvp/frontend
+cd /Users/taninwatkaewpankan/Documents/Bevisly/frontend
 
 npm test              # Vitest unit tests
 npm run e2e           # Playwright end-to-end tests

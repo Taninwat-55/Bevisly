@@ -1,7 +1,5 @@
-import nodemailer from "nodemailer";
-
-const GMAIL_APP_PASSWORD = Deno.env.get("GMAIL_APP_PASSWORD");
-const GMAIL_FROM = Deno.env.get("GMAIL_FROM") || "hello@bevisly.com";
+const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
+const FROM = "Bevisly <hello@bevisly.com>";
 
 const corsHeaders = {
     "Access-Control-Allow-Origin": "*",
@@ -17,30 +15,34 @@ Deno.serve(async (req) => {
     try {
         const { to, subject, html, text, reply_to } = await req.json();
 
-        if (!GMAIL_APP_PASSWORD) {
-            throw new Error("Missing GMAIL_APP_PASSWORD");
+        if (!RESEND_API_KEY) {
+            throw new Error("Missing RESEND_API_KEY");
         }
 
-        const transporter = nodemailer.createTransport({
-            host: "smtp.gmail.com",
-            port: 587,
-            secure: false,
-            auth: {
-                user: GMAIL_FROM,
-                pass: GMAIL_APP_PASSWORD,
+        const res = await fetch("https://api.resend.com/emails", {
+            method: "POST",
+            headers: {
+                "Authorization": `Bearer ${RESEND_API_KEY}`,
+                "Content-Type": "application/json",
             },
+            body: JSON.stringify({
+                from: FROM,
+                to: Array.isArray(to) ? to : [to],
+                subject,
+                html,
+                text,
+                reply_to: reply_to || "hello@bevisly.com",
+            }),
         });
 
-        const info = await transporter.sendMail({
-            from: `Bevisly <${GMAIL_FROM}>`,
-            to: Array.isArray(to) ? to.join(", ") : to,
-            subject,
-            html,
-            text,
-            replyTo: reply_to || GMAIL_FROM,
-        });
+        const data = await res.json();
 
-        return new Response(JSON.stringify({ id: info.messageId }), {
+        if (!res.ok) {
+            const detail = data?.message ?? data?.name ?? JSON.stringify(data);
+            throw new Error(`Resend ${res.status}: ${detail}`);
+        }
+
+        return new Response(JSON.stringify({ id: data.id }), {
             status: 200,
             headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
@@ -48,8 +50,9 @@ Deno.serve(async (req) => {
         const message = error instanceof Error
             ? error.message
             : "Internal Server Error";
+        // Always return 200 so the client can read the error body
         return new Response(JSON.stringify({ error: message }), {
-            status: 500,
+            status: 200,
             headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
     }

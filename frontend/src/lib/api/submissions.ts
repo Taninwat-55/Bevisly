@@ -154,6 +154,8 @@ export async function getEmployerSubmissionsWithFeedback(
       employer_notes,
       resume_url,
       rejection_email_sent,
+      offer_email_sent,
+      interview_email_sent,
       proof_tasks ( id, title ),
       jobs ( id, title ),
       feedback ( stars ),
@@ -705,11 +707,10 @@ export async function updateHiringStage(
  * Guarded by `rejection_email_sent` flag to prevent duplicates.
  */
 export async function sendRejectionFeedbackEmail(
-  submissionId: string
+  submissionId: string,
+  note?: string
 ): Promise<void> {
-  try {
-    // 1. Check if email was already sent
-    const { data: submission, error: subErr } = await supabase
+  const { data: submission, error: subErr } = await supabase
       .from("submissions")
       .select(
         `
@@ -726,53 +727,40 @@ export async function sendRejectionFeedbackEmail(
       .single();
 
     if (subErr || !submission) {
-      console.warn("[RejectionEmail] Could not fetch submission:", subErr);
-      return;
+      throw new Error(`Could not fetch submission: ${subErr?.message ?? "unknown"}`);
     }
 
-    // Already sent — skip
+    // Already sent — no-op (not an error)
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    if ((submission as any).rejection_email_sent) {
-      console.log("[RejectionEmail] Already sent for submission:", submissionId);
-      return;
-    }
+    if ((submission as any).rejection_email_sent) return;
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const sub = submission as any;
 
-    // 2. Extract feedback
+    // 2. Extract candidate + job info
+    const profile = Array.isArray(sub.profiles) ? sub.profiles[0] : sub.profiles;
+    const candidateEmail = profile?.email;
+    const candidateName = profile?.full_name || "there";
+
+    if (!candidateEmail) {
+      throw new Error("Candidate email not found — cannot send rejection email.");
+    }
+
+    const job = Array.isArray(sub.jobs) ? sub.jobs[0] : sub.jobs;
+    const jobTitle = job?.title || "this role";
+    const employerEmail = (Array.isArray(job?.employer) ? job.employer[0] : job?.employer)?.email || null;
+
+    // 3. Extract feedback (may not exist for simple-apply candidates)
     const feedbackArr = Array.isArray(sub.feedback)
       ? sub.feedback
       : sub.feedback
         ? [sub.feedback]
         : [];
-    if (feedbackArr.length === 0) {
-      console.log("[RejectionEmail] No feedback found — skipping email.");
-      return;
-    }
-
-    const feedback = feedbackArr[0];
-    const strengths = feedback.strengths || "No specific strengths noted.";
-    const improvements =
-      feedback.improvements || "No specific improvements noted.";
-    const stars = feedback.stars ?? "—";
-
-    // 3. Extract candidate info
-    const profile = Array.isArray(sub.profiles)
-      ? sub.profiles[0]
-      : sub.profiles;
-    const candidateEmail = profile?.email;
-    const candidateName = profile?.full_name || "there";
-
-    if (!candidateEmail) {
-      console.warn("[RejectionEmail] No candidate email found — skipping.");
-      return;
-    }
-
-    // 4. Extract job info
-    const job = Array.isArray(sub.jobs) ? sub.jobs[0] : sub.jobs;
-    const jobTitle = job?.title || "this role";
-    const employerEmail = (Array.isArray(job?.employer) ? job.employer[0] : job?.employer)?.email || null;
+    const hasFeedback = feedbackArr.length > 0;
+    const feedback = hasFeedback ? feedbackArr[0] : null;
+    const strengths = feedback?.strengths || "No specific strengths noted.";
+    const improvements = feedback?.improvements || "No specific improvements noted.";
+    const stars = feedback?.stars ?? null;
 
     // 5. Build HTML email
     const escapeHtml = (str: string) =>
@@ -784,60 +772,58 @@ export async function sendRejectionFeedbackEmail(
 
     const safeName = escapeHtml(candidateName);
     const safeTitle = escapeHtml(jobTitle);
-    const safeStrengths = escapeHtml(strengths);
-    const safeImprovements = escapeHtml(improvements);
+    const safeNote = note ? escapeHtml(note) : null;
 
-    const starDisplay = typeof stars === "number"
-      ? "⭐".repeat(Math.round(stars)) + ` (${stars}/5)`
-      : "—";
+    const noteBlock = safeNote ? `
+      <div style="margin: 20px 0; padding: 16px; background-color: #f8fafc; border-left: 3px solid #6366f1; border-radius: 0 8px 8px 0;">
+        <p style="margin: 0 0 6px 0; font-size: 12px; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px;">Note from the employer</p>
+        <p style="margin: 0; font-size: 14px; color: #334155; line-height: 1.6; font-style: italic;">"${safeNote}"</p>
+      </div>` : "";
+
+    const feedbackBlock = hasFeedback ? (() => {
+      const starDisplay = typeof stars === "number"
+        ? "⭐".repeat(Math.round(stars)) + ` (${stars}/5)`
+        : "—";
+      return `
+      <div style="margin: 24px 0; padding: 20px; background-color: #f8fafc; border-radius: 10px; border: 1px solid #e2e8f0;">
+        <p style="margin: 0 0 12px 0; font-size: 14px; font-weight: 600; color: #334155;">Rating: ${starDisplay}</p>
+        <div style="margin-bottom: 16px;">
+          <p style="margin: 0 0 6px 0; font-size: 13px; font-weight: 700; color: #16a34a; text-transform: uppercase; letter-spacing: 0.5px;">💪 Strengths</p>
+          <p style="margin: 0; font-size: 14px; color: #475569; line-height: 1.6;">${escapeHtml(strengths)}</p>
+        </div>
+        <div>
+          <p style="margin: 0 0 6px 0; font-size: 13px; font-weight: 700; color: #2563eb; text-transform: uppercase; letter-spacing: 0.5px;">📈 Areas for Growth</p>
+          <p style="margin: 0; font-size: 14px; color: #475569; line-height: 1.6;">${escapeHtml(improvements)}</p>
+        </div>
+      </div>` ;
+    })() : "";
+
+    const headerText = hasFeedback ? "Your Feedback is Ready 🎁" : "Application Update";
+    const bodyText = hasFeedback
+      ? `Thank you for applying to <strong>${safeTitle}</strong>. While the team went in a different direction, we wanted to share your proof review feedback to help you build your skills.`
+      : `Thank you for applying to <strong>${safeTitle}</strong>. After careful consideration, the team has decided not to move forward with your application at this time.`;
+    const footerText = hasFeedback
+      ? `<p style="font-size: 14px; color: #94a3b8; text-align: center; margin-top: 28px; line-height: 1.5;">Every proof you complete builds your portfolio.<br>Keep going — your skills speak louder than any résumé.</p>`
+      : `<p style="font-size: 14px; color: #94a3b8; text-align: center; margin-top: 28px; line-height: 1.5;">We wish you the best in your search.</p>`;
 
     const html = `
       <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden;">
         <div style="background: linear-gradient(135deg, #6366f1, #3b82f6); padding: 28px 24px; text-align: center;">
-          <h1 style="color: white; margin: 0; font-size: 22px; font-weight: 700;">Your Feedback is Ready 🎁</h1>
+          <h1 style="color: white; margin: 0; font-size: 22px; font-weight: 700;">${headerText}</h1>
         </div>
         <div style="padding: 32px 28px; background-color: #ffffff;">
-          <p style="font-size: 16px; color: #1e293b; margin-bottom: 16px;">
-            Hi <strong>${safeName}</strong>,
-          </p>
-          <p style="font-size: 15px; color: #475569; line-height: 1.65;">
-            Thank you for applying to <strong>${safeTitle}</strong>. While the team went in a different direction, we wanted to share your code review feedback to help you build your skills and grow as a developer.
-          </p>
-
-          <div style="margin: 24px 0; padding: 20px; background-color: #f8fafc; border-radius: 10px; border: 1px solid #e2e8f0;">
-            <p style="margin: 0 0 12px 0; font-size: 14px; font-weight: 600; color: #334155;">
-              Rating: ${starDisplay}
-            </p>
-            <div style="margin-bottom: 16px;">
-              <p style="margin: 0 0 6px 0; font-size: 13px; font-weight: 700; color: #16a34a; text-transform: uppercase; letter-spacing: 0.5px;">💪 Strengths</p>
-              <p style="margin: 0; font-size: 14px; color: #475569; line-height: 1.6;">${safeStrengths}</p>
-            </div>
-            <div>
-              <p style="margin: 0 0 6px 0; font-size: 13px; font-weight: 700; color: #2563eb; text-transform: uppercase; letter-spacing: 0.5px;">📈 Areas for Growth</p>
-              <p style="margin: 0; font-size: 14px; color: #475569; line-height: 1.6;">${safeImprovements}</p>
-            </div>
-          </div>
-
-          <div style="text-align: center; margin: 28px 0;">
-            <a href="https://bevisly.com/candidate/proofs"
-               style="background: linear-gradient(135deg, #6366f1, #3b82f6); color: white; padding: 12px 28px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 15px; display: inline-block;">
-               View Your Proof Portfolio
-            </a>
-          </div>
-
-          <p style="font-size: 14px; color: #94a3b8; text-align: center; margin-top: 28px; line-height: 1.5;">
-            Every proof you complete builds your portfolio.<br>
-            Keep going — your skills speak louder than any résumé.
-          </p>
-          <p style="font-size: 13px; color: #cbd5e1; text-align: center; margin-top: 16px;">
-            &mdash; The Bevisly Team
-          </p>
+          <p style="font-size: 16px; color: #1e293b; margin-bottom: 16px;">Hi <strong>${safeName}</strong>,</p>
+          <p style="font-size: 15px; color: #475569; line-height: 1.65;">${bodyText}</p>
+          ${noteBlock}
+          ${feedbackBlock}
+          ${footerText}
+          <p style="font-size: 13px; color: #cbd5e1; text-align: center; margin-top: 16px;">&mdash; The Bevisly Team</p>
         </div>
       </div>
     `;
 
     // 6. Send via send-email edge function
-    const { error: emailErr } = await supabase.functions.invoke("send-email", {
+    const { data: emailData, error: emailErr } = await supabase.functions.invoke("send-email", {
       body: {
         to: candidateEmail,
         subject: `Your Code Review Feedback — ${jobTitle}`,
@@ -846,28 +832,17 @@ export async function sendRejectionFeedbackEmail(
       },
     });
 
-    if (emailErr) {
-      console.error("[RejectionEmail] Edge function error:", emailErr);
-      return;
-    }
+    if (emailErr) throw emailErr;
+    if (emailData?.error) throw new Error(emailData.error);
 
-    // 7. Mark as sent to prevent duplicates
     await supabase
       .from("submissions")
       .update({ rejection_email_sent: true })
       .eq("id", submissionId);
-
-    console.log(
-      `[RejectionEmail] ✅ Feedback email sent to ${candidateEmail} for "${jobTitle}"`
-    );
-  } catch (err) {
-    console.error("[RejectionEmail] Unexpected error:", err);
-  }
 }
 
-export async function sendOfferEmail(submissionId: string): Promise<void> {
-  try {
-    const { data: submission, error: subErr } = await supabase
+export async function sendOfferEmail(submissionId: string, note?: string): Promise<void> {
+  const { data: submission, error: subErr } = await supabase
       .from("submissions")
       .select(
         `
@@ -883,15 +858,11 @@ export async function sendOfferEmail(submissionId: string): Promise<void> {
       .single();
 
     if (subErr || !submission) {
-      console.warn("[OfferEmail] Could not fetch submission:", subErr);
-      return;
+      throw new Error(`Could not fetch submission: ${subErr?.message ?? "unknown"}`);
     }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    if ((submission as any).offer_email_sent) {
-      console.log("[OfferEmail] Already sent for submission:", submissionId);
-      return;
-    }
+    if ((submission as any).offer_email_sent) return;
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const sub = submission as any;
@@ -901,8 +872,7 @@ export async function sendOfferEmail(submissionId: string): Promise<void> {
     const candidateName = profile?.full_name || "there";
 
     if (!candidateEmail) {
-      console.warn("[OfferEmail] No candidate email found — skipping.");
-      return;
+      throw new Error("Candidate email not found — cannot send offer email.");
     }
 
     const job = Array.isArray(sub.jobs) ? sub.jobs[0] : sub.jobs;
@@ -920,6 +890,13 @@ export async function sendOfferEmail(submissionId: string): Promise<void> {
     const safeName = escapeHtml(candidateName);
     const safeTitle = escapeHtml(jobTitle);
     const safeCompany = escapeHtml(companyName);
+    const safeNote = note ? escapeHtml(note) : null;
+
+    const noteBlock = safeNote ? `
+      <div style="margin: 20px 0; padding: 16px; background-color: #f0fdf4; border-left: 3px solid #10b981; border-radius: 0 8px 8px 0;">
+        <p style="margin: 0 0 6px 0; font-size: 12px; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px;">Message from the employer</p>
+        <p style="margin: 0; font-size: 14px; color: #334155; line-height: 1.6; font-style: italic;">"${safeNote}"</p>
+      </div>` : "";
 
     const html = `
       <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden;">
@@ -932,10 +909,9 @@ export async function sendOfferEmail(submissionId: string): Promise<void> {
           </p>
           <p style="font-size: 15px; color: #475569; line-height: 1.65;">
             Congratulations! <strong>${safeCompany}</strong> has reviewed your proof submission for
-            <strong>${safeTitle}</strong> and would like to extend you an offer. You've been selected
-            for the role — the team will be in touch with you shortly to discuss next steps.
+            <strong>${safeTitle}</strong> and would like to extend you an offer.
           </p>
-
+          ${noteBlock}
           <div style="margin: 24px 0; padding: 20px; background-color: #f0fdf4; border-radius: 10px; border: 1px solid #bbf7d0;">
             <p style="margin: 0; font-size: 14px; font-weight: 600; color: #15803d;">
               Role: ${safeTitle}
@@ -946,8 +922,7 @@ export async function sendOfferEmail(submissionId: string): Promise<void> {
           </div>
 
           <p style="font-size: 15px; color: #475569; line-height: 1.65;">
-            Keep an eye on your inbox for further details. If you have any questions in the meantime,
-            don't hesitate to reach out.
+            Reply directly to this email if you have any questions.
           </p>
 
           <div style="text-align: center; margin: 28px 0;">
@@ -964,7 +939,7 @@ export async function sendOfferEmail(submissionId: string): Promise<void> {
       </div>
     `;
 
-    const { error: emailErr } = await supabase.functions.invoke("send-email", {
+    const { data: emailData, error: emailErr } = await supabase.functions.invoke("send-email", {
       body: {
         to: candidateEmail,
         subject: `You've received an offer from ${companyName} 🎉`,
@@ -973,20 +948,130 @@ export async function sendOfferEmail(submissionId: string): Promise<void> {
       },
     });
 
-    if (emailErr) {
-      console.error("[OfferEmail] Edge function error:", emailErr);
-      return;
-    }
+    if (emailErr) throw emailErr;
+    if (emailData?.error) throw new Error(emailData.error);
 
     await supabase
       .from("submissions")
       .update({ offer_email_sent: true })
       .eq("id", submissionId);
+}
 
-    console.log(`[OfferEmail] Offer email sent to ${candidateEmail} for "${jobTitle}"`);
-  } catch (err) {
-    console.error("[OfferEmail] Unexpected error:", err);
-  }
+export async function sendInterviewEmail(submissionId: string, note?: string): Promise<void> {
+  const { data: submission, error: subErr } = await supabase
+      .from("submissions")
+      .select(
+        `
+        id,
+        interview_email_sent,
+        user_id,
+        job_id,
+        profiles:user_id ( full_name, email ),
+        jobs:job_id ( title, company, employer_id, employer:employer_id ( email ) )
+      `
+      )
+      .eq("id", submissionId)
+      .single();
+
+    if (subErr || !submission) {
+      throw new Error(`Could not fetch submission: ${subErr?.message ?? "unknown"}`);
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    if ((submission as any).interview_email_sent) return;
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const sub = submission as any;
+    const profile = Array.isArray(sub.profiles) ? sub.profiles[0] : sub.profiles;
+    const candidateEmail = profile?.email;
+    const candidateName = profile?.full_name || "there";
+
+    if (!candidateEmail) {
+      throw new Error("Candidate email not found — cannot send interview invitation.");
+    }
+
+    const job = Array.isArray(sub.jobs) ? sub.jobs[0] : sub.jobs;
+    const jobTitle = job?.title || "this role";
+    const companyName = job?.company || "the company";
+    const replyTo =
+      (Array.isArray(job?.employer) ? job.employer[0] : job?.employer)?.email ||
+      "hello@bevisly.com";
+
+    const escapeHtml = (str: string) =>
+      str
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+
+    const safeName = escapeHtml(candidateName);
+    const safeTitle = escapeHtml(jobTitle);
+    const safeCompany = escapeHtml(companyName);
+    const safeNote = note ? escapeHtml(note) : null;
+
+    const noteBlock = safeNote ? `
+      <div style="margin: 20px 0; padding: 16px; background-color: #ecfeff; border-left: 3px solid #06b6d4; border-radius: 0 8px 8px 0;">
+        <p style="margin: 0 0 6px 0; font-size: 12px; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px;">Message from the employer</p>
+        <p style="margin: 0; font-size: 14px; color: #334155; line-height: 1.6; font-style: italic;">"${safeNote}"</p>
+      </div>` : "";
+
+    const html = `
+      <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden;">
+        <div style="background: linear-gradient(135deg, #06b6d4, #8b5cf6); padding: 28px 24px; text-align: center;">
+          <h1 style="color: white; margin: 0; font-size: 22px; font-weight: 700;">You're Moving Forward! 🎯</h1>
+        </div>
+        <div style="padding: 32px 28px; background-color: #ffffff;">
+          <p style="font-size: 16px; color: #1e293b; margin-bottom: 16px;">
+            Hi <strong>${safeName}</strong>,
+          </p>
+          <p style="font-size: 15px; color: #475569; line-height: 1.65;">
+            Great news — <strong>${safeCompany}</strong> has reviewed your proof submission for
+            <strong>${safeTitle}</strong> and would like to invite you to an interview.
+          </p>
+          ${noteBlock}
+          <div style="margin: 24px 0; padding: 20px; background-color: #ecfeff; border-radius: 10px; border: 1px solid #a5f3fc;">
+            <p style="margin: 0; font-size: 14px; font-weight: 600; color: #0e7490;">
+              Role: ${safeTitle}
+            </p>
+            <p style="margin: 8px 0 0; font-size: 14px; color: #155e75;">
+              Company: ${safeCompany}
+            </p>
+          </div>
+
+          <p style="font-size: 15px; color: #475569; line-height: 1.65;">
+            Reply directly to this email with any questions.
+          </p>
+
+          <div style="text-align: center; margin: 28px 0;">
+            <a href="https://bevisly.com/candidate/proofs"
+               style="background: linear-gradient(135deg, #06b6d4, #8b5cf6); color: white; padding: 12px 28px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 15px; display: inline-block;">
+               View Your Proof Portfolio
+            </a>
+          </div>
+
+          <p style="font-size: 13px; color: #cbd5e1; text-align: center; margin-top: 16px;">
+            &mdash; The Bevisly Team
+          </p>
+        </div>
+      </div>
+    `;
+
+    const { data: emailData, error: emailErr } = await supabase.functions.invoke("send-email", {
+      body: {
+        to: candidateEmail,
+        subject: `You've been invited to interview at ${companyName} 🎯`,
+        html,
+        reply_to: replyTo,
+      },
+    });
+
+    if (emailErr) throw emailErr;
+    if (emailData?.error) throw new Error(emailData.error);
+
+    await supabase
+      .from("submissions")
+      .update({ interview_email_sent: true })
+      .eq("id", submissionId);
 }
 
 export async function getCandidateApplications(userId: string) {
@@ -1027,4 +1112,59 @@ export async function requestDiscussion(submission_id: string): Promise<void> {
     .update({ discussion_requested_at: new Date().toISOString() })
     .eq("id", submission_id);
   if (error) throw error;
+
+  // Fetch submission details to notify the candidate
+  const { data } = await supabase
+    .from("submissions")
+    .select(`
+      profiles:user_id ( full_name, email ),
+      jobs:job_id ( title, company, employer_id, employer:employer_id ( email ) )
+    `)
+    .eq("id", submission_id)
+    .single();
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const sub = data as any;
+  const profile = Array.isArray(sub?.profiles) ? sub.profiles[0] : sub?.profiles;
+  const candidateEmail = profile?.email;
+  const candidateName = profile?.full_name || "there";
+  const job = Array.isArray(sub?.jobs) ? sub.jobs[0] : sub?.jobs;
+  const jobTitle = job?.title || "this role";
+  const companyName = job?.company || "the company";
+  const replyTo = (Array.isArray(job?.employer) ? job.employer[0] : job?.employer)?.email || "hello@bevisly.com";
+
+  if (!candidateEmail) return;
+
+  const escapeHtml = (str: string) =>
+    str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+
+  const html = `
+    <div style="font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;max-width:600px;margin:0 auto;border:1px solid #e2e8f0;border-radius:12px;overflow:hidden;">
+      <div style="background:linear-gradient(135deg,#6366f1,#8b5cf6);padding:28px 24px;text-align:center;">
+        <h1 style="color:white;margin:0;font-size:22px;font-weight:700;">They want to talk 💬</h1>
+      </div>
+      <div style="padding:32px 28px;background-color:#ffffff;">
+        <p style="font-size:16px;color:#1e293b;margin-bottom:16px;">Hi <strong>${escapeHtml(candidateName)}</strong>,</p>
+        <p style="font-size:15px;color:#475569;line-height:1.65;">
+          <strong>${escapeHtml(companyName)}</strong> has reviewed your proof submission for
+          <strong>${escapeHtml(jobTitle)}</strong> and would like to discuss it with you.
+        </p>
+        <div style="margin:24px 0;padding:20px;background-color:#f5f3ff;border-radius:10px;border:1px solid #ddd6fe;">
+          <p style="margin:0;font-size:14px;color:#5b21b6;line-height:1.6;">
+            Simply reply to this email to connect with the team. They'll take it from there.
+          </p>
+        </div>
+        <p style="font-size:13px;color:#cbd5e1;text-align:center;margin-top:24px;">&mdash; The Bevisly Team</p>
+      </div>
+    </div>
+  `;
+
+  await supabase.functions.invoke("send-email", {
+    body: {
+      to: candidateEmail,
+      subject: `${companyName} wants to discuss your proof — ${jobTitle}`,
+      html,
+      reply_to: replyTo,
+    },
+  });
 }

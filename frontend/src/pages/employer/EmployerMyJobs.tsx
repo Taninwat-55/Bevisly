@@ -7,6 +7,7 @@ import { getEmployerJobs, getEmployerJobSummary } from "@/lib/api";
 import type { EmployerJob, EmployerJobSummary } from "@/types";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
+import EmployerJobPreviewDrawer from "./EmployerJobPreviewDrawer";
 
 const STATUS_STYLES: Record<string, string> = {
   active: "bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800",
@@ -24,12 +25,14 @@ function formatDate(value: string | null) {
   });
 }
 
+
 export default function EmployerMyJobs() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [jobs, setJobs] = useState<EmployerJob[]>([]);
   const [summaries, setSummaries] = useState<EmployerJobSummary[]>([]);
   const [loading, setLoading] = useState(true);
+  const [viewingJobId, setViewingJobId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!user?.id) return;
@@ -152,13 +155,13 @@ export default function EmployerMyJobs() {
                   </div>
 
                   <div className="flex items-center gap-2 shrink-0">
-                    <Link
-                      to={`/jobs/${job.id}`}
+                    <button
+                      onClick={() => setViewingJobId(job.id)}
                       className="inline-flex items-center gap-1.5 px-3 py-2 text-sm font-medium rounded-lg border border-[var(--color-border)] text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[var(--color-surface-hover)] transition-colors"
                     >
                       <Eye size={14} />
                       View
-                    </Link>
+                    </button>
                     <Link
                       to={`/employer/talent-board?jobId=${job.id}`}
                       className="inline-flex items-center gap-1.5 px-3 py-2 text-sm font-medium rounded-lg bg-[var(--color-brand-primary)] text-white hover:opacity-90 transition-opacity"
@@ -173,6 +176,8 @@ export default function EmployerMyJobs() {
           })}
         </div>
       )}
+
+      <EmployerJobPreviewDrawer jobId={viewingJobId} onClose={() => setViewingJobId(null)} />
     </div>
   );
 }

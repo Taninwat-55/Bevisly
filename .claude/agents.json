@@ -1,8 +1,0 @@
-{
-  "roles": {
-    "assistant": "Chief of Staff. Focuses on project state, CLAUDE.md, and task orchestration.",
-    "engineer": "Senior Full-Stack + AI specialist. Expert in TypeScript, Python, and LLM integrations.",
-    "artist": "UI/UX lead. Uses the 'frontend-design' skill. Focuses on aesthetics and user flow.",
-    "growth": "Marketing & SEO lead. Uses 'firecrawl' for market research and copy optimization."
-  }
-}

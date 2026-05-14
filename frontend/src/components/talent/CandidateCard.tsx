@@ -4,7 +4,7 @@ import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { ExternalLink, GripVertical, User, Mail, Star, FileText, MoreHorizontal } from "lucide-react";
 import toast from "react-hot-toast";
-import { updateHiringStage, sendRejectionFeedbackEmail, sendOfferEmail } from "@/lib/api/submissions";
+import { updateHiringStage } from "@/lib/api/submissions";
 import type { EmployerSubmission, HiringStage } from "@/types";
 import NotesModal from "./NotesModal";
 import { useNavigate } from "react-router-dom";
@@ -43,6 +43,7 @@ function InnerCard({
   isDragging = false,
   onReview,
   onUpdateSubmission,
+  onRequestEmail,
 }: {
   submission: EmployerSubmission;
   isOverlay?: boolean;
@@ -55,6 +56,7 @@ function InnerCard({
   onReview?: (id: string) => void;
   isDragging?: boolean;
   onUpdateSubmission?: (id: string, updated: Partial<EmployerSubmission>) => void;
+  onRequestEmail?: (submissionId: string, stage: "interview" | "offer_sent" | "rejected") => void;
 }) {
   const navigate = useNavigate();
   const { id, profiles, proof_tasks, feedback, employer_notes, hiring_stage, jobs, created_at } =
@@ -89,31 +91,22 @@ function InnerCard({
     try {
       await updateHiringStage(id, stage, employer_notes ?? "");
       onUpdateSubmission?.(id, { hiring_stage: stage });
-      toast.success(`Moved to ${stage}`);
-      
-      if (stage === "rejected") {
-        toast.promise(sendRejectionFeedbackEmail(id), {
-          loading: "Sending rejection email...",
-          success: () => {
-            onUpdateSubmission?.(id, { rejection_email_sent: true });
-            return "Rejection email sent ✓";
-          },
-          error: "Failed to send rejection email",
-        });
-      }
-
-      if (stage === "offer_sent") {
-        toast.promise(sendOfferEmail(id), {
-          loading: "Sending offer email...",
-          success: () => {
-            onUpdateSubmission?.(id, { offer_email_sent: true });
-            return "Offer email sent ✓";
-          },
-          error: "Failed to send offer email",
-        });
-      }
-
+      toast.success(`Moved to ${STAGES.find((s) => s.key === stage)?.label ?? stage}`);
       setOpen(false);
+
+      if (stage === "rejected" || stage === "offer_sent" || stage === "interview") {
+        const alreadySent =
+          (stage === "rejected" && submission.rejection_email_sent) ||
+          (stage === "offer_sent" && submission.offer_email_sent) ||
+          (stage === "interview" && submission.interview_email_sent);
+
+        if (alreadySent) {
+          const label = stage === "rejected" ? "rejection" : stage === "offer_sent" ? "offer" : "interview invitation";
+          toast(`No email sent — ${candidateName} already received a ${label} email.`, { icon: "ℹ️" });
+        } else {
+          onRequestEmail?.(id, stage);
+        }
+      }
     } catch {
       toast.error("Failed to move candidate");
     }
@@ -202,7 +195,7 @@ function InnerCard({
         </span>
 
         <div className="flex items-center gap-1.5">
-          {(submission.rejection_email_sent || submission.offer_email_sent) && (
+          {(submission.rejection_email_sent || submission.offer_email_sent || submission.interview_email_sent) && (
             <span className="flex items-center gap-1 text-[10px] font-bold text-emerald-600 bg-emerald-50 dark:bg-emerald-950/30 px-1.5 py-0.5 rounded border border-emerald-200/50">
               <Mail size={10} /> Email sent
             </span>
@@ -268,22 +261,35 @@ function InnerCard({
                 <div className="px-3 py-1 text-[10px] uppercase font-bold text-[var(--color-text-muted)] tracking-wider">
                   Move to
                 </div>
-                {STAGES.map(({ key, label }) => (
-                  <button
-                    key={key}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleMove(key);
-                    }}
-                    disabled={key === hiring_stage}
-                    className={`flex items-center gap-2 w-full text-left px-3 py-1.5 hover:bg-[var(--color-bg)] transition-colors ${key === hiring_stage
-                      ? "text-[var(--color-text-muted)] opacity-50 cursor-not-allowed"
-                      : "text-[var(--color-text)]"
-                      }`}
-                  >
-                    <span className="text-xs">{label}</span>
-                  </button>
-                ))}
+                {STAGES.map(({ key, label }) => {
+                  const emailStage = key === "interview" || key === "offer_sent" || key === "rejected";
+                  const emailSent =
+                    (key === "rejected" && submission.rejection_email_sent) ||
+                    (key === "offer_sent" && submission.offer_email_sent) ||
+                    (key === "interview" && submission.interview_email_sent);
+                  return (
+                    <button
+                      key={key}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleMove(key);
+                      }}
+                      disabled={key === hiring_stage}
+                      className={`flex items-center justify-between gap-2 w-full text-left px-3 py-1.5 hover:bg-[var(--color-bg)] transition-colors ${key === hiring_stage
+                        ? "text-[var(--color-text-muted)] opacity-50 cursor-not-allowed"
+                        : "text-[var(--color-text)]"
+                        }`}
+                    >
+                      <span className="text-xs">{label}</span>
+                      {emailStage && (
+                        <span className={`text-[9px] font-bold flex items-center gap-0.5 ${emailSent ? "text-emerald-500" : "text-[var(--color-text-muted)]"}`}>
+                          <Mail size={9} />
+                          {emailSent ? "sent" : "email"}
+                        </span>
+                      )}
+                    </button>
+                  );
+                })}
               </div>,
               document.body
             )}
@@ -307,10 +313,12 @@ export default function CandidateCard({
   submission,
   onReview,
   onUpdateSubmission,
+  onRequestEmail,
 }: {
   submission: EmployerSubmission;
   onReview?: (id: string) => void;
   onUpdateSubmission?: (id: string, updated: Partial<EmployerSubmission>) => void;
+  onRequestEmail?: (submissionId: string, stage: "interview" | "offer_sent" | "rejected") => void;
 }) {
   const { attributes, listeners, setNodeRef, transform, isDragging } =
     useSortable({ id: submission.id });
@@ -318,7 +326,7 @@ export default function CandidateCard({
   const style = {
     transform: CSS.Transform.toString(transform),
     transition: "transform 0.15s ease, opacity 0.15s, box-shadow 0.15s",
-    opacity: isDragging ? 0.3 : 1, // Make original item very faint while dragging
+    opacity: isDragging ? 0.3 : 1,
   };
 
   return (
@@ -331,6 +339,7 @@ export default function CandidateCard({
       isDragging={isDragging}
       onReview={onReview}
       onUpdateSubmission={onUpdateSubmission}
+      onRequestEmail={onRequestEmail}
     />
   );
 }

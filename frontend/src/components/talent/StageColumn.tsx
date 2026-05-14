@@ -6,7 +6,9 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { motion } from "framer-motion";
-import { Inbox } from "lucide-react";
+import { Inbox, Mail } from "lucide-react";
+
+const EMAIL_STAGES = new Set<HiringStage>(["interview", "offer_sent", "rejected"]);
 
 interface StageColumnProps {
   stage: HiringStage;
@@ -14,6 +16,7 @@ interface StageColumnProps {
   submissions: EmployerSubmission[];
   onReview?: (id: string) => void;
   onUpdateSubmission?: (id: string, updated: Partial<EmployerSubmission>) => void;
+  onRequestEmail?: (submissionId: string, stage: "interview" | "offer_sent" | "rejected") => void;
 }
 
 const stageStyles: Record<
@@ -70,6 +73,7 @@ export default function StageColumn({
   submissions,
   onReview,
   onUpdateSubmission,
+  onRequestEmail,
 }: StageColumnProps) {
   const { setNodeRef, isOver } = useDroppable({ id: stage, data: { stage } });
   const style = stageStyles[stage];
@@ -86,11 +90,17 @@ export default function StageColumn({
       <div className={`absolute top-0 left-0 h-1.5 w-full rounded-t-2xl ${style.accent}`} />
 
       {/* Header */}
-      <div className="flex items-center justify-between mb-4 mt-1">
-        <h3 className="font-bold text-sm text-[var(--color-text)]">
-          {label}
-        </h3>
-        <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${style.countBg}`}>
+      <div className="flex items-start justify-between mb-4 mt-1">
+        <div className="min-w-0">
+          <h3 className="font-bold text-sm text-[var(--color-text)]">{label}</h3>
+          {EMAIL_STAGES.has(stage) && (
+            <span className="inline-flex items-center gap-1 text-[10px] font-medium text-[var(--color-text-muted)] mt-0.5">
+              <Mail size={9} />
+              Sends email
+            </span>
+          )}
+        </div>
+        <span className={`text-xs font-bold px-2 py-0.5 rounded-full shrink-0 ${style.countBg}`}>
           {submissions.length}
         </span>
       </div>
@@ -122,6 +132,7 @@ export default function StageColumn({
                   submission={submission}
                   onReview={onReview}
                   onUpdateSubmission={onUpdateSubmission}
+                  onRequestEmail={onRequestEmail}
                 />
               ))
             )}

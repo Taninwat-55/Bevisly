@@ -100,6 +100,7 @@ export type EmployerSubmission = {
 
   rejection_email_sent?: boolean | null;
   offer_email_sent?: boolean | null;
+  interview_email_sent?: boolean | null;
 };
 
 // Used on EmployerHome.tsx for recent submissions section
