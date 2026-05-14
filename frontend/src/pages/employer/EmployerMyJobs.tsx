@@ -78,12 +78,15 @@ export default function EmployerMyJobs() {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-start justify-between gap-4 flex-wrap">
-        <div>
-          <h1 className="text-2xl md:text-3xl font-bold text-[var(--color-text)] flex items-center gap-2">
-            <Briefcase size={26} className="text-[var(--color-brand-primary)]" />
+        <div className="space-y-2">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[var(--color-brand-primary)]/10 text-[var(--color-brand-primary)] text-xs font-bold uppercase tracking-widest">
+            <Briefcase size={14} />
+            My Jobs
+          </div>
+          <h1 className="text-3xl md:text-4xl font-bold font-display text-[var(--color-text)]">
             My Jobs
           </h1>
-          <p className="text-sm text-[var(--color-text-muted)] mt-1">
+          <p className="text-[var(--color-text-muted)] text-lg max-w-xl leading-relaxed">
             All roles you've posted. Edit details, review applicants, or close roles you've filled.
           </p>
         </div>
