@@ -1,8 +1,9 @@
-// supabase/functions/notify/index.ts
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { serve } from "std/http/server.ts";
+import { createClient } from "@supabase/supabase-js";
+import nodemailer from "nodemailer";
 
-const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
+const GMAIL_APP_PASSWORD = Deno.env.get("GMAIL_APP_PASSWORD");
+const GMAIL_FROM = Deno.env.get("GMAIL_FROM") || "hello@bevisly.com";
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
@@ -13,35 +14,37 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+interface SubmissionRecord {
+  id: string;
+  job_id: string;
+  user_id: string;
+  status: string;
+}
+
 serve(async (req) => {
-  // Handle CORS for browser testing
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
   try {
     const payload = await req.json();
-    const { record, old_record, type, table } = payload; 
+    const { record, old_record, type, table } = payload;
 
     console.log(`🔔 Webhook received: ${type} on ${table}`);
 
     if (table !== "submissions") return new Response("Ignored", { headers: corsHeaders });
 
-    // We only care about UPDATE events for status changes
-    // (INSERT is just a draft starting, so we ignore it now)
     if (type === "UPDATE") {
-      const newStatus = record.status;
-      const oldStatus = old_record?.status;
+      const newStatus = (record as SubmissionRecord).status;
+      const oldStatus = (old_record as SubmissionRecord | undefined)?.status;
 
       console.log(`🔄 Status Change: ${oldStatus} -> ${newStatus}`);
 
-      // 📨 SCENARIO A: Candidate Submits (in_progress -> submitted) => Email Employer
       if (newStatus === "submitted" && oldStatus !== "submitted") {
-        await notifyEmployer(record);
+        await notifyEmployer(record as SubmissionRecord);
       }
 
-      // 📨 SCENARIO B: Employer Reviews (submitted -> reviewed) => Email Candidate
       if (newStatus === "reviewed" && oldStatus !== "reviewed") {
-        console.log("Status changed to reviewed. Notifying candidate:", record.user_id);
-        await notifyCandidate(record);
+        console.log("Status changed to reviewed. Notifying candidate:", (record as SubmissionRecord).user_id);
+        await notifyCandidate(record as SubmissionRecord);
       }
     }
 
@@ -51,7 +54,8 @@ serve(async (req) => {
 
   } catch (error) {
     console.error("❌ Error:", error);
-    return new Response(JSON.stringify({ error: error.message }), {
+    const message = error instanceof Error ? error.message : String(error);
+    return new Response(JSON.stringify({ error: message }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
@@ -60,25 +64,23 @@ serve(async (req) => {
 
 /* ─── Helpers ─── */
 
-async function notifyEmployer(record: any) {
+async function notifyEmployer(record: SubmissionRecord) {
   console.log("📧 Notifying Employer...");
-  
-  // 1. Get Job & Employer Email
+
   const { data: job } = await supabase
     .from("jobs")
     .select(`title, employer_id, profiles!employer_id ( email )`)
     .eq("id", record.job_id)
     .single();
 
-  // 2. Get Candidate Name
   const { data: candidate } = await supabase
     .from("profiles")
     .select("full_name")
     .eq("id", record.user_id)
     .single();
 
-  // @ts-ignore
-  const employerEmail = job?.profiles?.email;
+  // Supabase returns profiles as a single object for foreign key joins
+  const employerEmail = (job?.profiles as { email?: string } | null)?.email;
   const candidateName = candidate?.full_name || "A Candidate";
   const escapedCandidateName = escapeHtml(candidateName);
   const escapedJobTitle = escapeHtml(job?.title || "");
@@ -101,7 +103,7 @@ async function notifyEmployer(record: any) {
   }
 }
 
-async function notifyCandidate(record: any) {
+async function notifyCandidate(record: SubmissionRecord) {
   const { data: candidate } = await supabase
     .from("profiles")
     .select("email, full_name")
@@ -118,7 +120,6 @@ async function notifyCandidate(record: any) {
     const escapedCandidateName = escapeHtml(candidate.full_name || "Candidate");
     const escapedJobTitle = escapeHtml(job?.title || "");
 
-    // ✅ Better HTML Design
     await sendEmail({
       to: [candidate.email],
       subject: `⭐ Feedback Received: ${job?.title}`,
@@ -133,7 +134,7 @@ async function notifyCandidate(record: any) {
               Good news! An employer has reviewed your proof submission for <strong>${escapedJobTitle}</strong>.
             </p>
             <div style="text-align: center; margin: 30px 0;">
-              <a href="https://bevis.app/candidate/proofs" 
+              <a href="https://bevisly.com/candidate/proofs"
                  style="background-color: #ff8b3d; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 16px; display: inline-block;">
                  View Feedback & Score
               </a>
@@ -147,35 +148,37 @@ async function notifyCandidate(record: any) {
       `,
     });
   } else {
-      console.error("Candidate email not found for ID:", record.user_id);
+    console.error("Candidate email not found for ID:", record.user_id);
   }
 }
 
 async function sendEmail({ to, subject, html }: { to: string[]; subject: string; html: string }) {
-  if (!RESEND_API_KEY) return console.error("⚠️ No Resend Key");
+  if (!GMAIL_APP_PASSWORD) return console.error("⚠️ No GMAIL_APP_PASSWORD");
 
-  const res = await fetch("https://api.resend.com/emails", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${RESEND_API_KEY}`,
+  const transporter = nodemailer.createTransport({
+    host: "smtp.gmail.com",
+    port: 587,
+    secure: false,
+    auth: {
+      user: GMAIL_FROM,
+      pass: GMAIL_APP_PASSWORD,
     },
-    body: JSON.stringify({
-      from: "Bevisly <hello@bevisly.com>",
-      to,
-      subject,
-      html,
-    }),
   });
 
-  if (!res.ok) {
-    const text = await res.text();
-    console.error("❌ Resend API Error:", text);
-  } else {
+  try {
+    await transporter.sendMail({
+      from: `Bevisly <${GMAIL_FROM}>`,
+      to: to.join(", "),
+      subject,
+      html,
+    });
     console.log(`✅ Email sent to ${to.join(", ")}`);
+  } catch (err) {
+    console.error("❌ Gmail SMTP Error:", err);
   }
 }
-function escapeHtml(str: string) {
+
+function escapeHtml(str: string): string {
   if (!str) return "";
   return str
     .replace(/&/g, "&amp;")

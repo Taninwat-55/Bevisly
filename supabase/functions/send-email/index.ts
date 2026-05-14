@@ -1,4 +1,7 @@
-const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
+import nodemailer from "nodemailer";
+
+const GMAIL_APP_PASSWORD = Deno.env.get("GMAIL_APP_PASSWORD");
+const GMAIL_FROM = Deno.env.get("GMAIL_FROM") || "hello@bevisly.com";
 
 const corsHeaders = {
     "Access-Control-Allow-Origin": "*",
@@ -12,40 +15,32 @@ Deno.serve(async (req) => {
     }
 
     try {
-        const { to, subject, html, text, from_name: _from_name, reply_to } =
-            await req
-                .json();
+        const { to, subject, html, text, reply_to } = await req.json();
 
-        if (!RESEND_API_KEY) {
-            throw new Error("Missing RESEND_API_KEY");
+        if (!GMAIL_APP_PASSWORD) {
+            throw new Error("Missing GMAIL_APP_PASSWORD");
         }
 
-        const res = await fetch("https://api.resend.com/emails", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${RESEND_API_KEY}`,
+        const transporter = nodemailer.createTransport({
+            host: "smtp.gmail.com",
+            port: 587,
+            secure: false,
+            auth: {
+                user: GMAIL_FROM,
+                pass: GMAIL_APP_PASSWORD,
             },
-            body: JSON.stringify({
-                from: `Bevisly <hello@bevisly.com>`,
-                to,
-                subject,
-                html,
-                text,
-                reply_to: reply_to || "bevislyapp@gmail.com",
-            }),
         });
 
-        const data = await res.json();
+        const info = await transporter.sendMail({
+            from: `Bevisly <${GMAIL_FROM}>`,
+            to: Array.isArray(to) ? to.join(", ") : to,
+            subject,
+            html,
+            text,
+            replyTo: reply_to || GMAIL_FROM,
+        });
 
-        if (!res.ok) {
-            return new Response(JSON.stringify(data), {
-                status: 400,
-                headers: { ...corsHeaders, "Content-Type": "application/json" },
-            });
-        }
-
-        return new Response(JSON.stringify(data), {
+        return new Response(JSON.stringify({ id: info.messageId }), {
             status: 200,
             headers: { ...corsHeaders, "Content-Type": "application/json" },
         });

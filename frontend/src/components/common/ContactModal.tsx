@@ -25,7 +25,7 @@ export default function ContactModal({ isOpen, onClose }: ContactModalProps) {
     try {
       const { error: mailError } = await supabase.functions.invoke("send-email", {
         body: {
-          to: ["bevislyapp@gmail.com"],
+          to: ["hello@bevisly.com"],
           reply_to: email, // Allow direct reply
           subject: `📬 New Contact Inquiry from ${name}`,
           html: getContactMessageTemplate(name, email, message),

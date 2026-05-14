@@ -61,7 +61,7 @@ export default function CandidateDashboard() {
       .then(({ count }) => setHasPracticed((count ?? 0) > 0));
   }, [user?.id]);
 
-  const displayName = user?.email?.split("@")[0] || "Candidate";
+  const displayName = user?.full_name || user?.email?.split("@")[0] || "Candidate";
   const isNewCandidate = proofsCompleted === 0 && jobsApplied === 0;
 
   return (

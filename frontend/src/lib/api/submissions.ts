@@ -842,7 +842,7 @@ export async function sendRejectionFeedbackEmail(
         to: candidateEmail,
         subject: `Your Code Review Feedback — ${jobTitle}`,
         html,
-        reply_to: employerEmail || "bevislyapp@gmail.com",
+        reply_to: employerEmail || "hello@bevisly.com",
       },
     });
 
@@ -908,7 +908,7 @@ export async function sendOfferEmail(submissionId: string): Promise<void> {
     const job = Array.isArray(sub.jobs) ? sub.jobs[0] : sub.jobs;
     const jobTitle = job?.title || "this role";
     const companyName = job?.company || "the company";
-    const offerReplyTo = (Array.isArray(job?.employer) ? job.employer[0] : job?.employer)?.email || "bevislyapp@gmail.com";
+    const offerReplyTo = (Array.isArray(job?.employer) ? job.employer[0] : job?.employer)?.email || "hello@bevisly.com";
 
     const escapeHtml = (str: string) =>
       str

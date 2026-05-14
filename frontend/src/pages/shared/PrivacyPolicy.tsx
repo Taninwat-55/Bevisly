@@ -88,7 +88,7 @@ export default function PrivacyPolicy() {
                   onClick={() => setIsContactOpen(true)}
                   className="text-[var(--color-candidate)] underline hover:no-underline"
                 >
-                  bevislyapp@gmail.com
+                  hello@bevisly.com
                 </button>{" "}
                 or use the Feedback button on the site.
               </p>

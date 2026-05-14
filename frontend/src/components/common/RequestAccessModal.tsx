@@ -25,7 +25,7 @@ export default function RequestAccessModal({ isOpen, onClose }: RequestAccessMod
     try {
       const { error: adminMailError } = await supabase.functions.invoke("send-email", {
         body: {
-          to: ["bevislyapp@gmail.com"], // Send request to admin
+          to: ["hello@bevisly.com"],
           subject: `🚀 New Beta Request: ${name} (${company})`,
           html: getAdminNotificationTemplate(name, email, company, "Beta Access"),
         },

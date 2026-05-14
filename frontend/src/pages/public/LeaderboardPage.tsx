@@ -21,6 +21,7 @@ export default function PublicLeaderboard({ isWorkspaceView = false }: { isWorks
       const { data, error } = await supabase
         .from("profiles")
         .select("id, full_name, bevisly_score, avatar_url")
+        .eq("role", "candidate")
         .order("bevisly_score", { ascending: false })
         .limit(20);
 
