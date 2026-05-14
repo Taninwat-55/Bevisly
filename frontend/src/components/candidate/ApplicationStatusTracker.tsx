@@ -6,6 +6,7 @@ type Application = {
   id: string;
   hiring_stage: HiringStage | string | null;
   status: string | null;
+  proof_task_id: string | null;
   jobs: { id: string; title: string; company: string } | null;
   created_at: string | null;
 };
@@ -114,6 +115,14 @@ export default function ApplicationStatusTracker({ applications }: Props) {
             <div className="shrink-0">
               {isTerminal ? (
                 <TerminalBadge stage={app.hiring_stage!} />
+              ) : app.status === "in_progress" && app.proof_task_id ? (
+                <Link
+                  to={`/candidate/proof/${app.proof_task_id}`}
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-500/10 text-amber-600 border border-amber-500/20 hover:bg-amber-500/20 transition-colors"
+                >
+                  <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
+                  Continue
+                </Link>
               ) : (
                 <div className="flex flex-col items-end gap-1">
                   <StepIndicator currentStep={stepIndex} />

@@ -1082,6 +1082,7 @@ export async function getCandidateApplications(userId: string) {
       created_at,
       hiring_stage,
       status,
+      proof_task_id,
       jobs:job_id ( id, title, company )
     `)
     .eq("user_id", userId)
