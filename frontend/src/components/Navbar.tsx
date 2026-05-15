@@ -14,6 +14,7 @@ const navLinks: NavLink[] = [
   { label: "Home", to: "/" },
   { label: "Jobs", to: "/jobs" },
   { label: "Companies", to: "/companies" },
+  { label: "Blog", to: "/blog" },
   { label: "Help", to: "/docs" },
 ];
 

@@ -53,6 +53,8 @@ const JobDetailPage = lazy(() => import("@/pages/jobs/JobDetailPage"));
 const JobListingPage = lazy(() => import("@/pages/jobs/JobListingPage"));
 const CompanyBrandPage = lazy(() => import("@/pages/public/CompanyBrandPage"));
 const CompaniesPage = lazy(() => import("@/pages/public/CompaniesPage"));
+const BlogIndexPage = lazy(() => import("@/pages/blog/BlogIndexPage"));
+const BlogPostPage = lazy(() => import("@/pages/blog/BlogPostPage"));
 
 export const router = createBrowserRouter([
   // Public Pages with shared layout
@@ -73,6 +75,8 @@ export const router = createBrowserRouter([
       { path: "/privacy", element: <PrivacyPolicy /> },
       { path: "/about", element: <AboutPage /> },
       { path: "/docs", element: <DocsPage /> },
+      { path: "/blog", element: <BlogIndexPage /> },
+      { path: "/blog/:slug", element: <BlogPostPage /> },
     ],
   },
 
