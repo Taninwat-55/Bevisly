@@ -195,12 +195,6 @@ export default function PracticeWorkspace() {
             {scoreLabel(gradeResult.score)}
           </div>
 
-          {gradeResult.credits_earned > 0 && (
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-400 font-semibold text-sm">
-              <Zap size={15} />
-              +{gradeResult.credits_earned} Credits Earned
-            </div>
-          )}
         </div>
 
         {/* Feedback */}

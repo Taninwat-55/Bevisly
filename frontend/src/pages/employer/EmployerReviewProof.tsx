@@ -33,7 +33,7 @@ import {
   MessageSquare,
   CalendarCheck,
 } from "lucide-react";
-import { distributeCredits } from "@/lib/api/credits";
+
 import { Star, Sparkles } from "lucide-react";
 
 // Inline TaskRequirementsPanel (original was deleted)
@@ -576,16 +576,6 @@ export default function EmployerReviewProof({
       });
 
       await updateSubmissionStatus(submission.id, "reviewed");
-
-      if (finalStars >= 4) {
-        await distributeCredits(
-          submission.user_id || "",
-          50,
-          "quality_bonus",
-          submission.id,
-        );
-        toast.success("Quality Bonus (50 Credits) awarded");
-      }
 
       toast.success("Feedback submitted");
 
