@@ -32,7 +32,7 @@ export default defineConfig({
           "vendor-ui": ["framer-motion", "lucide-react", "@headlessui/react"],
           "vendor-utils": ["@supabase/supabase-js"],
           "vendor-dnd": ["@dnd-kit/core", "@dnd-kit/sortable", "@dnd-kit/utilities"],
-          "vendor-markdown": ["react-markdown"],
+          "vendor-markdown": ["react-markdown", "remark-gfm"],
         },
       },
     },

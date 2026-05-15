@@ -3,6 +3,7 @@ import { createClient } from "@supabase/supabase-js";
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
+import matter from "gray-matter";
 
 // Polyfill for __dirname in ESM
 const __filename = fileURLToPath(import.meta.url);
@@ -48,7 +49,14 @@ async function generateSitemap() {
     { url: "/", changefreq: "daily", priority: 1.0 },
     { url: "/auth", changefreq: "monthly", priority: 0.8 },
     { url: "/leaderboard", changefreq: "daily", priority: 0.9 },
+    { url: "/blog", changefreq: "weekly", priority: 0.8 },
   ];
+
+  // 4. Blog Posts from markdown files
+  const blogDir = path.resolve(__dirname, "../src/content/blog");
+  const blogFiles = fs.existsSync(blogDir)
+    ? fs.readdirSync(blogDir).filter((f) => f.endsWith(".md"))
+    : [];
 
   /* ─── XML Generation ────────────────────────────────────────────── */
   let sitemap = `<?xml version="1.0" encoding="UTF-8"?>
@@ -76,6 +84,21 @@ async function generateSitemap() {
 `;
   });
 
+  // Add Blog Post Routes
+  blogFiles.forEach((file) => {
+    const raw = fs.readFileSync(path.join(blogDir, file), "utf-8");
+    const { data } = matter(raw);
+    const slug = data.slug ?? file.replace(".md", "");
+    const lastmod = new Date(data.updatedDate ?? data.date ?? Date.now()).toISOString();
+    sitemap += `  <url>
+    <loc>${BASE_URL}/blog/${slug}</loc>
+    <lastmod>${lastmod}</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+`;
+  });
+
   // Add Profile Routes
   profiles?.forEach((profile) => {
     if (profile.username) {
@@ -97,6 +120,7 @@ async function generateSitemap() {
 
   console.log(`✅ Sitemap generated successfully with:`);
   console.log(`   - ${staticRoutes.length} static routes`);
+  console.log(`   - ${blogFiles.length} blog posts`);
   console.log(`   - ${jobs?.length || 0} job posts`);
   console.log(`   - ${profiles?.length || 0} public profiles`);
   console.log(`   Saved to: ${path.join(publicDir, "sitemap.xml")}`);
