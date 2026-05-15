@@ -54,10 +54,43 @@ export default function LandingPage() {
         "name": "Bevisly",
         "url": "https://bevisly.com",
         "logo": "https://bevisly.com/logo.png",
+        "contactPoint": {
+          "@type": "ContactPoint",
+          "email": "hello@bevisly.com",
+          "contactType": "customer support"
+        },
         "sameAs": [
           "https://twitter.com/bevisly",
           "https://linkedin.com/company/bevisly"
         ]
+      },
+      {
+        "@type": "WebSite",
+        "name": "Bevisly",
+        "url": "https://bevisly.com",
+        "description": "The proof-first hiring platform for junior talent. Candidates complete real tasks to apply. Employers review actual work, not CVs.",
+        "potentialAction": {
+          "@type": "SearchAction",
+          "target": {
+            "@type": "EntryPoint",
+            "urlTemplate": "https://bevisly.com/jobs?q={search_term_string}"
+          },
+          "query-input": "required name=search_term_string"
+        }
+      },
+      {
+        "@type": "SoftwareApplication",
+        "name": "Bevisly",
+        "applicationCategory": "BusinessApplication",
+        "operatingSystem": "Web",
+        "url": "https://bevisly.com",
+        "description": "Proof-first hiring platform. Candidates complete employer-set tasks to prove their skills. Employers shortlist based on real deliverables, not self-reported experience.",
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "EUR",
+          "description": "Free for candidates. Employer plans available."
+        }
       },
       {
         "@type": "FAQPage",
@@ -84,6 +117,54 @@ export default function LandingPage() {
             "acceptedAnswer": {
               "@type": "Answer",
               "text": "Yes, always. Complete proof tasks, build your verified portfolio, and keep your credentials forever — at no cost. Candidates should never pay to prove themselves."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "How is Bevisly different from LinkedIn or traditional job boards?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Traditional job boards filter on credentials — degree, job title, years of experience. Bevisly filters on demonstrated ability. Every application includes a short proof task, so employers compare actual work output rather than self-reported claims. This is especially valuable for recent graduates and career switchers who lack conventional credentials."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Does Bevisly comply with EU pay transparency requirements?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Yes. Every job posted on Bevisly requires a salary range (min and max) before it can go live. This aligns with the EU Pay Transparency Directive and ensures candidates can self-select before investing time in a proof task."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "How does the AI feedback system work?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "When an employer reviews a submission, Bevisly's AI (powered by Gemini) suggests a rating and a feedback paragraph based on the proof task rubric. The AI points to specific parts of the submission to justify its suggestion. The employer always makes the final decision — AI is decision support, never the decision."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "What is the Bevisly Responsibility Score?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "The Responsibility Score is an anti-ghosting accountability metric. For employers, it tracks how consistently they review submissions and give feedback. For candidates, it tracks proof completion rate and profile completeness. Both scores are visible publicly to build trust on both sides of the hiring process."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "How do candidates get shortlisted on Bevisly?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Candidates apply by completing a short proof task — typically 30 minutes — set by the employer. The employer reviews the submitted work using a pre-defined rubric and ranks candidates based on their output. Strong proof submissions are the primary shortlisting signal, not CV formatting or keyword matching."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Can I use Bevisly to hire remotely across Europe?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Yes. Bevisly supports remote, hybrid, and on-site roles. Employers can specify location requirements, and candidates can filter job listings by location. The proof task format works equally well for distributed teams since it's asynchronous and completed independently."
             }
           }
         ]
@@ -122,6 +203,19 @@ export default function LandingPage() {
     <div className="bg-[var(--color-bg)] min-h-screen font-sans selection:bg-[var(--color-brand-primary)] selection:text-white">
       <Helmet>
         <title>Bevisly — Proof-First Hiring for Junior Talent</title>
+        <meta name="description" content="Bevisly is the proof-first hiring platform for junior talent. Candidates prove skills with 30-minute tasks. Employers review real work, not CVs." />
+        <link rel="canonical" href="https://bevisly.com/" />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://bevisly.com/" />
+        <meta property="og:title" content="Bevisly — Proof-First Hiring for Junior Talent" />
+        <meta property="og:description" content="Stop hiring based on self-reported skills. Bevisly validates candidate ability with real proof tasks. Free for candidates, built for startups and SMEs." />
+        <meta property="og:image" content="https://bevisly.com/logo.png" />
+        <meta property="og:site_name" content="Bevisly" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:site" content="@bevisly" />
+        <meta name="twitter:title" content="Bevisly — Proof-First Hiring for Junior Talent" />
+        <meta name="twitter:description" content="Stop hiring based on self-reported skills. Bevisly validates candidate ability with real proof tasks." />
+        <meta name="twitter:image" content="https://bevisly.com/logo.png" />
         <script type="application/ld+json">{JSON.stringify(structuredData)}</script>
       </Helmet>
       <main>

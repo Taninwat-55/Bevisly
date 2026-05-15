@@ -279,10 +279,19 @@ export default function JobDetailPage() {
       {job && (
         <Helmet>
           <title>{`${job.title} at ${job.company} | Bevisly`}</title>
-          <meta name="description" content={`Apply for the ${job.title} role at ${job.company}. Verified proof-based hiring.`} />
-          <meta property="og:title" content={`${job.title} at ${job.company}`} />
-          <meta property="og:description" content={job.description?.slice(0, 150) + "..."} />
+          <meta name="description" content={`Apply for the ${job.title} role at ${job.company}. Proof-based hiring — demonstrate your skills with a real task, not a CV.`} />
+          <link rel="canonical" href={`https://bevisly.com/jobs/${job.id}`} />
           <meta property="og:type" content="website" />
+          <meta property="og:url" content={`https://bevisly.com/jobs/${job.id}`} />
+          <meta property="og:title" content={`${job.title} at ${job.company} | Bevisly`} />
+          <meta property="og:description" content={job.description?.slice(0, 160) ?? `Apply for the ${job.title} role at ${job.company} on Bevisly.`} />
+          <meta property="og:image" content="https://bevisly.com/logo.png" />
+          <meta property="og:site_name" content="Bevisly" />
+          <meta name="twitter:card" content="summary_large_image" />
+          <meta name="twitter:site" content="@bevisly" />
+          <meta name="twitter:title" content={`${job.title} at ${job.company} | Bevisly`} />
+          <meta name="twitter:description" content={`Proof-based hiring for ${job.title} at ${job.company}. Apply with a real task, not a CV.`} />
+          <meta name="twitter:image" content="https://bevisly.com/logo.png" />
           <script type="application/ld+json">{jobSchema}</script>
         </Helmet>
       )}

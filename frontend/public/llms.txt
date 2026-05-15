@@ -1,0 +1,45 @@
+# Bevisly
+
+> Bevisly is the proof-first hiring platform for junior talent, recent graduates, and career switchers. Employers post jobs and evaluate candidates through short, structured proof tasks — not CVs or self-reported credentials.
+
+## What Bevisly does
+
+- Employers post job listings with an attached proof task (typically 30 minutes)
+- Candidates complete the task and submit real work as their application
+- Employers review submissions using a rubric they defined upfront
+- AI (Gemini) suggests a rating and feedback paragraph, citing specific parts of the submission — but the employer makes the final decision
+- Candidates build a verified portfolio of proof submissions (the Proof Vault) visible on their public profile
+- Both employers and candidates have accountability scores: Employer Responsibility Score (anti-ghosting) and Candidate Reliability Score
+
+## Key principles
+
+- AI is decision support, never the decision maker
+- All AI feedback is grounded in rubric criteria the employer set upfront
+- Salary range is required on every job listing (EU Pay Transparency Directive compliance)
+- Candidates never pay to use Bevisly
+- Evidence over opinion — AI claims must point to the specific part of the submission they reference
+
+## Who it's for
+
+- **Employers:** Startups and SMEs (especially Nordic companies) that need to hire junior-to-mid level talent efficiently without a large HR team
+- **Candidates:** Recent graduates, career switchers, and students who lack conventional credentials but want to demonstrate real ability
+
+## Contact
+
+- Website: https://bevisly.com
+- Email: hello@bevisly.com
+
+## Pages
+
+- / — Landing page, platform overview
+- /jobs — All open job listings
+- /companies — All companies hiring on Bevisly
+- /leaderboard — Top candidates ranked by Bevisly Score
+- /pricing — Employer pricing plans
+- /about — About Bevisly
+- /docs — Documentation and help
+- /privacy — Privacy policy
+- /@:username — Public candidate profile (e.g. /@johndoe)
+- /company/:slug — Public employer brand page (e.g. /company/acme)
+- /proof/:id — Publicly shareable proof certificate
+- /jobs/:id — Individual job listing detail page
