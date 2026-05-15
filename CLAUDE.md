@@ -140,7 +140,7 @@ supabase migration new <migration-name>
 
 ## Current Task
 
-Only Stripe integration remains before cold outreach begins.
+Full user flow walkthrough (E2E test) — the last step before cold outreach begins.
 
 - **Sprint #1 (done):** Bevisly Score + Featured Proofs — unified score and pinned proof highlights on candidate profiles.
 - **Sprint #2 (done):** Responsibility Score + Employer Brand Page — anti-ghosting accountability scores (employer + candidate) via DB triggers, public `/company/:slug` brand pages, score badges on job cards and profiles, Docs & Help page, navbar/footer polish.
@@ -151,13 +151,6 @@ Only Stripe integration remains before cold outreach begins.
 ## Pre-Launch Roadmap
 
 Features still pending before sending cold emails to employers. Shipped features are recorded in `CHANGELOG.md`.
-
-### ⬜ Stripe Payment Integration
-Wire up Stripe before sending cold emails — a pricing page with no working checkout undermines credibility.
-- Stripe Checkout for subscription plans (Free / Pro)
-- Webhook → updates `profiles.subscription_tier` in Supabase on payment
-- "Manage Billing" button → Stripe Customer Portal
-- Gate Pro features behind subscription check
 
 ### ✅ AI Framing & Disclaimers (Anti-Bias Hygiene)
 Renamed "AI suggested rating" → "AI evidence summary", added one-line disclaimer under every AI-generated rating, added "How Bevisly uses AI" section to `/docs`.
@@ -182,6 +175,13 @@ The remaining Fairness & Evidence Layer phases (blind first review, override jus
 
 Features to build after launch and initial traction. Full list in `PRODUCT_ROADMAP.md`.
 
+### ⬜ Stripe Payment Integration
+Wire up once there's real traffic and validated demand — a pricing page without working checkout is acceptable at launch while we test the product.
+- Stripe Checkout for subscription plans (Free / Pro)
+- Webhook → updates `profiles.subscription_tier` in Supabase on payment
+- "Manage Billing" button → Stripe Customer Portal
+- Gate Pro features behind subscription check
+
 ### ⬜ Fairness & Evidence Layer
 Four remaining phases that operationalise the Product Principles once we have real employer usage data: blind first review, required justification on override, employer consistency dashboard with fairness alerts, and weekly AI self-audit. (Phase 1 — Locked Rubric — was promoted to pre-launch on 2026-05-08.) See `PRODUCT_ROADMAP.md` feature #19.
 
@@ -194,6 +194,6 @@ In-app AI assistant powered by Gemini. Dual-purpose: helps candidates refine app
 ---
 
 ## Additional Pre-Launch Checks
-- Full user flow walkthrough for both candidate and employer roles
-- Pricing research: validate plan prices against comparable tools (Workable, Lever, etc.)
+- ⬜ Full user flow walkthrough for both candidate and employer roles
+- ⬜ Pricing research: validate plan prices against comparable tools (Workable, Lever, etc.)
 - ✅ Onboarding experience: employer and candidate first-login guidance — done via WelcomeBanner with role-specific steps and action links
