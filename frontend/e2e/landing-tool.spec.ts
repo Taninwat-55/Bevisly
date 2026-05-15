@@ -33,9 +33,7 @@ test.describe("Tool-First Landing Page", () => {
         await page.goto("/");
 
         // 3. Ensure we see the default hero search bar
-        const searchInput = page.getByPlaceholder(
-            "e.g. Need a Senior React Developer...",
-        );
+        const searchInput = page.locator('input[placeholder*="Frontend Developer"], input[placeholder*="developer"], textarea[placeholder*="developer"]').first();
         await expect(searchInput).toBeVisible();
 
         // 4. Enter a prompt
@@ -48,15 +46,15 @@ test.describe("Tool-First Landing Page", () => {
         await expect(generateBtn).toBeVisible();
         await generateBtn.click({ force: true });
 
-        // 6. Verify the Loading Skeleton appears
-        await expect(page.getByText("Analyzing Requirements...")).toBeVisible();
+        // 6. Verify the loading state appears (AILoadingState cycles through steps)
+        await expect(page.getByText(/Analyzing your job requirements/i)).toBeVisible();
 
-        // 7. Wait for the Success Output to render (this will now happen instantly)
-        await expect(page.getByText("AI Generated")).toBeVisible();
+        // 7. Wait for the Success Output to render (mock resolves after 1s delay)
+        await expect(page.getByText(/Job Listing|1\. Job/i)).toBeVisible({ timeout: 5000 });
 
         // 8. Verify the conversion CTA appears
         const convertBtn = page.getByRole("button", {
-            name: /Post this Job for Free/i,
+            name: /Post This Role|Post this Job|Find.*Talent/i,
         });
         await expect(convertBtn).toBeVisible();
 

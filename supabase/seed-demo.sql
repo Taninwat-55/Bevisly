@@ -79,7 +79,7 @@ BEGIN
     employer_id, company_id,
     location, status, job_type, work_mode,
     compensation_type, salary_min, salary_max,
-    show_salary_range, pay_period,
+    show_salary_range, pay_period, payment_currency,
     required_skills, is_public, featured
   ) VALUES (
     gen_random_uuid(),
@@ -89,7 +89,7 @@ BEGIN
     v_employer_id,
     v_company_id,
     'Remote (Europe)',
-    'open',
+    'active',
     'full-time',
     'remote',
     'salary',
@@ -97,6 +97,7 @@ BEGIN
     650000,
     true,
     'yearly',
+    'EUR',
     ARRAY['React', 'TypeScript', 'CSS', 'JavaScript'],
     true,
     true

@@ -605,6 +605,29 @@ export default function EmployerJobForm({
               </p>
             </Card>
 
+            {/* Featured Job Placeholder */}
+            <Card className="p-5 border border-[var(--color-border)] shadow-sm">
+              <label className="flex items-start gap-3 cursor-not-allowed opacity-60">
+                <input
+                  type="checkbox"
+                  checked={false}
+                  disabled
+                  className="mt-0.5 h-4 w-4 rounded border-[var(--color-border)] accent-[var(--color-brand-primary)]"
+                />
+                <div>
+                  <span className="text-sm font-semibold text-[var(--color-text)]">
+                    Featured Job
+                    <span className="ml-2 text-[10px] font-bold uppercase tracking-widest px-1.5 py-0.5 rounded-md bg-amber-100 dark:bg-amber-900/40 text-amber-600 dark:text-amber-400 border border-amber-200 dark:border-amber-800">
+                      Paid — coming soon
+                    </span>
+                  </span>
+                  <p className="text-xs text-[var(--color-text-muted)] mt-0.5">
+                    Boost your listing to the top of search results and the homepage for 30 days. $99 per job.
+                  </p>
+                </div>
+              </label>
+            </Card>
+
             {/* Step 1 Nav */}
             <div className="flex items-center justify-end pt-2">
               <Button

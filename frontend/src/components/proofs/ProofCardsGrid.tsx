@@ -104,7 +104,7 @@ export default function ProofCardsGrid({
 
               <div className="relative rounded-[calc(1rem-1px)] bg-[var(--color-surface)] flex flex-col h-full overflow-hidden">
 
-                <div className="flex items-center justify-between px-4 pt-4 pb-3 border-b border-white/5">
+                <div className="flex items-center justify-between px-4 pt-4 pb-3 border-b border-[var(--color-border)]">
                   <div className="flex items-center gap-2.5">
                     <div className="flex items-center gap-1.5">
                       <BadgeCheck size={13} className="text-violet-400 shrink-0" />
@@ -196,7 +196,7 @@ export default function ProofCardsGrid({
 
                 {allowTogglePublic && sid && (
                   <div className="px-4 pb-4">
-                    <div className="pt-3 border-t border-white/5 flex items-center justify-between gap-2">
+                    <div className="pt-3 border-t border-[var(--color-border)] flex items-center justify-between gap-2">
                       <span className="flex items-center gap-1.5 text-xs font-medium">
                         {card.is_public ? (
                           <>
@@ -230,8 +230,8 @@ export default function ProofCardsGrid({
                             card.is_featured
                               ? "text-amber-400 hover:text-amber-300"
                               : !card.is_featured && featuredCount >= 3
-                              ? "text-white/20 cursor-not-allowed"
-                              : "text-white/30 hover:text-amber-400",
+                              ? "text-slate-300 dark:text-white/20 cursor-not-allowed"
+                              : "text-slate-400 dark:text-white/30 hover:text-amber-400",
                             toggling[`feat_${sid}`] ? "opacity-50 cursor-not-allowed" : "",
                           ].join(" ")}
                         >
@@ -257,7 +257,7 @@ export default function ProofCardsGrid({
                           title={card.is_public ? "Make Private" : "Make Public"}
                           className={[
                             "relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 focus:outline-none",
-                            card.is_public ? "bg-emerald-500" : "bg-white/10",
+                            card.is_public ? "bg-emerald-500" : "bg-slate-300 dark:bg-white/10",
                             toggling[sid] ? "opacity-50 cursor-not-allowed" : "",
                           ].join(" ")}
                         >

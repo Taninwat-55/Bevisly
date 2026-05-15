@@ -1,4 +1,8 @@
 import { defineConfig, devices } from "@playwright/test";
+import { config } from "dotenv";
+
+// Load test credentials from .env.test.local (git-ignored)
+config({ path: ".env.test.local" });
 
 /**
  * See https://playwright.dev/docs/test-configuration.
