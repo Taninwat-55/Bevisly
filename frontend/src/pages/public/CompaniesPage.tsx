@@ -65,8 +65,19 @@ export default function CompaniesPage() {
   return (
     <>
       <Helmet>
-        <title>Companies — Bevisly</title>
-        <meta name="description" content="Browse companies hiring on Bevisly. Every role includes a proof task." />
+        <title>Companies Hiring on Bevisly — Proof-Based Recruitment</title>
+        <meta name="description" content="Browse startups and SMEs hiring on Bevisly. Every role includes a proof task — apply with real work, not a CV." />
+        <link rel="canonical" href="https://bevisly.com/companies" />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://bevisly.com/companies" />
+        <meta property="og:title" content="Companies Hiring on Bevisly" />
+        <meta property="og:description" content="Browse startups and SMEs hiring on Bevisly. Every role includes a proof task — apply with real work, not a CV." />
+        <meta property="og:image" content="https://bevisly.com/logo.png" />
+        <meta property="og:site_name" content="Bevisly" />
+        <meta name="twitter:card" content="summary" />
+        <meta name="twitter:site" content="@bevisly" />
+        <meta name="twitter:title" content="Companies Hiring on Bevisly" />
+        <meta name="twitter:description" content="Browse startups and SMEs hiring on Bevisly. Apply with real work, not a CV." />
       </Helmet>
 
       {/* Header */}

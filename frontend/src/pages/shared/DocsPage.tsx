@@ -373,15 +373,14 @@ export default function DocsPage() {
     <div className="min-h-screen bg-[var(--color-bg)] text-[var(--color-text)] transition-colors pb-24">
       <Helmet>
         <title>Docs & Help — Bevisly</title>
-        <meta
-          name="description"
-          content="Everything you need to know about how Bevisly works — proof tasks, scores, employer tools, and FAQ."
-        />
+        <meta name="description" content="Everything you need to know about how Bevisly works — proof tasks, scores, employer tools, and FAQ." />
+        <link rel="canonical" href="https://bevisly.com/docs" />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://bevisly.com/docs" />
         <meta property="og:title" content="Docs & Help — Bevisly" />
-        <meta
-          property="og:description"
-          content="Bevisly is a proof-of-work hiring platform. Candidates complete real tasks to apply. Employers review actual output, not CVs."
-        />
+        <meta property="og:description" content="Bevisly is a proof-of-work hiring platform. Candidates complete real tasks to apply. Employers review actual output, not CVs." />
+        <meta property="og:image" content="https://bevisly.com/logo.png" />
+        <meta property="og:site_name" content="Bevisly" />
       </Helmet>
 
       {/* ── Hero Banner ── */}
