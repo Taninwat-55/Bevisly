@@ -4,9 +4,10 @@ import type { CandidateFeedbackEntry } from "@/types/candidate";
 interface ProofCardProps {
   proof: CandidateFeedbackEntry;
   onClick: () => void;
+  isUnseen?: boolean;
 }
 
-export default function ProofCard({ proof, onClick }: ProofCardProps) {
+export default function ProofCard({ proof, onClick, isUnseen = false }: ProofCardProps) {
   const fb = proof.feedback?.[0];
   const reviewed = proof.status === "reviewed" && fb;
   const company = proof.jobs?.company;
@@ -55,9 +56,15 @@ export default function ProofCard({ proof, onClick }: ProofCardProps) {
 
           {/* Status badge */}
           {reviewed ? (
-            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 text-[11px] font-bold uppercase tracking-wider shrink-0">
+            <div className="relative flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 text-[11px] font-bold uppercase tracking-wider shrink-0">
               <CheckCircle2 size={12} />
               Reviewed
+              {isUnseen && (
+                <span className="absolute -top-1 -right-1 flex h-3 w-3">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75" />
+                  <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500 ring-2 ring-[var(--color-surface)]" />
+                </span>
+              )}
             </div>
           ) : (
             <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-500 text-[11px] font-bold uppercase tracking-wider shrink-0">

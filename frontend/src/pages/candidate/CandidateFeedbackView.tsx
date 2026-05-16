@@ -7,6 +7,7 @@ import ProofDetailModal from "@/components/proofs/ProofDetailModal";
 import { ShieldCheck } from "lucide-react";
 import type { CandidateFeedbackEntry } from "@/types/candidate";
 import { FileCheck } from "lucide-react";
+import { getUnseenIds, cacheUnseenCount, markFeedbackSeen } from "@/hooks/useUnseenFeedback";
 
 export default function CandidateFeedbackView() {
   const { user } = useAuth();
@@ -14,14 +15,32 @@ export default function CandidateFeedbackView() {
   const [selectedProof, setSelectedProof] =
     useState<CandidateFeedbackEntry | null>(null);
   const [loading, setLoading] = useState(true);
+  const [unseenIds, setUnseenIds] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     if (!user?.id) return;
     getCandidateFeedback(user.id)
-      .then((data) => setProofs(data))
+      .then((data) => {
+        setProofs(data);
+        const unseen = getUnseenIds(data);
+        setUnseenIds(unseen);
+        cacheUnseenCount(unseen.size);
+      })
       .catch((err) => toast.error(err.message))
       .finally(() => setLoading(false));
   }, [user?.id]);
+
+  function handleCardClick(proof: CandidateFeedbackEntry) {
+    if (unseenIds.has(proof.id)) {
+      markFeedbackSeen(proof.id);
+      setUnseenIds((prev) => {
+        const next = new Set(prev);
+        next.delete(proof.id);
+        return next;
+      });
+    }
+    setSelectedProof(proof);
+  }
 
   if (loading)
     return (
@@ -75,7 +94,8 @@ export default function CandidateFeedbackView() {
             <ProofCard
               key={proof.id}
               proof={proof}
-              onClick={() => setSelectedProof(proof)}
+              isUnseen={unseenIds.has(proof.id)}
+              onClick={() => handleCardClick(proof)}
             />
           ))}
         </div>
