@@ -51,8 +51,8 @@ export async function updateProfileName(full_name: string) {
 
   const { error } = await supabase
     .from("profiles")
-    .upsert({ id: user.id, full_name })
-    .select();
+    .update({ full_name })
+    .eq("id", user.id);
 
   if (error) throw error;
 }
@@ -79,8 +79,8 @@ export async function updateProfileData(
 ) {
   const { error } = await supabase
     .from("profiles")
-    .upsert({ id: userId, ...data })
-    .select();
+    .update(data)
+    .eq("id", userId);
 
   if (error) throw error;
 }
