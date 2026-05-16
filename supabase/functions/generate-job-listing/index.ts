@@ -91,44 +91,57 @@ Deno.serve(async (req) => {
         }
 
         const prompt = `
-      Act as an expert Technical Hiring Manager for ${
-            company_name || "a tech company"
-        }.
-      Based on the following raw, unstructured inputs from a hiring manager, generate a compelling Job Description, extract a concise Job Title, list the Requirements, and design a practical Proof Task.
-      
-      Raw Input / Ideas:
-      ${raw_input}
+Act as an expert Technical Hiring Manager for ${company_name || "a tech company"}.
+Based on the following raw, unstructured input from a hiring manager, generate a complete job listing with a proof task.
 
-      The Job Title should be concise and professional (e.g. "Senior React Developer", "Growth Marketing Specialist").
-      The Job Description should be engaging and highlight the impact of the role.
-      The Requirements should be clear bullet points.
-      The Proof Task should be a realistic challenge (45-60 mins) to verify the core skills implied by the input.
+Raw Input:
+${raw_input}
 
-      Each Proof Task MUST include a "rubric_criteria" array of exactly 3 weighted scoring criteria:
-        - "name": short label (2–4 words), e.g. "Code clarity", "Problem decomposition", "UX polish"
-        - "weight": integer 1–100; the three weights MUST sum to exactly 100
-        - "description": one-line plain-English description of what 'good' looks like for that criterion
-      Pick criteria that match the actual skill being tested by the task.
+Instructions:
+- Job Title: concise and professional (e.g. "Senior React Developer", "Growth Marketing Specialist")
+- Job Description: engaging, highlights the impact of the role (use markdown)
+- Requirements: clear markdown bullet points
+- Job Type: infer from input — one of: "Full-time", "Part-time", "Contract", "Internship", "Freelance", "Volunteer". Default to "Full-time" if unclear.
+- Work Mode: infer from input — one of: "Remote", "On-site", "Hybrid". Default to "Remote" if unclear.
+- Location: extract city/country if mentioned, use "Remote" if it's a remote role, or leave empty string "" if not mentioned.
+- Proof Task: a realistic, practical challenge (~30 minutes) that directly tests the core skills this role requires.
 
-      Return ONLY a JSON object with this exact structure (no markdown formatting):
-      {
-        "title": "Extracted Job Title",
-        "description": "Full job description text (can use markdown)",
-        "requirements": "List of requirements (markdown bullet points)",
-        "proof_tasks": [
-          {
-            "title": "Task Title",
-            "description": "Detailed instructions...",
-            "expected_time": "45-60 mins",
-            "submission_format": "github_repo",
-            "rubric_criteria": [
-              { "name": "Code clarity", "weight": 30, "description": "Readable structure, clear naming" },
-              { "name": "Problem decomposition", "weight": 40, "description": "Breaks the problem into clean steps" },
-              { "name": "Edge-case handling", "weight": 30, "description": "Anticipates failure modes and inputs" }
-            ]
-          }
-        ]
-      }
+Each Proof Task MUST include:
+1. "rubric_criteria": exactly 3 weighted scoring criteria
+   - "name": short label (2–4 words), e.g. "Code clarity", "Problem decomposition", "UX polish"
+   - "weight": integer 1–100; all three weights MUST sum to exactly 100
+   - "description": one-line plain-English description of what 'good' looks like
+   Pick criteria that directly match the skill being tested.
+
+2. "follow_up_questions": exactly 2–3 short interview probe questions based on the task (e.g. "Walk us through your approach.", "What trade-offs did you consider?", "How would you improve this given more time?")
+
+Return ONLY a JSON object with this exact structure (no markdown, no code fences):
+{
+  "title": "Extracted Job Title",
+  "description": "Full job description (markdown ok)",
+  "requirements": "Requirements as markdown bullet points",
+  "job_type": "Full-time",
+  "work_mode": "Remote",
+  "location": "",
+  "proof_tasks": [
+    {
+      "title": "Task Title",
+      "description": "Detailed task instructions...",
+      "expected_time": "30-45 mins",
+      "submission_format": "github_repo",
+      "rubric_criteria": [
+        { "name": "Code clarity", "weight": 40, "description": "Readable structure, clear naming" },
+        { "name": "Problem decomposition", "weight": 35, "description": "Breaks the problem into clean logical steps" },
+        { "name": "Edge-case handling", "weight": 25, "description": "Anticipates failure modes and edge inputs" }
+      ],
+      "follow_up_questions": [
+        "Walk us through your approach to this challenge.",
+        "What trade-offs did you consider?",
+        "How would you improve this given more time?"
+      ]
+    }
+  ]
+}
     `;
 
         const model = "gemini-2.5-flash"; // Updated from deprecated 1.5-flash

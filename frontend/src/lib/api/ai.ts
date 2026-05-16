@@ -6,13 +6,17 @@ import type { RubricCriterion, RubricScore } from "@/types";
 export interface GeneratedJobListing {
     title: string;
     description: string;
-    requirements: string; // Edge function returns markdown bullet points.
+    requirements: string;
+    job_type?: string;
+    work_mode?: string;
+    location?: string;
     proof_tasks: {
         title: string;
         description: string;
         expected_time: string;
         submission_format: string;
         rubric_criteria?: RubricCriterion[];
+        follow_up_questions?: string[];
     }[];
 }
 
