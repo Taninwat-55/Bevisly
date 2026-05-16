@@ -6,6 +6,7 @@ import DOMPurify from "dompurify";
 import { motion } from "framer-motion";
 import { createFeedback } from "@/lib/api/feedback";
 import { suggestFeedback } from "@/lib/api/ai";
+import SubmissionBreakdownCard, { type AIBreakdownResult } from "@/components/employer/SubmissionBreakdownCard";
 import {
   updateSubmissionStatus,
   getSubmissionById,
@@ -411,6 +412,7 @@ export default function EmployerReviewProof({
   const [currentIndex, setCurrentIndex] = useState<number>(0);
   const [requestingDiscussion, setRequestingDiscussion] = useState(false);
   const [discussionRequested, setDiscussionRequested] = useState(false);
+  const [aiResult, setAiResult] = useState<AIBreakdownResult | null>(null);
 
   const rubricCriteria = submission?.proof_tasks?.rubric_criteria ?? null;
   const hasRubric = Array.isArray(rubricCriteria) && rubricCriteria.length > 0;
@@ -454,6 +456,10 @@ export default function EmployerReviewProof({
     loadSubmission();
   }, [id]);
 
+  useEffect(() => {
+    setAiResult(null);
+  }, [id]);
+
   const totalSubmissions = submissionsCache.current.length;
   const prevCandidate =
     currentIndex > 0 ? submissionsCache.current[currentIndex - 1] : null;
@@ -493,22 +499,14 @@ export default function EmployerReviewProof({
         result &&
         (result.strengths || result.improvements || result.rubric_scores)
       ) {
-        if (Array.isArray(result.rubric_scores) && result.rubric_scores.length) {
-          setRubricScores(result.rubric_scores);
-          setScoresFromAI(true);
-        } else if (typeof result.suggested_rating === "number") {
-          setStars(result.suggested_rating || stars || 3);
-        }
-        if (result.strengths) {
-          setStrengths(result.strengths);
-          setStrengthsFromAI(true);
-        }
-        if (result.improvements) {
-          setImprovements(result.improvements);
-          setImprovementsFromAI(true);
-        }
+        setAiResult({
+          rubricScores: result.rubric_scores ?? undefined,
+          strengths: result.strengths ?? undefined,
+          improvements: result.improvements ?? undefined,
+          suggestedRating: result.suggested_rating ?? undefined,
+        });
         toast.success(
-          "AI evidence summary ready. Review and edit before submitting.",
+          "AI evidence summary ready. Review before applying.",
           { id: toastId },
         );
       }
@@ -522,6 +520,25 @@ export default function EmployerReviewProof({
       setSuggestingAI(false);
     }
   };
+
+  function handleApplyAIToReview() {
+    if (!aiResult) return;
+    if (Array.isArray(aiResult.rubricScores) && aiResult.rubricScores.length > 0) {
+      setRubricScores(aiResult.rubricScores);
+      setScoresFromAI(true);
+    } else if (typeof aiResult.suggestedRating === "number") {
+      setStars(aiResult.suggestedRating);
+    }
+    if (aiResult.strengths) {
+      setStrengths(aiResult.strengths);
+      setStrengthsFromAI(true);
+    }
+    if (aiResult.improvements) {
+      setImprovements(aiResult.improvements);
+      setImprovementsFromAI(true);
+    }
+    toast.success("AI summary applied. Edit before submitting.");
+  }
 
   async function handleSubmitFeedback(direction?: "next" | "previous") {
     if (!user?.id || !submission) return;
@@ -1044,6 +1061,16 @@ export default function EmployerReviewProof({
               {discussionRequested ? "Requested" : "Request Discussion"}
             </button>
           </div>
+        )}
+
+        {/* AI Breakdown Card */}
+        {aiResult && (
+          <SubmissionBreakdownCard
+            result={aiResult}
+            rubricCriteria={submission.proof_tasks?.rubric_criteria ?? null}
+            onApply={handleApplyAIToReview}
+            isLocked={!!isReviewed}
+          />
         )}
 
         {/* Scorecard */}
