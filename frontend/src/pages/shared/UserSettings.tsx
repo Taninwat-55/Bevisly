@@ -14,7 +14,7 @@ import {
   Moon, Sun, LogOut, Trash2, Camera,
   Mail, Upload, Loader2, FileJson,
   Eye, EyeOff, CreditCard, ChevronRight,
-  Sparkles, Lock, Receipt
+  Sparkles, Lock, Receipt, ImagePlus, X
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 
@@ -136,6 +136,9 @@ export default function UserSettings() {
   const [companyMission, setCompanyMission] = useState("");
   const [companyCulture, setCompanyCulture] = useState("");
   const [companyWebsite, setCompanyWebsite] = useState("");
+  const [companyTeamPhotos, setCompanyTeamPhotos] = useState<string[]>([]);
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
+  const teamPhotoInputRef = useRef<HTMLInputElement>(null);
 
   // Prefs state
   const [emailNotif, setEmailNotif] = useState(true);
@@ -164,6 +167,7 @@ export default function UserSettings() {
       setCompanyMission(currentCompanyRecord.mission || "");
       setCompanyCulture(currentCompanyRecord.culture || "");
       setCompanyWebsite(currentCompanyRecord.website_url || "");
+      setCompanyTeamPhotos(currentCompanyRecord.team_photos ?? []);
     }
   }, [currentCompanyRecord]);
 
@@ -207,6 +211,53 @@ export default function UserSettings() {
       if (user.role === "employer" && currentCompanyRecord?.id) {
         await supabase.from("companies").update({ logo_url: null }).eq("id", currentCompanyRecord.id);
         await refreshCompany?.();
+      }
+      toast.success("Photo removed");
+    } catch {
+      toast.error("Failed to remove photo");
+    }
+  };
+
+  const handleTeamPhotoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file || !user) return;
+    if (!file.type.startsWith("image/")) { toast.error("Please select an image file"); return; }
+    if (file.size > 5 * 1024 * 1024) { toast.error("Image must be less than 5MB"); return; }
+    if (companyTeamPhotos.length >= 3) { toast.error("Maximum 3 team photos allowed"); return; }
+
+    setUploadingPhoto(true);
+    try {
+      const fileExt = file.name.split(".").pop();
+      const filePath = `${user.id}/${Date.now()}.${fileExt}`;
+      const { error: uploadError } = await supabase.storage.from("company-photos").upload(filePath, file, { upsert: true });
+      if (uploadError) throw uploadError;
+      const { data: { publicUrl } } = supabase.storage.from("company-photos").getPublicUrl(filePath);
+      const updated = [...companyTeamPhotos, publicUrl];
+      setCompanyTeamPhotos(updated);
+      const { getCurrentCompanyId } = await import("@/lib/api/companies");
+      const companyId = currentCompanyRecord?.id || (await getCurrentCompanyId());
+      if (companyId) {
+        await updateCompanyProfile(companyId, { team_photos: updated });
+        await refreshCompany();
+      }
+      toast.success("Photo added!");
+    } catch {
+      toast.error("Failed to upload photo");
+    } finally {
+      setUploadingPhoto(false);
+      if (teamPhotoInputRef.current) teamPhotoInputRef.current.value = "";
+    }
+  };
+
+  const handleRemoveTeamPhoto = async (url: string) => {
+    const updated = companyTeamPhotos.filter(p => p !== url);
+    setCompanyTeamPhotos(updated);
+    try {
+      const { getCurrentCompanyId } = await import("@/lib/api/companies");
+      const companyId = currentCompanyRecord?.id || (await getCurrentCompanyId());
+      if (companyId) {
+        await updateCompanyProfile(companyId, { team_photos: updated });
+        await refreshCompany();
       }
       toast.success("Photo removed");
     } catch {
@@ -525,6 +576,34 @@ export default function UserSettings() {
                               placeholder="https://yourcompany.com"
                               className={inputCls}
                             />
+                          </FormField>
+                          <FormField label="Team Photos" hint="Up to 3 photos · JPG, PNG · Max 5MB each — shown on your company brand page.">
+                            <div className="flex flex-wrap gap-3 mt-1">
+                              {companyTeamPhotos.map((url) => (
+                                <div key={url} className="relative w-24 h-24 rounded-xl overflow-hidden border border-[var(--color-border)] group shrink-0">
+                                  <img src={url} className="w-full h-full object-cover" alt="Team photo" />
+                                  <button
+                                    type="button"
+                                    onClick={() => handleRemoveTeamPhoto(url)}
+                                    className="absolute top-1 right-1 w-5 h-5 bg-black/60 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                                  >
+                                    <X size={10} className="text-white" />
+                                  </button>
+                                </div>
+                              ))}
+                              {companyTeamPhotos.length < 3 && (
+                                <button
+                                  type="button"
+                                  onClick={() => teamPhotoInputRef.current?.click()}
+                                  disabled={uploadingPhoto}
+                                  className="w-24 h-24 rounded-xl border-2 border-dashed border-[var(--color-border)] flex flex-col items-center justify-center gap-1 hover:border-[var(--color-brand-primary)] hover:bg-[var(--color-surface-hover)] transition-colors text-[var(--color-text-muted)] shrink-0 disabled:opacity-50"
+                                >
+                                  {uploadingPhoto ? <Loader2 size={16} className="animate-spin" /> : <ImagePlus size={16} />}
+                                  <span className="text-[10px]">Add photo</span>
+                                </button>
+                              )}
+                            </div>
+                            <input ref={teamPhotoInputRef} type="file" accept="image/*" className="hidden" onChange={handleTeamPhotoUpload} disabled={uploadingPhoto} />
                           </FormField>
                         </>
                       )}
