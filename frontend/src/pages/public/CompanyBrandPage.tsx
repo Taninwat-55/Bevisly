@@ -260,13 +260,9 @@ export default function CompanyBrandPage() {
           {/* Team Photos */}
           {Array.isArray(company.team_photos) && company.team_photos.length > 0 && (
             <section className="mt-8">
-              <h2 className="text-xl font-bold text-[var(--color-text)] mb-4 flex items-center gap-2">
-                <Building2 size={20} className="text-[var(--color-brand-primary)]" />
-                Our Team
-              </h2>
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+              <div className={`grid gap-4 ${company.team_photos.length === 1 ? "grid-cols-1" : "grid-cols-2"}`}>
                 {company.team_photos.map((url, i) => (
-                  <div key={i} className="aspect-video rounded-xl overflow-hidden border border-[var(--color-border)]">
+                  <div key={i} className="aspect-[4/3] rounded-2xl overflow-hidden border border-[var(--color-border)]">
                     <img src={url} alt={`${company.name} team`} className="w-full h-full object-cover" />
                   </div>
                 ))}
