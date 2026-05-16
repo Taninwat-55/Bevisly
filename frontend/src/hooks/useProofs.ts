@@ -14,6 +14,7 @@ export type ProofCard = {
   comments: string | null;
   strengths: string | null;
   improvements: string | null;
+  feedback_letter?: string | null;
   reviewed_at: string | null;
   is_public: boolean;
   is_featured: boolean;

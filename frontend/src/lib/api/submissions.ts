@@ -245,6 +245,7 @@ export async function getCandidateFeedback(user_id: string) {
         improvements,
         stars,
         comments,
+        feedback_letter,
         created_at
       )
     `,
@@ -286,7 +287,7 @@ export async function getSubmissionById(submission_id: string) {
       proof_tasks ( id, title, description, rubric_criteria, rubric_locked_at, follow_up_questions ),
       jobs ( id, title, company ),
       profiles:user_id ( full_name, email, resume_url ),
-      feedback ( stars, strengths, improvements, rubric_scores )
+      feedback ( stars, strengths, improvements, rubric_scores, feedback_letter )
 `)
     .eq("id", submission_id)
     .single();

@@ -27,6 +27,7 @@ export async function createFeedback(entry: {
   improvements: string;
   stars: number;
   rubric_scores?: RubricScore[] | null;
+  feedback_letter?: string | null;
 }): Promise<Feedback> {
   const { data, error } = await supabase
     .from("feedback")

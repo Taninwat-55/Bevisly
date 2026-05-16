@@ -95,6 +95,7 @@ export default function CandidateFeedbackView() {
             comments: selectedProof.feedback?.[0]?.comments ?? null,
             strengths: selectedProof.feedback?.[0]?.strengths ?? null,
             improvements: selectedProof.feedback?.[0]?.improvements ?? null,
+            feedback_letter: selectedProof.feedback?.[0]?.feedback_letter ?? null,
             reviewed_at: selectedProof.feedback?.[0]?.created_at ?? selectedProof.created_at ?? null,
             is_public: selectedProof.is_public ?? false,
             is_featured: false,
