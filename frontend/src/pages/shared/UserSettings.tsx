@@ -223,7 +223,7 @@ export default function UserSettings() {
     if (!file || !user) return;
     if (!file.type.startsWith("image/")) { toast.error("Please select an image file"); return; }
     if (file.size > 5 * 1024 * 1024) { toast.error("Image must be less than 5MB"); return; }
-    if (companyTeamPhotos.length >= 3) { toast.error("Maximum 3 team photos allowed"); return; }
+    if (companyTeamPhotos.length >= 3) { toast.error("Maximum 3 images allowed"); return; }
 
     setUploadingPhoto(true);
     try {
@@ -577,7 +577,7 @@ export default function UserSettings() {
                               className={inputCls}
                             />
                           </FormField>
-                          <FormField label="Team Photos" hint="Up to 3 photos · JPG, PNG · Max 5MB each — shown on your company brand page.">
+                          <FormField label="Images" hint="Up to 3 photos · JPG, PNG · Max 5MB each — shown on your company brand page.">
                             <div className="flex flex-wrap gap-3 mt-1">
                               {companyTeamPhotos.map((url) => (
                                 <div key={url} className="relative w-24 h-24 rounded-xl overflow-hidden border border-[var(--color-border)] group shrink-0">
