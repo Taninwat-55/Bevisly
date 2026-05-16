@@ -64,12 +64,14 @@ Deno.serve(async (req) => {
     { "name": "<criterion name verbatim>", "score": <integer 1-5 based on rubric>, "note": "Evidence-based note (≤25 words)" }
   ],
   "strengths": "1–3 specific strengths across the whole submission (max 60 words)",
-  "improvements": "1–3 specific, constructive suggestions (max 60 words)"
+  "improvements": "1–3 specific, constructive suggestions (max 60 words)",
+  "interview_questions": ["Question grounded in a specific choice they made", "Question probing a gap or incomplete area", "Question about scalability or next steps"]
 }`
             : `{
   "suggested_rating": <integer 1-5 based on calibration below>,
   "strengths": "What the candidate did well... (max 60 words)",
-  "improvements": "What could be improved... (max 60 words)"
+  "improvements": "What could be improved... (max 60 words)",
+  "interview_questions": ["Question grounded in a specific choice they made", "Question probing a gap or incomplete area", "Question about scalability or next steps"]
 }`;
 
         const prompt = `
@@ -93,6 +95,14 @@ Evaluate whether the submission fulfills the task requirements. Consider:
 ${hasRubric
     ? "- Score each rubric criterion independently. Cite specific evidence from the submission for each score."
     : "- Provide a single 1–5 rating and a strengths/improvements summary."}
+
+## Interview Probe Questions
+Generate exactly 3 targeted follow-up interview questions based on SPECIFIC aspects of this submission. Each question must:
+- Reference something concrete from their work (a decision, approach, gap, or trade-off)
+- Be open-ended, inviting the candidate to elaborate
+- Be useful in a 15-minute follow-up call with the hiring manager
+Bad example: "What challenges did you face?" (generic)
+Good example: "You used a fetch-based approach here — how would you handle retry logic and timeout errors in a production environment?"
 
 ## Rating Calibration (use the full 1–5 scale)
 - 5 — Exceptional: exceeds requirements, polished, demonstrates novel insight or rigor.
@@ -122,7 +132,7 @@ ${responseShape}
                     contents: [{ parts: [{ text: prompt }] }],
                     generationConfig: {
                         temperature: 0.7,
-                        maxOutputTokens: 1024,
+                        maxOutputTokens: 1536,
                         responseMimeType: "application/json",
                         thinkingConfig: { thinkingBudget: 0 },
                     },
