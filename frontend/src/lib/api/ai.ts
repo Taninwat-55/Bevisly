@@ -76,6 +76,7 @@ export interface SuggestFeedbackResult {
     improvements?: string;
     suggested_rating?: number; // legacy fallback when no rubric is set
     rubric_scores?: RubricScore[];
+    interview_questions?: string[];
 }
 
 export async function suggestFeedback(
@@ -113,6 +114,9 @@ export async function suggestFeedback(
         suggested_rating: data.suggested_rating,
         rubric_scores: Array.isArray(data.rubric_scores)
             ? data.rubric_scores
+            : undefined,
+        interview_questions: Array.isArray(data.interview_questions)
+            ? data.interview_questions
             : undefined,
     };
 }

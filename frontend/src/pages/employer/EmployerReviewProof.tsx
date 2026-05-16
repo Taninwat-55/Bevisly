@@ -474,6 +474,7 @@ export default function EmployerReviewProof({
                 strengths: result.strengths ?? undefined,
                 improvements: result.improvements ?? undefined,
                 suggestedRating: result.suggested_rating ?? undefined,
+                interviewQuestions: result.interview_questions ?? undefined,
               });
             }
           } catch {
@@ -542,6 +543,7 @@ export default function EmployerReviewProof({
           strengths: result.strengths ?? undefined,
           improvements: result.improvements ?? undefined,
           suggestedRating: result.suggested_rating ?? undefined,
+          interviewQuestions: result.interview_questions ?? undefined,
         });
         toast.success(
           "AI evidence summary ready. Review before applying.",

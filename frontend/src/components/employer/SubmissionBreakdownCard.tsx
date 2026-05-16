@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Sparkles, ChevronDown, ChevronUp, ArrowRight } from "lucide-react";
+import { Sparkles, ChevronDown, ChevronUp, ArrowRight, MessageSquare } from "lucide-react";
 import type { RubricCriterion, RubricScore } from "@/types";
 
 export type RecommendedAction = "shortlist" | "discuss" | "pass";
@@ -11,6 +11,7 @@ export interface AIBreakdownResult {
   strengths?: string;
   improvements?: string;
   suggestedRating?: number;
+  interviewQuestions?: string[];
 }
 
 export interface SubmissionBreakdownCardProps {
@@ -259,6 +260,23 @@ export default function SubmissionBreakdownCard({
                 strengths={result.strengths}
                 improvements={result.improvements}
               />
+
+              {Array.isArray(result.interviewQuestions) && result.interviewQuestions.length > 0 && (
+                <div className="space-y-2.5 pt-1">
+                  <p className="text-xs font-bold uppercase tracking-wider text-[var(--color-employer)] flex items-center gap-1.5">
+                    <MessageSquare size={11} />
+                    Interview Probes
+                  </p>
+                  <ol className="space-y-2">
+                    {result.interviewQuestions.map((q, i) => (
+                      <li key={i} className="flex items-start gap-2.5 text-sm text-[var(--color-text-muted)]">
+                        <span className="text-[var(--color-employer)] font-semibold shrink-0 mt-0.5 text-xs">{i + 1}.</span>
+                        {q}
+                      </li>
+                    ))}
+                  </ol>
+                </div>
+              )}
 
               {!isLocked && (
                 <div className="flex items-center justify-between pt-2 border-t border-[var(--color-border)]">
