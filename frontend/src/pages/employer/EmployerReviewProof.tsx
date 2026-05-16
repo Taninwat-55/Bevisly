@@ -12,6 +12,7 @@ import {
   getSubmissionById,
   getSubmissionsByJob,
   requestDiscussion,
+  updateHiringStage,
 } from "@/lib/api/submissions";
 import { useAuth } from "@/hooks/useAuth";
 import type { EmployerSubmission, RubricCriterion, RubricScore } from "@/types";
@@ -102,6 +103,7 @@ interface ScorecardProps {
   isSuggesting: boolean;
   canAIEvaluate: boolean;
   aiSuggested: boolean;
+  aiResultReady: boolean;
 }
 
 function getScoreFor(scores: RubricScore[], name: string): number {
@@ -154,6 +156,7 @@ function Scorecard({
   isSuggesting,
   canAIEvaluate,
   aiSuggested,
+  aiResultReady,
 }: ScorecardProps) {
   const hasRubric = !!rubricCriteria && rubricCriteria.length > 0;
   const weightedOverall = hasRubric
@@ -180,7 +183,7 @@ function Scorecard({
                 ) : (
                   <Sparkles size={12} />
                 )}
-                AI Evidence Summary
+                {aiResultReady ? "Re-analyze" : "AI Evidence Summary"}
               </button>
               <Link
                 to="/docs#how-ai-works"
@@ -397,6 +400,7 @@ export default function EmployerReviewProof({
   const navigate = useNavigate();
 
   const submissionsCache = useRef<EmployerSubmission[]>([]);
+  const aiTriggeredRef = useRef(false);
   const [submission, setSubmission] = useState<EmployerSubmission | null>(null);
 
   const [strengths, setStrengths] = useState("");
@@ -449,6 +453,35 @@ export default function EmployerReviewProof({
         }
         const idx = submissionsCache.current.findIndex((s) => s.id === id);
         if (idx !== -1) setCurrentIndex(idx);
+
+        // Auto-trigger AI for text submissions that haven't been reviewed
+        const alreadyReviewed = data.status === "reviewed" || (data.feedback && data.feedback.length > 0);
+        if (data.text_response && !alreadyReviewed && !aiTriggeredRef.current) {
+          aiTriggeredRef.current = true;
+          setSuggestingAI(true);
+          try {
+            const result = await suggestFeedback(
+              0,
+              data.proof_tasks?.title || "General",
+              data.text_response,
+              data.proof_tasks?.description ?? null,
+              data.reflection ?? null,
+              data.proof_tasks?.rubric_criteria ?? undefined,
+            );
+            if (result && (result.strengths || result.improvements || result.rubric_scores)) {
+              setAiResult({
+                rubricScores: result.rubric_scores ?? undefined,
+                strengths: result.strengths ?? undefined,
+                improvements: result.improvements ?? undefined,
+                suggestedRating: result.suggested_rating ?? undefined,
+              });
+            }
+          } catch {
+            // Silent fail — employer can manually trigger if needed
+          } finally {
+            setSuggestingAI(false);
+          }
+        }
       } catch (err) {
         console.error(err);
         toast.error("Failed to load submission");
@@ -462,6 +495,7 @@ export default function EmployerReviewProof({
   useEffect(() => {
     setAiResult(null);
     setFeedbackLetter("");
+    aiTriggeredRef.current = false;
   }, [id]);
 
   const totalSubmissions = submissionsCache.current.length;
@@ -542,6 +576,56 @@ export default function EmployerReviewProof({
       setImprovementsFromAI(true);
     }
     toast.success("AI summary applied. Edit before submitting.");
+  }
+
+  async function handleAcceptAIAndShortlist() {
+    if (!aiResult || !user?.id || !submission) return;
+
+    // Compute final scores directly from aiResult to avoid async state-read issues
+    let finalStars: number;
+    let finalRubricScores: RubricScore[] | null = null;
+
+    if (hasRubric && Array.isArray(aiResult.rubricScores) && aiResult.rubricScores.length > 0) {
+      finalRubricScores = rubricCriteria!.map((c) => {
+        const s = aiResult.rubricScores!.find((r) => r.name === c.name);
+        return { name: c.name, score: s?.score ?? 0, note: s?.note ?? "" };
+      });
+      const weighted = computeWeightedOverall(rubricCriteria!, finalRubricScores);
+      finalStars = Math.max(1, Math.min(5, Math.round(weighted)));
+    } else if (typeof aiResult.suggestedRating === "number") {
+      finalStars = aiResult.suggestedRating;
+    } else {
+      toast.error("AI result incomplete — please review manually.");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      await createFeedback({
+        submission_id: submission.id,
+        employer_id: user.id,
+        strengths: aiResult.strengths ?? "",
+        improvements: aiResult.improvements ?? "",
+        stars: finalStars,
+        rubric_scores: finalRubricScores,
+        feedback_letter: null,
+      });
+      await updateSubmissionStatus(submission.id, "reviewed");
+      await updateHiringStage(submission.id, "shortlisted");
+      toast.success("Accepted & shortlisted");
+      if (nextCandidate) {
+        if (onNavigate) onNavigate(nextCandidate.id);
+        else navigate(`/employer/review/${nextCandidate.id}`);
+      } else {
+        if (onBack) onBack();
+        else navigate("/employer");
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to accept & shortlist.");
+    } finally {
+      setLoading(false);
+    }
   }
 
   async function handleDraftLetter() {
@@ -1098,7 +1182,15 @@ export default function EmployerReviewProof({
           </div>
         )}
 
-        {/* AI Breakdown Card */}
+        {/* AI Breakdown Card — skeleton while loading, card when ready */}
+        {suggestingAI && !aiResult && (
+          <div className="glass-panel rounded-2xl p-6 animate-pulse space-y-3">
+            <div className="h-3 w-36 bg-[var(--color-border)] rounded-full" />
+            <div className="h-3 w-full bg-[var(--color-border)] rounded-full" />
+            <div className="h-3 w-4/5 bg-[var(--color-border)] rounded-full" />
+            <div className="h-3 w-3/5 bg-[var(--color-border)] rounded-full" />
+          </div>
+        )}
         {aiResult && (
           <SubmissionBreakdownCard
             result={aiResult}
@@ -1133,6 +1225,7 @@ export default function EmployerReviewProof({
           isSuggesting={suggestingAI}
           canAIEvaluate={canAIEvaluate}
           aiSuggested={strengthsFromAI || improvementsFromAI || scoresFromAI}
+          aiResultReady={!!aiResult}
         />
 
         {/* Candidate Feedback Letter */}
@@ -1189,30 +1282,48 @@ export default function EmployerReviewProof({
             <ChevronLeft size={16} /> Previous
           </button>
 
-          <motion.button
-            onClick={() => handleSubmitFeedback("next")}
-            disabled={
-              loading ||
-              (!isReviewed &&
-                (hasRubric
-                  ? rubricCriteria!.some(
-                      (c) => (getScoreFor(rubricScores, c.name) || 0) <= 0,
-                    )
-                  : !stars))
-            }
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            className={`flex items-center gap-2 px-6 py-2.5 rounded-xl font-medium transition-all
-              ${
-                isReviewed
-                  ? "bg-emerald-500 text-white"
-                  : "bg-[var(--color-employer)] text-white hover:brightness-110"
-              } disabled:opacity-50`}
-          >
-            {loading && <Loader2 size={16} className="animate-spin" />}
-            {!loading && isReviewed && <CheckCircle2 size={16} />}
-            {isReviewed ? "Next Candidate" : "Submit Review"}
-          </motion.button>
+          <div className="flex items-center gap-3">
+            {aiResult && !isReviewed && (
+              <motion.button
+                onClick={handleAcceptAIAndShortlist}
+                disabled={loading}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                className="flex items-center gap-2 px-5 py-2.5 rounded-xl font-medium text-white bg-emerald-600 hover:bg-emerald-700 transition-colors disabled:opacity-50"
+              >
+                {loading ? (
+                  <Loader2 size={16} className="animate-spin" />
+                ) : (
+                  <CheckCircle2 size={16} />
+                )}
+                Accept AI &amp; Shortlist
+              </motion.button>
+            )}
+            <motion.button
+              onClick={() => handleSubmitFeedback("next")}
+              disabled={
+                loading ||
+                (!isReviewed &&
+                  (hasRubric
+                    ? rubricCriteria!.some(
+                        (c) => (getScoreFor(rubricScores, c.name) || 0) <= 0,
+                      )
+                    : !stars))
+              }
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              className={`flex items-center gap-2 px-6 py-2.5 rounded-xl font-medium transition-all
+                ${
+                  isReviewed
+                    ? "bg-emerald-500 text-white"
+                    : "bg-[var(--color-employer)] text-white hover:brightness-110"
+                } disabled:opacity-50`}
+            >
+              {loading && <Loader2 size={16} className="animate-spin" />}
+              {!loading && isReviewed && <CheckCircle2 size={16} />}
+              {isReviewed ? "Next Candidate" : "Submit Review"}
+            </motion.button>
+          </div>
 
           <button
             onClick={() => nextCandidate && handleSubmitFeedback("next")}
