@@ -259,14 +259,21 @@ export default function CompanyBrandPage() {
 
           {/* Team Photos */}
           {Array.isArray(company.team_photos) && company.team_photos.length > 0 && (
-            <section className="mt-8">
-              <div className={`grid gap-4 ${company.team_photos.length === 1 ? "grid-cols-1" : "grid-cols-2"}`}>
-                {company.team_photos.map((url, i) => (
-                  <div key={i} className="aspect-[4/3] rounded-2xl overflow-hidden border border-[var(--color-border)]">
-                    <img src={url} alt={`${company.name} team`} className="w-full h-full object-cover" />
-                  </div>
-                ))}
+            <section className="mt-8 space-y-3">
+              {/* Featured / banner photo */}
+              <div className="aspect-[16/6] rounded-2xl overflow-hidden border border-[var(--color-border)]">
+                <img src={company.team_photos[0]} alt={`${company.name} team`} className="w-full h-full object-cover" />
               </div>
+              {/* Supporting photos */}
+              {company.team_photos.length > 1 && (
+                <div className="grid grid-cols-2 gap-3">
+                  {company.team_photos.slice(1).map((url, i) => (
+                    <div key={i} className="aspect-[4/3] rounded-2xl overflow-hidden border border-[var(--color-border)]">
+                      <img src={url} alt={`${company.name} team`} className="w-full h-full object-cover" />
+                    </div>
+                  ))}
+                </div>
+              )}
             </section>
           )}
 
