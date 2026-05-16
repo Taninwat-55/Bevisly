@@ -160,24 +160,24 @@ export default function AboutPage() {
         </p>
       </section>
 
-      {/* ── The Team Section ── */}
+      {/* ── The Founder Section ── */}
       <section className="max-w-5xl mx-auto px-6 py-24 border-b border-[var(--color-border)]">
         <div className="text-center mb-12">
           <div className="inline-block px-3 py-1 rounded-full bg-[var(--color-brand-primary)]/10 text-[var(--color-brand-primary)] text-sm font-medium mb-4">
-            The Team
+            The Founder
           </div>
           <h2 className="text-3xl font-bold font-display text-[var(--color-text)] mb-3">
-            Right now, it's just me.
+            Built by someone who lived the problem.
           </h2>
           <p className="text-[var(--color-text-muted)] max-w-xl mx-auto">
-            Bevisly is a solo-founded product. I'm building it in public,
-            shipping fast, and talking directly to every employer and candidate
-            who uses it.
+            Bevisly is solo-founded and fully shipped. Every feature you see was
+            designed, built, and iterated on by one person — someone who spent
+            over a year on the wrong side of a broken hiring system.
           </p>
         </div>
 
         {/* Founder Card */}
-        <div className="flex flex-col md:flex-row justify-center gap-8 mb-16">
+        <div className="flex flex-col md:flex-row justify-center gap-8 mb-12">
           <div className="glass-panel rounded-2xl p-8 max-w-sm mx-auto md:mx-0 text-center border border-[var(--color-border)] hover:border-[var(--color-brand-primary)]/30 transition-colors">
             <img
               src="/Founder_Image.webp"
@@ -198,30 +198,13 @@ export default function AboutPage() {
           </div>
         </div>
 
-        {/* Future team slots */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-          {["Engineer", "Design", "Growth", "Operations"].map((role) => (
-            <div
-              key={role}
-              className="rounded-xl border border-dashed border-[var(--color-border)] p-5 flex flex-col items-center justify-center gap-2 opacity-40 hover:opacity-60 transition-opacity"
-            >
-              <div className="w-10 h-10 rounded-full bg-[var(--color-surface)] border border-[var(--color-border)] flex items-center justify-center text-[var(--color-text-muted)] text-lg font-bold">
-                ?
-              </div>
-              <p className="text-xs font-medium text-[var(--color-text-muted)] text-center">
-                Future {role}
-              </p>
-            </div>
-          ))}
-        </div>
-
-        <p className="text-center text-sm text-[var(--color-text-muted)] mt-8">
-          We're growing.{" "}
+        <p className="text-center text-sm text-[var(--color-text-muted)]">
+          Have a role to post, a question, or want to be part of what Bevisly is building?{" "}
           <button
             onClick={() => setIsContactOpen(true)}
             className="text-[var(--color-brand-primary)] hover:underline font-medium"
           >
-            Reach out if you want to help build this.
+            Get in touch.
           </button>
         </p>
       </section>

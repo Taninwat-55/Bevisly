@@ -1,28 +1,80 @@
 # Bevisly
 
-> Bevisly is the proof-first hiring platform for junior talent, recent graduates, and career switchers. Employers post jobs and evaluate candidates through short, structured proof tasks — not CVs or self-reported credentials.
+> Bevisly is a proof-first hiring platform for junior talent — recent graduates, career switchers, and students. Employers post jobs and evaluate candidates through short, structured proof tasks instead of CVs or self-reported credentials. All core features are live and the platform is in early access (free for employers, always free for candidates).
 
-## What Bevisly does
+## The Problem Bevisly Solves
 
-- Employers post job listings with an attached proof task (typically 30 minutes)
-- Candidates complete the task and submit real work as their application
-- Employers review submissions using a rubric they defined upfront
-- AI (Gemini) suggests a rating and feedback paragraph, citing specific parts of the submission — but the employer makes the final decision
-- Candidates build a verified portfolio of proof submissions (the Proof Vault) visible on their public profile
-- Both employers and candidates have accountability scores: Employer Responsibility Score (anti-ghosting) and Candidate Reliability Score
+Junior hiring is broken. Employers receive hundreds of keyword-stuffed CVs with no reliable signal for who can actually do the work. Strong candidates — especially those without prestigious credentials or traditional backgrounds — get filtered out before anyone sees their actual work. Traditional job boards and ATS systems optimise for credential matching, not skill matching.
 
-## Key principles
+Bevisly replaces the CV with a 30-minute proof task. Candidates submit real deliverables. Employers review actual output. Both sides are held accountable.
 
-- AI is decision support, never the decision maker
-- All AI feedback is grounded in rubric criteria the employer set upfront
-- Salary range is required on every job listing (EU Pay Transparency Directive compliance)
-- Candidates never pay to use Bevisly
-- Evidence over opinion — AI claims must point to the specific part of the submission they reference
+## How It Works
 
-## Who it's for
+### For Employers
+1. Post a role — describe it in plain English. Bevisly's AI (Gemini) generates a structured, job-relevant proof task automatically. No task design experience needed.
+2. Define a rubric — set 3–5 weighted evaluation criteria upfront. Once the first candidate submits, the rubric locks to ensure consistent, fair scoring across all applicants.
+3. Candidates complete the task and submit real deliverables — code, writing, analysis, designs. No cover letter, no keyword games.
+4. Review submissions — AI (Gemini) generates an evidence summary citing specific parts of each submission against the rubric. The employer sees the raw submission, the rubric, and the AI notes. Every decision is the employer's.
+5. Shortlist — from job post to shortlist in under 10 minutes of setup.
 
-- **Employers:** Startups and SMEs (especially Nordic companies) that need to hire junior-to-mid level talent efficiently without a large HR team
-- **Candidates:** Recent graduates, career switchers, and students who lack conventional credentials but want to demonstrate real ability
+### For Candidates
+1. Browse proof-based job listings or complete Practice Proof Tasks to build a portfolio before applying to anything.
+2. Complete the proof task — typically 30 minutes of real work. No cover letter required.
+3. Receive employer-reviewed feedback added to the public Proof Vault portfolio. Verifiable, shareable, kept forever — even rejections include proof of what was built.
+
+## Features (All Live)
+
+- **AI-generated proof tasks** — describe a role; Gemini generates a structured task in seconds. Employers can customise or use as-is.
+- **Locked rubric** — employers define evaluation criteria before any submissions arrive; rubric locks on first submission to prevent retroactive bias.
+- **AI evidence summary** — Gemini suggests a rating and feedback paragraph by citing specific submission content against rubric criteria. Employer always decides. No automated rejections.
+- **Proof Vault** — candidates build a verified, publicly shareable portfolio of completed proof tasks at their public profile URL (/@username).
+- **Practice Proof Tasks** — candidates can complete real tasks independently before applying to any job, building their portfolio on their own timeline.
+- **Employer Responsibility Score** — anti-ghosting accountability metric tracking how consistently employers review submissions and give feedback. Publicly visible on employer brand pages.
+- **Candidate Reliability Score** — tracks proof completion rate and profile completeness. Publicly visible on candidate profiles.
+- **Employer Brand Pages** — public company profiles at /company/:slug showing open roles, employer track record, and Responsibility Score.
+- **Candidate Leaderboard** — top candidates ranked by Bevisly Score (composite of proof quality, employer ratings, and profile completeness) at /leaderboard.
+- **Pay transparency** — every job listing requires a salary range (min and max) before going live. Aligned with the EU Pay Transparency Directive.
+- **Time estimation label** — every proof task shows expected completion time so candidates can self-select before committing hours.
+- **Fast Pass Application** — expedited application flow for qualifying candidates.
+- **Invitation system** — employers can invite specific candidates to apply for a role directly.
+- **Team collaboration** — employers can invite team members to review submissions and make hiring decisions together.
+- **Email notifications** — automated status updates when submissions are reviewed, powered by Resend.
+- **Public proof certificates** — individual proof submissions are shareable at /proof/:id.
+
+## Core Principles
+
+- AI is decision support, never the decision maker — no automated rejections or acceptances
+- Evidence over opinion — AI feedback must cite the specific part of the submission it references
+- Evaluate against a rubric the employer defined before seeing any applications, not vibes
+- Proof quality is separate from hire decision — candidates keep verified proof regardless of outcome
+- Both sides are accountable — Employer Responsibility Score and Candidate Reliability Score are publicly visible
+- Candidates never pay — Bevisly is always free for candidates
+- Salary transparency is required — every job listing must include a pay range
+
+## Who It's For
+
+- **Employers:** Startups and SMEs (especially Nordic and European companies) that need to hire junior-to-mid level talent efficiently without a large HR team. Ideal for roles in frontend development, backend development, content writing, design, support, and analysis — domains where a 30-minute task is a meaningful signal.
+- **Candidates:** Recent graduates, career switchers, and students who lack conventional credentials but want to demonstrate real ability. Particularly valuable for those who have been filtered out by keyword-matching ATS systems despite having the actual skills to do the work.
+
+## How Bevisly Compares to Alternatives
+
+- **vs. TestGorilla / HackerRank / Codility:** Those platforms use standardised tests and algorithm challenges. Bevisly uses short real-world proof tasks — more relevant for non-engineering roles and for employers who want to see actual deliverables rather than test scores.
+- **vs. Vervoe:** The closest philosophical competitor (realistic job simulations). Bevisly differentiates through AI-generated tasks from a plain-English role description, locked rubrics for provably fair evaluation, a candidate-side Proof Vault for portfolio building, and built-in accountability scores for both sides.
+- **vs. LinkedIn / traditional job boards:** Those filter on credentials (degree, title, years of experience). Bevisly filters on demonstrated ability. Every application includes actual work output.
+- **vs. generic ATS tools:** Bevisly is not an ATS — it is a proof-first hiring layer designed to sit before or alongside an ATS, replacing CV screening with task-based shortlisting.
+
+## Current Status
+
+Early access. All core features are live and functional. Free for employers during early access. Candidates are always free. No invitation code required. Built initially for the Nordic hiring market (Denmark, Sweden, Norway, Finland), with a broader European and global roadmap.
+
+## Origin
+
+Built by Taninwat Kaewpankan (Ice), a founder who spent over a year applying to jobs after graduation — despite having an MSc in Entrepreneurship — and hearing nothing back. Inspired by Bitcoin's proof-of-work concept: you do the work, you prove it, you win the reward. Bevisly is the platform he wished had existed.
+
+## Blog
+
+- /blog/why-proof-of-work-hiring-matters — Why Proof-of-Work Hiring Is the Future for Junior Talent. CVs filter out strong candidates before anyone sees their actual work. Published 2026-05-15.
+- /blog/modern-job-market-history-mechanics-ai-era — The Modern Job Market: History, Mechanics, and Navigating the AI Era. How the job market became this hard and evidence-backed strategies for navigating it. Published 2026-05-15.
 
 ## Contact
 
@@ -31,15 +83,17 @@
 
 ## Pages
 
-- / — Landing page, platform overview
-- /jobs — All open job listings
-- /companies — All companies hiring on Bevisly
+- / — Landing page and platform overview
+- /jobs — All open job listings with proof tasks
+- /companies — All companies currently hiring on Bevisly
 - /leaderboard — Top candidates ranked by Bevisly Score
-- /pricing — Employer pricing plans
-- /about — About Bevisly
-- /docs — Documentation and help
+- /pricing — Employer pricing plans (free during early access)
+- /about — About Bevisly and the founder's story
+- /learn-more — Detailed guide for candidates and employers on how Bevisly works
+- /docs — Documentation, help, and AI usage transparency
+- /blog — Founder's blog on proof-first hiring and junior talent
 - /privacy — Privacy policy
-- /@:username — Public candidate profile (e.g. /@johndoe)
+- /@:username — Public candidate profile and Proof Vault (e.g. /@johndoe)
 - /company/:slug — Public employer brand page (e.g. /company/acme)
-- /proof/:id — Publicly shareable proof certificate
-- /jobs/:id — Individual job listing detail page
+- /proof/:id — Publicly shareable proof certificate for a completed task
+- /jobs/:id — Individual job listing with proof task details
