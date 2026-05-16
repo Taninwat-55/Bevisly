@@ -43,6 +43,7 @@ export async function getCurrentCompany(): Promise<Company | null> {
     name: company.name,
     slug: company.slug,
     logo_url: company.logo_url,
+    team_photos: company.team_photos ?? null,
     owner_id: company.owner_id,
     created_at: company.created_at,
     description: company.description ?? null,
@@ -202,11 +203,11 @@ export async function updateCompanyName(companyId: string, name: string): Promis
 }
 
 /**
- * Update company profile fields (about, mission, culture, website)
+ * Update company profile fields (about, mission, culture, website, team photos)
  */
 export async function updateCompanyProfile(
   companyId: string,
-  fields: { description?: string | null; mission?: string | null; culture?: string | null; website_url?: string | null }
+  fields: { description?: string | null; mission?: string | null; culture?: string | null; website_url?: string | null; team_photos?: string[] | null }
 ): Promise<void> {
   const user = (await supabase.auth.getUser()).data.user;
   if (!user) throw new Error("Not authenticated");
@@ -225,7 +226,7 @@ export async function updateCompanyProfile(
 export async function getCompanyProfile(companyId: string): Promise<Company | null> {
   const { data, error } = await supabase
     .from("companies")
-    .select("id, name, slug, logo_url, description, mission, culture, website_url, responsibility_score")
+    .select("id, name, slug, logo_url, team_photos, description, mission, culture, website_url, responsibility_score")
     .eq("id", companyId)
     .single();
 
@@ -236,6 +237,7 @@ export async function getCompanyProfile(companyId: string): Promise<Company | nu
     name: data.name,
     slug: data.slug,
     logo_url: data.logo_url,
+    team_photos: data.team_photos ?? null,
     owner_id: null,
     created_at: null,
     description: data.description ?? null,
@@ -252,7 +254,7 @@ export async function getCompanyProfile(companyId: string): Promise<Company | nu
 export async function getCompanyBySlug(slug: string): Promise<Company | null> {
   const { data, error } = await supabase
     .from("companies")
-    .select("id, name, slug, logo_url, description, mission, culture, website_url, responsibility_score, avg_review_days")
+    .select("id, name, slug, logo_url, team_photos, description, mission, culture, website_url, responsibility_score, avg_review_days")
     .eq("slug", slug)
     .maybeSingle();
 
@@ -263,6 +265,7 @@ export async function getCompanyBySlug(slug: string): Promise<Company | null> {
     name: data.name,
     slug: data.slug,
     logo_url: data.logo_url,
+    team_photos: data.team_photos ?? null,
     owner_id: null,
     created_at: null,
     description: data.description ?? null,

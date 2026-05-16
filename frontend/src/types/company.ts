@@ -9,6 +9,7 @@ export type Company = {
   name: string;
   slug: string | null;
   logo_url: string | null;
+  team_photos?: string[] | null;
   owner_id: string | null;
   created_at: string | null;
   // Company Profile (set once in settings, shown on job posts)
