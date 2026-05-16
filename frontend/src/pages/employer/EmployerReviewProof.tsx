@@ -5,7 +5,8 @@ import ReactMarkdown from "react-markdown";
 import DOMPurify from "dompurify";
 import { motion } from "framer-motion";
 import { createFeedback } from "@/lib/api/feedback";
-import { suggestFeedback } from "@/lib/api/ai";
+import { suggestFeedback, draftFeedbackLetter } from "@/lib/api/ai";
+import SubmissionBreakdownCard, { type AIBreakdownResult } from "@/components/employer/SubmissionBreakdownCard";
 import {
   updateSubmissionStatus,
   getSubmissionById,
@@ -411,6 +412,9 @@ export default function EmployerReviewProof({
   const [currentIndex, setCurrentIndex] = useState<number>(0);
   const [requestingDiscussion, setRequestingDiscussion] = useState(false);
   const [discussionRequested, setDiscussionRequested] = useState(false);
+  const [aiResult, setAiResult] = useState<AIBreakdownResult | null>(null);
+  const [feedbackLetter, setFeedbackLetter] = useState("");
+  const [draftingLetter, setDraftingLetter] = useState(false);
 
   const rubricCriteria = submission?.proof_tasks?.rubric_criteria ?? null;
   const hasRubric = Array.isArray(rubricCriteria) && rubricCriteria.length > 0;
@@ -433,6 +437,7 @@ export default function EmployerReviewProof({
           if (Array.isArray(data.feedback[0].rubric_scores)) {
             setRubricScores(data.feedback[0].rubric_scores);
           }
+          setFeedbackLetter(data.feedback[0].feedback_letter ?? "");
         }
         if (data.discussion_requested_at) {
           setDiscussionRequested(true);
@@ -452,6 +457,11 @@ export default function EmployerReviewProof({
       }
     };
     loadSubmission();
+  }, [id]);
+
+  useEffect(() => {
+    setAiResult(null);
+    setFeedbackLetter("");
   }, [id]);
 
   const totalSubmissions = submissionsCache.current.length;
@@ -493,22 +503,14 @@ export default function EmployerReviewProof({
         result &&
         (result.strengths || result.improvements || result.rubric_scores)
       ) {
-        if (Array.isArray(result.rubric_scores) && result.rubric_scores.length) {
-          setRubricScores(result.rubric_scores);
-          setScoresFromAI(true);
-        } else if (typeof result.suggested_rating === "number") {
-          setStars(result.suggested_rating || stars || 3);
-        }
-        if (result.strengths) {
-          setStrengths(result.strengths);
-          setStrengthsFromAI(true);
-        }
-        if (result.improvements) {
-          setImprovements(result.improvements);
-          setImprovementsFromAI(true);
-        }
+        setAiResult({
+          rubricScores: result.rubric_scores ?? undefined,
+          strengths: result.strengths ?? undefined,
+          improvements: result.improvements ?? undefined,
+          suggestedRating: result.suggested_rating ?? undefined,
+        });
         toast.success(
-          "AI evidence summary ready. Review and edit before submitting.",
+          "AI evidence summary ready. Review before applying.",
           { id: toastId },
         );
       }
@@ -522,6 +524,55 @@ export default function EmployerReviewProof({
       setSuggestingAI(false);
     }
   };
+
+  function handleApplyAIToReview() {
+    if (!aiResult) return;
+    if (Array.isArray(aiResult.rubricScores) && aiResult.rubricScores.length > 0) {
+      setRubricScores(aiResult.rubricScores);
+      setScoresFromAI(true);
+    } else if (typeof aiResult.suggestedRating === "number") {
+      setStars(aiResult.suggestedRating);
+    }
+    if (aiResult.strengths) {
+      setStrengths(aiResult.strengths);
+      setStrengthsFromAI(true);
+    }
+    if (aiResult.improvements) {
+      setImprovements(aiResult.improvements);
+      setImprovementsFromAI(true);
+    }
+    toast.success("AI summary applied. Edit before submitting.");
+  }
+
+  async function handleDraftLetter() {
+    if (!submission) return;
+    setDraftingLetter(true);
+    const toastId = toast.loading("Drafting feedback letter...");
+    try {
+      const letter = await draftFeedbackLetter({
+        candidateName: submission.profiles?.full_name ?? "Candidate",
+        jobTitle: submission.jobs?.title ?? "",
+        companyName: user?.company_name ?? submission.jobs?.company ?? "Our team",
+        taskTitle: submission.proof_tasks?.title ?? "",
+        taskDescription: submission.proof_tasks?.description,
+        submissionContent: displayText,
+        reflection: submission.reflection,
+        rubricCriteria: rubricCriteria,
+        rubricScores: rubricScores.length > 0 ? rubricScores : undefined,
+        suggestedRating: stars || undefined,
+        strengths,
+        improvements,
+      });
+      setFeedbackLetter(letter ?? "");
+      toast.success("Letter drafted. Review and edit before submitting.", { id: toastId });
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : "Failed to draft letter.";
+      console.error("[draftLetter]", e);
+      toast.error(msg, { id: toastId });
+    } finally {
+      setDraftingLetter(false);
+    }
+  }
 
   async function handleSubmitFeedback(direction?: "next" | "previous") {
     if (!user?.id || !submission) return;
@@ -573,6 +624,7 @@ export default function EmployerReviewProof({
         improvements,
         stars: finalStars,
         rubric_scores: finalRubricScores,
+        feedback_letter: feedbackLetter || null,
       });
 
       await updateSubmissionStatus(submission.id, "reviewed");
@@ -1046,6 +1098,16 @@ export default function EmployerReviewProof({
           </div>
         )}
 
+        {/* AI Breakdown Card */}
+        {aiResult && (
+          <SubmissionBreakdownCard
+            result={aiResult}
+            rubricCriteria={submission.proof_tasks?.rubric_criteria ?? null}
+            onApply={handleApplyAIToReview}
+            isLocked={!!isReviewed}
+          />
+        )}
+
         {/* Scorecard */}
         <Scorecard
           rubricCriteria={rubricCriteria}
@@ -1072,6 +1134,48 @@ export default function EmployerReviewProof({
           canAIEvaluate={canAIEvaluate}
           aiSuggested={strengthsFromAI || improvementsFromAI || scoresFromAI}
         />
+
+        {/* Candidate Feedback Letter */}
+        <div className="glass-panel rounded-2xl p-6 space-y-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-xs font-bold uppercase tracking-wider text-[var(--color-employer)]">
+                Candidate Feedback Letter
+              </h3>
+              <p className="text-xs text-[var(--color-text-muted)] mt-0.5">
+                This message will be visible to the candidate after you submit.
+              </p>
+            </div>
+            {!isReviewed && (
+              <button
+                type="button"
+                onClick={handleDraftLetter}
+                disabled={draftingLetter}
+                className="flex items-center gap-1.5 text-xs font-medium text-purple-600 hover:text-purple-700 bg-purple-50 hover:bg-purple-100 dark:bg-purple-900/20 px-3 py-1.5 rounded-lg transition-colors disabled:opacity-50"
+              >
+                {draftingLetter ? (
+                  <Loader2 size={12} className="animate-spin" />
+                ) : (
+                  <Sparkles size={12} />
+                )}
+                {feedbackLetter ? "Regenerate" : "Generate Draft"}
+              </button>
+            )}
+          </div>
+          <textarea
+            value={feedbackLetter}
+            onChange={(e) => setFeedbackLetter(e.target.value)}
+            disabled={!!isReviewed}
+            placeholder="Click 'Generate Draft' to create a personalised feedback letter for the candidate, or write your own."
+            className="w-full p-3 rounded-xl border border-[var(--color-border)] bg-[var(--color-input-bg)] text-[var(--color-text)] placeholder:text-[var(--color-text-muted)] resize-none focus:outline-none focus:ring-2 focus:ring-[var(--color-employer)] disabled:opacity-60 text-sm leading-relaxed"
+            rows={7}
+          />
+          {!isReviewed && (
+            <p className="text-[10px] text-[var(--color-text-muted)] italic">
+              Optional — if left blank, the candidate will see your rubric scores and notes only.
+            </p>
+          )}
+        </div>
 
         {/* Action Bar */}
         <div className="sticky bottom-0 z-20 flex items-center justify-between p-4 glass-panel rounded-2xl shadow-xl border border-[var(--color-border)] mt-8">

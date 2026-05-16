@@ -436,6 +436,15 @@ export default function EmployerDashboard() {
                       onClose={() => setIsPostingJob(false)}
                       companyName={user?.company_name || "your company"}
                       onGenerated={(data) => setPostJobData(data)}
+                      onLaunched={async () => {
+                        setIsPostingJob(false);
+                        setPostJobData(null);
+                        setShowCelebration(true);
+                        if (user?.id) {
+                          const updatedJobs = await getEmployerJobs(user.id);
+                          setJobs(updatedJobs);
+                        }
+                      }}
                     />
                   </div>
                 ) : (

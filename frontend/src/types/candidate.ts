@@ -19,6 +19,7 @@ export type CandidateFeedback = {
   improvements: string | null;
   stars: number | null;
   comments: string | null;
+  feedback_letter?: string | null;
   created_at: string | null;
 };
 

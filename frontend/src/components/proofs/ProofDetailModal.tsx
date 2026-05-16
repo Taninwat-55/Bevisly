@@ -116,6 +116,17 @@ export default function ProofDetailModal({ card, isOpen, onClose, username }: Pr
                     </div>
                   )}
 
+                  {card.feedback_letter && (
+                    <div className="space-y-2">
+                      <p className="text-xs font-semibold uppercase tracking-widest text-[var(--color-text-muted)] mb-3">
+                        Message from {card.company_name ?? "the employer"}
+                      </p>
+                      <div className="p-4 rounded-xl bg-[var(--color-bg)] border border-[var(--color-border)] text-sm text-[var(--color-text)] leading-relaxed whitespace-pre-wrap">
+                        {card.feedback_letter}
+                      </div>
+                    </div>
+                  )}
+
                   {card.comments && (
                     <div>
                       <p className="text-xs font-semibold uppercase tracking-widest text-[var(--color-text-muted)] mb-3">

@@ -81,6 +81,7 @@ export type EmployerSubmission = {
     strengths: string | null;
     improvements: string | null;
     rubric_scores?: RubricScore[] | null;
+    feedback_letter?: string | null;
   }[] | null;
 
   // Talent Manager fields

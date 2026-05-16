@@ -56,6 +56,7 @@ export type Feedback = {
   improvements: string | null;
   stars: number | null;
   rubric_scores?: RubricScore[] | null;
+  feedback_letter?: string | null;
   created_at: string | null;
 };
 

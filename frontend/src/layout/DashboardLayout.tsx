@@ -28,6 +28,7 @@ import { ThemeToggle } from "@/components/ui/ThemeToggle";
 import { useTheme } from "@/hooks/useTheme";
 import { getEmployerSubmissionsWithFeedback } from "@/lib/api";
 import type { EmployerSubmission } from "@/types";
+import { useUnseenFeedbackCount } from "@/hooks/useUnseenFeedback";
 import ContactModal from "@/components/common/ContactModal";
 import FeedbackButton from "@/components/common/FeedbackButton";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
@@ -70,6 +71,8 @@ export default function DashboardLayout({
         .catch(console.error);
     }
   }, [user?.role, user?.id]);
+
+  const unseenFeedbackCount = useUnseenFeedbackCount();
 
   const needsReviewCount = submissions.filter(
     (s) => s.status === "submitted" && (!s.feedback || s.feedback.length === 0)
@@ -117,7 +120,7 @@ export default function DashboardLayout({
         : [
             { label: "Dashboard", path: "/candidate", icon: LayoutDashboard },
             { label: "Find Jobs", path: "/candidate/jobs", icon: Briefcase },
-            { label: "My Proofs", path: "/candidate/proofs", icon: FileCheck, featured: true },
+            { label: "My Proofs", path: "/candidate/proofs", icon: FileCheck, featured: true, badge: unseenFeedbackCount },
             { label: "Practice", path: "/candidate/practice", icon: Zap },
             { label: "Leaderboard", path: "/candidate/leaderboard", icon: Trophy },
             {

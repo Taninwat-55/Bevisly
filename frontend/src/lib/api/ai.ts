@@ -6,13 +6,17 @@ import type { RubricCriterion, RubricScore } from "@/types";
 export interface GeneratedJobListing {
     title: string;
     description: string;
-    requirements: string; // Edge function returns markdown bullet points.
+    requirements: string;
+    job_type?: string;
+    work_mode?: string;
+    location?: string;
     proof_tasks: {
         title: string;
         description: string;
         expected_time: string;
         submission_format: string;
         rubric_criteria?: RubricCriterion[];
+        follow_up_questions?: string[];
     }[];
 }
 
@@ -111,4 +115,43 @@ export async function suggestFeedback(
             ? data.rubric_scores
             : undefined,
     };
+}
+
+export async function draftFeedbackLetter(params: {
+    candidateName: string;
+    jobTitle: string;
+    companyName: string;
+    taskTitle: string;
+    taskDescription?: string | null;
+    submissionContent?: string | null;
+    reflection?: string | null;
+    rubricCriteria?: RubricCriterion[] | null;
+    rubricScores?: RubricScore[] | null;
+    suggestedRating?: number | null;
+    strengths?: string | null;
+    improvements?: string | null;
+}): Promise<string | null> {
+    const { data, error } = await supabase.functions.invoke(
+        "draft-feedback-letter",
+        {
+            body: {
+                candidate_name: params.candidateName,
+                job_title: params.jobTitle,
+                company_name: params.companyName,
+                task_title: params.taskTitle,
+                task_description: params.taskDescription ?? null,
+                submission_content: params.submissionContent ?? null,
+                reflection: params.reflection ?? null,
+                rubric_criteria: params.rubricCriteria ?? null,
+                rubric_scores: params.rubricScores ?? null,
+                suggested_rating: params.suggestedRating ?? null,
+                strengths: params.strengths ?? null,
+                improvements: params.improvements ?? null,
+            },
+        },
+    );
+    if (error) throw error;
+    if (data?.error) throw new Error(data.error);
+    if (!data?.letter) throw new Error("No letter returned from AI.");
+    return data.letter as string;
 }
