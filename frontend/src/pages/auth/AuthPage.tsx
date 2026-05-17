@@ -60,6 +60,7 @@ export default function AuthPage() {
   const [formLoading, setFormLoading] = useState(false);
   const [isLogin, setIsLogin] = useState(true);
   const [formError, setFormError] = useState<string | null>(null);
+  const [confirmationPending, setConfirmationPending] = useState<string | null>(null);
   const [showMFAChallenge, setShowMFAChallenge] = useState(false);
   const [showWaitlistModal, setShowWaitlistModal] = useState(false);
 
@@ -179,8 +180,7 @@ export default function AuthPage() {
           }
         }
       } else if (data.user) {
-        notify.success("Success. Please check your email to confirm.", role);
-        setIsLogin(true);
+        setConfirmationPending(email);
       }
     } catch (err) {
       console.error("Error", err);
@@ -339,6 +339,33 @@ export default function AuthPage() {
 
         <div className="w-full max-w-md space-y-8">
 
+          {confirmationPending && (
+            <div className="flex flex-col items-center text-center gap-6 py-8">
+              <div className="w-16 h-16 rounded-full bg-blue-100 dark:bg-blue-500/10 flex items-center justify-center">
+                <svg className="w-8 h-8 text-[var(--color-brand-primary)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25H4.5a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5H4.5a2.25 2.25 0 00-2.25 2.25m19.5 0l-9.75 6.75L2.25 6.75" />
+                </svg>
+              </div>
+              <div>
+                <h2 className="text-2xl font-bold font-display text-[var(--color-text)] mb-2">Check your inbox</h2>
+                <p className="text-[var(--color-text-muted)] text-sm leading-relaxed">
+                  We sent a confirmation link to<br />
+                  <span className="font-semibold text-[var(--color-text)]">{confirmationPending}</span>
+                </p>
+                <p className="text-[var(--color-text-muted)] text-sm mt-3">
+                  Click the link in that email to activate your account. Check your spam folder if you don't see it.
+                </p>
+              </div>
+              <button
+                onClick={() => { setConfirmationPending(null); setIsLogin(true); }}
+                className="text-sm text-[var(--color-brand-primary)] hover:underline"
+              >
+                Already confirmed? Sign in →
+              </button>
+            </div>
+          )}
+
+          {!confirmationPending && (<>
           <Link to="/" className="lg:hidden flex items-center gap-2 mb-8">
             <div className="w-8 h-8 rounded-lg bg-[var(--color-brand-primary)] flex items-center justify-center text-white font-bold">
               B
@@ -623,6 +650,7 @@ export default function AuthPage() {
               {isLogin ? "Create an account" : "Log in to existing account"}
             </Button>
           </div>
+          </>)}
         </div>
       </div>
 
