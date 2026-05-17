@@ -533,13 +533,17 @@ export default function JobDetailPage() {
                 {companyProfile.mission && (
                   <div className="p-5 rounded-2xl bg-[var(--color-surface)]/50 border border-[var(--color-border)]">
                     <h4 className="text-xs font-bold uppercase tracking-wider text-[var(--color-text-muted)] mb-2">Our Mission</h4>
-                    <p className="text-[var(--color-text)] leading-relaxed">{companyProfile.mission}</p>
+                    <div className="text-[var(--color-text)] leading-relaxed prose prose-sm dark:prose-invert max-w-none prose-p:my-0 prose-ul:my-1 prose-li:my-0">
+                      <ReactMarkdown>{DOMPurify.sanitize(companyProfile.mission)}</ReactMarkdown>
+                    </div>
                   </div>
                 )}
                 {companyProfile.culture && (
                   <div className="p-5 rounded-2xl bg-[var(--color-surface)]/50 border border-[var(--color-border)]">
                     <h4 className="text-xs font-bold uppercase tracking-wider text-[var(--color-text-muted)] mb-2">Culture & Values</h4>
-                    <p className="text-[var(--color-text)] leading-relaxed">{companyProfile.culture}</p>
+                    <div className="text-[var(--color-text)] leading-relaxed prose prose-sm dark:prose-invert max-w-none prose-p:my-0 prose-ul:my-1 prose-li:my-0">
+                      <ReactMarkdown>{DOMPurify.sanitize(companyProfile.culture)}</ReactMarkdown>
+                    </div>
                   </div>
                 )}
                 <div className="flex flex-wrap gap-4 pt-2">

@@ -15,6 +15,8 @@ import {
   Loader2,
   ShieldCheck,
   Globe,
+  User,
+  Mail,
 } from "lucide-react";
 import { supabase } from "@/lib/supabaseClient";
 import { getCompanyProfile } from "@/lib/api/companies";
@@ -259,25 +261,49 @@ export default function EmployerJobPreviewDrawer({ jobId, onClose }: Props) {
                           {companyProfile.mission && (
                             <div className="p-5 rounded-2xl bg-[var(--color-surface)]/50 border border-[var(--color-border)]">
                               <h4 className="text-xs font-bold uppercase tracking-wider text-[var(--color-text-muted)] mb-2">Our Mission</h4>
-                              <p className="text-[var(--color-text)] leading-relaxed">{companyProfile.mission}</p>
+                              <div className="text-[var(--color-text)] leading-relaxed prose prose-sm dark:prose-invert max-w-none prose-p:my-0 prose-ul:my-1 prose-li:my-0">
+                                <ReactMarkdown>{DOMPurify.sanitize(companyProfile.mission)}</ReactMarkdown>
+                              </div>
                             </div>
                           )}
                           {companyProfile.culture && (
                             <div className="p-5 rounded-2xl bg-[var(--color-surface)]/50 border border-[var(--color-border)]">
                               <h4 className="text-xs font-bold uppercase tracking-wider text-[var(--color-text-muted)] mb-2">Culture & Values</h4>
-                              <p className="text-[var(--color-text)] leading-relaxed">{companyProfile.culture}</p>
+                              <div className="text-[var(--color-text)] leading-relaxed prose prose-sm dark:prose-invert max-w-none prose-p:my-0 prose-ul:my-1 prose-li:my-0">
+                                <ReactMarkdown>{DOMPurify.sanitize(companyProfile.culture)}</ReactMarkdown>
+                              </div>
                             </div>
                           )}
-                          {companyProfile.website_url && (
-                            <a
-                              href={companyProfile.website_url}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="inline-flex items-center gap-2 text-sm text-[var(--color-brand-primary)] hover:underline font-medium"
-                            >
-                              <Globe size={14} /> Visit company website
-                            </a>
-                          )}
+                          <div className="flex flex-wrap items-center gap-4 pt-1">
+                            {companyProfile.website_url && (
+                              <a
+                                href={companyProfile.website_url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center gap-2 text-sm text-[var(--color-brand-primary)] hover:underline font-medium"
+                              >
+                                <Globe size={14} /> Visit company website
+                              </a>
+                            )}
+                            {job.contact_person && (
+                              <div className="flex items-center gap-4 text-sm text-[var(--color-text-muted)]">
+                                {companyProfile.website_url && <span className="border-l border-[var(--color-border)] h-4" />}
+                                <div className="flex items-center gap-2">
+                                  <User size={14} className="text-[var(--color-brand-primary)]" />
+                                  <span>{job.contact_person.full_name || "Contact Person"}</span>
+                                </div>
+                                {job.contact_person.email && (
+                                  <a
+                                    href={`mailto:${job.contact_person.email}`}
+                                    className="flex items-center gap-2 hover:text-[var(--color-brand-primary)] transition-colors"
+                                  >
+                                    <Mail size={14} className="text-[var(--color-brand-primary)]" />
+                                    <span>{job.contact_person.email}</span>
+                                  </a>
+                                )}
+                              </div>
+                            )}
+                          </div>
                         </div>
                       </section>
                     )}
