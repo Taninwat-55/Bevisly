@@ -587,3 +587,83 @@ export function FollowUpQuestionsEditor({ questions, onChange }: FollowUpQuestio
     </div>
   );
 }
+
+interface ScreeningQuestionsEditorProps {
+  questions: string[];
+  onChange: (questions: string[]) => void;
+}
+
+export function ScreeningQuestionsEditor({ questions, onChange }: ScreeningQuestionsEditorProps) {
+  const PLACEHOLDERS = [
+    "e.g. Why do you want to work here?",
+    "e.g. What's your most relevant experience?",
+    "e.g. Where do you see yourself in 2 years?",
+    "e.g. What excites you about this role?",
+    "e.g. How do you handle working in a fast-paced environment?",
+  ];
+
+  const update = (idx: number, value: string) => {
+    const next = [...questions];
+    next[idx] = value;
+    onChange(next);
+  };
+
+  const remove = (idx: number) => {
+    onChange(questions.filter((_, i) => i !== idx));
+  };
+
+  const add = () => {
+    if (questions.length >= 5) return;
+    onChange([...questions, ""]);
+  };
+
+  return (
+    <div className="border border-[var(--color-border)] rounded-xl p-4 bg-[var(--color-surface)]/40">
+      <div className="flex items-center justify-between mb-1">
+        <label className="text-sm font-semibold text-[var(--color-text)] flex items-center gap-2">
+          <MessageSquare size={14} />
+          Screening Questions
+          <span className="text-[10px] font-bold uppercase tracking-widest px-1.5 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-500 border border-slate-200 dark:border-slate-700">
+            Optional
+          </span>
+        </label>
+        <span className="text-xs text-[var(--color-text-muted)]">{questions.length} / 5</span>
+      </div>
+      <p className="text-xs text-[var(--color-text-muted)] mb-3">
+        Candidates answer these before their application is reviewed. Use these for motivation, culture-fit, or experience questions — even without a proof task.
+      </p>
+
+      <div className="space-y-3">
+        {questions.map((q, idx) => (
+          <div key={idx} className="flex gap-3 items-start">
+            <input
+              type="text"
+              value={q}
+              onChange={(e) => update(idx, e.target.value)}
+              placeholder={PLACEHOLDERS[idx] ?? "e.g. Tell us more about yourself"}
+              className="flex-1 border border-[var(--color-border)] rounded-[var(--radius-input)] p-2 text-sm bg-[var(--color-bg)] text-[var(--color-text)] focus:outline-none focus:ring-2 focus:ring-[var(--color-employer)]"
+            />
+            <button
+              type="button"
+              onClick={() => remove(idx)}
+              className="mt-1 text-[var(--color-text-muted)] hover:text-[var(--color-error)] transition"
+              title="Remove question"
+            >
+              <Trash2 size={14} />
+            </button>
+          </div>
+        ))}
+      </div>
+
+      {questions.length < 5 && (
+        <button
+          type="button"
+          onClick={add}
+          className="mt-3 inline-flex items-center gap-1 text-xs font-medium text-[var(--color-employer)] hover:underline"
+        >
+          <Plus size={12} /> Add question
+        </button>
+      )}
+    </div>
+  );
+}

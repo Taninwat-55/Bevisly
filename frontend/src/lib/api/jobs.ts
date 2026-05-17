@@ -255,7 +255,7 @@ export async function createJobWithTasks(
         requirements: values.requirements ?? "",
         paid: values.paid ?? false,
         payment_amount: values.payment_amount ?? null,
-        payment_currency: values.payment_currency ?? "EUR",
+        payment_currency: values.payment_currency ?? "DKK",
         show_salary_range: values.show_salary_range ?? false,
         salary_min: values.salary_min ?? null,
         salary_max: values.salary_max ?? null,
@@ -269,6 +269,7 @@ export async function createJobWithTasks(
         job_type: values.job_type ?? null,
         department: values.department ?? null,
         work_mode: values.work_mode ?? null,
+        screening_questions: (values.screening_questions?.length) ? values.screening_questions : null,
       },
     ])
     .select("id")
@@ -318,7 +319,7 @@ export async function updateJobWithTasks(
       requirements: values.requirements,
       paid: values.paid ?? false,
       payment_amount: values.payment_amount ?? null,
-      payment_currency: values.payment_currency ?? "EUR",
+      payment_currency: values.payment_currency ?? "DKK",
       show_salary_range: values.show_salary_range ?? false,
       salary_min: values.salary_min ?? null,
       salary_max: values.salary_max ?? null,
@@ -329,6 +330,7 @@ export async function updateJobWithTasks(
       expires_at: values.application_deadline
         ? new Date(values.application_deadline).toISOString()
         : values.expires_at ?? null,
+      screening_questions: (values.screening_questions?.length) ? values.screening_questions : null,
       updated_at: new Date().toISOString(),
     })
     .eq("id", job_id);
