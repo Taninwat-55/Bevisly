@@ -14,6 +14,9 @@ interface EmployerJobIntentFormProps {
   onGenerated: (jobData: Partial<EmployerJob & { proof_tasks: ProofTask[] }>) => void;
   onLaunched?: () => Promise<void>;
   companyName: string;
+  companyDescription?: string | null;
+  companyMission?: string | null;
+  companyCulture?: string | null;
 }
 
 type CompensationType = "salary" | "salary_and_equity" | "equity_only" | "volunteer";
@@ -32,6 +35,9 @@ export default function EmployerJobIntentForm({
   onGenerated,
   onLaunched,
   companyName,
+  companyDescription,
+  companyMission,
+  companyCulture,
 }: EmployerJobIntentFormProps) {
   const [stage, setStage] = useState<"input" | "review">("input");
   const [rawInput, setRawInput] = useState("");
@@ -55,7 +61,11 @@ export default function EmployerJobIntentForm({
     }
     setIsGenerating(true);
     try {
-      const data = await generateJobListing(rawInput, companyName);
+      const data = await generateJobListing(rawInput, companyName, {
+        description: companyDescription,
+        mission: companyMission,
+        culture: companyCulture,
+      });
       setGenerated(data);
       setJobType(data.job_type || "Full-time");
       setWorkMode(data.work_mode || "Remote");

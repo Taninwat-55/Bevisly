@@ -12,6 +12,32 @@ import BackButton from "@/components/common/BackButton";
 import RequestAccessModal from "@/components/auth/RequestAccessModal";
 import { Link } from "react-router-dom";
 
+function navigateByRole(
+  role: "candidate" | "employer" | "admin" | "demo_admin" | null | undefined,
+  navigate: ReturnType<typeof useNavigate>
+) {
+  if (role === "employer") navigate("/employer");
+  else if (role === "admin" || role === "demo_admin") navigate("/admin");
+  else navigate("/candidate");
+}
+
+function evaluateStrength(password: string) {
+  let score = 0;
+  const rules = {
+    hasLower: /[a-z]/.test(password),
+    hasUpper: /[A-Z]/.test(password),
+    hasNumber: /[0-9]/.test(password),
+    hasSymbol: /[^A-Za-z0-9]/.test(password),
+  };
+  score = Object.values(rules).filter(Boolean).length;
+  if (password.length < 8) score = Math.max(0, score - 1);
+  let label = "Weak";
+  let color = "bg-red-500";
+  if (score === 3) { label = "Medium"; color = "bg-yellow-400"; }
+  else if (score >= 4) { label = "Strong"; color = "bg-green-500"; }
+  return { score, label, color, rules };
+}
+
 const GoogleIcon = () => (
   <svg viewBox="0 0 24 24" width="18" height="18" xmlns="http://www.w3.org/2000/svg">
     <g transform="matrix(1, 0, 0, 1, 27.009001, -39.238998)">
@@ -69,14 +95,16 @@ export default function AuthPage() {
     emailRef.current?.focus();
   }, [isLogin]);
 
-  // Redirect if already logged in
+  // Redirect if already logged in — check MFA requirement first (covers all login methods)
   useEffect(() => {
-    console.log("[Auth] user state changed →", user?.role ?? "null", "| authLoading:", authLoading);
     if (!authLoading && user) {
-      console.log("[Auth] Navigating to dashboard for role:", user.role);
-      if (user.role === "employer") navigate("/employer");
-      else if (user.role === "admin" || user.role === "demo_admin") navigate("/admin");
-      else navigate("/candidate");
+      supabase.auth.mfa.getAuthenticatorAssuranceLevel().then(({ data: aal }) => {
+        if (aal?.nextLevel === "aal2" && aal?.currentLevel === "aal1") {
+          setShowMFAChallenge(true);
+          return;
+        }
+        navigateByRole(user.role, navigate);
+      });
     }
   }, [user, authLoading, navigate]);
 
@@ -88,8 +116,13 @@ export default function AuthPage() {
       setFormError("Please enter a valid email address.");
       return;
     }
-    if (password.length < 6) {
-      setFormError("Password must be at least 6 characters long.");
+    if (password.length < 8) {
+      setFormError("Password must be at least 8 characters.");
+      return;
+    }
+    const strength = evaluateStrength(password);
+    if (strength.score < 3) {
+      setFormError("Password too weak. Use uppercase, lowercase, a number, and a symbol.");
       return;
     }
     if (password !== confirmPassword) {
@@ -120,10 +153,14 @@ export default function AuthPage() {
         }
       }
 
+      const redirectTo = role === "employer" && inviteCode
+        ? `${window.location.origin}/auth?claim_invite=${encodeURIComponent(inviteCode)}`
+        : undefined;
+
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
-        options: { data: { role } },
+        options: { data: { role }, emailRedirectTo: redirectTo },
       });
 
       if (error) {
@@ -171,13 +208,6 @@ export default function AuthPage() {
 
       if (error) {
         setFormError("Invalid email or password. Please try again.");
-        return;
-      }
-
-      // Check for MFA
-      const aal = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
-      if (!aal.error && aal.data.nextLevel === "aal2" && aal.data.currentLevel === "aal1") {
-        setShowMFAChallenge(true);
         return;
       }
 
@@ -360,6 +390,42 @@ export default function AuthPage() {
                 {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
               </button>
             </div>
+
+            {/* Password strength meter (Signup only) */}
+            <AnimatePresence>
+              {!isLogin && password && (() => {
+                const s = evaluateStrength(password);
+                return (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    exit={{ opacity: 0, height: 0 }}
+                    className="overflow-hidden space-y-2"
+                  >
+                    <div className="flex justify-between text-xs font-medium">
+                      <span className="text-[var(--color-text-muted)]">Password Strength</span>
+                      <span className={s.label === "Strong" ? "text-green-500" : s.label === "Medium" ? "text-yellow-500" : "text-red-500"}>{s.label}</span>
+                    </div>
+                    <div className="w-full h-1.5 bg-[var(--color-slate-200)] dark:bg-[var(--color-slate-800)] rounded-full overflow-hidden">
+                      <motion.div
+                        className={`h-full ${s.color}`}
+                        initial={{ width: 0 }}
+                        animate={{ width: `${(s.score / 4) * 100}%` }}
+                        transition={{ duration: 0.3 }}
+                      />
+                    </div>
+                    <ul className="grid grid-cols-2 gap-x-4 gap-y-1">
+                      {([["hasLower","Lowercase"],["hasUpper","Uppercase"],["hasNumber","Number"],["hasSymbol","Symbol"]] as const).map(([key, label]) => (
+                        <li key={key} className={`flex items-center gap-1.5 text-[10px] ${s.rules[key] ? "text-green-500" : "text-[var(--color-text-muted)]"}`}>
+                          <div className={`w-1 h-1 rounded-full ${s.rules[key] ? "bg-green-500" : "bg-[var(--color-slate-300)]"}`} />
+                          {label}
+                        </li>
+                      ))}
+                    </ul>
+                  </motion.div>
+                );
+              })()}
+            </AnimatePresence>
 
             {/* Confirm Password (Signup only) */}
             <AnimatePresence>
@@ -564,7 +630,7 @@ export default function AuthPage() {
         isOpen={showMFAChallenge}
         onSuccess={() => {
           setShowMFAChallenge(false);
-          // Navigation is handled by the useEffect watching user state above.
+          navigateByRole(user?.role, navigate);
         }}
         onCancel={async () => {
           setShowMFAChallenge(false);
