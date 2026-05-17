@@ -435,6 +435,9 @@ export default function EmployerDashboard() {
                     <EmployerJobIntentForm
                       onClose={() => setIsPostingJob(false)}
                       companyName={user?.company_name || "your company"}
+                      companyDescription={company?.description}
+                      companyMission={company?.mission}
+                      companyCulture={company?.culture}
                       onGenerated={(data) => setPostJobData(data)}
                       onLaunched={async () => {
                         setIsPostingJob(false);

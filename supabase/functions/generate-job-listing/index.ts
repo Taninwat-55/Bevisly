@@ -20,7 +20,7 @@ Deno.serve(async (req) => {
             "";
         const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-        const { raw_input, company_name } = await req.json();
+        const { raw_input, company_name, company_description, company_mission, company_culture } = await req.json();
 
         if (!raw_input) {
             throw new Error("Missing raw_input");
@@ -90,8 +90,15 @@ Deno.serve(async (req) => {
             );
         }
 
+        const companyContext = [
+            company_description ? `- About: ${company_description}` : "",
+            company_mission ? `- Mission: ${company_mission}` : "",
+            company_culture ? `- Culture & Values: ${company_culture}` : "",
+        ].filter(Boolean).join("\n");
+
         const prompt = `
 Act as an expert Technical Hiring Manager for ${company_name || "a tech company"}.
+${companyContext ? `\nCompany Context:\n${companyContext}\n\nIMPORTANT: Use the company context above to deeply understand what this role means at this specific company — what "good" looks like here, what the company values in its people, and what the proof task should actually test. Do NOT copy or paraphrase this company information into the job description; that content is already shown to candidates separately. Instead, let it shape the accuracy and specificity of the proof task, the rubric criteria, and the follow-up questions.\n` : ""}
 Based on the following raw, unstructured input from a hiring manager, generate a complete job listing with a proof task.
 
 Raw Input:

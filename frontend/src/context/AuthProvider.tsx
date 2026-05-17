@@ -199,7 +199,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
         const sessionUser = session?.user;
         if (sessionUser) {
-          fetchProfileFromDB(sessionUser.id).then((profile) => {
+          const urlParams = new URLSearchParams(window.location.search);
+          const claimInvite = urlParams.get("claim_invite");
+          const setupUser = async () => {
+            if (claimInvite) {
+              try {
+                await supabase.rpc("claim_invite_code", { invite_code: claimInvite });
+                // Strip the param so it doesn't re-fire on refresh
+                const cleanUrl = window.location.pathname;
+                window.history.replaceState({}, "", cleanUrl);
+              } catch (e) {
+                console.warn("[Auth] Could not claim invite from URL:", e);
+              }
+            }
+            return fetchProfileFromDB(sessionUser.id);
+          };
+          setupUser().then((profile) => {
             console.log("[Auth] fetchProfileFromDB done. role:", profile.role);
             const newUser: SessionUser = {
               id: sessionUser.id,
@@ -263,8 +278,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
   }, []);
 
-  // Apply local override
-  const overrideRole = localStorage.getItem("overrideRole");
+  // Apply local override — only for real admins to prevent role escalation via DevTools
+  const isRealAdmin = user?.role === "admin" || user?.role === "demo_admin";
+  if (!isRealAdmin && localStorage.getItem("overrideRole")) {
+    localStorage.removeItem("overrideRole");
+  }
+  const overrideRole = isRealAdmin ? localStorage.getItem("overrideRole") : null;
   const effectiveUser = user
     ? { ...user, role: (overrideRole as SessionUser["role"]) || user.role, original_role: user.role }
     : null;

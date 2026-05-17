@@ -23,6 +23,11 @@ export interface GeneratedJobListing {
 export async function generateJobListing(
     rawInput: string,
     companyName: string,
+    companyContext?: {
+        description?: string | null;
+        mission?: string | null;
+        culture?: string | null;
+    },
 ): Promise<GeneratedJobListing> {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => {
@@ -41,6 +46,9 @@ export async function generateJobListing(
                 body: JSON.stringify({
                     raw_input: rawInput,
                     company_name: companyName,
+                    company_description: companyContext?.description ?? null,
+                    company_mission: companyContext?.mission ?? null,
+                    company_culture: companyContext?.culture ?? null,
                 }),
                 signal: controller.signal,
             },
