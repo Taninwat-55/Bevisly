@@ -17,6 +17,7 @@ import {
   Globe,
   User,
   Mail,
+  MessageSquare,
 } from "lucide-react";
 import { supabase } from "@/lib/supabaseClient";
 import { getCompanyProfile } from "@/lib/api/companies";
@@ -383,6 +384,22 @@ export default function EmployerJobPreviewDrawer({ jobId, onClose }: Props) {
                               </div>
                             </div>
                           </div>
+                        </div>
+                      </section>
+                    )}
+
+                    {/* Screening Questions */}
+                    {Array.isArray(job.screening_questions) && job.screening_questions.length > 0 && (
+                      <section className="px-6 pb-6">
+                        <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-5">
+                          <h3 className="text-sm font-semibold text-[var(--color-text)] mb-3 flex items-center gap-2">
+                            <MessageSquare size={14} /> Screening Questions
+                          </h3>
+                          <ol className="space-y-2 list-decimal list-inside">
+                            {job.screening_questions.map((q: string, i: number) => (
+                              <li key={i} className="text-sm text-[var(--color-text-muted)]">{q}</li>
+                            ))}
+                          </ol>
                         </div>
                       </section>
                     )}

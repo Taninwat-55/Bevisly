@@ -46,6 +46,8 @@ export interface Job {
   company_responsibility_score?: number | null;
   company_slug?: string | null;
 
+  screening_questions?: string[] | null;
+
   proof_tasks?: {
     id: string;
     title: string;

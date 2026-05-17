@@ -21,6 +21,7 @@ import {
   Globe,
   User,
   Mail,
+  MessageSquare,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import type { Job } from "@/types/job";
@@ -259,7 +260,7 @@ export default function JobDetailPage() {
     },
     "baseSalary": job.show_salary_range ? {
       "@type": "MonetaryAmount",
-      "currency": job.payment_currency || "EUR",
+      "currency": job.payment_currency || "DKK",
       "value": {
         "@type": "QuantitativeValue",
         "minValue": job.salary_min,
@@ -651,6 +652,22 @@ export default function JobDetailPage() {
                     </div>
                   </div>
                 </div>
+              </div>
+            </section>
+          )}
+
+          {/* ── Screening Questions ── */}
+          {Array.isArray(job.screening_questions) && job.screening_questions.length > 0 && (
+            <section className="max-w-4xl mx-auto px-4 sm:px-6 pb-8">
+              <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-6">
+                <h3 className="text-sm font-semibold text-[var(--color-text)] mb-3 flex items-center gap-2">
+                  <MessageSquare size={14} /> Screening Questions
+                </h3>
+                <ol className="space-y-2 list-decimal list-inside">
+                  {job.screening_questions.map((q: string, i: number) => (
+                    <li key={i} className="text-sm text-[var(--color-text-muted)]">{q}</li>
+                  ))}
+                </ol>
               </div>
             </section>
           )}

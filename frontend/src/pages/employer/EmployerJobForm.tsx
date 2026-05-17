@@ -18,6 +18,7 @@ import { useCompany } from "@/hooks/useCompany";
 import {
   RubricEditor,
   FollowUpQuestionsEditor,
+  ScreeningQuestionsEditor,
   type ProofTaskRubricErrors,
   type RubricFieldError,
 } from "@/components/employer/ProofTasksSection";
@@ -57,7 +58,7 @@ export default function EmployerJobForm({
     payment_amount: defaultValues?.payment_amount ?? null,
     paid: defaultValues?.paid ?? true,
     compensation_type: defaultValues?.compensation_type ?? "salary",
-    payment_currency: defaultValues?.payment_currency ?? "EUR",
+    payment_currency: defaultValues?.payment_currency ?? "DKK",
     show_salary_range: true,
     salary_min: defaultValues?.salary_min ?? null,
     salary_max: defaultValues?.salary_max ?? null,
@@ -70,6 +71,7 @@ export default function EmployerJobForm({
     start_date: defaultValues?.start_date ?? undefined,
     application_deadline: defaultValues?.application_deadline ?? undefined,
     proof_tasks: defaultValues?.proof_tasks ?? [],
+    screening_questions: defaultValues?.screening_questions ?? [],
   });
 
   // Sync company name from context into form state.
@@ -533,7 +535,7 @@ export default function EmployerJobForm({
                       <label className="text-sm font-medium text-[var(--color-text)]">Currency</label>
                       <select
                         className="w-full h-10 px-3 rounded-[var(--radius-input)] border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text)] text-sm"
-                        value={values.payment_currency ?? "EUR"}
+                        value={values.payment_currency ?? "DKK"}
                         onChange={(e) => handleChange("payment_currency", e.target.value)}
                       >
                         <option value="USD">USD ($)</option>
@@ -665,7 +667,7 @@ export default function EmployerJobForm({
                         title: "",
                         description: "",
                         expected_time: "1–2 hours",
-                        submission_format: "link",
+                        submission_format: "",
                         submission_type: "link",
                         rubric_criteria: [
                           { name: "", weight: 34, description: "" },
@@ -699,7 +701,7 @@ export default function EmployerJobForm({
                         title: "",
                         description: "",
                         expected_time: "1–2 hours",
-                        submission_format: "link",
+                        submission_format: "",
                         submission_type: "link",
                         rubric_criteria: [
                           { name: "", weight: 34, description: "" },
@@ -787,6 +789,35 @@ export default function EmployerJobForm({
                     )}
                   </div>
 
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-1.5">
+                      <label className="text-sm font-medium text-[var(--color-text)]">Submission Type</label>
+                      <select
+                        className="w-full h-10 px-3 rounded-[var(--radius-input)] border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text)] text-sm focus:ring-2 focus:ring-[var(--color-brand-primary)]/20 focus:outline-none"
+                        value={task.submission_type ?? "link"}
+                        onChange={(e) => handleTaskChange(index, "submission_type", e.target.value)}
+                      >
+                        <option value="link">Link</option>
+                        <option value="file">File Upload</option>
+                        <option value="text">Text</option>
+                        <option value="github_repo">GitHub Repository</option>
+                        <option value="mixed">Mixed</option>
+                      </select>
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className="text-sm font-medium text-[var(--color-text)]">
+                        Format <span className="text-[var(--color-text-muted)] font-normal">(optional)</span>
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="e.g. Google Doc, PDF, Figma file"
+                        className="w-full h-10 px-3 rounded-[var(--radius-input)] border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text)] text-sm focus:ring-2 focus:ring-[var(--color-brand-primary)]/20 focus:outline-none"
+                        value={task.submission_format ?? ""}
+                        onChange={(e) => handleTaskChange(index, "submission_format", e.target.value)}
+                      />
+                    </div>
+                  </div>
+
                   <RubricEditor
                     task={task}
                     aiSuggested={!!task.id && aiRubricTaskIds.has(task.id)}
@@ -816,6 +847,25 @@ export default function EmployerJobForm({
                   />
                 </div>
               ))}
+            </Card>
+
+            {/* ── SCREENING QUESTIONS ── */}
+            <Card className="p-6 md:p-8 space-y-4 border-l-4 border-l-[var(--color-brand-primary)] shadow-sm">
+              <div>
+                <h2 className="text-lg font-bold text-[var(--color-text)] flex items-center gap-2">
+                  Screening Questions
+                  <span className="text-[10px] font-bold uppercase tracking-widest px-1.5 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-500 border border-slate-200 dark:border-slate-700">
+                    Optional
+                  </span>
+                </h2>
+                <p className="text-sm text-[var(--color-text-muted)] mt-1">
+                  Ask candidates about motivation, experience, or culture fit before reviewing their application.
+                </p>
+              </div>
+              <ScreeningQuestionsEditor
+                questions={values.screening_questions ?? []}
+                onChange={(qs) => handleChange("screening_questions", qs)}
+              />
             </Card>
 
             {/* Step 2 Nav */}

@@ -28,6 +28,7 @@ export type EmployerJob = {
   start_date?: string | null;
   application_deadline?: string | null;
   company_id?: string | null; // Multi-tenant: Links to companies table
+  screening_questions?: string[] | null;
 };
 
 /**
@@ -145,6 +146,7 @@ export interface EmployerJobFormValues {
   proof_tasks: ProofTask[];
   start_date?: string;
   application_deadline?: string;
+  screening_questions?: string[] | null;
 }
 
 export type EmployerProfile = {
