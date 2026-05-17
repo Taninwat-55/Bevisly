@@ -76,6 +76,9 @@ export default function CandidateProofWorkspace() {
   const [consentChecked, setConsentChecked] = useState(false);
   const [showCelebration, setShowCelebration] = useState(false);
 
+  // Screening Q&A state
+  const [screeningAnswers, setScreeningAnswers] = useState<string[]>([]);
+
   // Follow-up Q&A state
   const [submissionId, setSubmissionId] = useState<string | null>(null);
   const [showFollowUpModal, setShowFollowUpModal] = useState(false);
@@ -90,6 +93,9 @@ export default function CandidateProofWorkspace() {
         const taskData = await getProofTaskDetails(proof_task_id);
         if (!taskData) throw new Error("Task not found");
         setTask(taskData);
+        if (taskData.screening_questions && taskData.screening_questions.length > 0) {
+          setScreeningAnswers(taskData.screening_questions.map(() => ""));
+        }
 
         if (taskData.job_id) {
           const sid = await startProof(taskData.job_id, taskData.id);
@@ -137,6 +143,11 @@ export default function CandidateProofWorkspace() {
     setSubmitting(true);
     toast.loading("Deploying proof...", { id: "submit" });
     try {
+      const screeningQs = task.screening_questions?.filter(Boolean) ?? [];
+      const builtScreeningAnswers = screeningQs.length > 0
+        ? screeningQs.map((q, i) => ({ question: q, answer: screeningAnswers[i] ?? "" }))
+        : undefined;
+
       const result = await completeProof({
         job_id: task.job_id,
         submission_link: link || undefined,
@@ -144,6 +155,7 @@ export default function CandidateProofWorkspace() {
         reflection: reflection,
         video_url: videoLink || undefined,
         file: file || undefined,
+        screening_answers: builtScreeningAnswers,
       });
       if (result?.id) setSubmissionId(result.id);
       toast.success("Proof Deployed Successfully", { id: "submit" });
@@ -354,6 +366,33 @@ export default function CandidateProofWorkspace() {
 
             {activeTab === 'submission' && (
               <div className="max-w-2xl mx-auto space-y-6">
+
+                {/* Screening Questions */}
+                {task.screening_questions && task.screening_questions.filter(Boolean).length > 0 && (
+                  <div className="p-4 rounded-lg bg-[#252526] border border-[#3e3e42] space-y-4">
+                    <label className="text-xs font-medium text-slate-400 uppercase tracking-wider block">
+                      Screening Questions
+                    </label>
+                    <p className="text-xs text-slate-500">Answer these before submitting. Be specific — the employer reads these before reviewing your proof.</p>
+                    {task.screening_questions.filter(Boolean).map((q, i) => (
+                      <div key={i}>
+                        <label className="text-xs text-slate-300 mb-1.5 block">{i + 1}. {q}</label>
+                        <textarea
+                          className="w-full bg-[#1e1e1e] border border-[#3e3e42] rounded px-3 py-2 text-sm text-slate-200 focus:border-blue-500 outline-none resize-none transition-colors"
+                          rows={3}
+                          placeholder="Your answer..."
+                          value={screeningAnswers[i] ?? ""}
+                          onChange={(e) => {
+                            const next = [...screeningAnswers];
+                            next[i] = e.target.value;
+                            setScreeningAnswers(next);
+                          }}
+                          disabled={isLocked}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                )}
 
                 {/* Link Input */}
                 <div className="p-4 rounded-lg bg-[#252526] border border-[#3e3e42]">
