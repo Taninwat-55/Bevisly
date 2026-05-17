@@ -187,7 +187,7 @@ export async function getProofTaskDetails(
   const { data, error } = await supabase
     .from("proof_tasks")
     .select(
-      "id, job_id, title, description, expected_time, submission_format, ai_tools_allowed, attachments, recommended_platform, submission_type, rubric_criteria, rubric_locked_at, follow_up_questions, jobs ( company )",
+      "id, job_id, title, description, expected_time, submission_format, ai_tools_allowed, attachments, recommended_platform, submission_type, rubric_criteria, rubric_locked_at, follow_up_questions, jobs ( company, screening_questions )",
     )
     .eq("id", proof_task_id)
     .maybeSingle();
@@ -199,11 +199,11 @@ export async function getProofTaskDetails(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const raw = data as any;
 
+  const jobsData = Array.isArray(raw.jobs) ? raw.jobs[0] : raw.jobs;
   const result: ProofTask = {
     ...raw,
-    company_name: Array.isArray(raw.jobs)
-      ? raw.jobs[0]?.company
-      : raw.jobs?.company,
+    company_name: jobsData?.company,
+    screening_questions: jobsData?.screening_questions ?? [],
   };
 
   return result;
@@ -282,6 +282,7 @@ export async function getSubmissionById(submission_id: string) {
       resume_url,
       rejection_email_sent,
       follow_up_answers,
+      screening_answers,
       discussion_requested_at,
       created_at,
       proof_tasks ( id, title, description, rubric_criteria, rubric_locked_at, follow_up_questions ),
@@ -314,15 +315,17 @@ export async function submitProof({
   submission_link,
   text_response,
   reflection,
-  video_url, // ✅ Add this
+  video_url,
   file,
+  screening_answers,
 }: {
   job_id: string;
   submission_link?: string;
   text_response?: string;
   reflection?: string;
-  video_url?: string; // ✅ Add type
+  video_url?: string;
   file?: File | null;
+  screening_answers?: { question: string; answer: string }[];
 }) {
   const user = (await supabase.auth.getUser()).data.user;
   if (!user) throw new Error("Not authenticated");
@@ -358,6 +361,7 @@ export async function submitProof({
       status: "submitted",
       completed_at: new Date().toISOString(),
       resume_url: profile?.resume_url || null,
+      ...(screening_answers && screening_answers.length > 0 ? { screening_answers } : {}),
     })
     .eq("job_id", job_id)
     .eq("user_id", user.id)

@@ -39,6 +39,7 @@ export type ProofTask = {
   rubric_criteria?: RubricCriterion[] | null;
   rubric_locked_at?: string | null;
   follow_up_questions?: string[] | null;
+  screening_questions?: string[] | null;
 };
 
 /** One answered follow-up question on a submission. */

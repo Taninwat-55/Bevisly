@@ -113,7 +113,7 @@ async function notifyEmployer(record: SubmissionRecord) {
         <h2>New Proof Submitted</h2>
         <p><strong>${escapedCandidateName}</strong> just submitted work for <strong>${escapedJobTitle}</strong>.</p>
         <p style="margin-top: 20px;">
-          <a href="https://bevisly.vercel.app/employer/review/${escapedRecordId}" style="background-color: #0077cc; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">
+          <a href="https://bevisly.com/employer/review/${escapedRecordId}" style="background-color: #0077cc; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">
             Review Submission
           </a>
         </p>

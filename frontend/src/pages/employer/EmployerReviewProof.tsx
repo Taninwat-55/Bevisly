@@ -1094,6 +1094,33 @@ export default function EmployerReviewProof({
           </div>
         )}
 
+        {/* Screening Answers */}
+        {Array.isArray(submission.screening_answers) && submission.screening_answers.length > 0 && (
+          <div className="glass-panel rounded-2xl p-6 space-y-4">
+            <div className="flex items-center gap-2">
+              <MessageSquare size={16} className="text-[var(--color-employer)]" />
+              <h3 className="text-xs font-bold uppercase tracking-wider text-[var(--color-employer)]">
+                Screening Answers
+              </h3>
+            </div>
+            <p className="text-xs text-[var(--color-text-muted)]">
+              The candidate answered these screening questions before applying.
+            </p>
+            <div className="space-y-4">
+              {submission.screening_answers.map((item, idx) => (
+                <div key={idx} className="p-4 bg-[var(--color-bg)] border border-[var(--color-border)] rounded-xl space-y-2">
+                  <p className="text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wide">
+                    Q{idx + 1}. {item.question}
+                  </p>
+                  <p className="text-sm text-[var(--color-text)] leading-relaxed whitespace-pre-wrap">
+                    {item.answer || <span className="italic text-[var(--color-text-muted)]">No answer provided.</span>}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Follow-up Answers */}
         {Array.isArray(submission.follow_up_answers) && submission.follow_up_answers.length > 0 && (
           <div className="glass-panel rounded-2xl p-6 space-y-4">

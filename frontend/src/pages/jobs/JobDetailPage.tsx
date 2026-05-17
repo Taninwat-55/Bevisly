@@ -54,6 +54,8 @@ export default function JobDetailPage() {
   const [skipModal, setSkipModal] = useState<boolean>(
     localStorage.getItem("skipProofConfirm") === "true"
   );
+  const [showScreeningModal, setShowScreeningModal] = useState(false);
+  const [screeningAnswers, setScreeningAnswers] = useState<string[]>([]);
   const [fastPassMatch, setFastPassMatch] = useState<FastPassMatch | null>(null);
   const [showFastPass, setShowFastPass] = useState(false);
   const [checkingFastPass, setCheckingFastPass] = useState(false);
@@ -134,9 +136,10 @@ export default function JobDetailPage() {
   const proof = job.proof_tasks?.[0];
 
   /* ─── Simple Apply (no proof task) ──────────────────────── */
-  const handleSimpleApply = async () => {
+  const handleSimpleApply = async (answers?: { question: string; answer: string }[]) => {
     if (!user || !job) return;
     setStarting(true);
+    setShowScreeningModal(false);
     try {
       const { data: profile } = await supabase
         .from("profiles")
@@ -162,6 +165,7 @@ export default function JobDetailPage() {
         resume_url: profile.resume_url,
         started_at: new Date().toISOString(),
         completed_at: new Date().toISOString(),
+        ...(answers && answers.length > 0 ? { screening_answers: answers } : {}),
       });
 
       if (error) throw error;
@@ -183,7 +187,15 @@ export default function JobDetailPage() {
 
     // No proof task — quick apply flow
     if (!proof) {
-      if (!existingStatus) await handleSimpleApply();
+      if (!existingStatus) {
+        const qs = Array.isArray(job?.screening_questions) ? job.screening_questions.filter(Boolean) : [];
+        if (qs.length > 0) {
+          setScreeningAnswers(qs.map(() => ""));
+          setShowScreeningModal(true);
+        } else {
+          await handleSimpleApply();
+        }
+      }
       return;
     }
 
@@ -823,6 +835,86 @@ export default function JobDetailPage() {
                 >
                   <X size={20} />
                 </button>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>,
+        document.body
+        )}
+
+        {/* Screening Questions Modal */}
+        {createPortal(
+        <AnimatePresence>
+          {showScreeningModal && job?.screening_questions && (
+            <motion.div
+              className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[100] p-4"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+            >
+              <motion.div
+                className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-2xl shadow-2xl p-8 w-full max-w-lg relative max-h-[90vh] overflow-y-auto"
+                initial={{ scale: 0.95, opacity: 0, y: 10 }}
+                animate={{ scale: 1, opacity: 1, y: 0 }}
+                exit={{ scale: 0.95, opacity: 0, y: 10 }}
+              >
+                <button
+                  onClick={() => setShowScreeningModal(false)}
+                  className="absolute top-4 right-4 text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors"
+                >
+                  <X size={20} />
+                </button>
+
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="w-10 h-10 rounded-xl bg-[var(--color-brand-primary)]/10 flex items-center justify-center text-[var(--color-brand-primary)]">
+                    <MessageSquare size={20} />
+                  </div>
+                  <div>
+                    <h2 className="text-lg font-bold text-[var(--color-text)]">Screening Questions</h2>
+                    <p className="text-sm text-[var(--color-text-muted)]">Answer before your application is sent.</p>
+                  </div>
+                </div>
+
+                <div className="space-y-5 mb-6">
+                  {job.screening_questions.filter(Boolean).map((q, i) => (
+                    <div key={i}>
+                      <label className="block text-sm font-medium text-[var(--color-text)] mb-2">
+                        {i + 1}. {q}
+                      </label>
+                      <textarea
+                        rows={3}
+                        className="w-full px-3 py-2 rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)] text-[var(--color-text)] text-sm placeholder:text-[var(--color-text-muted)] focus:ring-2 focus:ring-[var(--color-brand-primary)] focus:border-transparent outline-none resize-none"
+                        placeholder="Your answer..."
+                        value={screeningAnswers[i] ?? ""}
+                        onChange={(e) => {
+                          const next = [...screeningAnswers];
+                          next[i] = e.target.value;
+                          setScreeningAnswers(next);
+                        }}
+                      />
+                    </div>
+                  ))}
+                </div>
+
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => setShowScreeningModal(false)}
+                    className="flex-1 px-4 py-2.5 rounded-xl border border-[var(--color-border)] text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[var(--color-surface-hover)] font-medium text-sm transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={() => {
+                      const qs = job.screening_questions!.filter(Boolean);
+                      const answers = qs.map((q, i) => ({ question: q, answer: screeningAnswers[i] ?? "" }));
+                      handleSimpleApply(answers);
+                    }}
+                    disabled={starting}
+                    className="flex-1 px-4 py-2.5 rounded-xl bg-[var(--color-brand-primary)] hover:bg-[var(--color-brand-primary-hover)] text-white font-bold text-sm transition-colors disabled:opacity-70"
+                  >
+                    {starting ? "Submitting..." : "Submit Application"}
+                  </button>
+                </div>
               </motion.div>
             </motion.div>
           )}

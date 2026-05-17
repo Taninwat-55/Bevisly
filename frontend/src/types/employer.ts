@@ -66,6 +66,7 @@ export type EmployerSubmission = {
   video_url?: string | null;
   reflection: string | null;
   follow_up_answers?: FollowUpAnswer[] | null;
+  screening_answers?: FollowUpAnswer[] | null;
   discussion_requested_at?: string | null;
   proof_tasks: {
     id: string;
