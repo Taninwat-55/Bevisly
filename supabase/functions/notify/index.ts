@@ -1,9 +1,7 @@
-import { serve } from "std/http/server.ts";
 import { createClient } from "@supabase/supabase-js";
-import nodemailer from "nodemailer";
 
-const GMAIL_APP_PASSWORD = Deno.env.get("GMAIL_APP_PASSWORD");
-const GMAIL_FROM = Deno.env.get("GMAIL_FROM") || "hello@bevisly.com";
+const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
+const FROM = "Bevisly <hello@bevisly.com>";
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
@@ -14,6 +12,27 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+async function sendEmail({ to, subject, html }: { to: string[]; subject: string; html: string }) {
+  if (!RESEND_API_KEY) {
+    console.error("⚠️ No RESEND_API_KEY — email not sent");
+    return;
+  }
+  const res = await fetch("https://api.resend.com/emails", {
+    method: "POST",
+    headers: {
+      "Authorization": `Bearer ${RESEND_API_KEY}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ from: FROM, to, subject, html }),
+  });
+  if (!res.ok) {
+    const detail = await res.text();
+    console.error(`❌ Resend error ${res.status}: ${detail}`);
+  } else {
+    console.log(`✅ Email sent to ${to.join(", ")}`);
+  }
+}
+
 interface SubmissionRecord {
   id: string;
   job_id: string;
@@ -21,7 +40,7 @@ interface SubmissionRecord {
   status: string;
 }
 
-serve(async (req) => {
+Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
   try {
@@ -152,31 +171,6 @@ async function notifyCandidate(record: SubmissionRecord) {
   }
 }
 
-async function sendEmail({ to, subject, html }: { to: string[]; subject: string; html: string }) {
-  if (!GMAIL_APP_PASSWORD) return console.error("⚠️ No GMAIL_APP_PASSWORD");
-
-  const transporter = nodemailer.createTransport({
-    host: "smtp.gmail.com",
-    port: 587,
-    secure: false,
-    auth: {
-      user: GMAIL_FROM,
-      pass: GMAIL_APP_PASSWORD,
-    },
-  });
-
-  try {
-    await transporter.sendMail({
-      from: `Bevisly <${GMAIL_FROM}>`,
-      to: to.join(", "),
-      subject,
-      html,
-    });
-    console.log(`✅ Email sent to ${to.join(", ")}`);
-  } catch (err) {
-    console.error("❌ Gmail SMTP Error:", err);
-  }
-}
 
 function escapeHtml(str: string): string {
   if (!str) return "";
