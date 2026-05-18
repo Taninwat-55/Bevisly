@@ -28,6 +28,7 @@ export async function generateJobListing(
         mission?: string | null;
         culture?: string | null;
     },
+    durationMinutes?: number,
 ): Promise<GeneratedJobListing> {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => {
@@ -49,6 +50,7 @@ export async function generateJobListing(
                     company_description: companyContext?.description ?? null,
                     company_mission: companyContext?.mission ?? null,
                     company_culture: companyContext?.culture ?? null,
+                    duration_minutes: durationMinutes ?? 60,
                 }),
                 signal: controller.signal,
             },

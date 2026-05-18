@@ -35,6 +35,7 @@ export default function LandingPage() {
   const [rawInput, setRawInput] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedData, setGeneratedData] = useState<GeneratedJobListing | null>(null);
+  const [selectedDuration, setSelectedDuration] = useState<30 | 60 | 120 | 180>(60);
   const magicBoxRef = useRef<HTMLDivElement>(null);
 
   // Featured Jobs
@@ -184,7 +185,7 @@ export default function LandingPage() {
     setGeneratedData(null);
     try {
       // Pass 'Guest Company' or similar because they aren't logged in
-      const data = await generateJobListing(rawInput, "your company");
+      const data = await generateJobListing(rawInput, "your company", undefined, selectedDuration);
       setGeneratedData(data);
       
       // Scroll to the result slightly after it renders
@@ -281,7 +282,29 @@ export default function LandingPage() {
                      )}
                   </button>
                 </form>
-                <div className="flex items-center justify-center gap-4 mt-6">
+                <div className="flex items-center justify-center gap-2 mt-3">
+                  <span className="text-xs text-[var(--color-text-muted)] mr-1">Task length:</span>
+                  {([
+                    { label: "30 min", value: 30 },
+                    { label: "1 hour", value: 60 },
+                    { label: "2 hours", value: 120 },
+                    { label: "3 hours", value: 180 },
+                  ] as const).map((tier) => (
+                    <button
+                      key={tier.value}
+                      type="button"
+                      onClick={() => setSelectedDuration(tier.value)}
+                      className={`px-3 py-1 rounded-full text-xs font-medium border transition-colors ${
+                        selectedDuration === tier.value
+                          ? "bg-[var(--color-brand-primary)] border-[var(--color-brand-primary)] text-white"
+                          : "border-[var(--color-border)] text-[var(--color-text-muted)] hover:border-[var(--color-brand-primary)]/50"
+                      }`}
+                    >
+                      {tier.label}
+                    </button>
+                  ))}
+                </div>
+                <div className="flex items-center justify-center gap-4 mt-3">
                   <p className="text-sm font-medium text-[var(--color-text-muted)]">
                     Describe the role. AI writes the proof task and rubric. Free to try — no account needed.
                   </p>
