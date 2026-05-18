@@ -32,49 +32,99 @@ export type Database = {
         }
         Relationships: []
       }
+      candidate_projects: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          id: string
+          link_url: string | null
+          skills: string[] | null
+          thumbnail_url: string | null
+          title: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          link_url?: string | null
+          skills?: string[] | null
+          thumbnail_url?: string | null
+          title: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          link_url?: string | null
+          skills?: string[] | null
+          thumbnail_url?: string | null
+          title?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "candidate_projects_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       companies: {
         Row: {
           avg_review_days: number | null
+          country: string | null
           created_at: string | null
           culture: string | null
           description: string | null
           id: string
+          is_internal: boolean | null
           logo_url: string | null
           mission: string | null
           name: string
           owner_id: string | null
           responsibility_score: number | null
           slug: string | null
+          team_photos: string[] | null
           updated_at: string | null
           website_url: string | null
         }
         Insert: {
           avg_review_days?: number | null
+          country?: string | null
           created_at?: string | null
           culture?: string | null
           description?: string | null
           id?: string
+          is_internal?: boolean | null
           logo_url?: string | null
           mission?: string | null
           name: string
           owner_id?: string | null
           responsibility_score?: number | null
           slug?: string | null
+          team_photos?: string[] | null
           updated_at?: string | null
           website_url?: string | null
         }
         Update: {
           avg_review_days?: number | null
+          country?: string | null
           created_at?: string | null
           culture?: string | null
           description?: string | null
           id?: string
+          is_internal?: boolean | null
           logo_url?: string | null
           mission?: string | null
           name?: string
           owner_id?: string | null
           responsibility_score?: number | null
           slug?: string | null
+          team_photos?: string[] | null
           updated_at?: string | null
           website_url?: string | null
         }
@@ -178,6 +228,7 @@ export type Database = {
           comments: string | null
           created_at: string | null
           employer_id: string | null
+          feedback_letter: string | null
           id: string
           improvements: string | null
           rating: number | null
@@ -192,6 +243,7 @@ export type Database = {
           comments?: string | null
           created_at?: string | null
           employer_id?: string | null
+          feedback_letter?: string | null
           id?: string
           improvements?: string | null
           rating?: number | null
@@ -206,6 +258,7 @@ export type Database = {
           comments?: string | null
           created_at?: string | null
           employer_id?: string | null
+          feedback_letter?: string | null
           id?: string
           improvements?: string | null
           rating?: number | null
@@ -294,25 +347,46 @@ export type Database = {
       invitations: {
         Row: {
           code: string
+          company_name: string | null
+          contact_email: string | null
+          contact_name: string | null
           created_at: string | null
+          created_by: string | null
           id: string
+          invite_type: string | null
           is_used: boolean | null
+          message: string | null
+          sent_at: string | null
           used_at: string | null
           used_by: string | null
         }
         Insert: {
           code: string
+          company_name?: string | null
+          contact_email?: string | null
+          contact_name?: string | null
           created_at?: string | null
+          created_by?: string | null
           id?: string
+          invite_type?: string | null
           is_used?: boolean | null
+          message?: string | null
+          sent_at?: string | null
           used_at?: string | null
           used_by?: string | null
         }
         Update: {
           code?: string
+          company_name?: string | null
+          contact_email?: string | null
+          contact_name?: string | null
           created_at?: string | null
+          created_by?: string | null
           id?: string
+          invite_type?: string | null
           is_used?: boolean | null
+          message?: string | null
+          sent_at?: string | null
           used_at?: string | null
           used_by?: string | null
         }
@@ -323,10 +397,13 @@ export type Database = {
           apply_url: string | null
           company: string | null
           company_id: string | null
+          compensation_type: string | null
           created_at: string | null
           department: string | null
           description: string | null
           employer_id: string | null
+          equity_max: number | null
+          equity_min: number | null
           expires_at: string | null
           featured: boolean | null
           id: string
@@ -341,6 +418,7 @@ export type Database = {
           requirements: string | null
           salary_max: number | null
           salary_min: number | null
+          screening_questions: Json | null
           show_salary_range: boolean | null
           status: string | null
           title: string
@@ -351,10 +429,13 @@ export type Database = {
           apply_url?: string | null
           company?: string | null
           company_id?: string | null
+          compensation_type?: string | null
           created_at?: string | null
           department?: string | null
           description?: string | null
           employer_id?: string | null
+          equity_max?: number | null
+          equity_min?: number | null
           expires_at?: string | null
           featured?: boolean | null
           id?: string
@@ -369,6 +450,7 @@ export type Database = {
           requirements?: string | null
           salary_max?: number | null
           salary_min?: number | null
+          screening_questions?: Json | null
           show_salary_range?: boolean | null
           status?: string | null
           title: string
@@ -379,10 +461,13 @@ export type Database = {
           apply_url?: string | null
           company?: string | null
           company_id?: string | null
+          compensation_type?: string | null
           created_at?: string | null
           department?: string | null
           description?: string | null
           employer_id?: string | null
+          equity_max?: number | null
+          equity_min?: number | null
           expires_at?: string | null
           featured?: boolean | null
           id?: string
@@ -397,6 +482,7 @@ export type Database = {
           requirements?: string | null
           salary_max?: number | null
           salary_min?: number | null
+          screening_questions?: Json | null
           show_salary_range?: boolean | null
           status?: string | null
           title?: string
@@ -520,14 +606,19 @@ export type Database = {
         Row: {
           active_jobs_count: number | null
           avatar_url: string | null
+          banner_url: string | null
           bevisly_score: number
           billing_period_end: string | null
           billing_period_start: string | null
           bio: string | null
           company_name: string | null
+          consented_at: string | null
           created_at: string | null
           credits: number | null
+          education: Json | null
           email: string | null
+          email_notif: boolean
+          experience: Json | null
           full_name: string | null
           github_url: string | null
           id: string
@@ -535,6 +626,7 @@ export type Database = {
           is_verified: boolean
           languages: string[] | null
           linkedin_url: string | null
+          marketing_emails: boolean
           monthly_job_posts_count: number | null
           reliability_score: number | null
           resume_updated_at: string | null
@@ -546,21 +638,28 @@ export type Database = {
           subscription_tier:
             | Database["public"]["Enums"]["subscription_tier_enum"]
             | null
+          tos_version: string | null
           username: string | null
+          video_intro_url: string | null
           website_url: string | null
           work_status: string | null
         }
         Insert: {
           active_jobs_count?: number | null
           avatar_url?: string | null
+          banner_url?: string | null
           bevisly_score?: number
           billing_period_end?: string | null
           billing_period_start?: string | null
           bio?: string | null
           company_name?: string | null
+          consented_at?: string | null
           created_at?: string | null
           credits?: number | null
+          education?: Json | null
           email?: string | null
+          email_notif?: boolean
+          experience?: Json | null
           full_name?: string | null
           github_url?: string | null
           id: string
@@ -568,6 +667,7 @@ export type Database = {
           is_verified?: boolean
           languages?: string[] | null
           linkedin_url?: string | null
+          marketing_emails?: boolean
           monthly_job_posts_count?: number | null
           reliability_score?: number | null
           resume_updated_at?: string | null
@@ -579,21 +679,28 @@ export type Database = {
           subscription_tier?:
             | Database["public"]["Enums"]["subscription_tier_enum"]
             | null
+          tos_version?: string | null
           username?: string | null
+          video_intro_url?: string | null
           website_url?: string | null
           work_status?: string | null
         }
         Update: {
           active_jobs_count?: number | null
           avatar_url?: string | null
+          banner_url?: string | null
           bevisly_score?: number
           billing_period_end?: string | null
           billing_period_start?: string | null
           bio?: string | null
           company_name?: string | null
+          consented_at?: string | null
           created_at?: string | null
           credits?: number | null
+          education?: Json | null
           email?: string | null
+          email_notif?: boolean
+          experience?: Json | null
           full_name?: string | null
           github_url?: string | null
           id?: string
@@ -601,6 +708,7 @@ export type Database = {
           is_verified?: boolean
           languages?: string[] | null
           linkedin_url?: string | null
+          marketing_emails?: boolean
           monthly_job_posts_count?: number | null
           reliability_score?: number | null
           resume_updated_at?: string | null
@@ -612,7 +720,9 @@ export type Database = {
           subscription_tier?:
             | Database["public"]["Enums"]["subscription_tier_enum"]
             | null
+          tos_version?: string | null
           username?: string | null
+          video_intro_url?: string | null
           website_url?: string | null
           work_status?: string | null
         }
@@ -627,6 +737,7 @@ export type Database = {
           description: string | null
           duration_minutes: number | null
           expected_time: string | null
+          follow_up_questions: Json | null
           id: string
           instructions: string | null
           job_id: string | null
@@ -645,6 +756,7 @@ export type Database = {
           description?: string | null
           duration_minutes?: number | null
           expected_time?: string | null
+          follow_up_questions?: Json | null
           id?: string
           instructions?: string | null
           job_id?: string | null
@@ -663,6 +775,7 @@ export type Database = {
           description?: string | null
           duration_minutes?: number | null
           expected_time?: string | null
+          follow_up_questions?: Json | null
           id?: string
           instructions?: string | null
           job_id?: string | null
@@ -734,10 +847,13 @@ export type Database = {
         Row: {
           completed_at: string | null
           created_at: string | null
+          discussion_requested_at: string | null
           employer_notes: string | null
           file_url: string | null
+          follow_up_answers: Json | null
           hiring_stage: string | null
           id: string
+          interview_email_sent: boolean
           is_fast_pass: boolean | null
           is_featured: boolean | null
           is_public: boolean | null
@@ -750,6 +866,7 @@ export type Database = {
           resume_metadata: Json | null
           resume_url: string | null
           score: number | null
+          screening_answers: Json | null
           started_at: string | null
           status: string | null
           submission_link: string | null
@@ -761,10 +878,13 @@ export type Database = {
         Insert: {
           completed_at?: string | null
           created_at?: string | null
+          discussion_requested_at?: string | null
           employer_notes?: string | null
           file_url?: string | null
+          follow_up_answers?: Json | null
           hiring_stage?: string | null
           id?: string
+          interview_email_sent?: boolean
           is_fast_pass?: boolean | null
           is_featured?: boolean | null
           is_public?: boolean | null
@@ -777,6 +897,7 @@ export type Database = {
           resume_metadata?: Json | null
           resume_url?: string | null
           score?: number | null
+          screening_answers?: Json | null
           started_at?: string | null
           status?: string | null
           submission_link?: string | null
@@ -788,10 +909,13 @@ export type Database = {
         Update: {
           completed_at?: string | null
           created_at?: string | null
+          discussion_requested_at?: string | null
           employer_notes?: string | null
           file_url?: string | null
+          follow_up_answers?: Json | null
           hiring_stage?: string | null
           id?: string
+          interview_email_sent?: boolean
           is_fast_pass?: boolean | null
           is_featured?: boolean | null
           is_public?: boolean | null
@@ -804,6 +928,7 @@ export type Database = {
           resume_metadata?: Json | null
           resume_url?: string | null
           score?: number | null
+          screening_answers?: Json | null
           started_at?: string | null
           status?: string | null
           submission_link?: string | null
@@ -842,6 +967,36 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      waitlist: {
+        Row: {
+          company_name: string
+          contact_name: string
+          created_at: string | null
+          email: string
+          id: string
+          status: string | null
+          website: string | null
+        }
+        Insert: {
+          company_name: string
+          contact_name: string
+          created_at?: string | null
+          email: string
+          id?: string
+          status?: string | null
+          website?: string | null
+        }
+        Update: {
+          company_name?: string
+          contact_name?: string
+          created_at?: string | null
+          email?: string
+          id?: string
+          status?: string | null
+          website?: string | null
+        }
+        Relationships: []
       }
     }
     Views: {
