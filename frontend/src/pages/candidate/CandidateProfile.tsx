@@ -25,6 +25,8 @@ import {
   Languages,
   Video,
   Camera,
+  GraduationCap,
+  Briefcase,
 } from "lucide-react";
 import { uploadResume, getProfileResume } from "@/lib/api/profiles";
 import EditProfileModal from "@/components/profile/EditProfileModal";
@@ -44,6 +46,8 @@ export default function CandidateProfile() {
   const [website, setWebsite] = useState<string>("");
   const [videoIntroUrl, setVideoIntroUrl] = useState<string>("");
   const [bannerUrl, setBannerUrl] = useState<string | null>(null);
+  const [education, setEducation] = useState<{ level: string; field?: string; institution?: string; graduation_year?: string }[]>([]);
+  const [experienceYears, setExperienceYears] = useState<string>("");
 
   const [username, setUsername] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
@@ -64,7 +68,7 @@ export default function CandidateProfile() {
     const { data: profileData } = await supabase
       .from("profiles")
       .select(
-        "created_at, full_name, skills, languages, work_status, bio, linkedin_url, github_url, website_url, video_intro_url, banner_url, username",
+        "created_at, full_name, skills, languages, work_status, bio, linkedin_url, github_url, website_url, video_intro_url, banner_url, username, education, experience",
       )
       .eq("id", user.id)
       .single();
@@ -89,6 +93,10 @@ export default function CandidateProfile() {
       setWebsite(profileData.website_url || "");
       setVideoIntroUrl(profileData.video_intro_url || "");
       setBannerUrl(profileData.banner_url || null);
+      const edu = (profileData as Record<string, unknown>).education as { level: string; field?: string; institution?: string; graduation_year?: string }[] | null;
+      const exp = (profileData as Record<string, unknown>).experience as { years?: string } | null;
+      setEducation(Array.isArray(edu) ? edu : []);
+      setExperienceYears(exp?.years ?? "");
       setUsername(
         ((profileData as Record<string, unknown>).username as string | null) ??
           null,
@@ -570,6 +578,52 @@ export default function CandidateProfile() {
             </Button>
           </div>
 
+          {/* Education & Experience Card */}
+          {(education.length > 0 || experienceYears) && (
+            <div className="glass-panel p-6 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] shadow-sm">
+              <h2 className="heading-md mb-4 flex items-center gap-2 text-[var(--color-text)] font-semibold">
+                <GraduationCap size={18} className="text-indigo-400" /> Education & Experience
+              </h2>
+              <div className="space-y-3">
+                {education.map((entry, idx) => (
+                  <div key={idx} className="flex items-start gap-3">
+                    <div className="w-8 h-8 rounded-lg bg-[var(--color-surface-hover)] flex items-center justify-center shrink-0 mt-0.5">
+                      <GraduationCap size={14} className="text-[var(--color-text-muted)]" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold text-[var(--color-text)]">
+                        {entry.level}{entry.field ? ` · ${entry.field}` : ""}
+                      </p>
+                      {(entry.institution || entry.graduation_year) && (
+                        <p className="text-xs text-[var(--color-text-muted)] mt-0.5">
+                          {[entry.institution, entry.graduation_year].filter(Boolean).join(" · ")}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                ))}
+                {experienceYears && (
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-lg bg-[var(--color-surface-hover)] flex items-center justify-center shrink-0">
+                      <Briefcase size={14} className="text-[var(--color-text-muted)]" />
+                    </div>
+                    <p className="text-sm text-[var(--color-text)]">
+                      <span className="font-semibold">{experienceYears}</span> of relevant experience
+                    </p>
+                  </div>
+                )}
+              </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="w-full mt-4 text-[var(--color-text-muted)]"
+                onClick={() => setIsEditModalOpen(true)}
+              >
+                Edit Education & Experience
+              </Button>
+            </div>
+          )}
+
           {/* Resume Card */}
           <div className="glass-panel p-6 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] shadow-sm">
             <h2 className="heading-md mb-4 flex items-center gap-2 text-[var(--color-text)] font-semibold">
@@ -675,6 +729,8 @@ export default function CandidateProfile() {
         currentGithub={github}
         currentWebsite={website}
         currentVideoIntro={videoIntroUrl}
+        currentEducation={education.length ? education : null}
+        currentExperienceYears={experienceYears}
         onUpdate={handleProfileUpdate}
       />
     </div>

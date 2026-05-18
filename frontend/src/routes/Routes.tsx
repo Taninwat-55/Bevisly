@@ -20,6 +20,7 @@ const CandidateProofWorkspace = lazy(() => import("@/pages/candidate/CandidatePr
 const CandidateFeedbackView = lazy(() => import("@/pages/candidate/CandidateFeedbackView"));
 const PracticeTasksPage = lazy(() => import("@/pages/candidate/PracticeTasksPage"));
 const PracticeWorkspace = lazy(() => import("@/pages/candidate/PracticeWorkspace"));
+const CareerCompassPage = lazy(() => import("@/pages/candidate/CareerCompassPage"));
 
 // Employer pages
 const EmployerDashboard = lazy(() => import("@/pages/employer/EmployerDashboard"));
@@ -107,6 +108,7 @@ export const router = createBrowserRouter([
           { path: "proofs", element: <CandidateFeedbackView /> },
           { path: "practice", element: <PracticeTasksPage /> },
           { path: "practice/:id", element: <PracticeWorkspace /> },
+          { path: "compass", element: <CareerCompassPage /> },
           { path: "settings", element: <UserSettings /> },
           { path: "leaderboard", element: <LeaderboardPage isWorkspaceView={true} /> },
           { path: "profile", element: <ProfilePage isWorkspaceView={true} /> },

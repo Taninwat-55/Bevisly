@@ -16,6 +16,7 @@ import {
   Bookmark,
   ShieldCheck,
   AtSign,
+  GraduationCap,
 } from "lucide-react";
 import toast from "react-hot-toast";
 import type { ProfileLite, ProofCardLite } from "@/types/shared";
@@ -33,6 +34,8 @@ interface PublicProfile extends ProfileLite {
   banner_url?: string | null;
   video_intro_url?: string | null;
   skills?: string[] | null;
+  education?: { level: string; field?: string; institution?: string; graduation_year?: string }[] | null;
+  experience?: { years?: string } | null;
 }
 
 export default function PublicProfilePage({ isWorkspaceView = false }: { isWorkspaceView?: boolean }) {
@@ -59,7 +62,7 @@ export default function PublicProfilePage({ isWorkspaceView = false }: { isWorks
         const query = supabase
           .from("profiles")
           .select(
-            "id, full_name, credits, bevisly_score, reliability_score, email, avatar_url, banner_url, video_intro_url, skills, is_public, username",
+            "id, full_name, credits, bevisly_score, reliability_score, email, avatar_url, banner_url, video_intro_url, skills, is_public, username, education, experience",
           );
 
         const { data: prof, error: profErr } = username
@@ -504,6 +507,44 @@ export default function PublicProfilePage({ isWorkspaceView = false }: { isWorks
                   Verified skills are earned via 4+ star Proof Tasks
                 </p>
               )}
+            </div>
+          )}
+
+          {/* Education & Experience */}
+          {(profile.education?.length || profile.experience?.years) && (
+            <div className="mt-6 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-2xl p-6 shadow-sm">
+              <h2 className="text-sm font-bold uppercase tracking-wider text-[var(--color-text-muted)] mb-4 flex items-center gap-2">
+                <GraduationCap size={16} /> Education & Experience
+              </h2>
+              <div className="space-y-3">
+                {profile.education?.map((entry, idx) => (
+                  <div key={idx} className="flex items-start gap-3">
+                    <div className="w-8 h-8 rounded-lg bg-[var(--color-surface-hover)] flex items-center justify-center shrink-0 mt-0.5">
+                      <GraduationCap size={14} className="text-[var(--color-text-muted)]" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold text-[var(--color-text)]">
+                        {entry.level}{entry.field ? ` · ${entry.field}` : ""}
+                      </p>
+                      {(entry.institution || entry.graduation_year) && (
+                        <p className="text-xs text-[var(--color-text-muted)] mt-0.5">
+                          {[entry.institution, entry.graduation_year].filter(Boolean).join(" · ")}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                ))}
+                {profile.experience?.years && (
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-lg bg-[var(--color-surface-hover)] flex items-center justify-center shrink-0">
+                      <Briefcase size={14} className="text-[var(--color-text-muted)]" />
+                    </div>
+                    <p className="text-sm text-[var(--color-text)]">
+                      <span className="font-semibold">{profile.experience.years}</span> of relevant experience
+                    </p>
+                  </div>
+                )}
+              </div>
             </div>
           )}
 

@@ -8,6 +8,13 @@ import { updateProfileData } from "@/lib/api/profiles";
 import { useAuth } from "@/hooks/useAuth";
 import toast from "react-hot-toast";
 
+export interface EducationEntry {
+  level: string;
+  field?: string;
+  institution?: string;
+  graduation_year?: string;
+}
+
 interface EditProfileModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -21,8 +28,13 @@ interface EditProfileModalProps {
   currentGithub?: string;
   currentWebsite?: string;
   currentVideoIntro?: string;
+  currentEducation?: EducationEntry[] | null;
+  currentExperienceYears?: string;
   onUpdate: () => void;
 }
+
+const EDUCATION_LEVELS = ["Self-taught", "Bootcamp", "High school", "Associate's", "Bachelor's", "Master's", "PhD"];
+const EXPERIENCE_OPTIONS = ["None yet", "Less than 1 year", "1–2 years", "3–5 years", "5+ years"];
 
 export default function EditProfileModal({
   isOpen,
@@ -37,6 +49,8 @@ export default function EditProfileModal({
   currentGithub = "",
   currentWebsite = "",
   currentVideoIntro = "",
+  currentEducation = null,
+  currentExperienceYears = "",
   onUpdate,
 }: EditProfileModalProps) {
   const { user, refreshProfile } = useAuth();
@@ -50,7 +64,20 @@ export default function EditProfileModal({
   const [github, setGithub] = useState(currentGithub);
   const [website, setWebsite] = useState(currentWebsite);
   const [videoIntro, setVideoIntro] = useState(currentVideoIntro);
-  
+  const [educationEntries, setEducationEntries] = useState<EducationEntry[]>(
+    currentEducation?.length ? currentEducation : []
+  );
+  const [experienceYears, setExperienceYears] = useState(currentExperienceYears);
+
+  const addEducationEntry = () =>
+    setEducationEntries((prev) => [...prev, { level: "" }]);
+
+  const removeEducationEntry = (idx: number) =>
+    setEducationEntries((prev) => prev.filter((_, i) => i !== idx));
+
+  const updateEducationEntry = (idx: number, patch: Partial<EducationEntry>) =>
+    setEducationEntries((prev) => prev.map((e, i) => (i === idx ? { ...e, ...patch } : e)));
+
   const [newSkill, setNewSkill] = useState("");
   const [newLanguage, setNewLanguage] = useState("");
   const [uploading, setUploading] = useState(false);
@@ -165,6 +192,8 @@ export default function EditProfileModal({
         github_url: github,
         website_url: website,
         video_intro_url: videoIntro,
+        education: educationEntries.filter((e) => e.level).length ? educationEntries.filter((e) => e.level) : undefined,
+        experience: experienceYears ? { years: experienceYears } : undefined,
       });
       
       await refreshProfile?.(); 
@@ -435,6 +464,86 @@ export default function EditProfileModal({
                         {languages.length === 0 && (
                             <p className="text-sm text-[var(--color-text-muted)] italic">No languages added yet.</p>
                         )}
+                    </div>
+                  </div>
+
+                  {/* Education & Experience */}
+                  <div>
+                    <div className="flex items-center justify-between mb-3">
+                      <label className="text-sm font-medium text-[var(--color-text)] flex items-center gap-2">
+                        <Briefcase size={16} className="text-[var(--color-text-muted)]" />
+                        Education & Experience
+                      </label>
+                      <button
+                        type="button"
+                        onClick={addEducationEntry}
+                        className="text-xs text-[var(--color-brand-primary)] hover:underline font-medium"
+                      >
+                        + Add degree
+                      </button>
+                    </div>
+
+                    <div className="space-y-4">
+                      {educationEntries.map((entry, idx) => (
+                        <div key={idx} className="p-3 rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)] space-y-2">
+                          <div className="flex items-center justify-between gap-2">
+                            <select
+                              value={entry.level}
+                              onChange={(e) => updateEducationEntry(idx, { level: e.target.value })}
+                              className="flex-1 px-3 py-2 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text)] text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+                            >
+                              <option value="">Education level…</option>
+                              {EDUCATION_LEVELS.map((l) => <option key={l} value={l}>{l}</option>)}
+                            </select>
+                            <button
+                              type="button"
+                              onClick={() => removeEducationEntry(idx)}
+                              className="p-1.5 text-[var(--color-text-muted)] hover:text-red-500 transition-colors shrink-0"
+                            >
+                              <X size={14} />
+                            </button>
+                          </div>
+                          {entry.level && entry.level !== "Self-taught" && entry.level !== "Bootcamp" && (
+                            <input
+                              type="text"
+                              value={entry.field ?? ""}
+                              onChange={(e) => updateEducationEntry(idx, { field: e.target.value })}
+                              placeholder="Field of study (e.g. Computer Science)"
+                              className="w-full px-3 py-2 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text)] text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+                            />
+                          )}
+                          <div className="flex gap-2">
+                            <input
+                              type="text"
+                              value={entry.institution ?? ""}
+                              onChange={(e) => updateEducationEntry(idx, { institution: e.target.value })}
+                              placeholder="Institution (optional)"
+                              className="flex-1 px-3 py-2 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text)] text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+                            />
+                            <input
+                              type="text"
+                              value={entry.graduation_year ?? ""}
+                              onChange={(e) => updateEducationEntry(idx, { graduation_year: e.target.value })}
+                              placeholder="Year"
+                              className="w-20 px-3 py-2 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text)] text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+                            />
+                          </div>
+                        </div>
+                      ))}
+                      {educationEntries.length === 0 && (
+                        <p className="text-sm text-[var(--color-text-muted)] italic">No education added yet. Click "+ Add degree" above.</p>
+                      )}
+                    </div>
+
+                    <div className="mt-3">
+                      <select
+                        value={experienceYears}
+                        onChange={(e) => setExperienceYears(e.target.value)}
+                        className="w-full px-3 py-2.5 rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)] text-[var(--color-text)] text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+                      >
+                        <option value="">Years of relevant experience…</option>
+                        {EXPERIENCE_OPTIONS.map((o) => <option key={o} value={o}>{o}</option>)}
+                      </select>
                     </div>
                   </div>
 

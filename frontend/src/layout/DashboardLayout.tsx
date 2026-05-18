@@ -20,6 +20,7 @@ import {
   Menu,
   Shield,
   Crown,
+  Compass,
 } from "lucide-react";
 import MobileNavDrawer from "@/components/MobileNavDrawer";
 import MobileBottomNav from "@/components/MobileBottomNav";
@@ -122,6 +123,7 @@ export default function DashboardLayout({
             { label: "Find Jobs", path: "/candidate/jobs", icon: Briefcase },
             { label: "My Proofs", path: "/candidate/proofs", icon: FileCheck, featured: true, badge: unseenFeedbackCount },
             { label: "Practice", path: "/candidate/practice", icon: Zap },
+            { label: "Career Compass", path: "/candidate/compass", icon: Compass },
             { label: "Leaderboard", path: "/candidate/leaderboard", icon: Trophy },
             {
               label: "Public Profile",

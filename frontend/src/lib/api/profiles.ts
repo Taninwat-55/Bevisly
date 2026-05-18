@@ -73,7 +73,7 @@ export async function updateProfileData(
     is_public?: boolean;
     banner_url?: string | null;
     video_intro_url?: string | null;
-    experience?: Record<string, unknown>[];
+    experience?: Record<string, unknown>;
     education?: Record<string, unknown>[];
   },
 ) {
