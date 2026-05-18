@@ -6,7 +6,10 @@ import type { Company, CompanyMember } from "@/types";
  * Falls back to profile data for billing fields (subscription_tier, credits, etc.)
  */
 export async function getCurrentCompany(): Promise<Company | null> {
-  const user = (await supabase.auth.getUser()).data.user;
+  // getSession() reads from localStorage — no network round-trip. The DB queries
+  // below use the same JWT, so if it were invalid they would fail anyway.
+  const { data: { session } } = await supabase.auth.getSession();
+  const user = session?.user;
   if (!user) return null;
 
   // 1. Find the user's company via company_members
@@ -50,6 +53,7 @@ export async function getCurrentCompany(): Promise<Company | null> {
     mission: company.mission ?? null,
     culture: company.culture ?? null,
     website_url: company.website_url ?? null,
+    country: company.country ?? null,
     responsibility_score: company.responsibility_score ?? null,
     subscription_tier: profile?.subscription_tier,
     active_jobs_count: profile?.active_jobs_count,

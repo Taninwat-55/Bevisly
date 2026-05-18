@@ -112,7 +112,7 @@ const COUNTRY_OPTIONS = [
 
 export default function UserSettings() {
   const { user, signOut, refreshProfile } = useAuth();
-  const { company: currentCompanyRecord, refresh: refreshCompany } = useCompany();
+  const { company: currentCompanyRecord, loading: companyLoading, refresh: refreshCompany } = useCompany();
   const { isDark, toggleTheme } = useTheme();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -577,7 +577,18 @@ export default function UserSettings() {
                         </FormField>
                       )}
 
-                      {isEmployer && (
+                      {isEmployer && companyLoading && (
+                        <div className="space-y-4 animate-pulse">
+                          {[4, 2, 3].map((rows, i) => (
+                            <div key={i} className="space-y-2">
+                              <div className="h-3 w-32 bg-[var(--color-surface-hover)] rounded" />
+                              <div className={`h-${rows === 2 ? 16 : rows === 3 ? 20 : 24} rounded-xl bg-[var(--color-surface-hover)]`} />
+                            </div>
+                          ))}
+                        </div>
+                      )}
+
+                      {isEmployer && !companyLoading && (
                         <>
                           <FormField label="About the Company" hint="Tell candidates what makes your company unique.">
                             <textarea

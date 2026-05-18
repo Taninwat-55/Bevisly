@@ -88,7 +88,7 @@ async function notifyEmployer(record: SubmissionRecord) {
 
   const { data: job } = await supabase
     .from("jobs")
-    .select(`title, employer_id, profiles!employer_id ( email )`)
+    .select(`title, employer_id, profiles!employer_id ( email, email_notif )`)
     .eq("id", record.job_id)
     .single();
 
@@ -99,11 +99,17 @@ async function notifyEmployer(record: SubmissionRecord) {
     .single();
 
   // Supabase returns profiles as a single object for foreign key joins
-  const employerEmail = (job?.profiles as { email?: string } | null)?.email;
+  const employerProfile = job?.profiles as { email?: string; email_notif?: boolean } | null;
+  const employerEmail = employerProfile?.email;
+
+  if (employerProfile?.email_notif === false) {
+    console.log("Employer has disabled email notifications, skipping:", job?.employer_id);
+    return;
+  }
+
   const candidateName = candidate?.full_name || "A Candidate";
   const escapedCandidateName = escapeHtml(candidateName);
   const escapedJobTitle = escapeHtml(job?.title || "");
-  const escapedRecordId = escapeHtml(String(record.id));
 
   if (employerEmail) {
     await sendEmail({
@@ -113,7 +119,7 @@ async function notifyEmployer(record: SubmissionRecord) {
         <h2>New Proof Submitted</h2>
         <p><strong>${escapedCandidateName}</strong> just submitted work for <strong>${escapedJobTitle}</strong>.</p>
         <p style="margin-top: 20px;">
-          <a href="https://bevisly.com/employer/review/${escapedRecordId}" style="background-color: #0077cc; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">
+          <a href="https://bevisly.com/employer/inbox" style="background-color: #0077cc; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">
             Review Submission
           </a>
         </p>
