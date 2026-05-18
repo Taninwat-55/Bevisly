@@ -10,6 +10,7 @@ import toast from "react-hot-toast";
 import AILoadingState from "@/components/common/AILoadingState";
 import ContactModal from "@/components/common/ContactModal";
 import PlatformStats from "@/components/landing/PlatformStats";
+import ResearchStats from "@/components/landing/ResearchStats";
 import ReactMarkdown, { type Components } from "react-markdown";
 import DOMPurify from "dompurify";
 
@@ -68,7 +69,7 @@ export default function LandingPage() {
         "@type": "WebSite",
         "name": "Bevisly",
         "url": "https://bevisly.com",
-        "description": "The proof-first hiring platform for junior talent. Candidates complete real tasks to apply. Employers review actual work, not CVs.",
+        "description": "The proof-based hiring infrastructure for startups, SMEs, and scale-ups. Candidates complete real tasks. Employers review evidence, not CVs. Rubric-locked, AI-assisted, human-decided.",
         "potentialAction": {
           "@type": "SearchAction",
           "target": {
@@ -84,7 +85,7 @@ export default function LandingPage() {
         "applicationCategory": "BusinessApplication",
         "operatingSystem": "Web",
         "url": "https://bevisly.com",
-        "description": "Proof-first hiring platform. Candidates complete employer-set tasks to prove their skills. Employers shortlist based on real deliverables, not self-reported experience.",
+        "description": "Proof-based hiring infrastructure. Candidates complete employer-set tasks to prove their skills. Employers shortlist based on real deliverables and a locked rubric — not self-reported experience.",
         "offers": {
           "@type": "Offer",
           "price": "0",
@@ -97,10 +98,10 @@ export default function LandingPage() {
         "mainEntity": [
           {
             "@type": "Question",
-            "name": "How does proof-first hiring work for junior talent?",
+            "name": "How does proof-based hiring work?",
             "acceptedAnswer": {
               "@type": "Answer",
-              "text": "You post a role and Bevisly generates a short proof task — typically 30 minutes. Junior candidates complete the task and submit their work. You review real deliverables and shortlist based on actual skill, not years of experience."
+              "text": "You post a role and Bevisly generates a proof task — typically 30 minutes to 2 hours depending on the role. Candidates complete the task and submit real work. You review deliverables against a rubric you defined upfront and shortlist based on actual skill, not years of experience or CV keywords."
             }
           },
           {
@@ -202,19 +203,19 @@ export default function LandingPage() {
   return (
     <div className="bg-[var(--color-bg)] min-h-screen font-sans selection:bg-[var(--color-brand-primary)] selection:text-white">
       <Helmet>
-        <title>Bevisly — Proof-First Hiring for Junior Talent</title>
-        <meta name="description" content="Bevisly is the proof-first hiring platform for junior talent. Candidates prove skills with 30-minute tasks. Employers review real work, not CVs." />
+        <title>Bevisly — Proof-Based Hiring Infrastructure for Startups and Scale-Ups</title>
+        <meta name="description" content="Bevisly is the proof-based hiring infrastructure for startups, SMEs, and scale-ups. Candidates complete real tasks. Employers review evidence, not CVs. Rubric-locked, AI-assisted, human-decided." />
         <link rel="canonical" href="https://bevisly.com/" />
         <meta property="og:type" content="website" />
         <meta property="og:url" content="https://bevisly.com/" />
-        <meta property="og:title" content="Bevisly — Proof-First Hiring for Junior Talent" />
-        <meta property="og:description" content="Stop hiring based on self-reported skills. Bevisly validates candidate ability with real proof tasks. Free for candidates, built for startups and SMEs." />
+        <meta property="og:title" content="Bevisly — Proof-Based Hiring Infrastructure for Startups and Scale-Ups" />
+        <meta property="og:description" content="Stop screening CVs. Bevisly replaces gut-feel hiring with structured, rubric-locked proof tasks. Built for startups and scale-ups." />
         <meta property="og:image" content="https://bevisly.com/logo.png" />
         <meta property="og:site_name" content="Bevisly" />
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:site" content="@bevisly" />
-        <meta name="twitter:title" content="Bevisly — Proof-First Hiring for Junior Talent" />
-        <meta name="twitter:description" content="Stop hiring based on self-reported skills. Bevisly validates candidate ability with real proof tasks." />
+        <meta name="twitter:title" content="Bevisly — Proof-Based Hiring Infrastructure for Startups and Scale-Ups" />
+        <meta name="twitter:description" content="Stop screening CVs. Proof-based hiring infrastructure for startups and scale-ups." />
         <meta name="twitter:image" content="https://bevisly.com/logo.png" />
         <script type="application/ld+json">{JSON.stringify(structuredData)}</script>
       </Helmet>
@@ -227,22 +228,25 @@ export default function LandingPage() {
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-md bg-[var(--color-brand-subtle)] border border-[var(--color-brand-subtle-border)] mb-8 animate-fade-in-up">
                 <span className="w-2 h-2 rounded-full bg-[var(--color-brand-primary)]" />
                 <span className="text-sm font-medium text-[var(--color-brand-primary)]">
-                  Now hiring junior talent for top Nordic companies
+                  Proof-based hiring infrastructure · Built for startups and scale-ups
                 </span>
               </div>
 
               <h1 className="text-5xl md:text-7xl font-bold font-display tracking-tight text-[var(--color-text)] mb-6 leading-[1.1] animate-fade-in-up" style={{ animationDelay: "0.1s" }}>
-                The{" "}
+                The proof-based{" "}
                 <span className="text-[var(--color-brand-primary)]">
-                  proof-first
+                  hiring infrastructure
                 </span>{" "}
-                platform <br />
-                for hiring junior talent.
+                <br />
+                for startups and scale-ups.
               </h1>
 
               <p className="text-xl text-[var(--color-text-muted)] mb-10 max-w-2xl mx-auto leading-relaxed animate-fade-in-up" style={{ animationDelay: "0.2s" }}>
-                Candidates prove skills with 30-minute tasks.
-                Employers review real work, not CVs.
+                Candidates prove skills through real tasks.
+                Employers review evidence, not CVs.{" "}
+                <span className="text-[var(--color-text-muted)] opacity-70">
+                  Rubric-locked. AI-assisted. Human-decided.
+                </span>
               </p>
 
               <div className="max-w-2xl mx-auto relative animate-fade-in-up" style={{ animationDelay: "0.3s" }}>
@@ -279,7 +283,7 @@ export default function LandingPage() {
                 </form>
                 <div className="flex items-center justify-center gap-4 mt-6">
                   <p className="text-sm font-medium text-[var(--color-text-muted)]">
-                    Describe the role. AI writes the proof task. Free to try — no account needed.
+                    Describe the role. AI writes the proof task and rubric. Free to try — no account needed.
                   </p>
                 </div>
               </div>
@@ -534,6 +538,9 @@ export default function LandingPage() {
           </section>
         )}
 
+        {/* ── RESEARCH STATS ────────────────────────────── */}
+        <ResearchStats />
+
         {/* ── FEATURES GRID (Bento) ────────────────────────────── */}
         <section id="features" className="py-24 bg-[var(--color-bg)]">
           <div className="max-w-7xl mx-auto px-6">
@@ -597,9 +604,13 @@ export default function LandingPage() {
                 For Employers
               </div>
               <h2 className="text-4xl md:text-5xl font-bold font-display text-[var(--color-text)] mb-6">Stop screening CVs.<br />Start reviewing proof.</h2>
-              <p className="text-[var(--color-text-muted)] text-lg leading-relaxed mb-8">
-                Junior roles get flooded with applications. Bevisly cuts through by replacing the CV with a 30-minute proof task. AI writes it for you. Review submissions in 10 minutes.
+              <p className="text-[var(--color-text-muted)] text-lg leading-relaxed mb-6">
+                Junior roles get flooded with applications. Bevisly cuts through by replacing the CV with a proof task. AI writes it for you. Review submissions in 10 minutes.
               </p>
+              <div className="flex flex-col gap-1.5 p-4 rounded-lg bg-[var(--color-brand-subtle)] border border-[var(--color-brand-subtle-border)] mb-8 text-sm text-[var(--color-text-muted)]">
+                <span><strong className="text-[var(--color-text)]">34%</strong> more career-switcher profiles are filtered out by ATS — even with equivalent skills. <span className="opacity-60">(NBER, 2023)</span></span>
+                <span><strong className="text-[var(--color-text)]">25%</strong> higher retention rate for skills-based hires vs. credential-based hiring. <span className="opacity-60">(IBM)</span></span>
+              </div>
               <Button variant="primary" size="lg" onClick={() => navigate('/auth?tab=signup&role=employer')}>
                 Post Your First Role
               </Button>
@@ -642,14 +653,17 @@ export default function LandingPage() {
           <div className="max-w-7xl mx-auto px-6">
             <div className="text-center mb-16">
               <div className="inline-block px-3 py-1 rounded-md border border-[var(--color-brand-subtle-border)] bg-[var(--color-brand-subtle)] text-sm font-medium text-[var(--color-brand-primary)] mb-4">
-                For Junior Talent
+                For Candidates
               </div>
               <h2 className="text-3xl md:text-5xl font-bold font-display text-[var(--color-text)] mb-4">
                 Your skills deserve more <br />
                 <span className="text-[var(--color-brand-primary)]">than a resume.</span>
               </h2>
-              <p className="text-[var(--color-text-muted)] text-lg max-w-2xl mx-auto">
-                Build a proof portfolio before you even apply. 30-minute tasks, verified feedback, credentials that live forever on your public profile.
+              <p className="text-[var(--color-text-muted)] text-lg max-w-2xl mx-auto mb-6">
+                Build a proof portfolio before you even apply. Real tasks, verified feedback, credentials that live forever on your public profile.
+              </p>
+              <p className="text-sm text-[var(--color-text-muted)] max-w-xl mx-auto italic opacity-80">
+                Candidates with white-sounding names receive up to 75% more responses to identical applications. Bevisly evaluates what you can do — not what your name or school signals.
               </p>
             </div>
 
