@@ -259,7 +259,6 @@ export default function CareerCompassPage() {
   const [screen, setScreen] = useState<Screen>("loading");
   const [gateInfo, setGateInfo] = useState<GateInfo | null>(null);
   const [previousSessions, setPreviousSessions] = useState<PreviousSession[]>([]);
-  const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
   const [compassResult, setCompassResult] = useState<CareerCompassResult | null>(null);
   const [intake, setIntake] = useState<IntakeData>(EMPTY_INTAKE);
   const [profileEducation, setProfileEducation] = useState<EducationEntry[]>([]);
@@ -301,7 +300,6 @@ export default function CareerCompassPage() {
       // If the latest session already has results, show them directly
       const latest = sessions[0];
       if (latest?.status === "analysis_ready" && latest.ai_output) {
-        setCurrentSessionId(latest.id);
         setCompassResult(latest.ai_output);
         setScreen("results");
         return;
@@ -320,7 +318,7 @@ export default function CareerCompassPage() {
     }
 
     checkGate().catch(console.error);
-  }, [user?.id]);
+  }, [user]);
 
   // ── Validation ─────────────────────────────────────────────────────────────
 
@@ -376,7 +374,6 @@ export default function CareerCompassPage() {
       }
 
       const sessionId = sessionRes.data.id;
-      setCurrentSessionId(sessionId);
 
       // Call AI pipeline
       const result = await runCareerCompass(sessionId, user.id);
@@ -454,7 +451,6 @@ export default function CareerCompassPage() {
           setIntake(EMPTY_INTAKE);
           setErrors({});
           setCompassResult(null);
-          setCurrentSessionId(null);
           setScreen("intro");
         }}
       />

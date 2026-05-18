@@ -192,7 +192,7 @@ export default function EditProfileModal({
         github_url: github,
         website_url: website,
         video_intro_url: videoIntro,
-        education: educationEntries.filter((e) => e.level).length ? educationEntries.filter((e) => e.level) : undefined,
+        education: educationEntries.filter((e) => e.level).length ? educationEntries.filter((e) => e.level) as Record<string, unknown>[] : undefined,
         experience: experienceYears ? { years: experienceYears } : undefined,
       });
       
