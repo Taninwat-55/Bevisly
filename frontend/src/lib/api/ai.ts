@@ -129,6 +129,50 @@ export async function suggestFeedback(
     };
 }
 
+// ── Career Compass ────────────────────────────────────────────────────────────
+
+export interface CareerDirectionItem {
+    role: string;
+    fit_score: number;
+    reasoning: string;
+    key_strengths: string[];
+}
+
+export interface ProofReadinessItem {
+    role: string;
+    readiness_score: number;
+    explanation: string;
+    what_would_improve_it: string;
+}
+
+export interface SkillsGapItem {
+    skill: string;
+    gap_level: "minor" | "moderate" | "significant";
+    evidence: string;
+    suggestion: string;
+}
+
+export interface CareerCompassResult {
+    career_direction: CareerDirectionItem[];
+    proof_readiness: ProofReadinessItem[];
+    skills_gap: SkillsGapItem[];
+    overall_summary: string;
+}
+
+export async function runCareerCompass(
+    sessionId: string,
+    userId: string,
+): Promise<CareerCompassResult> {
+    const { data, error } = await supabase.functions.invoke("career-compass", {
+        body: { session_id: sessionId, user_id: userId },
+    });
+
+    if (error) throw error;
+    if (data?.error) throw new Error(data.error);
+
+    return data.result as CareerCompassResult;
+}
+
 export async function draftFeedbackLetter(params: {
     candidateName: string;
     jobTitle: string;

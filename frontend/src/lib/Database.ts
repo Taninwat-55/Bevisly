@@ -73,6 +73,41 @@ export type Database = {
           },
         ]
       }
+      career_compass_sessions: {
+        Row: {
+          ai_output: Json | null
+          created_at: string | null
+          id: string
+          intake_data: Json
+          status: string
+          user_id: string
+        }
+        Insert: {
+          ai_output?: Json | null
+          created_at?: string | null
+          id?: string
+          intake_data: Json
+          status?: string
+          user_id: string
+        }
+        Update: {
+          ai_output?: Json | null
+          created_at?: string | null
+          id?: string
+          intake_data?: Json
+          status?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "career_compass_sessions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       companies: {
         Row: {
           avg_review_days: number | null

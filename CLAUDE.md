@@ -185,8 +185,8 @@ Wire up once there's real traffic and validated demand — a pricing page withou
 ### ⬜ Fairness & Evidence Layer
 Four remaining phases that operationalise the Product Principles once we have real employer usage data: blind first review, required justification on override, employer consistency dashboard with fairness alerts, and weekly AI self-audit. (Phase 1 — Locked Rubric — was promoted to pre-launch on 2026-05-08.) See `PRODUCT_ROADMAP.md` feature #19.
 
-### ⬜ Career Compass (AI Self-Discovery)
-Candidate-facing AI session that reads their proof history, employer ratings, and a short intake form to deliver three things: career direction (role types that fit them based on demonstrated strengths), proof readiness (how ready they are for specific roles with a percentage score), and skills gap analysis (what's in their way, grounded in real submission data). Powered by Gemini. Private to the candidate — never shared with employers. Gated behind minimum profile completeness. Post-launch because output quality scales with real proof data. Full spec in `PRODUCT_ROADMAP.md` feature #21.
+### ✅ Career Compass (AI Self-Discovery)
+Candidate-facing AI session that reads their profile information, proof history, employer ratings, and a short intake form to deliver three things: career direction (role types that fit them based on demonstrated strengths), proof readiness (how ready they are for specific roles with a percentage score), and skills gap analysis (what's in their way, grounded in real submission data). Powered by Gemini. Private to the candidate — never shared with employers. Gated behind minimum profile completeness. Post-launch because output quality scales with real proof data. Full spec in `PRODUCT_ROADMAP.md` feature #21.
 
 ### ⬜ AI Chatbot
 In-app AI assistant powered by Gemini. Dual-purpose: helps candidates refine applications, understand proof task requirements, and prep for interviews; helps employers draft job descriptions and proof tasks faster. Surfaced as a chat widget available across both dashboards.

@@ -379,3 +379,8 @@ entrypoint = "./functions/generate-job-listing/index.ts"
 enabled = true
 verify_jwt = true
 entrypoint = "./functions/grade-practice/index.ts"
+
+[functions.career-compass]
+enabled = true
+verify_jwt = true
+entrypoint = "./functions/career-compass/index.ts"
