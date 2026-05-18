@@ -85,6 +85,9 @@ export default function LandingFooter() {
               <Link to="/privacy" className="text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors">
                 Privacy
               </Link>
+              <Link to="/terms" className="text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors">
+                Terms
+              </Link>
             </nav>
           </div>
 

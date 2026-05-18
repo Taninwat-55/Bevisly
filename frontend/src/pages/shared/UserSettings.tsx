@@ -140,9 +140,24 @@ export default function UserSettings() {
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const teamPhotoInputRef = useRef<HTMLInputElement>(null);
 
-  // Prefs state
+  // Prefs state — loaded from DB on mount, auto-saved on toggle
   const [emailNotif, setEmailNotif] = useState(true);
   const [marketingEmails, setMarketingEmails] = useState(false);
+
+  useEffect(() => {
+    if (!user?.id) return;
+    supabase
+      .from("profiles")
+      .select("email_notif, marketing_emails")
+      .eq("id", user.id)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (data) {
+          setEmailNotif(data.email_notif ?? true);
+          setMarketingEmails(data.marketing_emails ?? false);
+        }
+      });
+  }, [user?.id]);
 
   // Set default tab to "profile" for employers once, on first load
   useEffect(() => {
@@ -375,6 +390,19 @@ export default function UserSettings() {
     if (!window.confirm("Delete your account permanently? This cannot be undone.")) return;
     setDeleting(true);
     try {
+      // Clean up storage files first (best-effort — don't abort if files are missing)
+      if (user?.id) {
+        const buckets = ["avatars", "resumes", "proofs", "task_attachments"];
+        await Promise.allSettled(
+          buckets.map(async (bucket) => {
+            const { data: files } = await supabase.storage.from(bucket).list(user.id);
+            if (files && files.length > 0) {
+              const paths = files.map((f) => `${user.id}/${f.name}`);
+              await supabase.storage.from(bucket).remove(paths);
+            }
+          })
+        );
+      }
       const { error } = await supabase.rpc("delete_user_account");
       if (error) throw error;
       await signOut();
@@ -882,7 +910,12 @@ export default function UserSettings() {
                             ? "New applications, submission reviews, and platform news."
                             : "Status changes on your applications and new opportunities.",
                           checked: emailNotif,
-                          onChange: () => setEmailNotif((v) => !v),
+                          onChange: () => {
+                            const next = !emailNotif;
+                            setEmailNotif(next);
+                            supabase.from("profiles").update({ email_notif: next }).eq("id", user!.id)
+                              .then(({ error }) => { if (error) toast.error("Failed to save preference"); });
+                          },
                           color: "bg-emerald-500",
                         },
                         {
@@ -896,7 +929,12 @@ export default function UserSettings() {
                             ? "Recruitment tips, feature highlights, and product news."
                             : "Profile tips, job search advice, and Bevis news.",
                           checked: marketingEmails,
-                          onChange: () => setMarketingEmails((v) => !v),
+                          onChange: () => {
+                            const next = !marketingEmails;
+                            setMarketingEmails(next);
+                            supabase.from("profiles").update({ marketing_emails: next }).eq("id", user!.id)
+                              .then(({ error }) => { if (error) toast.error("Failed to save preference"); });
+                          },
                           color: "bg-purple-500",
                         },
                       ].map((item) => (
