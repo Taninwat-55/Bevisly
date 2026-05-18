@@ -416,7 +416,7 @@ An in-app AI assistant (powered by Gemini) surfaced as a chat widget across both
 ---
 
 ### 21. Career Compass (AI Self-Discovery for Candidates)
-**Status:** 🔴
+**Status:** 🟢
 
 Most career tools tell you what jobs exist. Career Compass tells you where *you* fit — and what's in your way. It's a structured AI session that reads a candidate's entire Bevisly history and helps them answer three questions: Where should I go? Am I ready to get there? What's stopping me?
 
