@@ -1,7 +1,7 @@
 # Bevisly — Product Roadmap
 
 > Living document. No deadlines — ship when it's right.
-> Last updated: 2026-05-08
+> Last updated: 2026-05-18
 
 ---
 
@@ -53,6 +53,12 @@ Inspired by Bitcoin's proof-of-work model: effort produces something verifiable 
 - Each completed proof is a permanent on-profile asset, not a disposable application
 - The more proofs a candidate completes, the stronger their Bevisly Score becomes
 - Employers get evidence, not promises
+
+---
+
+## 🚀 Launch Date: Wednesday 2026-05-20
+
+Cold email outreach to first employers begins on launch day.
 
 ---
 
