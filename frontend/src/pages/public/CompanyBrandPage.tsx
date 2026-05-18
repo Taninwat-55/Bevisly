@@ -162,6 +162,12 @@ export default function CompanyBrandPage() {
                     <ExternalLink size={12} className="opacity-60" />
                   </a>
                 )}
+                {company.country && (
+                  <span className="inline-flex items-center gap-1.5 text-sm text-[var(--color-text-muted)] mt-1">
+                    <MapPin size={13} />
+                    {company.country}
+                  </span>
+                )}
               </div>
 
               {/* Responsibility Score — prominent */}

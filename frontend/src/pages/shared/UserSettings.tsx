@@ -103,6 +103,13 @@ const inputCls =
 const textareaCls =
   "w-full px-3.5 py-2.5 rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)] text-[var(--color-text)] text-sm placeholder:text-[var(--color-text-muted)]/60 focus:ring-2 focus:ring-[var(--color-brand-primary)] focus:border-transparent outline-none transition-all resize-y";
 
+const COUNTRY_OPTIONS = [
+  "Denmark", "Sweden", "Norway", "Finland", "Iceland",
+  "Germany", "Netherlands", "United Kingdom", "France", "Spain",
+  "Belgium", "Switzerland", "Austria", "Poland", "Italy",
+  "United States", "Canada", "Other",
+];
+
 export default function UserSettings() {
   const { user, signOut, refreshProfile } = useAuth();
   const { company: currentCompanyRecord, refresh: refreshCompany } = useCompany();
@@ -136,6 +143,7 @@ export default function UserSettings() {
   const [companyMission, setCompanyMission] = useState("");
   const [companyCulture, setCompanyCulture] = useState("");
   const [companyWebsite, setCompanyWebsite] = useState("");
+  const [companyCountry, setCompanyCountry] = useState("");
   const [companyTeamPhotos, setCompanyTeamPhotos] = useState<string[]>([]);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const teamPhotoInputRef = useRef<HTMLInputElement>(null);
@@ -182,6 +190,7 @@ export default function UserSettings() {
       setCompanyMission(currentCompanyRecord.mission || "");
       setCompanyCulture(currentCompanyRecord.culture || "");
       setCompanyWebsite(currentCompanyRecord.website_url || "");
+      setCompanyCountry(currentCompanyRecord.country || "");
       setCompanyTeamPhotos(currentCompanyRecord.team_photos ?? []);
     }
   }, [currentCompanyRecord]);
@@ -301,6 +310,7 @@ export default function UserSettings() {
             mission: companyMission || null,
             culture: companyCulture || null,
             website_url: companyWebsite || null,
+            country: companyCountry || null,
           });
           await refreshCompany();
         }
@@ -605,6 +615,18 @@ export default function UserSettings() {
                               className={inputCls}
                             />
                           </FormField>
+                          <FormField label="Company Location" hint="Country where your company is primarily based.">
+                            <select
+                              value={companyCountry}
+                              onChange={(e) => setCompanyCountry(e.target.value)}
+                              className={inputCls}
+                            >
+                              <option value="">Select a country…</option>
+                              {COUNTRY_OPTIONS.map((c) => (
+                                <option key={c} value={c}>{c}</option>
+                              ))}
+                            </select>
+                          </FormField>
                           <FormField label="Images" hint="Up to 3 photos · JPG, PNG · Max 5MB each — shown on your company brand page.">
                             <div className="flex flex-wrap gap-3 mt-1">
                               {companyTeamPhotos.map((url) => (
@@ -636,10 +658,21 @@ export default function UserSettings() {
                         </>
                       )}
 
-                      <div className="pt-2">
+                      <div className="pt-2 flex items-center gap-3">
                         <Button onClick={handleSaveProfile} isLoading={isLoading} size="sm">
                           Save Changes
                         </Button>
+                        {isEmployer && currentCompanyRecord?.slug && (
+                          <a
+                            href={`/company/${currentCompanyRecord.slug}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            <Button variant="secondary" size="sm" type="button">
+                              <Eye size={14} className="mr-1.5" /> Preview Profile
+                            </Button>
+                          </a>
+                        )}
                       </div>
                     </div>
                   </SettingsCard>

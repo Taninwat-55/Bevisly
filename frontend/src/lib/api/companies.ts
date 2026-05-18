@@ -207,7 +207,7 @@ export async function updateCompanyName(companyId: string, name: string): Promis
  */
 export async function updateCompanyProfile(
   companyId: string,
-  fields: { description?: string | null; mission?: string | null; culture?: string | null; website_url?: string | null; team_photos?: string[] | null }
+  fields: { description?: string | null; mission?: string | null; culture?: string | null; website_url?: string | null; team_photos?: string[] | null; country?: string | null }
 ): Promise<void> {
   const user = (await supabase.auth.getUser()).data.user;
   if (!user) throw new Error("Not authenticated");
@@ -226,7 +226,7 @@ export async function updateCompanyProfile(
 export async function getCompanyProfile(companyId: string): Promise<Company | null> {
   const { data, error } = await supabase
     .from("companies")
-    .select("id, name, slug, logo_url, team_photos, description, mission, culture, website_url, responsibility_score")
+    .select("id, name, slug, logo_url, team_photos, description, mission, culture, website_url, country, responsibility_score")
     .eq("id", companyId)
     .single();
 
@@ -244,6 +244,7 @@ export async function getCompanyProfile(companyId: string): Promise<Company | nu
     mission: data.mission ?? null,
     culture: data.culture ?? null,
     website_url: data.website_url ?? null,
+    country: data.country ?? null,
     responsibility_score: data.responsibility_score ?? null,
   };
 }
@@ -254,7 +255,7 @@ export async function getCompanyProfile(companyId: string): Promise<Company | nu
 export async function getCompanyBySlug(slug: string): Promise<Company | null> {
   const { data, error } = await supabase
     .from("companies")
-    .select("id, name, slug, logo_url, team_photos, description, mission, culture, website_url, responsibility_score, avg_review_days")
+    .select("id, name, slug, logo_url, team_photos, description, mission, culture, website_url, country, responsibility_score, avg_review_days")
     .eq("slug", slug)
     .maybeSingle();
 
@@ -272,6 +273,7 @@ export async function getCompanyBySlug(slug: string): Promise<Company | null> {
     mission: data.mission ?? null,
     culture: data.culture ?? null,
     website_url: data.website_url ?? null,
+    country: data.country ?? null,
     responsibility_score: data.responsibility_score ?? null,
     avg_review_days: data.avg_review_days ?? null,
   };
