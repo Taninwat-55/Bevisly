@@ -1,6 +1,177 @@
 # Changelog
 
-All notable features and changes to Bevis MVP are recorded here in plain language, most recent first.
+All notable features and changes to Bevisly are recorded here in plain language, most recent first.
+
+---
+
+## 2026-05-18 — Career Compass + GDPR Compliance + Employer Profile
+
+### Career Compass (AI Self-Discovery)
+A new candidate-facing feature at `/career-compass` that reads the candidate's profile, proof submission history, rubric scores, and projects, then delivers three outputs via Gemini 2.5 Flash: Career Direction (role types that fit based on demonstrated strengths), Proof Readiness (percentage score for specific roles), and Skills Gap Analysis (what's in the way, grounded in real data). The session uses a 3-step intake form, an AI-loading analysis screen, and a results screen. Results are stored in a new `career_compass_sessions` table with RLS so they remain private to the candidate. Education is now stored as a structured multi-entry array in `profiles.education` — candidates can add and remove degrees in their profile edit modal, displayed on both the private and public profile.
+
+### GDPR Compliance
+Full GDPR compliance package shipped:
+- Terms of Service page (`/terms`) with Denmark/EU governing law
+- Privacy Policy rewritten with Article 22 AI disclosures, data processor list, retention periods, and full GDPR rights sections
+- Consent checkbox at signup — `consented_at` and `tos_version` written to the user's profile on account creation
+- Full account deletion: wipes all storage files across every bucket before calling the `delete_user_account` RPC
+- Email notification preferences (`email_notif`, `marketing_emails`) in User Settings with auto-save; the `notify` edge function honours `email_notif` so silenced users don't get system emails
+- EU AI Act transparency notice added to the proof submission confirmation modal
+
+### Company Country Field + Employer Profile Preview
+A country field added to company settings — stored on the `companies` table, shown on the public brand page with a map pin. Dropdown is Nordic-first (DK/SE/NO/FI/IS) then broader Europe, US/CA, and Other. Employers now also have a "Preview Profile" button in settings that opens `/company/:slug` in a new tab so they can see exactly what candidates see before publishing.
+
+---
+
+## 2026-05-17 — Employer Onboarding, Screening Questions + Security Hardening
+
+### Employer Signup Confirmation Screen
+Employers who sign up via invite now land on a "Confirmation Pending" screen instead of silently switching to the login view. Gives clear feedback that the account exists and the confirmation email is on its way — previously the transition was silent and confusing.
+
+### Submission Type/Format + Standalone Screening Questions
+Employers can now specify a submission type (text, file upload, link, video) and a format (Markdown, plain text, PDF) when configuring a proof task. Screening questions are now also configurable as standalone items independent of the proof task, allowing employers to collect pre-qualification answers before the candidate starts the task. DKK set as the default currency platform-wide (aligns with Danish market focus).
+
+### Mission/Culture as Markdown + Contact Person on Job Preview
+The mission and culture sections on the public brand page now render as rich Markdown (bold, lists, links) instead of plain text. Job preview on the job detail page now also shows the contact person's name and the company website.
+
+### Security Hardening (Round 2)
+Three additional security fixes applied via DB migrations:
+- RLS policies tightened on additional tables
+- Dangerous RPC functions revoked from public access
+- Employer invite role assignment corrected — role now assigned correctly via `emailRedirectTo` callback, and the `prevent_role_change` guard patched to stop it from blocking legitimate role transitions on invite acceptance
+
+---
+
+## 2026-05-16 — AI Feature Expansion + Brand Page Media
+
+### Zero Setup Mode (Employer Quick Launch)
+Employers with no jobs posted see a "Zero Setup" card on their dashboard. One click triggers Gemini to draft a full job listing based on the company's existing profile data — title, description, requirements, proof task, and rubric — that the employer can review and publish directly. Removes the blank-page problem for first-time employers.
+
+### AI Review Summary (One-Click)
+The one-click AI review on the submission review panel polished: output now includes a structured evidence summary with rubric-by-rubric breakdown, cleaner formatting, and a clearer disclaimer separating AI evidence from human judgment.
+
+### Interview Probe Questions (Auto-Generated)
+After an employer completes an AI review of a submission, the platform auto-generates 3–5 tailored interview probe questions based on what the AI flagged in the submission analysis — weak points, strong signals, and ambiguous areas. Employers get interview prep baked in without leaving the review panel.
+
+### AI-Drafted Candidate Feedback Letter
+When an employer rates and leaves written feedback on a proof submission, a second AI-generated block drafts a full feedback letter addressed to the candidate — polite, structured, and grounded in the rubric. The employer can edit or discard it. Reduces the effort barrier to sending quality feedback.
+
+### Submission Breakdown Card (Auto-Gen)
+A new `SubmissionBreakdownCard` auto-generates a structured breakdown of the candidate's submission — key highlights, approach summary, and evidence quotes — directly in the review panel. Gives employers a scannable summary before diving into the raw submission.
+
+### Unseen Feedback Badge
+A badge counter appears on the "My Proofs" navigation item and on individual proof cards when the candidate has unread employer feedback. Clears when the candidate opens the feedback. Removes the need for candidates to manually check each proof.
+
+### Team Photo Layout on Brand Page
+Company brand pages now support a multi-image team section with an editorial layout: the first image displays as a full-width banner; additional images appear in a supporting grid below. Employers upload images in Settings under "Images". Replaces the old single-photo placeholder.
+
+### Pricing Page → Early Access Placeholder
+The full pricing page is replaced with a minimal "Early Access — Coming Soon" placeholder while the platform is in pre-launch validation mode. Pricing logic and Stripe integration remain post-launch.
+
+---
+
+## 2026-05-15 — SEO/GEO, Blog + E2E Test Suite
+
+### Blog with Article Schema
+A blog section added to the marketing site with full SEO/GEO-optimised Article schema markup. Structured to help AI crawlers and search engines understand and surface content. Each post uses `react-helmet-async` for per-page meta tags.
+
+### SEO and GEO Improvements
+Comprehensive SEO and GEO pass across the platform — improved meta descriptions, canonical tags, Open Graph tags, Twitter card support, and structured data for job listings and candidate profiles. A Vercel middleware layer added so shared proof links and company pages generate proper OG previews for social sharing instead of falling back to the generic app shell.
+
+### Full E2E Test Suite
+A complete Playwright end-to-end test suite covering both candidate and employer golden paths: signup, profile setup, job browsing, proof task submission, employer review, and pipeline stage transitions. Covers the full pre-launch user flow audit. Pre-launch bugs caught during this pass were fixed inline.
+
+---
+
+## 2026-05-14 — Email Loop + Navigation Unification
+
+### Complete Email Pipeline
+Every major candidate-facing pipeline event now triggers an email: application received, shortlisted, interview invitation, offer sent, and rejection. Employer emails use `hello@bevisly.com` as sender and set the responsible recruiter as reply-to so candidates can respond directly without logging in. The `notify` edge function now handles all status transitions cleanly.
+
+### Email Provider Switch to Google Workspace
+Email sending migrated from the Resend test sender to a verified Google Workspace account at `hello@bevisly.com`. All outbound platform email now delivers to any real address, not just the Resend account owner.
+
+### Candidate Navigation Unification
+The candidate sidebar, navbar, and profile pages unified into a consistent navigation system. Profile UX refined: avatar uploads, username changes, and section editing all work from one location without layout inconsistencies or duplicate entry points.
+
+### "Come Back to Finish" — Proof Task Resume
+Candidates who have started but not submitted a proof task now see a persistent "Come Back to Finish" reminder card on their dashboard and in the proof task list. Clicking it takes them directly back to their in-progress workspace. Prevents incomplete submissions from being silently abandoned.
+
+---
+
+## 2026-05-10 — Major Redesign + Feature Additions
+
+### Major Visual Redesign
+Full visual overhaul across both candidate and employer sides — typography, spacing, colour usage, component consistency, and layout density all revised. Mobile responsiveness fixed across the board: dashboards, sidebars, modals, and job cards all reflow correctly at tablet and phone breakpoints.
+
+### Saved Jobs
+Candidates can now save job listings and access them from a dedicated "Saved Jobs" section in the sidebar. Persisted in the database so the list survives sessions.
+
+### Companies Tab in Navbar
+"About" in the main navigation replaced with "Companies" — linking to a browsable list of employer brand pages. More useful discovery surface for candidates than a static about page.
+
+### Logo/Profile Image Sync + Work Mode
+Company logos and candidate profile images now sync across all surfaces (cards, sidebars, review panels) without needing a hard refresh. A work availability mode toggle added to candidate profiles (`Open to Work`, `Casually Looking`, `Not Available`) — displayed publicly so employers can see at a glance.
+
+### Improved Job Search
+Job listing search now filters across title, company name, and location simultaneously. Results update in real time without a page reload.
+
+---
+
+## 2026-05-08–09 — Sprint #3: AI Framing, Locked Rubric, Pay Transparency + Time Estimation (Complete)
+
+### AI Framing & Disclaimers (Anti-Bias Hygiene)
+"AI suggested rating" renamed to "AI evidence summary" across the platform. A one-line disclaimer added under every AI-generated output clarifying it is decision support, not a decision. A dedicated "How Bevisly uses AI" section added to `/docs`.
+
+### Locked Rubric Before Submissions Open
+Employers define 3–5 weighted rubric criteria when creating a proof task. Once the first candidate submits, the rubric locks — criteria and weights can no longer be changed. Edits after lock require creating a new task version. All AI suggestions and human ratings score against the locked rubric, preventing retroactive rule changes.
+
+### Pay Transparency (EU Compliance)
+A salary range (min/max + currency) is now required on every job listing — employers cannot publish without it. Aligns with EU Pay Transparency Directive expectations. Salary shown consistently on job cards, job detail pages, and the application flow.
+
+### Time Estimation Label
+Employers set an estimated time-to-complete when configuring a proof task (e.g. "2–4 hours"). Displayed prominently on the proof task page so candidates can self-select before committing time. Helps filter out mismatches before they become abandoned submissions.
+
+### Submission Follow-Up Questions
+Employers can add follow-up questions that appear after a candidate completes their proof task submission — clarifying questions, rationale requests, or reflection prompts. Answers are attached to the submission record and visible in the review panel.
+
+### Markdown Editor Improvements
+The rich text editor in the proof task workspace and the employer review submission panel upgraded: better toolbar, cleaner preview toggle, consistent rendering on both sides of the review flow.
+
+### Verified Proof Certificates
+Completed and rated proof submissions now generate a shareable digital badge/certificate at a unique URL. Candidates can link to their certificate from LinkedIn or a portfolio. The badge displays the task name, employer, rating, and a Bevisly verification URL.
+
+### Platform Stats on Landing
+Live platform statistics (number of candidates, jobs posted, proofs submitted) added to the landing page as social proof. Pulled from a read-only DB view to keep the query fast.
+
+---
+
+## 2026-05-07 — Dashboard Polish + Employer First-Login
+
+### Dashboard UI Polish
+Employer and candidate dashboards polished: consistent badge sizing, corrected sidebar labels, job detail page max-width fixed, and score badges aligned across views. Design system cleaned up — hardcoded colour values replaced with design tokens.
+
+### Employer First-Login Experience
+Employers who sign up and complete company setup now land on a tailored welcome screen showing three guided next steps: post your first job, preview your brand page, and invite a team member. Separate from the candidate welcome flow.
+
+### Profile Badge for Subscription Tier
+A tier badge (Free / Pro) added to candidate and employer profile headers. Billing placeholder added to User Settings linking to a coming Stripe Customer Portal integration.
+
+### Username Change for Candidates
+Candidates can now update their `@username` directly from profile settings. The public profile URL (`/@:username`) updates immediately and old URLs no longer resolve, preventing stale links from leaking.
+
+---
+
+## 2026-05-04 — Bevisly Rebrand + Onboarding Polish
+
+### Bevis → Bevisly
+The platform name updated to "Bevisly" everywhere — UI labels, page titles, email templates, auth flows, and documentation.
+
+### Onboarding UX Fixes
+Several first-login onboarding defects fixed: step completion state now persists correctly, action links in the welcome banner navigate to the right pages, and the banner dismisses cleanly without leaving orphaned state.
+
+### User Flow Improvements
+Miscellaneous flow fixes across both roles: empty state handling, missing redirects after key actions, and several dead-end screens that left users with no clear next step.
 
 ---
 

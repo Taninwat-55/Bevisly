@@ -27,7 +27,7 @@ Every feature must obey these. Full rationale lives in `PRODUCT_ROADMAP.md` → 
 | Frontend | React 19, React Router v7, TypeScript, Tailwind CSS v4, Vite |
 | Backend | Supabase (Auth, PostgreSQL, Storage, Realtime) |
 | Edge Functions | Deno (Supabase Edge Runtime) |
-| Email | Resend (via `send-email` / `notify` edge functions) |
+| Email | Google Workspace (`hello@bevisly.com`) via Resend |
 | AI | Gemini 2.5 Flash (feedback suggestions, job/task generation) |
 | Testing | Vitest (unit), Playwright (e2e) |
 
@@ -49,11 +49,12 @@ bevis-mvp/
 │       └── types/             # TypeScript types
 ├── supabase/
 │   ├── functions/             # Edge Functions (Deno)
-│   │   ├── notify/            # Submission status webhook → Resend email
-│   │   ├── send-email/        # Generic email sender via Resend
+│   │   ├── notify/            # Submission status webhook → email via hello@bevisly.com
+│   │   ├── send-email/        # Generic email sender
 │   │   ├── suggest-feedback/  # AI feedback generation (Gemini)
 │   │   ├── generate-job-listing/  # AI job listing generation (Gemini)
-│   │   └── generate-proof-task/   # AI proof task generation (Gemini)
+│   │   ├── generate-proof-task/   # AI proof task generation (Gemini)
+│   │   └── career-compass/    # AI career guidance session (Gemini)
 │   ├── migrations/            # Ordered SQL migrations
 │   ├── email-templates/       # HTML email templates
 │   └── config.toml            # Supabase local config (project_id: bevis-mvp)
@@ -72,14 +73,20 @@ bevis-mvp/
 
 ## Key Features
 
-- **Proof Task Workspace** — candidates complete a real task set by the employer to prove skills
-- **Submission Review Panel** — employers rate and give written feedback on proof submissions
-- **AI Feedback Suggestion** — Gemini suggests a rating and feedback paragraph to help employers
-- **Notify Webhook** — `notify` edge function fires on submission UPDATE events to send email notifications via Resend
-- **Fast Pass Application** — expedited application flow for qualifying candidates
-- **Proof Vault** — candidates can share/verify their submitted proofs publicly
-- **Leaderboard & Public Profiles** — candidates ranked publicly; profiles at `/@:username`
-- **Invitation System** — employers can invite candidates
+- **Proof Task Workspace** — candidates complete a real employer-set task to prove skills; supports text, file, link, and video submission types
+- **Submission Review Panel** — employers rate submissions against a locked rubric; AI evidence summary + interview probe questions auto-generated
+- **Locked Rubric** — employer defines weighted criteria up front; rubric locks once the first candidate submits
+- **AI Feedback Suggestion** — Gemini generates an evidence summary and a draft feedback letter per submission
+- **Notify Webhook** — `notify` edge function sends email on all pipeline stage changes (applied → shortlisted → interview → offer → decision)
+- **Career Compass** — candidate AI session: reads proof history and delivers career direction, readiness score, and skills gap analysis
+- **Proof Vault & Certificates** — candidates share verified proofs publicly; shareable digital badge per completed proof
+- **Bevisly Score + Leaderboard** — unified 0–100 candidate score; public leaderboard and profiles at `/@:username`
+- **Employer Brand Page** — public `/company/:slug` with team photos, Responsibility Score, open roles, and markdown mission/culture
+- **Application Status Tracker** — real-time pipeline timeline visible to candidates (Applied → Offer → Decision)
+- **Fast Pass Application** — expedited flow for qualifying candidates
+- **Invitation System** — employers can invite specific candidates to apply
+- **Practice Proofs** — AI-generated tasks candidates can attempt immediately; Gemini grades instantly
+- **Blog + SEO/GEO** — markdown blog with Article schema; structured data for job listings and profiles
 
 ---
 
@@ -122,7 +129,7 @@ supabase migration new <migration-name>
 - CORS headers block included in every function (`Access-Control-Allow-Origin: *`)
 - Handle `OPTIONS` preflight before any logic
 - Env vars accessed via `Deno.env.get("VAR_NAME")`
-- Required env vars: `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `RESEND_API_KEY`, `GEMINI_API_KEY`
+- Required env vars: `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `RESEND_API_KEY`, `GEMINI_API_KEY` (email sends via `hello@bevisly.com` — Google Workspace domain, Resend for delivery)
 - AI calls use Gemini 2.5 Flash at `v1beta` with `responseMimeType: "application/json"`
 - Always return HTTP 200 even on handled errors (frontend parses the JSON error field)
 - Register new functions in `supabase/config.toml` under `[functions.<name>]`
@@ -138,34 +145,17 @@ supabase migration new <migration-name>
 
 ---
 
-## Current Task
+## Current Status
 
-Full user flow walkthrough (E2E test) — the last step before cold outreach begins.
+Pre-launch build is complete. E2E test suite shipped. All pre-launch features done — see `CHANGELOG.md` for the full record.
 
-- **Sprint #1 (done):** Bevisly Score + Featured Proofs — unified score and pinned proof highlights on candidate profiles.
-- **Sprint #2 (done):** Responsibility Score + Employer Brand Page — anti-ghosting accountability scores (employer + candidate) via DB triggers, public `/company/:slug` brand pages, score badges on job cards and profiles, Docs & Help page, navbar/footer polish.
-- **Sprint #3 (done):** AI Framing & Disclaimers, Locked Rubric, Paid Promotion placeholder, Pay Transparency, Time Estimation Label.
+**Launch date: Wednesday 2026-05-20.** One pre-launch check still open: pricing validation (see below).
 
 ---
 
 ## Pre-Launch Roadmap
 
-Features still pending before sending cold emails to employers. Shipped features are recorded in `CHANGELOG.md`.
-
-### ✅ AI Framing & Disclaimers (Anti-Bias Hygiene)
-Renamed "AI suggested rating" → "AI evidence summary", added one-line disclaimer under every AI-generated rating, added "How Bevisly uses AI" section to `/docs`.
-
-### ✅ Locked Rubric Before Submissions Open
-Employer defines 3–5 weighted rubric criteria when creating a proof task. Once the first candidate submits, the rubric locks — changes require a new task version. All AI suggestions and human ratings score against the locked rubric.
-
-### ✅ Paid Promotion / Featured Job (Placeholder)
-Placeholder UI/data for employers on paid plans to mark a job as "Featured". Placement TBD post-launch.
-
-### ✅ Time Estimation Label
-Employer-set estimated time-to-complete on every proof task. Helps candidates self-select before committing hours.
-
-### ✅ Pay Transparency
-Required salary range (min/max) on every job listing. Aligns with EU pay-transparency expectations.
+All pre-launch features shipped. Full detail in `CHANGELOG.md`.
 
 The remaining Fairness & Evidence Layer phases (blind first review, override justification, consistency dashboard, AI self-audit) stay post-launch — see `PRODUCT_ROADMAP.md` feature #19.
 
@@ -194,6 +184,6 @@ In-app AI assistant powered by Gemini. Dual-purpose: helps candidates refine app
 ---
 
 ## Additional Pre-Launch Checks
-- ⬜ Full user flow walkthrough for both candidate and employer roles
+- ✅ Full user flow walkthrough for both candidate and employer roles — Playwright E2E suite shipped 2026-05-15
 - ⬜ Pricing research: validate plan prices against comparable tools (Workable, Lever, etc.)
 - ✅ Onboarding experience: employer and candidate first-login guidance — done via WelcomeBanner with role-specific steps and action links
