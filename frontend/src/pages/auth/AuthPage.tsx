@@ -63,6 +63,7 @@ export default function AuthPage() {
   const [confirmationPending, setConfirmationPending] = useState<string | null>(null);
   const [showMFAChallenge, setShowMFAChallenge] = useState(false);
   const [showWaitlistModal, setShowWaitlistModal] = useState(false);
+  const [consentChecked, setConsentChecked] = useState(false);
 
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
@@ -130,6 +131,10 @@ export default function AuthPage() {
       setFormError("Passwords do not match.");
       return;
     }
+    if (!consentChecked) {
+      setFormError("You must agree to the Terms of Service and Privacy Policy to create an account.");
+      return;
+    }
     try {
       setFormLoading(true);
 
@@ -170,6 +175,12 @@ export default function AuthPage() {
       }
 
       if (data.session) {
+        // Record when and to which version the user consented (GDPR Article 7)
+        await supabase.from("profiles").update({
+          consented_at: new Date().toISOString(),
+          tos_version: "1.0",
+        }).eq("id", data.user!.id);
+
         notify.success("Account created. Logging you in...", role);
         if (role === "employer") {
           try {
@@ -549,6 +560,25 @@ export default function AuthPage() {
 
 
 
+            {/* Terms & Privacy consent (signup only) */}
+            {!isLogin && (
+              <div className="flex items-start gap-3">
+                <input
+                  type="checkbox"
+                  id="consent"
+                  checked={consentChecked}
+                  onChange={(e) => setConsentChecked(e.target.checked)}
+                  className="mt-0.5 h-4 w-4 shrink-0 rounded border-[var(--color-border)] accent-[var(--color-brand-primary)] cursor-pointer"
+                />
+                <label htmlFor="consent" className="text-sm text-[var(--color-text-muted)] leading-snug cursor-pointer">
+                  I agree to the{" "}
+                  <a href="/terms" target="_blank" rel="noopener noreferrer" className="text-[var(--color-brand-primary)] hover:underline">Terms of Service</a>
+                  {" "}and{" "}
+                  <a href="/privacy" target="_blank" rel="noopener noreferrer" className="text-[var(--color-brand-primary)] hover:underline">Privacy Policy</a>.
+                </label>
+              </div>
+            )}
+
             {/* Form Error */}
             <AnimatePresence>
               {formError && (
@@ -645,7 +675,7 @@ export default function AuthPage() {
             <Button
               variant="ghost"
               className="w-full"
-              onClick={() => setIsLogin(!isLogin)}
+              onClick={() => { setIsLogin(!isLogin); setConsentChecked(false); }}
             >
               {isLogin ? "Create an account" : "Log in to existing account"}
             </Button>

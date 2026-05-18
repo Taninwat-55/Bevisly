@@ -125,7 +125,7 @@ async function notifyEmployer(record: SubmissionRecord) {
 async function notifyCandidate(record: SubmissionRecord) {
   const { data: candidate } = await supabase
     .from("profiles")
-    .select("email, full_name")
+    .select("email, full_name, email_notif")
     .eq("id", record.user_id)
     .single();
 
@@ -134,6 +134,11 @@ async function notifyCandidate(record: SubmissionRecord) {
     .select("title")
     .eq("id", record.job_id)
     .single();
+
+  if (candidate?.email_notif === false) {
+    console.log("Candidate has disabled email notifications, skipping:", record.user_id);
+    return;
+  }
 
   if (candidate?.email) {
     const escapedCandidateName = escapeHtml(candidate.full_name || "Candidate");
