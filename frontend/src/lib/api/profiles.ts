@@ -74,7 +74,7 @@ export async function updateProfileData(
     banner_url?: string | null;
     video_intro_url?: string | null;
     experience?: Record<string, unknown>;
-    education?: Record<string, unknown>[];
+    education?: { level: string; field?: string; institution?: string; graduation_year?: string }[];
   },
 ) {
   const { error } = await supabase
