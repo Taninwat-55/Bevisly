@@ -14,7 +14,7 @@ import {
   Loader2, Clock, Upload, Link as LinkIcon,
   Github, Video,
   Terminal, Play, Maximize2, Minimize2,
-  FileText, Layout, Save, X, AlertCircle
+  FileText, Layout, Save, X, AlertCircle, Brain
 } from "lucide-react";
 import type { ProofTask } from "@/types/shared";
 import ReactMarkdown from 'react-markdown';
@@ -56,15 +56,15 @@ export default function CandidateProofWorkspace() {
   const [task, setTask] = useState<ProofTask | null>(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
-  const [activeTab, setActiveTab] = useState<"code" | "preview" | "submission">("submission");
+  const [activeTab, setActiveTab] = useState<"code" | "preview" | "submission" | "reasoning">("submission");
   const [consoleOpen, setConsoleOpen] = useState(true);
 
   // Form State
   const [link, setLink] = useState("");
   const [videoLink, setVideoLink] = useState("");
   const [textSubmission, setTextSubmission] = useState("");
-  const [reflection, setReflection] = useState("");
   const [file, setFile] = useState<File | null>(null);
+  const [reasoningTrace, setReasoningTrace] = useState({ tradeoff: "", considered: "", uncertainty: "" });
   const [existingFileUrl, setExistingFileUrl] = useState<string | null>(null);
   const [isLocked, setIsLocked] = useState(false);
 
@@ -103,7 +103,9 @@ export default function CandidateProofWorkspace() {
           const existing = await checkSubmissionStatus(taskData.job_id);
           if (existing) {
             setLink(existing.submission_link || "");
-            setReflection(existing.reflection || "");
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const rt = (existing as any).reasoning_trace;
+            if (rt) setReasoningTrace(rt);
             if (existing.submission_link && existing.submission_link.includes("supabase")) {
               setExistingFileUrl(existing.submission_link);
             }
@@ -128,7 +130,7 @@ export default function CandidateProofWorkspace() {
       await saveDraft({
         job_id: task.job_id,
         submission_link: link,
-        reflection,
+        reasoning_trace: reasoningTrace,
       });
       setDraftStatus("saved");
       setTimeout(() => setDraftStatus("unsaved"), 3000);
@@ -136,10 +138,17 @@ export default function CandidateProofWorkspace() {
       setDraftStatus("unsaved");
       toast.error("Failed to save draft");
     }
-  }, [task?.job_id, link, reflection, isLocked]);
+  }, [task?.job_id, link, reasoningTrace, isLocked]);
 
   async function handleSubmit() {
     if (isLocked || !task?.job_id) return;
+
+    if (!reasoningTrace.tradeoff.trim() || !reasoningTrace.considered.trim() || !reasoningTrace.uncertainty.trim()) {
+      toast.error("Complete the Reasoning tab before submitting.");
+      setActiveTab("reasoning");
+      return;
+    }
+
     setSubmitting(true);
     toast.loading("Deploying proof...", { id: "submit" });
     try {
@@ -152,7 +161,7 @@ export default function CandidateProofWorkspace() {
         job_id: task.job_id,
         submission_link: link || undefined,
         text_response: textSubmission || undefined,
-        reflection: reflection,
+        reasoning_trace: reasoningTrace,
         video_url: videoLink || undefined,
         file: file || undefined,
         screening_answers: builtScreeningAnswers,
@@ -359,6 +368,20 @@ export default function CandidateProofWorkspace() {
               icon={Video}
               label="Media"
             />
+            <button
+              onClick={() => setActiveTab('reasoning')}
+              className={`flex items-center gap-2 px-4 py-2 text-sm font-medium border-t-2 transition-colors ${
+                activeTab === 'reasoning'
+                  ? "border-amber-400 bg-[var(--color-bg)] text-amber-400"
+                  : "border-transparent text-slate-500 hover:text-slate-200 hover:bg-[#2d2d30]"
+              }`}
+            >
+              <Brain size={14} />
+              Reasoning
+              {(!reasoningTrace.tradeoff.trim() || !reasoningTrace.considered.trim() || !reasoningTrace.uncertainty.trim()) && !isLocked && (
+                <span className="w-1.5 h-1.5 rounded-full bg-amber-400 ml-0.5" />
+              )}
+            </button>
           </div>
 
           {/* Content Area */}
@@ -433,19 +456,6 @@ export default function CandidateProofWorkspace() {
                   </div>
                 )}
 
-                {/* Reflection */}
-                <div>
-                  <label className="text-xs font-medium text-slate-400 uppercase tracking-wider mb-2 block">
-                    Implementation Notes / Reflection
-                  </label>
-                  <MarkdownEditorIDE
-                    value={reflection}
-                    onChange={setReflection}
-                    disabled={isLocked}
-                    placeholder="Describe your approach, trade-offs, and design decisions…"
-                    minHeight="12rem"
-                  />
-                </div>
               </div>
             )}
 
@@ -478,6 +488,57 @@ export default function CandidateProofWorkspace() {
                   onChange={(e) => setVideoLink(e.target.value)}
                   disabled={isLocked}
                 />
+              </div>
+            )}
+
+            {activeTab === 'reasoning' && (
+              <div className="max-w-2xl mx-auto space-y-6">
+                <div className="p-4 rounded-lg bg-[#252526] border border-amber-400/20">
+                  <p className="text-xs text-amber-400/80 leading-relaxed">
+                    Required before submitting. These three questions help employers evaluate your judgment — not just your output. Answer honestly in 1–3 sentences each.
+                  </p>
+                </div>
+
+                {[
+                  {
+                    key: "tradeoff" as const,
+                    label: "What was the most important decision you made in this task?",
+                    hint: "2–3 sentences",
+                    placeholder: "e.g. I chose to prioritise X over Y because the brief emphasised Z…",
+                  },
+                  {
+                    key: "considered" as const,
+                    label: "What did you consider and rule out?",
+                    hint: "2–3 sentences",
+                    placeholder: "e.g. I considered doing Z but ruled it out because it would have…",
+                  },
+                  {
+                    key: "uncertainty" as const,
+                    label: "What are you least confident about in your submission?",
+                    hint: "1–2 sentences",
+                    placeholder: "e.g. I'm uncertain whether my approach to X scales well when…",
+                  },
+                ].map(({ key, label, hint, placeholder }) => (
+                  <div key={key} className="p-4 rounded-lg bg-[#252526] border border-[#3e3e42] space-y-2">
+                    <div className="flex items-start justify-between gap-4">
+                      <label className="text-sm font-medium text-slate-200 leading-snug">{label}</label>
+                      <span className="text-[10px] text-slate-500 uppercase tracking-wider shrink-0 mt-0.5">{hint}</span>
+                    </div>
+                    <textarea
+                      className="w-full bg-[#1e1e1e] border border-[#3e3e42] rounded px-3 py-2 text-sm text-slate-200 focus:border-amber-400/60 outline-none resize-none transition-colors"
+                      rows={3}
+                      placeholder={placeholder}
+                      value={reasoningTrace[key]}
+                      onChange={(e) => setReasoningTrace((prev) => ({ ...prev, [key]: e.target.value }))}
+                      disabled={isLocked}
+                    />
+                  </div>
+                ))}
+
+                <p className="text-xs text-slate-600 text-right">
+                  {countWords(reasoningTrace.tradeoff + " " + reasoningTrace.considered + " " + reasoningTrace.uncertainty)} words
+                  {" "}· aim for under 200
+                </p>
               </div>
             )}
 

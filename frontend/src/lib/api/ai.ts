@@ -94,6 +94,7 @@ export async function suggestFeedback(
     taskDescription?: string | null,
     reflection?: string | null,
     rubricCriteria?: RubricCriterion[] | null,
+    reasoningTrace?: { tradeoff: string; considered: string; uncertainty: string } | null,
 ): Promise<SuggestFeedbackResult> {
     const { data, error } = await supabase.functions.invoke(
         "suggest-feedback",
@@ -104,6 +105,7 @@ export async function suggestFeedback(
                 submission_content: submissionContent,
                 task_description: taskDescription ?? null,
                 reflection: reflection ?? null,
+                reasoning_trace: reasoningTrace ?? null,
                 rubric_criteria: rubricCriteria ?? null,
             },
         },

@@ -24,6 +24,7 @@ Deno.serve(async (req) => {
             criteria,
             task_description,
             reflection,
+            reasoning_trace,
             rubric_criteria,
         } = await req.json();
 
@@ -85,7 +86,11 @@ ${rubricInstruction}
 ## Candidate's Submission
 ${submission_content ? submission_content.slice(0, 3000) : "N/A"}
 
-${reflection ? `## Candidate's Reflection\n${reflection.slice(0, 1000)}` : ""}
+${reasoning_trace
+    ? `## Candidate's Reasoning Trace\n- Key decision: ${(reasoning_trace.tradeoff ?? "").slice(0, 300)}\n- Ruled out: ${(reasoning_trace.considered ?? "").slice(0, 300)}\n- Uncertain about: ${(reasoning_trace.uncertainty ?? "").slice(0, 300)}`
+    : reflection
+        ? `## Candidate's Reflection\n${reflection.slice(0, 1000)}`
+        : ""}
 
 ## Your Job
 Evaluate whether the submission fulfills the task requirements. Consider:
