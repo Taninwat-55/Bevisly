@@ -14,7 +14,7 @@ import {
   ExternalLink,
   Heart,
 } from "lucide-react";
-import { PERKS_LIST } from "@/pages/employer/EmployerCompanyProfile";
+import { PERKS_LIST } from "@/lib/perks";
 import { motion } from "framer-motion";
 import { getCompanyBySlug } from "@/lib/api/companies";
 import type { Company } from "@/types/company";
