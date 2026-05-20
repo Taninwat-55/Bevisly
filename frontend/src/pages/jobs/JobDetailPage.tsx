@@ -608,6 +608,25 @@ export default function JobDetailPage() {
                   <ResponsibilityScoreBadge score={companyProfile.responsibility_score} size="sm" showLabel />
                 </div>
               </div>
+              {(companyProfile.industry || companyProfile.stage || companyProfile.company_size) && (
+                <div className="flex flex-wrap gap-2 mb-5">
+                  {companyProfile.industry && (
+                    <span className="px-2.5 py-1 rounded-full border border-[var(--color-border)] bg-[var(--color-surface)] text-xs font-medium text-[var(--color-text-muted)]">
+                      {companyProfile.industry}
+                    </span>
+                  )}
+                  {companyProfile.company_size && (
+                    <span className="px-2.5 py-1 rounded-full border border-[var(--color-border)] bg-[var(--color-surface)] text-xs font-medium text-[var(--color-text-muted)]">
+                      {companyProfile.company_size} people
+                    </span>
+                  )}
+                  {companyProfile.stage && (
+                    <span className="px-2.5 py-1 rounded-full border border-[var(--color-border)] bg-[var(--color-surface)] text-xs font-medium text-[var(--color-text-muted)]">
+                      {companyProfile.stage}
+                    </span>
+                  )}
+                </div>
+              )}
               <div className="space-y-6">
                 {companyProfile.description && (
                   <div>

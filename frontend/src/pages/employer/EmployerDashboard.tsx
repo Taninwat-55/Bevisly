@@ -438,6 +438,10 @@ export default function EmployerDashboard() {
                       companyDescription={company?.description}
                       companyMission={company?.mission}
                       companyCulture={company?.culture}
+                      companyIndustry={company?.industry}
+                      companyStage={company?.stage}
+                      companySize={company?.company_size}
+                      companyBusinessModel={company?.business_model}
                       onGenerated={(data) => setPostJobData(data)}
                       onLaunched={async () => {
                         setIsPostingJob(false);

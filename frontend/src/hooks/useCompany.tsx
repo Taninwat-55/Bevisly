@@ -1,4 +1,5 @@
 import { useState, useEffect, createContext, useContext, type ReactNode } from "react";
+import { supabase } from "@/lib/supabaseClient";
 import { getCurrentCompany, getUserCompanies } from "@/lib/api/companies";
 import type { Company } from "@/types";
 
@@ -39,6 +40,20 @@ export function CompanyProvider({ children }: { children: ReactNode }) {
 
     useEffect(() => {
         refresh();
+
+        // Retry when auth state becomes available — handles the race where
+        // getSession() returns null on first mount before Supabase initializes.
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+            if (event === "SIGNED_IN" || event === "TOKEN_REFRESHED") {
+                refresh();
+            }
+            if (event === "SIGNED_OUT") {
+                setCompany(null);
+                setCompanies([]);
+            }
+        });
+
+        return () => subscription.unsubscribe();
     }, []);
 
     return (

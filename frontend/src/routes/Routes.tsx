@@ -28,6 +28,7 @@ const EmployerInbox = lazy(() => import("@/pages/employer/EmployerInbox"));
 const EmployerAllCandidates = lazy(() => import("@/pages/employer/EmployerAllCandidates"));
 const EmployerTalentBoardPage = lazy(() => import("@/pages/employer/EmployerTalentBoardPage"));
 const EmployerMyJobs = lazy(() => import("@/pages/employer/EmployerMyJobs"));
+const EmployerCompanyProfile = lazy(() => import("@/pages/employer/EmployerCompanyProfile"));
 
 // Admin pages
 const AdminDashboard = lazy(() => import("@/pages/admin/AdminDashboard"));
@@ -142,6 +143,7 @@ export const router = createBrowserRouter([
           { path: "talent-board", element: <EmployerTalentBoardPage /> },
           { path: "candidates", element: <EmployerAllCandidates /> },
           { path: "jobs", element: <EmployerMyJobs /> },
+          { path: "company", element: <EmployerCompanyProfile /> },
           { path: "job/:id", element: <JobDetailPage /> },
           { path: "settings", element: <UserSettings /> },
         ],
