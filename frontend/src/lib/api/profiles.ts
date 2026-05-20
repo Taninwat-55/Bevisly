@@ -1,6 +1,20 @@
 import { supabase } from "../supabaseClient";
 
+const ALLOWED_RESUME_TYPES = [
+  "application/pdf",
+  "application/msword",
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+];
+const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
+
 export async function uploadResume(file: File) {
+  if (!ALLOWED_RESUME_TYPES.includes(file.type)) {
+    throw new Error("Only PDF and Word documents (.pdf, .doc, .docx) are allowed.");
+  }
+  if (file.size > MAX_FILE_SIZE) {
+    throw new Error("File must be under 10 MB.");
+  }
+
   const user = (await supabase.auth.getUser()).data.user;
   if (!user) throw new Error("Not authenticated");
 
@@ -58,7 +72,6 @@ export async function updateProfileName(full_name: string) {
 }
 
 export async function updateProfileData(
-  userId: string,
   data: {
     full_name?: string;
     company_name?: string;
@@ -77,10 +90,13 @@ export async function updateProfileData(
     education?: { level: string; field?: string; institution?: string; graduation_year?: string }[];
   },
 ) {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("Not authenticated");
+
   const { error } = await supabase
     .from("profiles")
     .update(data)
-    .eq("id", userId);
+    .eq("id", user.id);
 
   if (error) throw error;
 }

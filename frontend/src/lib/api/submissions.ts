@@ -1,4 +1,24 @@
 import { supabase } from "../supabaseClient";
+
+const MAX_PROOF_FILE_SIZE = 50 * 1024 * 1024; // 50 MB
+const BLOCKED_PROOF_TYPES = [
+  "application/x-msdownload",
+  "application/x-executable",
+  "application/x-sh",
+  "application/x-bat",
+  "application/x-msdos-program",
+  "text/x-shellscript",
+];
+
+function validateProofFile(file: File) {
+  if (file.size > MAX_PROOF_FILE_SIZE) {
+    throw new Error("File must be under 50 MB.");
+  }
+  if (BLOCKED_PROOF_TYPES.includes(file.type)) {
+    throw new Error("This file type is not allowed.");
+  }
+}
+
 import type {
   CandidateFeedbackEntry,
   CandidateSubmission,
@@ -333,6 +353,7 @@ export async function submitProof({
   let uploadedFileUrl: string | null = null;
 
   if (file) {
+    validateProofFile(file);
     const filePath = `proofs/${user.id}/${Date.now()}-${file.name}`;
     const { error: uploadErr } = await supabase.storage
       .from("proofs")
@@ -641,6 +662,7 @@ export async function saveDraft({
 
   // Handle file upload if a new file is provided
   if (file) {
+    validateProofFile(file);
     const filePath = `proofs/${user.id}/${Date.now()}-${file.name}`;
     const { error: uploadErr } = await supabase.storage
       .from("proofs")

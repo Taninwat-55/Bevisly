@@ -1,7 +1,9 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 
+const ALLOWED_ORIGIN = Deno.env.get("ALLOWED_ORIGIN") ?? "https://bevisly.com";
+
 const corsHeaders = {
-    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Origin": ALLOWED_ORIGIN,
     "Access-Control-Allow-Headers":
         "authorization, x-client-info, apikey, content-type, x-client-timeout",
 };
@@ -27,6 +29,17 @@ Deno.serve(async (req) => {
             reasoning_trace,
             rubric_criteria,
         } = await req.json();
+
+        if (submission_content !== undefined && submission_content !== null && typeof submission_content !== "string") {
+            return new Response(JSON.stringify({ error: "Invalid submission_content" }), {
+                status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+            });
+        }
+        if (typeof submission_content === "string" && submission_content.length > 20000) {
+            return new Response(JSON.stringify({ error: "submission_content exceeds maximum length" }), {
+                status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+            });
+        }
 
         const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY");
         if (!GEMINI_API_KEY) {

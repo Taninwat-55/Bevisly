@@ -1,5 +1,7 @@
+const ALLOWED_ORIGIN = Deno.env.get("ALLOWED_ORIGIN") ?? "https://bevisly.com";
+
 const corsHeaders = {
-    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Origin": ALLOWED_ORIGIN,
     "Access-Control-Allow-Headers":
         "authorization, x-client-info, apikey, content-type, x-client-timeout",
 };
@@ -29,6 +31,13 @@ Deno.serve(async (req: Request) => {
             strengths,
             improvements,
         } = await req.json();
+
+        if (submission_content !== undefined && submission_content !== null && typeof submission_content !== "string") {
+            throw new Error("Invalid submission_content");
+        }
+        if (typeof submission_content === "string" && submission_content.length > 20000) {
+            throw new Error("submission_content exceeds maximum length");
+        }
 
         const firstName = (candidate_name ?? "Candidate")
             .trim()
