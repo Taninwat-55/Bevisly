@@ -27,6 +27,10 @@ build/
 tmp/
 *.log
 
+# Firecrawl research output
+.firecrawl/
+frontend/.firecrawl/
+
 # System / Editor
 .DS_Store
 Thumbs.db
