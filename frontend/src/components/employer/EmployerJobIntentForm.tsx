@@ -17,6 +17,10 @@ interface EmployerJobIntentFormProps {
   companyDescription?: string | null;
   companyMission?: string | null;
   companyCulture?: string | null;
+  companyIndustry?: string | null;
+  companyStage?: string | null;
+  companySize?: string | null;
+  companyBusinessModel?: string[] | null;
 }
 
 type CompensationType = "salary" | "salary_and_equity" | "equity_only" | "volunteer";
@@ -38,6 +42,10 @@ export default function EmployerJobIntentForm({
   companyDescription,
   companyMission,
   companyCulture,
+  companyIndustry,
+  companyStage,
+  companySize,
+  companyBusinessModel,
 }: EmployerJobIntentFormProps) {
   const [stage, setStage] = useState<"input" | "review">("input");
   const [rawInput, setRawInput] = useState("");
@@ -66,6 +74,10 @@ export default function EmployerJobIntentForm({
         description: companyDescription,
         mission: companyMission,
         culture: companyCulture,
+        industry: companyIndustry,
+        stage: companyStage,
+        company_size: companySize,
+        business_model: companyBusinessModel,
       }, durationMinutes);
       setGenerated(data);
       setJobType(data.job_type || "Full-time");

@@ -7,14 +7,13 @@ import MFASettings from "@/components/auth/MFASettings";
 import toast from "react-hot-toast";
 import { supabase } from "@/lib/supabaseClient";
 import { updateProfileData, downloadUserData } from "@/lib/api/profiles";
-import { updateCompanyProfile } from "@/lib/api/companies";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import {
   UserCircle, Building2, Bell, Shield,
   Moon, Sun, LogOut, Trash2, Camera,
   Mail, Upload, Loader2, FileJson,
   Eye, EyeOff, CreditCard, ChevronRight,
-  Sparkles, Lock, Receipt, ImagePlus, X
+  Sparkles, Lock, Receipt,
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 
@@ -100,15 +99,6 @@ function FormField({
 const inputCls =
   "w-full px-3.5 py-2.5 rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)] text-[var(--color-text)] text-sm placeholder:text-[var(--color-text-muted)]/60 focus:ring-2 focus:ring-[var(--color-brand-primary)] focus:border-transparent outline-none transition-all";
 
-const textareaCls =
-  "w-full px-3.5 py-2.5 rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)] text-[var(--color-text)] text-sm placeholder:text-[var(--color-text-muted)]/60 focus:ring-2 focus:ring-[var(--color-brand-primary)] focus:border-transparent outline-none transition-all resize-y";
-
-const COUNTRY_OPTIONS = [
-  "Denmark", "Sweden", "Norway", "Finland", "Iceland",
-  "Germany", "Netherlands", "United Kingdom", "France", "Spain",
-  "Belgium", "Switzerland", "Austria", "Poland", "Italy",
-  "United States", "Canada", "Other",
-];
 
 export default function UserSettings() {
   const { user, signOut, refreshProfile } = useAuth();
@@ -138,15 +128,6 @@ export default function UserSettings() {
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Company profile state (employer-only)
-  const [companyDescription, setCompanyDescription] = useState("");
-  const [companyMission, setCompanyMission] = useState("");
-  const [companyCulture, setCompanyCulture] = useState("");
-  const [companyWebsite, setCompanyWebsite] = useState("");
-  const [companyCountry, setCompanyCountry] = useState("");
-  const [companyTeamPhotos, setCompanyTeamPhotos] = useState<string[]>([]);
-  const [uploadingPhoto, setUploadingPhoto] = useState(false);
-  const teamPhotoInputRef = useRef<HTMLInputElement>(null);
 
   // Prefs state — loaded from DB on mount, auto-saved on toggle
   const [emailNotif, setEmailNotif] = useState(true);
@@ -184,16 +165,6 @@ export default function UserSettings() {
     }
   }, [user]);
 
-  useEffect(() => {
-    if (currentCompanyRecord) {
-      setCompanyDescription(currentCompanyRecord.description || "");
-      setCompanyMission(currentCompanyRecord.mission || "");
-      setCompanyCulture(currentCompanyRecord.culture || "");
-      setCompanyWebsite(currentCompanyRecord.website_url || "");
-      setCompanyCountry(currentCompanyRecord.country || "");
-      setCompanyTeamPhotos(currentCompanyRecord.team_photos ?? []);
-    }
-  }, [currentCompanyRecord]);
 
   const handleAvatarUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -242,53 +213,6 @@ export default function UserSettings() {
     }
   };
 
-  const handleTeamPhotoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file || !user) return;
-    if (!file.type.startsWith("image/")) { toast.error("Please select an image file"); return; }
-    if (file.size > 5 * 1024 * 1024) { toast.error("Image must be less than 5MB"); return; }
-    if (companyTeamPhotos.length >= 3) { toast.error("Maximum 3 images allowed"); return; }
-
-    setUploadingPhoto(true);
-    try {
-      const fileExt = file.name.split(".").pop();
-      const filePath = `${user.id}/${Date.now()}.${fileExt}`;
-      const { error: uploadError } = await supabase.storage.from("company-photos").upload(filePath, file, { upsert: true });
-      if (uploadError) throw uploadError;
-      const { data: { publicUrl } } = supabase.storage.from("company-photos").getPublicUrl(filePath);
-      const updated = [...companyTeamPhotos, publicUrl];
-      setCompanyTeamPhotos(updated);
-      const { getCurrentCompanyId } = await import("@/lib/api/companies");
-      const companyId = currentCompanyRecord?.id || (await getCurrentCompanyId());
-      if (companyId) {
-        await updateCompanyProfile(companyId, { team_photos: updated });
-        await refreshCompany();
-      }
-      toast.success("Photo added!");
-    } catch {
-      toast.error("Failed to upload photo");
-    } finally {
-      setUploadingPhoto(false);
-      if (teamPhotoInputRef.current) teamPhotoInputRef.current.value = "";
-    }
-  };
-
-  const handleRemoveTeamPhoto = async (url: string) => {
-    const updated = companyTeamPhotos.filter(p => p !== url);
-    setCompanyTeamPhotos(updated);
-    try {
-      const { getCurrentCompanyId } = await import("@/lib/api/companies");
-      const companyId = currentCompanyRecord?.id || (await getCurrentCompanyId());
-      if (companyId) {
-        await updateCompanyProfile(companyId, { team_photos: updated });
-        await refreshCompany();
-      }
-      toast.success("Photo removed");
-    } catch {
-      toast.error("Failed to remove photo");
-    }
-  };
-
   const handleSaveProfile = async () => {
     setIsLoading(true);
     try {
@@ -305,13 +229,6 @@ export default function UserSettings() {
         const companyId = currentCompanyRecord?.id || (await getCurrentCompanyId());
         if (companyId) {
           await updateCompanyName(companyId, company);
-          await updateCompanyProfile(companyId, {
-            description: companyDescription || null,
-            mission: companyMission || null,
-            culture: companyCulture || null,
-            website_url: companyWebsite || null,
-            country: companyCountry || null,
-          });
           await refreshCompany();
         }
       }
@@ -589,84 +506,19 @@ export default function UserSettings() {
                       )}
 
                       {isEmployer && !companyLoading && (
-                        <>
-                          <FormField label="About the Company" hint="Tell candidates what makes your company unique.">
-                            <textarea
-                              value={companyDescription}
-                              onChange={(e) => setCompanyDescription(e.target.value)}
-                              placeholder="We're building..."
-                              rows={4}
-                              className={textareaCls}
-                            />
-                          </FormField>
-                          <FormField label="Mission Statement">
-                            <textarea
-                              value={companyMission}
-                              onChange={(e) => setCompanyMission(e.target.value)}
-                              placeholder="What drives your company..."
-                              rows={2}
-                              className={textareaCls}
-                            />
-                          </FormField>
-                          <FormField label="Culture & Values">
-                            <textarea
-                              value={companyCulture}
-                              onChange={(e) => setCompanyCulture(e.target.value)}
-                              placeholder="Describe your team culture..."
-                              rows={3}
-                              className={textareaCls}
-                            />
-                          </FormField>
-                          <FormField label="Company Website">
-                            <input
-                              type="url"
-                              value={companyWebsite}
-                              onChange={(e) => setCompanyWebsite(e.target.value)}
-                              placeholder="https://yourcompany.com"
-                              className={inputCls}
-                            />
-                          </FormField>
-                          <FormField label="Company Location" hint="Country where your company is primarily based.">
-                            <select
-                              value={companyCountry}
-                              onChange={(e) => setCompanyCountry(e.target.value)}
-                              className={inputCls}
-                            >
-                              <option value="">Select a country…</option>
-                              {COUNTRY_OPTIONS.map((c) => (
-                                <option key={c} value={c}>{c}</option>
-                              ))}
-                            </select>
-                          </FormField>
-                          <FormField label="Images" hint="Up to 3 photos · JPG, PNG · Max 5MB each — shown on your company brand page.">
-                            <div className="flex flex-wrap gap-3 mt-1">
-                              {companyTeamPhotos.map((url) => (
-                                <div key={url} className="relative w-24 h-24 rounded-xl overflow-hidden border border-[var(--color-border)] group shrink-0">
-                                  <img src={url} className="w-full h-full object-cover" alt="Team photo" />
-                                  <button
-                                    type="button"
-                                    onClick={() => handleRemoveTeamPhoto(url)}
-                                    className="absolute top-1 right-1 w-5 h-5 bg-black/60 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-                                  >
-                                    <X size={10} className="text-white" />
-                                  </button>
-                                </div>
-                              ))}
-                              {companyTeamPhotos.length < 3 && (
-                                <button
-                                  type="button"
-                                  onClick={() => teamPhotoInputRef.current?.click()}
-                                  disabled={uploadingPhoto}
-                                  className="w-24 h-24 rounded-xl border-2 border-dashed border-[var(--color-border)] flex flex-col items-center justify-center gap-1 hover:border-[var(--color-brand-primary)] hover:bg-[var(--color-surface-hover)] transition-colors text-[var(--color-text-muted)] shrink-0 disabled:opacity-50"
-                                >
-                                  {uploadingPhoto ? <Loader2 size={16} className="animate-spin" /> : <ImagePlus size={16} />}
-                                  <span className="text-[10px]">Add photo</span>
-                                </button>
-                              )}
-                            </div>
-                            <input ref={teamPhotoInputRef} type="file" accept="image/*" className="hidden" onChange={handleTeamPhotoUpload} disabled={uploadingPhoto} />
-                          </FormField>
-                        </>
+                        <div className="flex items-center gap-3 p-4 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface-hover)]/40">
+                          <Building2 size={18} className="shrink-0 text-[var(--color-brand-primary)]" />
+                          <div className="min-w-0">
+                            <p className="text-sm font-semibold text-[var(--color-text)]">Company Brand Page</p>
+                            <p className="text-xs text-[var(--color-text-muted)] mt-0.5">Edit your about, mission, culture, perks, team photos and more.</p>
+                          </div>
+                          <a
+                            href="/employer/company"
+                            className="shrink-0 text-xs font-semibold px-3 py-1.5 rounded-lg bg-[var(--color-brand-primary)] text-white hover:opacity-90 transition-opacity"
+                          >
+                            Edit Profile →
+                          </a>
+                        </div>
                       )}
 
                       <div className="pt-2 flex items-center gap-3">

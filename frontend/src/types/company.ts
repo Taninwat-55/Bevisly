@@ -18,9 +18,18 @@ export type Company = {
   culture?: string | null;
   website_url?: string | null;
   country?: string | null;
+  // Company Details
+  industry?: string | null;
+  company_size?: string | null;
+  stage?: string | null;
+  founded_year?: number | null;
+  business_model?: string[] | null;
+  perks?: string[] | null;
   // Responsibility Score (anti-ghosting accountability)
   responsibility_score?: number | null;
   avg_review_days?: number | null;
+  // Verification (set by admin on the owner's profile)
+  is_verified?: boolean | null;
   // Pricing & Usage
   subscription_tier?: "free" | "pro_saas";
   active_jobs_count?: number;

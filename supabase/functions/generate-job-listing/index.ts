@@ -20,7 +20,9 @@ Deno.serve(async (req) => {
             "";
         const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-        const { raw_input, company_name, company_description, company_mission, company_culture, duration_minutes } = await req.json();
+        const { raw_input, company_name, company_description, company_mission, company_culture,
+                company_industry, company_stage, company_size, company_business_model,
+                duration_minutes } = await req.json();
 
         if (!raw_input) {
             throw new Error("Missing raw_input");
@@ -108,9 +110,14 @@ Deno.serve(async (req) => {
         const rubricCount = durationMin <= 60 ? 3 : durationMin <= 120 ? 4 : 5;
 
         const companyContext = [
-            company_description ? `- About: ${company_description}` : "",
-            company_mission ? `- Mission: ${company_mission}` : "",
-            company_culture ? `- Culture & Values: ${company_culture}` : "",
+            company_description    ? `- About: ${company_description}` : "",
+            company_mission        ? `- Mission: ${company_mission}` : "",
+            company_culture        ? `- Culture & Values: ${company_culture}` : "",
+            company_industry       ? `- Industry: ${company_industry}` : "",
+            company_stage          ? `- Stage: ${company_stage}` : "",
+            company_size           ? `- Team size: ${company_size}` : "",
+            company_business_model?.length
+                ? `- Business model: ${company_business_model.join(", ")}` : "",
         ].filter(Boolean).join("\n");
 
         const prompt = `

@@ -28,7 +28,7 @@ export async function getCurrentCompany(): Promise<Company | null> {
   // 2. Fetch the company
   const { data: company, error: compError } = await supabase
     .from("companies")
-    .select("*")
+    .select("id, name, slug, logo_url, team_photos, owner_id, created_at, description, mission, culture, website_url, country, responsibility_score, avg_review_days, industry, company_size, stage, founded_year, business_model, perks")
     .eq("id", membership.company_id)
     .single();
 
@@ -54,6 +54,12 @@ export async function getCurrentCompany(): Promise<Company | null> {
     culture: company.culture ?? null,
     website_url: company.website_url ?? null,
     country: company.country ?? null,
+    industry: company.industry ?? null,
+    company_size: company.company_size ?? null,
+    stage: company.stage ?? null,
+    founded_year: company.founded_year ?? null,
+    business_model: company.business_model ?? null,
+    perks: company.perks ?? null,
     responsibility_score: company.responsibility_score ?? null,
     subscription_tier: profile?.subscription_tier,
     active_jobs_count: profile?.active_jobs_count,
@@ -211,7 +217,20 @@ export async function updateCompanyName(companyId: string, name: string): Promis
  */
 export async function updateCompanyProfile(
   companyId: string,
-  fields: { description?: string | null; mission?: string | null; culture?: string | null; website_url?: string | null; team_photos?: string[] | null; country?: string | null }
+  fields: {
+    description?: string | null;
+    mission?: string | null;
+    culture?: string | null;
+    website_url?: string | null;
+    team_photos?: string[] | null;
+    country?: string | null;
+    industry?: string | null;
+    company_size?: string | null;
+    stage?: string | null;
+    founded_year?: number | null;
+    business_model?: string[] | null;
+    perks?: string[] | null;
+  }
 ): Promise<void> {
   const user = (await supabase.auth.getUser()).data.user;
   if (!user) throw new Error("Not authenticated");
@@ -230,7 +249,7 @@ export async function updateCompanyProfile(
 export async function getCompanyProfile(companyId: string): Promise<Company | null> {
   const { data, error } = await supabase
     .from("companies")
-    .select("id, name, slug, logo_url, team_photos, description, mission, culture, website_url, country, responsibility_score")
+    .select("id, name, slug, logo_url, team_photos, description, mission, culture, website_url, country, responsibility_score, industry, company_size, stage, founded_year, business_model, perks")
     .eq("id", companyId)
     .single();
 
@@ -249,6 +268,12 @@ export async function getCompanyProfile(companyId: string): Promise<Company | nu
     culture: data.culture ?? null,
     website_url: data.website_url ?? null,
     country: data.country ?? null,
+    industry: data.industry ?? null,
+    company_size: data.company_size ?? null,
+    stage: data.stage ?? null,
+    founded_year: data.founded_year ?? null,
+    business_model: data.business_model ?? null,
+    perks: data.perks ?? null,
     responsibility_score: data.responsibility_score ?? null,
   };
 }
@@ -259,11 +284,22 @@ export async function getCompanyProfile(companyId: string): Promise<Company | nu
 export async function getCompanyBySlug(slug: string): Promise<Company | null> {
   const { data, error } = await supabase
     .from("companies")
-    .select("id, name, slug, logo_url, team_photos, description, mission, culture, website_url, country, responsibility_score, avg_review_days")
+    .select("id, name, slug, logo_url, team_photos, description, mission, culture, website_url, country, responsibility_score, avg_review_days, industry, company_size, stage, founded_year, business_model, perks, owner_id")
     .eq("slug", slug)
     .maybeSingle();
 
   if (error || !data) return null;
+
+  // Fetch is_verified from the owner's profile
+  let is_verified: boolean | null = null;
+  if (data.owner_id) {
+    const { data: ownerProfile } = await supabase
+      .from("profiles")
+      .select("is_verified")
+      .eq("id", data.owner_id)
+      .single();
+    is_verified = ownerProfile?.is_verified ?? null;
+  }
 
   return {
     id: data.id,
@@ -271,15 +307,22 @@ export async function getCompanyBySlug(slug: string): Promise<Company | null> {
     slug: data.slug,
     logo_url: data.logo_url,
     team_photos: data.team_photos ?? null,
-    owner_id: null,
+    owner_id: data.owner_id,
     created_at: null,
     description: data.description ?? null,
     mission: data.mission ?? null,
     culture: data.culture ?? null,
     website_url: data.website_url ?? null,
     country: data.country ?? null,
+    industry: data.industry ?? null,
+    company_size: data.company_size ?? null,
+    stage: data.stage ?? null,
+    founded_year: data.founded_year ?? null,
+    business_model: data.business_model ?? null,
+    perks: data.perks ?? null,
     responsibility_score: data.responsibility_score ?? null,
     avg_review_days: data.avg_review_days ?? null,
+    is_verified,
   };
 }
 

@@ -27,6 +27,10 @@ export async function generateJobListing(
         description?: string | null;
         mission?: string | null;
         culture?: string | null;
+        industry?: string | null;
+        stage?: string | null;
+        company_size?: string | null;
+        business_model?: string[] | null;
     },
     durationMinutes?: number,
 ): Promise<GeneratedJobListing> {
@@ -50,6 +54,10 @@ export async function generateJobListing(
                     company_description: companyContext?.description ?? null,
                     company_mission: companyContext?.mission ?? null,
                     company_culture: companyContext?.culture ?? null,
+                    company_industry: companyContext?.industry ?? null,
+                    company_stage: companyContext?.stage ?? null,
+                    company_size: companyContext?.company_size ?? null,
+                    company_business_model: companyContext?.business_model ?? null,
                     duration_minutes: durationMinutes ?? 60,
                 }),
                 signal: controller.signal,

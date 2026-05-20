@@ -12,7 +12,9 @@ import {
   ShieldCheck,
   Building2,
   ExternalLink,
+  Heart,
 } from "lucide-react";
+import { PERKS_LIST } from "@/pages/employer/EmployerCompanyProfile";
 import { motion } from "framer-motion";
 import { getCompanyBySlug } from "@/lib/api/companies";
 import type { Company } from "@/types/company";
@@ -147,7 +149,9 @@ export default function CompanyBrandPage() {
               <div className="flex-1 min-w-0">
                 <div className="flex flex-wrap items-center gap-2 mb-1">
                   <h1 className="text-2xl font-bold text-[var(--color-text)]">{company.name}</h1>
-                  <BadgeCheck className="text-blue-500 shrink-0" size={22} fill="white" />
+                  {company.is_verified && (
+                    <BadgeCheck className="text-blue-500 shrink-0" size={22} fill="white" />
+                  )}
                 </div>
 
                 {company.website_url && (
@@ -167,6 +171,37 @@ export default function CompanyBrandPage() {
                     <MapPin size={13} />
                     {company.country}
                   </span>
+                )}
+
+                {/* Metadata strip */}
+                {(company.industry || company.company_size || company.stage || company.founded_year || (company.business_model && company.business_model.length > 0)) && (
+                  <div className="flex flex-wrap items-center gap-1.5 mt-3">
+                    {company.industry && (
+                      <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-[var(--color-bg)] border border-[var(--color-border)] text-[var(--color-text-muted)]">
+                        {company.industry}
+                      </span>
+                    )}
+                    {company.company_size && (
+                      <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-[var(--color-bg)] border border-[var(--color-border)] text-[var(--color-text-muted)]">
+                        {company.company_size} people
+                      </span>
+                    )}
+                    {company.stage && (
+                      <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-[var(--color-brand-primary)]/10 border border-[var(--color-brand-primary)]/30 text-[var(--color-brand-primary)]">
+                        {company.stage}
+                      </span>
+                    )}
+                    {company.founded_year && (
+                      <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-[var(--color-bg)] border border-[var(--color-border)] text-[var(--color-text-muted)]">
+                        Est. {company.founded_year}
+                      </span>
+                    )}
+                    {company.business_model?.map(bm => (
+                      <span key={bm} className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-[var(--color-bg)] border border-[var(--color-border)] text-[var(--color-text-muted)]">
+                        {bm}
+                      </span>
+                    ))}
+                  </div>
                 )}
               </div>
 
@@ -256,9 +291,39 @@ export default function CompanyBrandPage() {
                 {company.culture && (
                   <div className="p-5 rounded-2xl bg-[var(--color-surface)] border border-[var(--color-border)]">
                     <h3 className="text-xs font-bold uppercase tracking-wider text-[var(--color-text-muted)] mb-2">Culture & Values</h3>
-                    <p className="text-[var(--color-text)] leading-relaxed">{company.culture}</p>
+                    <div className="prose prose-sm max-w-none text-[var(--color-text)] leading-relaxed [&_ul]:pl-4 [&_li]:marker:text-[var(--color-text-muted)]">
+                      <ReactMarkdown>
+                        {DOMPurify.sanitize(company.culture)}
+                      </ReactMarkdown>
+                    </div>
                   </div>
                 )}
+              </div>
+            </section>
+          )}
+
+          {/* Perks & Benefits */}
+          {company.perks && company.perks.length > 0 && (
+            <section className="mt-8">
+              <h2 className="text-xl font-bold text-[var(--color-text)] mb-4 flex items-center gap-2">
+                <Heart size={20} className="text-[var(--color-brand-primary)]" />
+                Perks & Benefits
+              </h2>
+              <div className="flex flex-wrap gap-2">
+                {company.perks.map(perkId => {
+                  const perk = PERKS_LIST.find(p => p.id === perkId);
+                  if (!perk) return null;
+                  const Icon = perk.icon;
+                  return (
+                    <span
+                      key={perkId}
+                      className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] text-sm font-medium text-[var(--color-text)]"
+                    >
+                      <Icon size={14} className="text-[var(--color-brand-primary)] shrink-0" />
+                      {perk.label}
+                    </span>
+                  );
+                })}
               </div>
             </section>
           )}

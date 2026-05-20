@@ -12,6 +12,7 @@ import {
   Plus,
   Inbox,
   Users,
+  Building2,
   HelpCircle,
   Trophy,
   UserCircle,
@@ -110,6 +111,7 @@ export default function DashboardLayout({
           { label: "Dashboard", path: "/employer", icon: LayoutDashboard },
           { label: "Review Queue", path: "/employer/inbox", icon: Inbox, badge: needsReviewCount },
           { label: "My Jobs", path: "/employer/jobs", icon: Briefcase },
+          { label: "Company Profile", path: "/employer/company", icon: Building2 },
           { label: "Pipeline Board", path: "/employer/talent-board", icon: Kanban },
           { label: "Talent Directory", path: "/employer/candidates", icon: Users },
         ]
