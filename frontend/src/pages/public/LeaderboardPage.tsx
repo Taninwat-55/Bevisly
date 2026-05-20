@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { Helmet } from "react-helmet-async";
 import { supabase } from "@/lib/supabaseClient";
 import { Loader2, Trophy, Medal, Star } from "lucide-react";
 import BackButton from "@/components/common/BackButton";
@@ -44,8 +45,24 @@ export default function PublicLeaderboard({ isWorkspaceView = false }: { isWorks
   const remaining = leaders.slice(3);
 
   return (
+    <>
+      <Helmet>
+        <title>Leaderboard — Bevisly</title>
+        <meta name="description" content="See the top-ranked candidates on Bevisly, ranked by proof score. Real skills, verified by real tasks." />
+        <link rel="canonical" href="https://bevisly.com/leaderboard" />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://bevisly.com/leaderboard" />
+        <meta property="og:title" content="Leaderboard — Bevisly" />
+        <meta property="og:description" content="Top-ranked candidates on Bevisly, ranked by proof score." />
+        <meta property="og:image" content="https://bevisly.com/logo.png" />
+        <meta property="og:site_name" content="Bevisly" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="Leaderboard — Bevisly" />
+        <meta name="twitter:description" content="Top-ranked candidates on Bevisly, ranked by proof score." />
+        <meta name="twitter:image" content="https://bevisly.com/logo.png" />
+      </Helmet>
     <div className="min-h-screen bg-[var(--color-bg)] transition-colors">
-      
+
       {/* ── Fancy Banner / Header ── */}
       <div className="relative pt-12 pb-24 px-8 bg-[var(--color-brand-primary)] text-white shadow-2xl overflow-hidden rounded-b-[4rem]">
         <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 mix-blend-overlay" />
@@ -198,5 +215,6 @@ export default function PublicLeaderboard({ isWorkspaceView = false }: { isWorks
 
       </div>
     </div>
+    </>
   );
 }

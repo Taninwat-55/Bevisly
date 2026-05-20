@@ -5,6 +5,7 @@
 
 import { useState, useMemo, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import { Helmet } from "react-helmet-async";
 import { useAuth } from "@/hooks/useAuth";
 import { useJobs } from "@/hooks/useJobs";
 import { getEmployerJobs, getSavedJobIds, toggleSavedJob } from "@/lib/api/jobs";
@@ -331,6 +332,22 @@ export default function JobListingPage() {
 
   /* ─── Main Layout ─────────────────────────────── */
   return (
+    <>
+      <Helmet>
+        <title>Jobs — Bevisly</title>
+        <meta name="description" content="Browse proof-based job listings on Bevisly. Every role includes a real task — apply with work, not a CV." />
+        <link rel="canonical" href="https://bevisly.com/jobs" />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://bevisly.com/jobs" />
+        <meta property="og:title" content="Jobs — Bevisly" />
+        <meta property="og:description" content="Browse proof-based job listings. Every role includes a real task — apply with work, not a CV." />
+        <meta property="og:image" content="https://bevisly.com/logo.png" />
+        <meta property="og:site_name" content="Bevisly" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="Jobs — Bevisly" />
+        <meta name="twitter:description" content="Proof-based job listings. Apply with real work, not a CV." />
+        <meta name="twitter:image" content="https://bevisly.com/logo.png" />
+      </Helmet>
     <div className="min-h-screen bg-[var(--color-bg)] transition-colors">
 
       {/* ── Fancy Banner / Header ── */}
@@ -472,5 +489,6 @@ export default function JobListingPage() {
 
       </div>
     </div>
+    </>
   );
 }

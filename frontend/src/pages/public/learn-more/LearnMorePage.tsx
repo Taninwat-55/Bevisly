@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import { Helmet } from "react-helmet-async";
 import { Button } from "@/components/ui/Button";
 import CandidateGuide from "./CandidateGuide";
 import EmployerGuide from "./EmployerGuide";
@@ -15,6 +16,18 @@ export default function LearnMorePage() {
   }, [searchParams]);
 
   return (
+    <>
+      <Helmet>
+        <title>How Bevisly Works — Proof-Based Hiring</title>
+        <meta name="description" content="Learn how Bevisly's proof-based hiring works for candidates and employers. Real tasks, structured rubrics, AI-assisted review." />
+        <link rel="canonical" href="https://bevisly.com/learn-more" />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://bevisly.com/learn-more" />
+        <meta property="og:title" content="How Bevisly Works" />
+        <meta property="og:description" content="Proof-based hiring for startups. Candidates complete real tasks. Employers review evidence, not CVs." />
+        <meta property="og:image" content="https://bevisly.com/logo.png" />
+        <meta property="og:site_name" content="Bevisly" />
+      </Helmet>
     <div className="min-h-screen bg-[var(--color-bg)] text-[var(--color-text)] transition-colors pb-20">
       {/* ── Hero Banner ── */}
       <header className="relative py-16 px-8 overflow-hidden mt-2 rounded-b-[3rem] mx-4 text-center mb-10 bg-[var(--color-obsidian)]">
@@ -110,5 +123,6 @@ export default function LearnMorePage() {
         </div>
       </section>
     </div>
+    </>
   );
 }

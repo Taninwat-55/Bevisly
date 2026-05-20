@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom";
+import { Helmet } from "react-helmet-async";
 import { Sparkles, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 
@@ -6,6 +7,18 @@ export default function PricingPage() {
   const navigate = useNavigate();
 
   return (
+    <>
+      <Helmet>
+        <title>Pricing — Bevisly</title>
+        <meta name="description" content="Simple, transparent pricing for proof-based hiring on Bevisly. Free to get started. Pro plans for growing teams." />
+        <link rel="canonical" href="https://bevisly.com/pricing" />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://bevisly.com/pricing" />
+        <meta property="og:title" content="Pricing — Bevisly" />
+        <meta property="og:description" content="Simple pricing for proof-based hiring. Free to start, Pro for scale." />
+        <meta property="og:image" content="https://bevisly.com/logo.png" />
+        <meta property="og:site_name" content="Bevisly" />
+      </Helmet>
     <div className="min-h-screen bg-[var(--color-bg)] flex flex-col items-center justify-center px-6 py-24 text-center">
       {/* Glow */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
@@ -67,5 +80,6 @@ export default function PricingPage() {
         </div>
       </div>
     </div>
+    </>
   );
 }

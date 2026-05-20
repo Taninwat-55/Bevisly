@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { Helmet } from "react-helmet-async";
 import { Target, Eye, Lightbulb, Quote } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import ContactModal from "@/components/common/ContactModal";
@@ -9,6 +10,18 @@ export default function AboutPage() {
   const [isContactOpen, setIsContactOpen] = useState(false);
 
   return (
+    <>
+      <Helmet>
+        <title>About — Bevisly</title>
+        <meta name="description" content="Bevisly is a proof-based hiring platform built for startups and recent graduates. Learn about our mission and the team behind it." />
+        <link rel="canonical" href="https://bevisly.com/about" />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://bevisly.com/about" />
+        <meta property="og:title" content="About — Bevisly" />
+        <meta property="og:description" content="Proof-based hiring built for startups. Learn about our mission." />
+        <meta property="og:image" content="https://bevisly.com/logo.png" />
+        <meta property="og:site_name" content="Bevisly" />
+      </Helmet>
     <div className="min-h-screen bg-[var(--color-bg)] text-[var(--color-text)] transition-colors pb-20">
       {/* ── Hero Banner ── */}
       <div className="relative py-16 px-8 overflow-hidden mt-2 rounded-b-[3rem] mx-4 text-center bg-[var(--color-obsidian)]">
@@ -246,5 +259,6 @@ export default function AboutPage() {
         onClose={() => setIsContactOpen(false)}
       />
     </div>
+    </>
   );
 }

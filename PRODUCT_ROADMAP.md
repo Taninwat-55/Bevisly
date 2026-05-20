@@ -170,6 +170,8 @@ Ghosting is one of the biggest complaints in hiring — from both sides. Bevisly
 
 **Why it matters:** Creates a marketplace of serious, accountable people on both sides. A core differentiator from LinkedIn and traditional job boards where ghosting has no consequences.
 
+**Known gap (post-launch fix):** The Responsibility Score currently works well for proof-task jobs but is incomplete for CV-only (simple apply) jobs. For proof jobs, the employer goes through a structured review flow that sets `status = 'reviewed'` and creates a feedback record — which feeds all three score components (response rate, speed, quality). For CV-only jobs, there is no equivalent "mark as reviewed + leave feedback" action; employers can change the hiring stage without formally reviewing, so only the ghosting penalty (response rate after 7 days) applies — the speed and quality points never accumulate. Fix: add a lightweight "reviewed" action to the simple apply review panel so the full score mechanics apply to CV-based applications too.
+
 ---
 
 ### 5. Bounty Board

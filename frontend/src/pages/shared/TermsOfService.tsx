@@ -1,9 +1,16 @@
 import BackButton from "@/components/common/BackButton";
+import { Helmet } from "react-helmet-async";
 
 const LAST_UPDATED = "May 2026";
 
 export default function TermsOfService() {
   return (
+    <>
+      <Helmet>
+        <title>Terms of Service — Bevisly</title>
+        <meta name="description" content="Bevisly's terms of service. Rules and guidelines for using the platform." />
+        <link rel="canonical" href="https://bevisly.com/terms" />
+      </Helmet>
     <div className="min-h-screen bg-[var(--color-bg)] transition-colors pb-20">
       {/* ── Header ── */}
       <div className="relative py-12 px-8 bg-[var(--color-brand-primary)] text-white shadow-xl overflow-hidden mt-2 rounded-b-[3rem] mx-4 mb-10">
@@ -138,5 +145,6 @@ export default function TermsOfService() {
         </article>
       </div>
     </div>
+    </>
   );
 }

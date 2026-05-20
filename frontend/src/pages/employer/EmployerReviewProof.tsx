@@ -422,6 +422,7 @@ export default function EmployerReviewProof({
 
   const rubricCriteria = submission?.proof_tasks?.rubric_criteria ?? null;
   const hasRubric = Array.isArray(rubricCriteria) && rubricCriteria.length > 0;
+  const isSimpleApply = submission ? !submission.proof_tasks : false;
 
   const isReviewed =
     submission?.status === "reviewed" ||
@@ -836,9 +837,16 @@ export default function EmployerReviewProof({
 
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-bold text-[var(--color-text)] mb-1">
-              {submission.proof_tasks?.title || "Review Submission"}
-            </h1>
+            <div className="flex items-center gap-3 flex-wrap mb-1">
+              <h1 className="text-2xl font-bold text-[var(--color-text)]">
+                {submission.proof_tasks?.title || "Review Submission"}
+              </h1>
+              {isSimpleApply && (
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-orange-100 dark:bg-orange-900/20 text-orange-600 border border-orange-200 dark:border-orange-800">
+                  <FileText size={12} /> CV Application
+                </span>
+              )}
+            </div>
             <p className="text-[var(--color-text-muted)] font-medium">
               Job: {submission.jobs?.title || "—"}
             </p>
@@ -1031,20 +1039,30 @@ export default function EmployerReviewProof({
             </div>
           )}
 
-          {/* Empty State */}
-          {!hasAnySubmission && !submission.video_url && (
+          {/* Empty State — only for proof jobs with no submission content */}
+          {!isSimpleApply && !hasAnySubmission && !submission.video_url && (
             <div className="p-8 text-center border border-dashed border-[var(--color-border)] rounded-xl text-[var(--color-text-muted)]">
               No submission content found. Check reflections below.
             </div>
           )}
         </div>
 
-        {/* Resume / CV Panel */}
-        {(submission.resume_url || submission.profiles?.resume_url) && (
-          <div className="glass-panel p-6 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] shadow-sm">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-[var(--color-employer)] mb-4 flex items-center gap-2">
-              <FileText size={16} /> Candidate Resume / CV
+        {/* Resume / CV Panel — hero for simple apply, secondary for proof jobs */}
+        {(submission.resume_url || submission.profiles?.resume_url) ? (
+          <div className={`glass-panel p-6 rounded-2xl border shadow-sm ${
+            isSimpleApply
+              ? "border-orange-300 dark:border-orange-800 bg-orange-50/30 dark:bg-orange-900/10"
+              : "border-[var(--color-border)] bg-[var(--color-surface)]"
+          }`}>
+            <h3 className="text-xs font-bold uppercase tracking-wider text-orange-600 mb-4 flex items-center gap-2">
+              <FileText size={16} />
+              {isSimpleApply ? "Primary Application: CV / Resume" : "Candidate Resume / CV"}
             </h3>
+            {isSimpleApply && (
+              <p className="text-xs text-[var(--color-text-muted)] mb-4">
+                This candidate applied without a proof task. Their CV is the primary artifact for your hiring decision.
+              </p>
+            )}
             <div className="flex items-center justify-between p-4 bg-[var(--color-bg)] rounded-xl border border-[var(--color-border)]">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-lg bg-orange-100 dark:bg-orange-900/20 flex items-center justify-center text-orange-600">
@@ -1073,7 +1091,11 @@ export default function EmployerReviewProof({
               </a>
             </div>
           </div>
-        )}
+        ) : isSimpleApply ? (
+          <div className="p-6 text-center border border-dashed border-orange-300 dark:border-orange-800 rounded-xl text-orange-500 text-sm">
+            No CV attached to this application.
+          </div>
+        ) : null}
 
         {/* Reasoning Trace */}
         {submission.reasoning_trace && (

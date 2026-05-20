@@ -22,6 +22,8 @@ import {
   User,
   Mail,
   MessageSquare,
+  FileText,
+  Upload,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import type { Job } from "@/types/job";
@@ -31,6 +33,7 @@ import {
   attachPastProof,
   type FastPassMatch,
 } from "@/lib/api/submissions";
+import { uploadResume } from "@/lib/api/profiles";
 import { Helmet } from "react-helmet-async";
 import DOMPurify from "dompurify";
 import ReactMarkdown from "react-markdown";
@@ -62,6 +65,8 @@ export default function JobDetailPage() {
   const [attaching, setAttaching] = useState(false);
   const [showStickyBar, setShowStickyBar] = useState(false);
   const [companyProfile, setCompanyProfile] = useState<Company | null>(null);
+  const [candidateResumeUrl, setCandidateResumeUrl] = useState<string | null>(null);
+  const [uploadingResume, setUploadingResume] = useState(false);
   const ctaRef = useRef<HTMLDivElement>(null);
 
   /* ─── Fetch job + proof tasks ─────────────────────────────── */
@@ -117,6 +122,13 @@ export default function JobDetailPage() {
     observer.observe(el);
     return () => observer.disconnect();
   }, [job]);
+
+  /* ─── Fetch candidate resume for no-proof jobs ───────────── */
+  useEffect(() => {
+    if (!user || !job || (job.proof_tasks && job.proof_tasks.length > 0)) return;
+    supabase.from("profiles").select("resume_url").eq("id", user.id).single()
+      .then(({ data }) => setCandidateResumeUrl(data?.resume_url ?? null));
+  }, [user, job]);
 
   /* ─── Loading & Empty States ─────────────────────────────── */
   if (loading)
@@ -175,6 +187,22 @@ export default function JobDetailPage() {
       toast.error("Failed to submit application. Please try again.");
     } finally {
       setStarting(false);
+    }
+  };
+
+  /* ─── CV Upload (no-proof jobs) ─────────────────────────── */
+  const handleResumeUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploadingResume(true);
+    try {
+      const url = await uploadResume(file);
+      setCandidateResumeUrl(url);
+      toast.success("CV uploaded successfully.");
+    } catch {
+      toast.error("Upload failed. Please try again.");
+    } finally {
+      setUploadingResume(false);
     }
   };
 
@@ -441,7 +469,60 @@ export default function JobDetailPage() {
               </button>
               <p className="text-[10px] text-[var(--color-text-muted)] text-center italic">You are viewing this as an employer.</p>
             </div>
+          ) : !proof ? (
+            /* ── No-proof job: CV-first vertical layout ── */
+            <div className="flex flex-col gap-4 w-full">
+              {hasApplied ? (
+                <div className="flex items-center gap-2 text-emerald-500 font-bold text-lg">
+                  <CheckCircle size={22} /> Application Submitted
+                </div>
+              ) : (
+                <>
+                  <p className="text-[var(--color-text-muted)] text-sm leading-relaxed">
+                    Your CV will be the primary input for the employer's decision. Make sure it's up to date before applying.
+                  </p>
+                  {candidateResumeUrl ? (
+                    <div className="flex items-center justify-between p-3 bg-[var(--color-bg)] rounded-xl border border-[var(--color-border)]">
+                      <div className="flex items-center gap-2 text-sm text-[var(--color-text)]">
+                        <FileText size={15} className="text-orange-500" />
+                        <span>CV attached</span>
+                      </div>
+                      <a
+                        href="/candidate/profile"
+                        className="text-xs text-[var(--color-brand-primary)] hover:underline"
+                      >
+                        Update
+                      </a>
+                    </div>
+                  ) : (
+                    <label className="flex flex-col items-center justify-center gap-2 p-4 border-2 border-dashed border-[var(--color-border)] rounded-xl cursor-pointer hover:border-[var(--color-brand-primary)] transition text-sm text-[var(--color-text-muted)]">
+                      {uploadingResume ? (
+                        <><Loader2 size={16} className="animate-spin" /> Uploading…</>
+                      ) : (
+                        <><Upload size={16} /> Upload your CV (PDF or DOCX)</>
+                      )}
+                      <input
+                        type="file"
+                        accept=".pdf,.docx"
+                        className="hidden"
+                        onChange={handleResumeUpload}
+                        disabled={uploadingResume}
+                      />
+                    </label>
+                  )}
+                  <button
+                    onClick={handleCTA}
+                    disabled={checkingFastPass || starting || !candidateResumeUrl}
+                    className="w-full px-8 py-3.5 rounded-2xl font-bold text-base transition-all active:scale-[0.98] shadow-lg flex items-center justify-center gap-2 bg-[var(--color-brand-primary)] hover:bg-[var(--color-brand-primary-hover)] text-white disabled:opacity-50"
+                  >
+                    {(checkingFastPass || starting) && <Loader2 size={18} className="animate-spin" />}
+                    {checkingFastPass || starting ? "Please wait…" : "Apply Now"}
+                  </button>
+                </>
+              )}
+            </div>
           ) : (
+            /* ── Proof-task job: original horizontal layout ── */
             <div className="flex flex-col sm:flex-row items-center gap-4">
               <div className="flex-1 min-w-0">
                 {hasApplied ? (
@@ -466,18 +547,10 @@ export default function JobDetailPage() {
                 >
                   {(checkingFastPass || starting) && <Loader2 size={18} className="animate-spin" />}
                   {hasApplied
-                    ? proof ? "View Submission" : "Applied ✓"
+                    ? "View Submission"
                     : checkingFastPass || starting ? "Please wait…"
-                    : proof ? "Start Proof Task" : "Apply Now"}
+                    : "Start Proof Task"}
                 </button>
-                {/* {hasApplied && (
-                  <button
-                    onClick={() => navigate("/candidate/dashboard")}
-                    className="px-8 py-2.5 rounded-xl border border-[var(--color-border)] text-sm font-semibold hover:bg-[var(--color-surface-hover)] transition-colors text-[var(--color-text-muted)]"
-                  >
-                    Back to Dashboard
-                  </button>
-                )} */}
               </div>
             </div>
           )}
@@ -722,7 +795,7 @@ export default function JobDetailPage() {
               ) : (
                 <button
                   onClick={handleCTA}
-                  disabled={hasApplied || checkingFastPass || starting}
+                  disabled={hasApplied || checkingFastPass || starting || (!proof && !candidateResumeUrl)}
                   className={`shrink-0 px-6 py-2.5 rounded-xl font-bold text-sm transition-all flex items-center gap-2
                     ${hasApplied
                       ? "bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 cursor-default"

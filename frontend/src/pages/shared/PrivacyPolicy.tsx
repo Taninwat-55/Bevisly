@@ -1,6 +1,7 @@
 import BackButton from "@/components/common/BackButton";
 import { useState } from "react";
 import ContactModal from "@/components/common/ContactModal";
+import { Helmet } from "react-helmet-async";
 
 const LAST_UPDATED = "May 2026";
 
@@ -8,6 +9,12 @@ export default function PrivacyPolicy() {
   const [isContactOpen, setIsContactOpen] = useState(false);
 
   return (
+    <>
+      <Helmet>
+        <title>Privacy Policy — Bevisly</title>
+        <meta name="description" content="Bevisly's privacy policy. How we collect, use, and protect your data." />
+        <link rel="canonical" href="https://bevisly.com/privacy" />
+      </Helmet>
     <div className="min-h-screen bg-[var(--color-bg)] transition-colors pb-20">
       <div className="relative py-12 px-8 bg-[var(--color-brand-primary)] text-white shadow-xl overflow-hidden mt-2 rounded-b-[3rem] mx-4 mb-10">
         <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20" />
@@ -216,5 +223,6 @@ export default function PrivacyPolicy() {
       </div>
       <ContactModal isOpen={isContactOpen} onClose={() => setIsContactOpen(false)} />
     </div>
+    </>
   );
 }
