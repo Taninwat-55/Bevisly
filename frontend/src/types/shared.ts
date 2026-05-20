@@ -48,6 +48,13 @@ export type FollowUpAnswer = {
   answer: string;
 };
 
+/** Structured reasoning trace submitted by the candidate alongside their proof. */
+export type ReasoningTrace = {
+  tradeoff: string;    // most important decision made
+  considered: string;  // what was considered and ruled out
+  uncertainty: string; // what the candidate is least confident about
+};
+
 // Shape of a feedback record from the `feedback` table.
 export type Feedback = {
   id?: string;

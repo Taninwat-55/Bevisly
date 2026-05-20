@@ -41,6 +41,7 @@ export default function EmployerJobIntentForm({
 }: EmployerJobIntentFormProps) {
   const [stage, setStage] = useState<"input" | "review">("input");
   const [rawInput, setRawInput] = useState("");
+  const [durationMinutes, setDurationMinutes] = useState<30 | 60 | 120 | 180>(60);
   const [isGenerating, setIsGenerating] = useState(false);
   const [isLaunching, setIsLaunching] = useState(false);
   const [generated, setGenerated] = useState<GeneratedJobListing | null>(null);
@@ -65,7 +66,7 @@ export default function EmployerJobIntentForm({
         description: companyDescription,
         mission: companyMission,
         culture: companyCulture,
-      });
+      }, durationMinutes);
       setGenerated(data);
       setJobType(data.job_type || "Full-time");
       setWorkMode(data.work_mode || "Remote");
@@ -168,6 +169,30 @@ export default function EmployerJobIntentForm({
             className="w-full h-40 min-h-[120px] p-4 text-sm bg-white/5 border border-white/10 rounded-xl text-white placeholder:text-white/20 focus:border-[var(--color-brand-primary)]/50 focus:ring-1 focus:ring-[var(--color-brand-primary)]/50 focus:outline-none resize-y"
             autoFocus
           />
+          <div className="space-y-1.5">
+            <p className="text-xs text-slate-400">Proof task length</p>
+            <div className="flex gap-2">
+              {([
+                { label: "30 min", value: 30 },
+                { label: "1 hour", value: 60 },
+                { label: "2 hours", value: 120 },
+                { label: "3 hours", value: 180 },
+              ] as const).map((tier) => (
+                <button
+                  key={tier.value}
+                  type="button"
+                  onClick={() => setDurationMinutes(tier.value)}
+                  className={`flex-1 py-1.5 rounded-lg border text-xs font-medium transition-colors ${
+                    durationMinutes === tier.value
+                      ? "bg-[var(--color-brand-primary)] border-[var(--color-brand-primary)] text-white"
+                      : "border-white/10 text-slate-400 hover:border-[var(--color-brand-primary)]/50"
+                  }`}
+                >
+                  {tier.label}
+                </button>
+              ))}
+            </div>
+          </div>
           <Button type="submit" disabled={isGenerating} className="w-full h-12 text-base font-semibold">
             {isGenerating ? (
               <>

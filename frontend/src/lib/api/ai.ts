@@ -28,6 +28,7 @@ export async function generateJobListing(
         mission?: string | null;
         culture?: string | null;
     },
+    durationMinutes?: number,
 ): Promise<GeneratedJobListing> {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => {
@@ -49,6 +50,7 @@ export async function generateJobListing(
                     company_description: companyContext?.description ?? null,
                     company_mission: companyContext?.mission ?? null,
                     company_culture: companyContext?.culture ?? null,
+                    duration_minutes: durationMinutes ?? 60,
                 }),
                 signal: controller.signal,
             },
@@ -94,6 +96,7 @@ export async function suggestFeedback(
     taskDescription?: string | null,
     reflection?: string | null,
     rubricCriteria?: RubricCriterion[] | null,
+    reasoningTrace?: { tradeoff: string; considered: string; uncertainty: string } | null,
 ): Promise<SuggestFeedbackResult> {
     const { data, error } = await supabase.functions.invoke(
         "suggest-feedback",
@@ -104,6 +107,7 @@ export async function suggestFeedback(
                 submission_content: submissionContent,
                 task_description: taskDescription ?? null,
                 reflection: reflection ?? null,
+                reasoning_trace: reasoningTrace ?? null,
                 rubric_criteria: rubricCriteria ?? null,
             },
         },

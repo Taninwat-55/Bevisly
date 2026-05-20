@@ -216,7 +216,7 @@ export async function checkSubmissionStatus(job_id: string) {
   const { data, error } = await supabase
     .from("submissions")
     .select(
-      "id, status, proof_task_id, submission_link, reflection, resume_url, created_at",
+      "id, status, proof_task_id, submission_link, reflection, reasoning_trace, resume_url, created_at",
     )
     .eq("user_id", user.id)
     .eq("job_id", job_id)
@@ -314,7 +314,7 @@ export async function submitProof({
   job_id,
   submission_link,
   text_response,
-  reflection,
+  reasoning_trace,
   video_url,
   file,
   screening_answers,
@@ -322,7 +322,7 @@ export async function submitProof({
   job_id: string;
   submission_link?: string;
   text_response?: string;
-  reflection?: string;
+  reasoning_trace?: { tradeoff: string; considered: string; uncertainty: string } | null;
   video_url?: string;
   file?: File | null;
   screening_answers?: { question: string; answer: string }[];
@@ -356,7 +356,8 @@ export async function submitProof({
       submission_link: submission_link || null,
       file_url: uploadedFileUrl || null,
       text_response: text_response || null,
-      reflection,
+      reflection: null,
+      reasoning_trace: reasoning_trace ?? null,
       video_url: video_url || null,
       status: "submitted",
       completed_at: new Date().toISOString(),
@@ -624,13 +625,13 @@ export async function saveDraft({
   job_id,
   submission_link,
   text_response,
-  reflection,
+  reasoning_trace,
   file,
 }: {
   job_id: string;
   submission_link?: string;
   text_response?: string;
-  reflection?: string;
+  reasoning_trace?: { tradeoff: string; considered: string; uncertainty: string } | null;
   file?: File | null;
 }) {
   const user = (await supabase.auth.getUser()).data.user;
@@ -659,7 +660,8 @@ export async function saveDraft({
       // Only update file_url if a new file was uploaded, otherwise keep existing
       ...(uploadedFileUrl ? { file_url: uploadedFileUrl } : {}),
       text_response: text_response || null,
-      reflection,
+      reflection: null,
+      reasoning_trace: reasoning_trace ?? null,
       status: "in_progress", // Force status to stay in_progress
       updated_at: new Date().toISOString(), // Track last save
     })

@@ -11,7 +11,7 @@ import { Card } from "@/components/ui/Card";
 import type { EmployerJobFormValues } from "@/types/employer";
 import {
   Briefcase, MapPin, DollarSign, BrainCircuit, ArrowRight, Calendar, Plus, Trash2,
-  ChevronRight, CheckCircle2, AlertTriangle,
+  ChevronRight, CheckCircle2,
 } from "lucide-react";
 import { POPULAR_JOB_TITLES } from "@/data/popularJobTitles";
 import { useCompany } from "@/hooks/useCompany";
@@ -24,6 +24,13 @@ import {
 } from "@/components/employer/ProofTasksSection";
 
 const FREE_TIER_JOB_LIMIT = 2;
+
+const TIME_TIERS = [
+  { label: "30 min", expectedTime: "30 min", minutes: 30 },
+  { label: "1 hour", expectedTime: "~1 hour", minutes: 60 },
+  { label: "2 hours", expectedTime: "~2 hours", minutes: 120 },
+  { label: "3 hours", expectedTime: "~3 hours", minutes: 180 },
+] as const;
 
 interface EmployerJobFormProps {
   mode?: "create" | "edit";
@@ -666,7 +673,8 @@ export default function EmployerJobForm({
                         id: crypto.randomUUID(),
                         title: "",
                         description: "",
-                        expected_time: "1–2 hours",
+                        expected_time: "~1 hour",
+                        duration_minutes: 60,
                         submission_format: "",
                         submission_type: "link",
                         rubric_criteria: [
@@ -700,7 +708,8 @@ export default function EmployerJobForm({
                         id: crypto.randomUUID(),
                         title: "",
                         description: "",
-                        expected_time: "1–2 hours",
+                        expected_time: "~1 hour",
+                        duration_minutes: 60,
                         submission_format: "",
                         submission_type: "link",
                         rubric_criteria: [
@@ -766,27 +775,28 @@ export default function EmployerJobForm({
 
                   <div className="space-y-1.5">
                     <label className="text-sm font-medium text-[var(--color-text)]">Estimated Time</label>
-                    <select
-                      className="w-full h-10 px-3 rounded-[var(--radius-input)] border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text)] text-sm focus:ring-2 focus:ring-[var(--color-brand-primary)]/20 focus:outline-none"
-                      value={task.expected_time ?? "1–2 hours"}
-                      onChange={(e) => handleTaskChange(index, "expected_time", e.target.value)}
-                    >
-                      <option value="&lt; 30 min">&lt; 30 min</option>
-                      <option value="~1 hour">~1 hour</option>
-                      <option value="1–2 hours">1–2 hours</option>
-                      <option value="2–4 hours">2–4 hours</option>
-                      <option value="Half day">Half day</option>
-                      <option value="Full day">Full day</option>
-                    </select>
+                    <div className="flex gap-2">
+                      {TIME_TIERS.map((tier) => (
+                        <button
+                          key={tier.minutes}
+                          type="button"
+                          onClick={() => {
+                            handleTaskChange(index, "expected_time", tier.expectedTime);
+                            handleTaskChange(index, "duration_minutes", tier.minutes);
+                          }}
+                          className={`flex-1 py-2 px-3 rounded-lg border text-sm font-medium transition-colors ${
+                            task.duration_minutes === tier.minutes || (!task.duration_minutes && tier.minutes === 60)
+                              ? "bg-[var(--color-brand-primary)] border-[var(--color-brand-primary)] text-white"
+                              : "border-[var(--color-border)] text-[var(--color-text-muted)] hover:border-[var(--color-brand-primary)]/50"
+                          }`}
+                        >
+                          {tier.label}
+                        </button>
+                      ))}
+                    </div>
                     <p className="text-xs text-[var(--color-text-muted)]">
-                      Bevisly recommends 1–3 hours max to maximise candidate quality.
+                      Min 30 min · Max 3 hours. Longer tasks see higher candidate drop-off.
                     </p>
-                    {(task.expected_time === "Half day" || task.expected_time === "Full day") && (
-                      <p className="text-xs text-amber-600 dark:text-amber-400 flex items-center gap-1">
-                        <AlertTriangle size={12} />
-                        Tasks over 4 hours see significantly higher drop-off. Consider breaking it into smaller stages.
-                      </p>
-                    )}
                   </div>
 
                   <div className="grid grid-cols-2 gap-4">

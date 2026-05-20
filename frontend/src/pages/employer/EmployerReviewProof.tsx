@@ -25,7 +25,6 @@ import {
   User,
   Download,
   AlignLeft,
-  Quote,
   Video,
   ChevronLeft,
   ChevronRight,
@@ -34,6 +33,7 @@ import {
   Paperclip,
   MessageSquare,
   CalendarCheck,
+  Brain,
 } from "lucide-react";
 
 import { Star, Sparkles } from "lucide-react";
@@ -465,8 +465,9 @@ export default function EmployerReviewProof({
               data.proof_tasks?.title || "General",
               data.text_response,
               data.proof_tasks?.description ?? null,
-              data.reflection ?? null,
+              null,
               data.proof_tasks?.rubric_criteria ?? undefined,
+              data.reasoning_trace ?? null,
             );
             if (result && (result.strengths || result.improvements || result.rubric_scores)) {
               setAiResult({
@@ -523,15 +524,15 @@ export default function EmployerReviewProof({
         submission?.submission_link ||
         "Checked file/link.";
       const taskDescription = submission?.proof_tasks?.description ?? null;
-      const reflection = submission?.reflection ?? null;
 
       const result = await suggestFeedback(
         stars || 0,
         criteria,
         content,
         taskDescription,
-        reflection,
+        null,
         rubricCriteria ?? undefined,
+        submission?.reasoning_trace ?? null,
       );
 
       if (
@@ -1074,22 +1075,29 @@ export default function EmployerReviewProof({
           </div>
         )}
 
-        {/* Reflection */}
-        {submission.reflection && (
-          <div className="glass-panel rounded-2xl p-6">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-[var(--color-text-muted)] mb-3">
-              Candidate Reflection
-            </h3>
-            <div className="relative p-4 bg-[var(--color-bg)] border border-[var(--color-border)] rounded-xl">
-              <Quote
-                size={20}
-                className="absolute top-4 left-4 text-[var(--color-border)] opacity-50"
-              />
-              <div className="pl-8 prose prose-sm dark:prose-invert max-w-none text-[var(--color-text)]">
-                <ReactMarkdown>
-                  {DOMPurify.sanitize(submission.reflection)}
-                </ReactMarkdown>
-              </div>
+        {/* Reasoning Trace */}
+        {submission.reasoning_trace && (
+          <div className="glass-panel rounded-2xl p-6 space-y-4">
+            <div className="flex items-center gap-2">
+              <Brain size={16} className="text-amber-500" />
+              <h3 className="text-xs font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400">
+                Candidate Reasoning Trace
+              </h3>
+            </div>
+            <p className="text-xs text-[var(--color-text-muted)]">
+              The candidate answered these questions before submitting. Use them to assess judgment and self-awareness alongside the proof output.
+            </p>
+            <div className="space-y-4">
+              {[
+                { q: "What was their most important decision?", a: submission.reasoning_trace.tradeoff },
+                { q: "What did they consider and rule out?", a: submission.reasoning_trace.considered },
+                { q: "What are they least confident about?", a: submission.reasoning_trace.uncertainty },
+              ].map(({ q, a }, idx) => (
+                <div key={idx} className="p-4 bg-[var(--color-bg)] border border-[var(--color-border)] rounded-xl space-y-1">
+                  <p className="text-[10px] font-semibold text-[var(--color-text-muted)] uppercase tracking-wider">{q}</p>
+                  <p className="text-sm text-[var(--color-text)] leading-relaxed">{a}</p>
+                </div>
+              ))}
             </div>
           </div>
         )}

@@ -20,7 +20,7 @@ Deno.serve(async (req) => {
             "";
         const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-        const { raw_input, company_name, company_description, company_mission, company_culture } = await req.json();
+        const { raw_input, company_name, company_description, company_mission, company_culture, duration_minutes } = await req.json();
 
         if (!raw_input) {
             throw new Error("Missing raw_input");
@@ -90,6 +90,23 @@ Deno.serve(async (req) => {
             );
         }
 
+        const durationMin = typeof duration_minutes === "number" ? duration_minutes : 60;
+
+        const tierLabel = durationMin <= 30 ? "30 minutes"
+            : durationMin <= 60 ? "~1 hour"
+            : durationMin <= 120 ? "~2 hours"
+            : "~3 hours";
+
+        const tierScope = durationMin <= 30
+            ? "The task MUST be completable in 30 minutes by a qualified candidate. Scope it to exactly 1 tight, concrete deliverable. No open-ended design or research."
+            : durationMin <= 60
+            ? "The task should take roughly 1 hour. Scope it to 1–2 focused deliverables. Avoid scope creep."
+            : durationMin <= 120
+            ? "The task should take roughly 2 hours. Allow 2–3 deliverables or an open-ended problem that expects the candidate to explain their trade-offs and reasoning."
+            : "The task should take roughly 3 hours. Design a complex multi-part challenge that tests systematic thinking, planning, and execution across multiple areas. Expect the candidate to make and justify decisions.";
+
+        const rubricCount = durationMin <= 60 ? 3 : durationMin <= 120 ? 4 : 5;
+
         const companyContext = [
             company_description ? `- About: ${company_description}` : "",
             company_mission ? `- Mission: ${company_mission}` : "",
@@ -111,12 +128,13 @@ Instructions:
 - Job Type: infer from input — one of: "Full-time", "Part-time", "Contract", "Internship", "Freelance", "Volunteer". Default to "Full-time" if unclear.
 - Work Mode: infer from input — one of: "Remote", "On-site", "Hybrid". Default to "Remote" if unclear.
 - Location: extract city/country if mentioned, use "Remote" if it's a remote role, or leave empty string "" if not mentioned.
-- Proof Task: a realistic, practical challenge (~30 minutes) that directly tests the core skills this role requires.
+- Proof Task: a realistic, practical challenge (${tierLabel}) that directly tests the core skills this role requires.
+- Time tier: ${tierScope}
 
 Each Proof Task MUST include:
-1. "rubric_criteria": exactly 3 weighted scoring criteria
+1. "rubric_criteria": exactly ${rubricCount} weighted scoring criteria
    - "name": short label (2–4 words), e.g. "Code clarity", "Problem decomposition", "UX polish"
-   - "weight": integer 1–100; all three weights MUST sum to exactly 100
+   - "weight": integer 1–100; all weights MUST sum to exactly 100
    - "description": one-line plain-English description of what 'good' looks like
    Pick criteria that directly match the skill being tested.
 
@@ -134,7 +152,7 @@ Return ONLY a JSON object with this exact structure (no markdown, no code fences
     {
       "title": "Task Title",
       "description": "Detailed task instructions...",
-      "expected_time": "30-45 mins",
+      "expected_time": "${tierLabel}",
       "submission_format": "github_repo",
       "rubric_criteria": [
         { "name": "Code clarity", "weight": 40, "description": "Readable structure, clear naming" },
