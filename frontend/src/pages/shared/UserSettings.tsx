@@ -182,7 +182,7 @@ export default function UserSettings() {
         throw uploadError;
       }
       const { data: { publicUrl } } = supabase.storage.from("avatars").getPublicUrl(filePath);
-      await updateProfileData(user.id, { avatar_url: publicUrl });
+      await updateProfileData({ avatar_url: publicUrl });
       setAvatarUrl(publicUrl);
       await refreshProfile?.();
       if (user.role === "employer" && currentCompanyRecord?.id) {
@@ -200,7 +200,7 @@ export default function UserSettings() {
   const handleRemoveAvatar = async () => {
     if (!user) return;
     try {
-      await updateProfileData(user.id, { avatar_url: null });
+      await updateProfileData({ avatar_url: null });
       setAvatarUrl(null);
       await refreshProfile?.();
       if (user.role === "employer" && currentCompanyRecord?.id) {
@@ -222,7 +222,7 @@ export default function UserSettings() {
       } else {
         updates.username = username || null;
       }
-      await updateProfileData(user!.id, updates);
+      await updateProfileData(updates);
 
       if (isEmployer && company) {
         const { updateCompanyName, getCurrentCompanyId } = await import("@/lib/api/companies");
@@ -961,7 +961,7 @@ export default function UserSettings() {
                               if (!user) return;
                               const newVal = !user.is_public;
                               try {
-                                await updateProfileData(user.id, { is_public: newVal });
+                                await updateProfileData({ is_public: newVal });
                                 await refreshProfile?.();
                                 toast.success(newVal ? "Profile is now public" : "Profile is now private");
                               } catch {

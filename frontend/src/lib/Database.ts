@@ -111,54 +111,72 @@ export type Database = {
       companies: {
         Row: {
           avg_review_days: number | null
+          business_model: string[] | null
+          company_size: string | null
           country: string | null
           created_at: string | null
           culture: string | null
           description: string | null
+          founded_year: number | null
           id: string
+          industry: string | null
           is_internal: boolean | null
           logo_url: string | null
           mission: string | null
           name: string
           owner_id: string | null
+          perks: string[] | null
           responsibility_score: number | null
           slug: string | null
+          stage: string | null
           team_photos: string[] | null
           updated_at: string | null
           website_url: string | null
         }
         Insert: {
           avg_review_days?: number | null
+          business_model?: string[] | null
+          company_size?: string | null
           country?: string | null
           created_at?: string | null
           culture?: string | null
           description?: string | null
+          founded_year?: number | null
           id?: string
+          industry?: string | null
           is_internal?: boolean | null
           logo_url?: string | null
           mission?: string | null
           name: string
           owner_id?: string | null
+          perks?: string[] | null
           responsibility_score?: number | null
           slug?: string | null
+          stage?: string | null
           team_photos?: string[] | null
           updated_at?: string | null
           website_url?: string | null
         }
         Update: {
           avg_review_days?: number | null
+          business_model?: string[] | null
+          company_size?: string | null
           country?: string | null
           created_at?: string | null
           culture?: string | null
           description?: string | null
+          founded_year?: number | null
           id?: string
+          industry?: string | null
           is_internal?: boolean | null
           logo_url?: string | null
           mission?: string | null
           name?: string
           owner_id?: string | null
+          perks?: string[] | null
           responsibility_score?: number | null
           slug?: string | null
+          stage?: string | null
           team_photos?: string[] | null
           updated_at?: string | null
           website_url?: string | null
@@ -896,6 +914,7 @@ export type Database = {
           offer_email_sent: boolean
           proof_link: string | null
           proof_task_id: string | null
+          reasoning_trace: Json | null
           reflection: string | null
           rejection_email_sent: boolean
           resume_metadata: Json | null
@@ -927,6 +946,7 @@ export type Database = {
           offer_email_sent?: boolean
           proof_link?: string | null
           proof_task_id?: string | null
+          reasoning_trace?: Json | null
           reflection?: string | null
           rejection_email_sent?: boolean
           resume_metadata?: Json | null
@@ -958,6 +978,7 @@ export type Database = {
           offer_email_sent?: boolean
           proof_link?: string | null
           proof_task_id?: string | null
+          reasoning_trace?: Json | null
           reflection?: string | null
           rejection_email_sent?: boolean
           resume_metadata?: Json | null

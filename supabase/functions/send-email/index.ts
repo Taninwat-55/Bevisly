@@ -1,8 +1,10 @@
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
 const FROM = "Bevisly <hello@bevisly.com>";
 
+const ALLOWED_ORIGIN = Deno.env.get("ALLOWED_ORIGIN") ?? "https://bevisly.com";
+
 const corsHeaders = {
-    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Origin": ALLOWED_ORIGIN,
     "Access-Control-Allow-Headers":
         "authorization, x-client-info, apikey, content-type",
 };
@@ -14,6 +16,14 @@ Deno.serve(async (req) => {
 
     try {
         const { to, subject, html, text, reply_to } = await req.json();
+
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        const toList = Array.isArray(to) ? to : [to];
+        for (const addr of toList) {
+            if (typeof addr !== "string" || !emailRegex.test(addr)) {
+                throw new Error(`Invalid email address: ${addr}`);
+            }
+        }
 
         if (!RESEND_API_KEY) {
             throw new Error("Missing RESEND_API_KEY");

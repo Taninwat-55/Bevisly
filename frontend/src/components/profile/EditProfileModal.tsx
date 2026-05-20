@@ -182,7 +182,7 @@ export default function EditProfileModal({
     if (!user) return;
     setSaving(true);
     try {
-      await updateProfileData(user.id, {
+      await updateProfileData({
         full_name: name,
         avatar_url: avatarUrl,
         skills: skills,
