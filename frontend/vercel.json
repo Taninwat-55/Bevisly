@@ -1,4 +1,12 @@
 {
+  "redirects": [
+    {
+      "source": "/(.*)",
+      "destination": "https://bevisly.com/$1",
+      "permanent": true,
+      "has": [{ "type": "host", "value": "www.bevisly.com" }]
+    }
+  ],
   "rewrites": [
     { "source": "/(.*)", "destination": "/index.html" }
   ]
