@@ -40,7 +40,7 @@ export async function getAllJobs(): Promise<CandidateJob[]> {
       company_id,
       proof_tasks ( id, title, expected_time ),
       employer:profiles!jobs_employer_id_fkey ( avatar_url, is_verified ),
-      company_data:companies ( responsibility_score, slug )
+      company_data:companies ( responsibility_score, slug, logo_url )
     `)
     .eq("status", "active")
     // Use an OR condition to include jobs with no deadline, or jobs whose deadline is in the future
@@ -53,7 +53,7 @@ export async function getAllJobs(): Promise<CandidateJob[]> {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return data.map((job: any) => ({
     ...job,
-    company_logo: job.employer?.avatar_url || null,
+    company_logo: job.company_data?.logo_url || job.employer?.avatar_url || null,
     employer_verified: job.employer?.is_verified ?? false,
     company_responsibility_score: job.company_data?.responsibility_score ?? null,
     company_slug: job.company_data?.slug ?? null,
