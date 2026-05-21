@@ -139,13 +139,21 @@ export async function getEmployerJobs(
       pay_period,
       created_at,
       featured,
-      proof_tasks ( id, title, expected_time, ai_tools_allowed, rubric_criteria, rubric_locked_at )
+      company_id,
+      proof_tasks ( id, title, expected_time, ai_tools_allowed, rubric_criteria, rubric_locked_at ),
+      employer:profiles!jobs_employer_id_fkey ( avatar_url ),
+      company_data:companies ( logo_url )
     `)
     .eq("employer_id", employer_id)
     .order("created_at", { ascending: false });
 
   if (error) throw error;
-  return data as (EmployerJob & { proof_tasks?: ProofTask[] })[];
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return data.map((job: any) => ({
+    ...job,
+    company_logo: job.company_data?.logo_url || job.employer?.avatar_url || null,
+  })) as (EmployerJob & { proof_tasks?: ProofTask[] })[];
 }
 
 /* ──────────────────────────────────────────────
