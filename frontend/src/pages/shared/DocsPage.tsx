@@ -689,7 +689,7 @@ export default function DocsPage() {
           <p className="text-[var(--color-text-muted)] text-sm mb-6 max-w-md mx-auto leading-relaxed">
             Send us a message and we'll get back to you. We read every email personally.
           </p>
-          <a href="mailto:thaninwatice@gmail.com">
+          <a href="mailto:bevislyapp@gmail.com">
             <Button size="lg" className="rounded-2xl h-12 px-8 mb-8">
               <Mail size={16} className="mr-2" />
               Contact Support

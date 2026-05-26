@@ -13,12 +13,11 @@
   <a href="#features">Features</a> •
   <a href="#tech-stack">Tech Stack</a> •
   <a href="#getting-started">Getting Started</a> •
-  <a href="#architecture">Architecture</a> •
-  <a href="#roadmap">Roadmap</a>
+  <a href="#architecture">Architecture</a>
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Status-Pre--Launch-F59E0B?style=flat-square" alt="Pre-Launch" />
+  <img src="https://img.shields.io/badge/Status-Personal%20Project-6366F1?style=flat-square" alt="Personal Project" />
   <img src="https://img.shields.io/badge/React-19.x-61DAFB?logo=react&style=flat-square" alt="React 19" />
   <img src="https://img.shields.io/badge/TypeScript-5.x-3178C6?logo=typescript&style=flat-square" alt="TypeScript" />
   <img src="https://img.shields.io/badge/Supabase-PostgreSQL-3FCF8E?logo=supabase&style=flat-square" alt="Supabase" />
@@ -29,19 +28,9 @@
 
 ## Overview
 
-**Bevisly** is a proof-of-skill hiring platform that bridges the gap between learning and employment. Instead of filtering by résumés, employers post real-world proof tasks — candidates complete them and submit. Structured rubrics, AI-assisted review, and accountability scores replace guesswork on both sides.
+**Bevisly** is a proof-of-skill hiring platform built as a personal project. Instead of filtering by résumés, employers post real-world proof tasks — candidates complete them and submit. Structured rubrics, AI-assisted review, and accountability scores replace guesswork on both sides.
 
-**Positioning:** *"Bevisly does not replace human judgment. It makes human judgment more structured, evidence-based, and auditable."*
-
-### The Problem We Solve
-
-| Traditional Hiring | Bevisly Approach |
-|--------------------|-----------------|
-| Résumés and keywords | Verified skill demonstrations |
-| Bias-prone screening | Rubric-based objective evaluation |
-| Employer ghosting after effort | Employer Responsibility Score with accountability |
-| No proof of effort for candidates | Public Proof Vault — a verifiable portfolio |
-| Vague "culture fit" decisions | AI evidence summaries tied to submission content |
+The core idea is inspired by Bitcoin's proof-of-work concept: you do the work, you prove it, and the evidence speaks for itself.
 
 ---
 
@@ -98,7 +87,7 @@
 
 ### Prerequisites
 
-- Node.js 18+
+- Node.js 20+
 - npm
 - Supabase account
 - Supabase CLI (`npm install -g supabase`)
@@ -115,18 +104,24 @@ npm install
 
 # Configure environment
 cp .env.example .env.local
+# Fill in your Supabase URL and anon key
 ```
 
 ### Environment Variables
 
+**Frontend** (`frontend/.env.local`):
 ```env
 VITE_SUPABASE_URL=https://your-project.supabase.co
 VITE_SUPABASE_ANON_KEY=your-anon-key
 ```
 
-Edge functions require additional vars set in Supabase dashboard:
-- `RESEND_API_KEY`
-- `GEMINI_API_KEY`
+**Edge functions** — set in Supabase dashboard under project secrets:
+```
+RESEND_API_KEY
+GEMINI_API_KEY
+```
+
+**E2E tests** — copy `frontend/.env.test.local.example` to `frontend/.env.test.local` and fill in your Supabase test account credentials.
 
 ### Development
 
@@ -141,6 +136,8 @@ supabase functions serve
 ---
 
 ## Scripts
+
+All commands run from the `frontend/` directory.
 
 | Command | Description |
 |---------|-------------|
@@ -175,10 +172,11 @@ bevis-mvp/
     │   ├── send-email/        # Generic email sender
     │   ├── suggest-feedback/  # AI feedback generation (Gemini)
     │   ├── generate-job-listing/   # AI job listing generation
-    │   └── generate-proof-task/    # AI proof task generation
+    │   ├── generate-proof-task/    # AI proof task generation
+    │   └── career-compass/    # AI career guidance session (Gemini)
     ├── migrations/            # SQL migrations (timestamp-prefixed)
     ├── email-templates/       # HTML email templates
-    └── config.toml            # Supabase config (project_id: bevis-mvp)
+    └── config.toml            # Supabase config
 ```
 
 ---
@@ -206,38 +204,9 @@ bevis-mvp/
 
 ---
 
-## Roadmap
-
-### Pre-Launch (In Progress)
-
-| Feature | Description | Status |
-|---------|-------------|--------|
-| **Stripe Integration** | Subscription checkout, webhook → `subscription_tier` in DB, Customer Portal | Planned |
-| **AI Framing & Disclaimers** | Rename "AI rating" → "AI evidence summary", add disclaimers, update `/docs` | Done |
-| **Locked Rubric** | Rubric locks once first submission is received; prevents post-hoc scoring changes | Done |
-| **Paid Promotion** | Placeholder UI for employers to mark jobs as "Featured" on paid plans | Done |
-
-### Post-Launch
-
-- **AI Chatbot** — In-app assistant for candidates (task prep) and employers (job/task drafting)
-- **Fairness & Evidence Layer** — Blind first review, override justification, consistency dashboard, AI self-audit
-
----
-
-## Branch Strategy
-
-| Branch | Purpose |
-|--------|---------|
-| `main` | Production-ready code |
-| `dev` | Active development |
-| `feature/*` | New features |
-| `fix/*` | Bug fixes |
-
----
-
 ## License
 
-© 2026 Bevisly — All rights reserved.
+© 2026 Taninwat Kaewpankan — All rights reserved.
 
 ---
 

@@ -2,8 +2,8 @@
 -- BEVISLY DEMO SEED — LinkedIn Video
 -- ============================================================
 -- Run this in Supabase Dashboard → SQL Editor AFTER signing up:
---   Employer : thaninwatice+employer@gmail.com
---   Candidate: thaninwatice+candidate@gmail.com
+--   Employer : employer@example.com
+--   Candidate: candidate@example.com
 -- ============================================================
 
 DO $$
@@ -17,20 +17,20 @@ DECLARE
 BEGIN
 
   -- ── 0. Resolve auth user IDs ──────────────────────────────
-  SELECT id INTO v_employer_id  FROM auth.users WHERE email = 'thaninwatice+employer@gmail.com';
-  SELECT id INTO v_candidate_id FROM auth.users WHERE email = 'thaninwatice+candidate@gmail.com';
+  SELECT id INTO v_employer_id  FROM auth.users WHERE email = 'employer@example.com';
+  SELECT id INTO v_candidate_id FROM auth.users WHERE email = 'candidate@example.com';
 
   IF v_employer_id IS NULL THEN
-    RAISE EXCEPTION 'Employer account not found. Sign up first at the app with thaninwatice+employer@gmail.com';
+    RAISE EXCEPTION 'Employer account not found. Sign up first at the app with employer@example.com';
   END IF;
   IF v_candidate_id IS NULL THEN
-    RAISE EXCEPTION 'Candidate account not found. Sign up first at the app with thaninwatice+candidate@gmail.com';
+    RAISE EXCEPTION 'Candidate account not found. Sign up first at the app with candidate@example.com';
   END IF;
 
   -- ── 1. Employer profile ───────────────────────────────────
   UPDATE profiles SET
     full_name         = 'Marcus Webb',
-    email             = 'thaninwatice+employer@gmail.com',
+    email             = 'employer@example.com',
     role              = 'employer',
     bio               = 'CTO & Co-founder at Pipebird. We build data pipeline tools that developers actually love. Looking for sharp junior talent who can prove their skills — not just their credentials.',
     avatar_url        = 'https://api.dicebear.com/9.x/avataaars/svg?seed=MarcusWebb&backgroundColor=b6e3f4',
@@ -44,7 +44,7 @@ BEGIN
   -- ── 2. Candidate profile ──────────────────────────────────
   UPDATE profiles SET
     full_name    = 'Sofia Andersen',
-    email        = 'thaninwatice+candidate@gmail.com',
+    email        = 'candidate@example.com',
     role         = 'candidate',
     bio          = 'Frontend developer with a passion for clean UI and real problem-solving. Built 3 production features during my internship at a Copenhagen fintech. Currently open to full-time roles in product-focused teams.',
     avatar_url   = 'https://api.dicebear.com/9.x/avataaars/svg?seed=SofiaAndersen&backgroundColor=ffd5dc',

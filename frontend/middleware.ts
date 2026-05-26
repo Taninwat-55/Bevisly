@@ -278,7 +278,7 @@ export default async function middleware(request: Request): Promise<Response | u
 <h2>Contact and Links</h2>
 <ul>
   <li>Website: https://bevisly.com</li>
-  <li>Email: hello@bevisly.com</li>
+  <li>Email: bevislyapp@gmail.com</li>
   <li>Blog: https://bevisly.com/blog</li>
   <li>About: https://bevisly.com/about</li>
   <li>Jobs: https://bevisly.com/jobs</li>
@@ -319,7 +319,7 @@ export default async function middleware(request: Request): Promise<Response | u
 <p>Taninwat Kaewpankan — Founder and Builder. MSc Entrepreneurship. Built Bevisly so junior talent gets judged on what they can do, not how well their CV reads.</p>
 
 <h2>Contact</h2>
-<p>Email: hello@bevisly.com</p>
+<p>Email: bevislyapp@gmail.com</p>
 <p>Website: https://bevisly.com</p>`.trim(),
       });
     }

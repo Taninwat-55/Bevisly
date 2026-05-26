@@ -58,7 +58,7 @@ export default function LandingPage() {
         "logo": "https://bevisly.com/logo.png",
         "contactPoint": {
           "@type": "ContactPoint",
-          "email": "hello@bevisly.com",
+          "email": "bevislyapp@gmail.com",
           "contactType": "customer support"
         },
         "sameAs": [

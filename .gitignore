@@ -39,3 +39,12 @@ Thumbs.db
 *.swp
 
 .claude/settings.local.json
+
+# Internal project docs (not for public repo)
+CLAUDE.md
+GROWTH_WEEKLY.md
+PRODUCT_ROADMAP.md
+
+# Claude Code tooling (internal AI agent configs)
+.agents/
+.claude/agents/

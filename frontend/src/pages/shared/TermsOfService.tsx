@@ -134,8 +134,8 @@ export default function TermsOfService() {
               <h2 className="text-lg font-semibold text-[var(--color-text)] mb-2">10. Contact</h2>
               <p>
                 Questions about these Terms? Contact us at{" "}
-                <a href="mailto:hello@bevisly.com" className="text-[var(--color-brand-primary)] hover:underline">
-                  hello@bevisly.com
+                <a href="mailto:bevislyapp@gmail.com" className="text-[var(--color-brand-primary)] hover:underline">
+                  bevislyapp@gmail.com
                 </a>
                 .
               </p>

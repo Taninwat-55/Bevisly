@@ -627,7 +627,7 @@ export default function CandidateProofWorkspace() {
               <div className="bg-blue-950/30 border border-blue-500/20 rounded p-3 flex items-start gap-2.5">
                 <svg className="shrink-0 mt-0.5 text-blue-400" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
                 <p className="text-xs text-slate-400 leading-relaxed">
-                  <span className="text-slate-300 font-medium">AI-assisted evaluation:</span> An AI tool may help your evaluator summarise feedback on this submission. All final decisions are made by a human reviewer at {task.company_name || "the hiring company"}. You may request human-only review by contacting <a href="mailto:hello@bevisly.com" className="text-blue-400 hover:underline">hello@bevisly.com</a>.
+                  <span className="text-slate-300 font-medium">AI-assisted evaluation:</span> An AI tool may help your evaluator summarise feedback on this submission. All final decisions are made by a human reviewer at {task.company_name || "the hiring company"}. You may request human-only review by contacting <a href="mailto:bevislyapp@gmail.com" className="text-blue-400 hover:underline">bevislyapp@gmail.com</a>.
                 </p>
               </div>
             </div>

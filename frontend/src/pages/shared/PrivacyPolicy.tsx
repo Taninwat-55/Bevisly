@@ -98,7 +98,7 @@ export default function PrivacyPolicy() {
                 <strong>Your rights regarding automated processing:</strong> You have the right to request human
                 review of any AI-influenced assessment, to express your point of view, and to contest automated
                 outcomes. To exercise this right, contact us at{" "}
-                <button onClick={() => setIsContactOpen(true)} className="text-[var(--color-brand-primary)] underline hover:no-underline">hello@bevisly.com</button>.
+                <button onClick={() => setIsContactOpen(true)} className="text-[var(--color-brand-primary)] underline hover:no-underline">bevislyapp@gmail.com</button>.
               </p>
             </div>
 
@@ -212,7 +212,7 @@ export default function PrivacyPolicy() {
                   onClick={() => setIsContactOpen(true)}
                   className="text-[var(--color-brand-primary)] underline hover:no-underline"
                 >
-                  hello@bevisly.com
+                  bevislyapp@gmail.com
                 </button>
                 . We will respond within 30 days.
               </p>

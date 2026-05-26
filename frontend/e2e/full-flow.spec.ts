@@ -1,10 +1,11 @@
 import { expect, test, type Page } from "@playwright/test";
 
-// Throwaway test accounts — deleted after E2E walkthrough is complete.
-const EMPLOYER_EMAIL = "thaninwatice+employer@gmail.com";
-const EMPLOYER_PASSWORD = "EmployerTest123_";
-const CANDIDATE_EMAIL = "thaninwatice+candidate@gmail.com";
-const CANDIDATE_PASSWORD = "CandidateTest123_";
+// Test credentials loaded from frontend/.env.test.local (git-ignored).
+// Copy .env.test.local.example and fill in your own Supabase test accounts.
+const EMPLOYER_EMAIL = process.env.E2E_EMPLOYER_EMAIL ?? "";
+const EMPLOYER_PASSWORD = process.env.E2E_EMPLOYER_PASSWORD ?? "";
+const CANDIDATE_EMAIL = process.env.E2E_CANDIDATE_EMAIL ?? "";
+const CANDIDATE_PASSWORD = process.env.E2E_CANDIDATE_PASSWORD ?? "";
 
 function employerPassword() { return EMPLOYER_PASSWORD; }
 function candidatePassword() { return CANDIDATE_PASSWORD; }

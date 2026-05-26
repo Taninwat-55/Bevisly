@@ -857,7 +857,7 @@ export async function sendRejectionFeedbackEmail(
         to: candidateEmail,
         subject: `Your Code Review Feedback — ${jobTitle}`,
         html,
-        reply_to: employerEmail || "hello@bevisly.com",
+        reply_to: employerEmail || "bevislyapp@gmail.com",
       },
     });
 
@@ -907,7 +907,7 @@ export async function sendOfferEmail(submissionId: string, note?: string): Promi
     const job = Array.isArray(sub.jobs) ? sub.jobs[0] : sub.jobs;
     const jobTitle = job?.title || "this role";
     const companyName = job?.company || "the company";
-    const offerReplyTo = (Array.isArray(job?.employer) ? job.employer[0] : job?.employer)?.email || "hello@bevisly.com";
+    const offerReplyTo = (Array.isArray(job?.employer) ? job.employer[0] : job?.employer)?.email || "bevislyapp@gmail.com";
 
     const escapeHtml = (str: string) =>
       str
@@ -1024,7 +1024,7 @@ export async function sendInterviewEmail(submissionId: string, note?: string): P
     const companyName = job?.company || "the company";
     const replyTo =
       (Array.isArray(job?.employer) ? job.employer[0] : job?.employer)?.email ||
-      "hello@bevisly.com";
+      "bevislyapp@gmail.com";
 
     const escapeHtml = (str: string) =>
       str
@@ -1161,7 +1161,7 @@ export async function requestDiscussion(submission_id: string): Promise<void> {
   const job = Array.isArray(sub?.jobs) ? sub.jobs[0] : sub?.jobs;
   const jobTitle = job?.title || "this role";
   const companyName = job?.company || "the company";
-  const replyTo = (Array.isArray(job?.employer) ? job.employer[0] : job?.employer)?.email || "hello@bevisly.com";
+  const replyTo = (Array.isArray(job?.employer) ? job.employer[0] : job?.employer)?.email || "bevislyapp@gmail.com";
 
   if (!candidateEmail) return;
 
