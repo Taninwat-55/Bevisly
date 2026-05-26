@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="frontend/public/bevisly-logo.svg" alt="Bevisly Logo" width="120" height="120" />
+  <img src="frontend/public/logo.png" alt="Bevisly Logo" width="120" height="120" />
 </p>
 
 <h1 align="center">Bevisly</h1>
