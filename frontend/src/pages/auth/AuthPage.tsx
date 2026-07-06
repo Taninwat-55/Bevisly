@@ -17,7 +17,9 @@ function navigateByRole(
   navigate: ReturnType<typeof useNavigate>
 ) {
   if (role === "employer") navigate("/employer");
-  else if (role === "admin" || role === "demo_admin") navigate("/admin");
+  // Demo account is not allowed in the admin panel — send it to the candidate
+  // side, where the Demo Mode switcher lets it flip to the employer view.
+  else if (role === "admin") navigate("/admin");
   else navigate("/candidate");
 }
 

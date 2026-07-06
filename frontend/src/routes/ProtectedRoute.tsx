@@ -27,7 +27,16 @@ export default function ProtectedRoute({
     return <Navigate to="/auth" replace />;
   }
 
-  // Demo admin gets full access to test all features
+  // Demo account is blocked from the admin panel entirely — it may only
+  // experience the candidate and employer sides. (Real admins are unaffected:
+  // their original_role is "admin", not "demo_admin".)
+  const isDemo =
+    user.original_role === "demo_admin" || user.role === "demo_admin";
+  if (isDemo && allowedRole === "admin") {
+    return <Navigate to="/candidate" replace />;
+  }
+
+  // Demo account gets access to candidate + employer areas to test both sides.
   if (user.role === "demo_admin") {
     return <>{children || <Outlet />}</>;
   }

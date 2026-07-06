@@ -1,6 +1,7 @@
 import { Outlet } from "react-router-dom";
 
 import { BevisToaster } from "@/components/common/Toast";
+import DemoModeSwitcher from "@/components/common/DemoModeSwitcher";
 
 export default function App() {
   return (
@@ -8,6 +9,7 @@ export default function App() {
 
       <Outlet />
       <BevisToaster />
+      <DemoModeSwitcher />
     </main>
   );
 }

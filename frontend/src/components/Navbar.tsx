@@ -45,8 +45,8 @@ export default function Navbar() {
   const goToDashboard = () => {
     if (!user) return navigate("/auth");
     if (user.role === "employer") return navigate("/employer");
-    if (user.role === "admin" || user.role === "demo_admin")
-      return navigate("/admin");
+    // Demo account is blocked from the admin panel — route it to the candidate side.
+    if (user.role === "admin") return navigate("/admin");
     return navigate("/candidate");
   };
 
